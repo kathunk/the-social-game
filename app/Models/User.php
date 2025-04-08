@@ -27,7 +27,8 @@ class User extends Authenticatable
         'email',
         'password',
         'status',
-        'is_admin',
+        'current_game_id',
+        'current_player_id',
     ];
 
     /**
@@ -67,5 +68,32 @@ class User extends Authenticatable
     public function state(): UserState
     {
         return UserState::load($this->id);
+    }
+
+    public function players()
+    {
+        return $this->hasMany(Player::class);
+    }
+
+    public function adminGames()
+    {
+        return $this->belongsToMany(Game::class, 'game_admins');
+    }
+
+    public function currentGame()
+    {
+        return $this->belongsTo(Game::class, 'current_game_id');
+    }
+
+    public function currentPlayer()
+    {
+        return $this->belongsTo(Player::class, 'current_player_id');
+    }
+
+    public function isAdminOfGame(Game $game)
+    {
+        // For debugging
+        dd($this->adminGames()->get());
+        return $this->adminGames()->where('game_id', $game->id)->exists();
     }
 }

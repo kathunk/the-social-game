@@ -35,7 +35,6 @@ class UserCreated extends Event
             'email' => $this->email,
             'password' => $this->encrypted_password,
             'status' => 'new',
-            'is_admin' => false,
         ]);
     }
 }
