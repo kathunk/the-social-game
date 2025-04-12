@@ -14,8 +14,6 @@ class GameCreated extends Event
 
     public string $name;
 
-    public int $admin_id;
-
     public function applyToGame(GameState $game)
     {
         $game->name = $this->name;

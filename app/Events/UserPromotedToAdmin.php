@@ -33,6 +33,7 @@ class UserPromotedToAdmin extends Event
     public function applyToUser(UserState $user)
     {
         $user->is_admin_of_game_ids->push($this->game_id);
+        $user->current_game_id = $this->game_id;
     }
 
     public function applyToGame(GameState $game)
@@ -45,5 +46,7 @@ class UserPromotedToAdmin extends Event
         $user = User::find($this->user_id);
         $game = Game::find($this->game_id);
         $user->adminGames()->attach($game);
+        $user->current_game_id = $game->id;
+        $user->save();
     }
 }

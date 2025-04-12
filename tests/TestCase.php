@@ -27,47 +27,14 @@ abstract class TestCase extends BaseTestCase
         return $this->game;
     }
 
-    public function createUser(?string $name = null, ?string $email = null, ?string $encrypted_password = null, ?bool $is_admin = false)
-    {
-        $user_id = UserCreated::fire(
-            name: $name ?? fake()->name(),
-            email: $email ?? fake()->email(),
-            encrypted_password: $encrypted_password ?? fake()->password(),
-            is_admin: $is_admin,
-        )->user_id;
-
-        $user = User::find($user_id);
-
-        if (! $is_admin) {
-            UserPromotedToAdmin::fire(
-                user_id: $user_id,
-                game_id: $this->game->id,
-            );
-
-            $this->admin = $user;
-        }
-
-        return $user;
-    }
-
-    public function createAdmin()
-    {
-        $this->admin = $this->createUser(is_admin: true);
-
-        return $this->admin;
-    }
-
-    public function createPlayer(?User $user = null, ?Game $game = null)
+    public function createPlayer(?User $user = null, ?User $admin = null, ?Game $game = null)
     {
         $user = $user ?? $this->createUser();
         $game = $game ?? $this->game;
+        $admin = $admin ?? $this->admin;
 
-        $player_id = UserAdmittedToGame::fire(
-            user_id: $user->id,
-            admin_id: $this->admin->id,
-            game_id: $game->id,
-        )->player_id;
+        $player = $user->admitToGame($game, $admin);
 
-        return Player::find($player_id);
+        return $player;
     }
 }

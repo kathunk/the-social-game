@@ -23,10 +23,13 @@ class UserState extends State
 
     public int $current_game_id;
 
+    public Collection $application_ids;
+
     public function __construct()
     {
         $this->player_ids = collect();
         $this->is_admin_of_game_ids = collect();
+        $this->application_ids = collect();
     }
 
     public function currentPlayer(): ?PlayerState

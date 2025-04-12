@@ -3,36 +3,45 @@
 namespace App\Livewire;
 
 use Flux\Flux;
+use App\Models\Game;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\Attributes\Computed;
+use App\Events\UserAdmittedToGame;
 
 class AdminDashboard extends Component
 {
     #[Computed]
-    public function user()
+    public function admin()
     {
         return auth()->user();
     }
 
     #[Computed]
+    public function game(): Game
+    {
+        return $this->admin->currentGame;
+    }
+
+    #[Computed]
     public function newUsers()
     {
-        return User::where('status', 'new')->orderBy('created_at', 'desc')->get();
+        return User::where('status', 'pending')->orderBy('created_at', 'desc')->get();
     }
 
     public function mount()
     {
-        if (! $this->user->is_admin) {
+        if (! $this->admin->is_admin) {
             return redirect()->route('dashboard');
         }
     }
 
     public function approveUser(string $user_id)
     {
-        UserApproved::fire(
+        UserAdmittedToGame::fire(
             user_id: (int) $user_id,
-            admin_id: $this->user->id,
+            admin_id: $this->admin->id,
+            game_id: $this->game->id,
         );
 
         $this->unset('newUsers');

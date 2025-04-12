@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Player;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\GameApplication;
 
 class Game extends Model
 {
@@ -20,5 +21,10 @@ class Game extends Model
     public function admins()
     {
         return $this->belongsToMany(User::class, 'game_admins');
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(GameApplication::class);
     }
 }

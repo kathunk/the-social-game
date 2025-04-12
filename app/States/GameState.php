@@ -13,6 +13,10 @@ class GameState extends State
 
     public Collection $user_ids;
 
+    public Collection $unaccepted_user_ids;
+
+    public Collection $rejected_user_ids;
+
     public Collection $player_ids;
 
     public Collection $admin_ids;
@@ -22,6 +26,8 @@ class GameState extends State
         $this->player_ids = collect();
         $this->admin_ids = collect();
         $this->user_ids = collect();
+        $this->rejected_user_ids = collect();
+        $this->unaccepted_user_ids = collect();
     }
 
     public function players()

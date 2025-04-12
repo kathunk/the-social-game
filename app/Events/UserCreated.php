@@ -23,8 +23,7 @@ class UserCreated extends Event
         $user->name = $this->name;
         $user->email = $this->email;
         $user->encrypted_password = $this->encrypted_password;
-        $user->status = 'new';
-        $user->is_admin = false;
+        $user->status = 'pending';
     }
 
     public function handle()
@@ -34,7 +33,6 @@ class UserCreated extends Event
             'name' => $this->name,
             'email' => $this->email,
             'password' => $this->encrypted_password,
-            'status' => 'new',
         ]);
     }
 }

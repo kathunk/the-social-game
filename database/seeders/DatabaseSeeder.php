@@ -2,11 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\Game;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
+use App\Events\GameCreated;
 use App\Events\UserCreated;
 use Thunk\Verbs\Facades\Verbs;
 use Illuminate\Database\Seeder;
+use App\Events\UserAdmittedToGame;
 use App\Events\UserPromotedToAdmin;
 
 class DatabaseSeeder extends Seeder
@@ -21,17 +24,23 @@ class DatabaseSeeder extends Seeder
             ['Daniel Coulbourne', 'daniel@thunk.dev'],
         ];
 
-        foreach ($admin_data as $data) {
-            $user_id = UserCreated::fire(
-                name: $data[0],
-                email: $data[1],
-                encrypted_password: bcrypt('password'),
-            )->user_id;
+        $game_id = GameCreated::fire(
+            name: 'Test Game',
+        )->game_id;
 
-            UserPromotedToAdmin::fire(
-                user_id: $user_id,
-            );
+        Verbs::commit();
+
+        $game = Game::find($game_id);
+
+        foreach ($admin_data as $data) {
+            $user = User::fromTemplate($data[0], $data[1], bcrypt('password'), $game)
+                ->applyToGame($game)
+                ->promoteToAdmin($game);
+            
+            $user->admitToGame($game, $user);
         }
+
+        $admin = $game->admins->first();
 
         $user_data = [
             ['Jake Bathman', 'jake@thunk.dev'],
@@ -41,14 +50,13 @@ class DatabaseSeeder extends Seeder
             ['Chris Morrell', 'chris@thunk.dev'],
             ['Caleb Porzio', 'caleb@thunk.dev'],
             ['Taylor Otwell', 'taylor@thunk.dev'],
+            ['Will King', 'will@thunk.dev'],
         ];
 
         foreach ($user_data as $data) {
-            UserCreated::fire(
-                name: $data[0],
-                email: $data[1],
-                encrypted_password: bcrypt('password'),
-            );
+            User::fromTemplate($data[0], $data[1], bcrypt('password'), $game)
+                ->applyToGame($game)
+                ->admitToGame($game, $admin);
         }
     }
 }
