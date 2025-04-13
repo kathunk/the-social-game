@@ -13,9 +13,10 @@ class PreGameLobby extends Component
         return auth()->user();
     }
 
-    public function mount()
+    #[Computed]
+    public function hasBeenRejected()
     {
-        // dd($this->user->is_admin);
+        return $this->user->gameApplications()->where('game_id', $this->game->id)->where('status', 'rejected')->exists();
     }
 
     public function render()

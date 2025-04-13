@@ -10,7 +10,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('dashboard', function () {
-    if (auth()->user()->status === 'pending') {
+    if (! auth()->user()->currentPlayer) {
         return redirect()->route('pre-game-lobby');
     }
     return view('dashboard');

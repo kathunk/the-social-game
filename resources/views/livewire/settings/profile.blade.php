@@ -17,6 +17,10 @@ new class extends Component {
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+
+        if (auth()->user()->currentPlayer) {
+            redirect()->route('dashboard');
+        }
     }
 
     /**
