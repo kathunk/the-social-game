@@ -5,7 +5,7 @@
         <flux:select wire:model="selected_application_id" variant="listbox" searchable placeholder="Choose player...">
             @foreach ($this->newApplications as $application)
                 <flux:select.option :value="(string) $application->id">
-                    {{ $application->user->name }}
+                    {{ $application->user->name }} ({{ $application->user->email }})
                     @if ($this->acceptedUserNames->contains($application->user->name))
                         <flux:badge class="ml-2" size="sm" color="red">Duplicate Name</flux:badge>
                     @endif

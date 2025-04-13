@@ -9,6 +9,8 @@ class GameState extends State
 {
     public string $name;
 
+    public string $template_class;
+
     public string $status;
 
     public Collection $user_ids;
@@ -21,6 +23,8 @@ class GameState extends State
 
     public Collection $admin_ids;
 
+    public Collection $team_ids;
+
     public function __construct()
     {
         $this->player_ids = collect();
@@ -28,6 +32,7 @@ class GameState extends State
         $this->user_ids = collect();
         $this->rejected_user_ids = collect();
         $this->unaccepted_user_ids = collect();
+        $this->team_ids = collect();
     }
 
     public function players()
@@ -43,5 +48,10 @@ class GameState extends State
     public function users()
     {
         return $this->user_ids->map(fn (int $user_id) => UserState::load($user_id));
+    }
+
+    public function teams()
+    {
+        return $this->team_ids->map(fn (int $team_id) => TeamState::load($team_id));
     }
 }

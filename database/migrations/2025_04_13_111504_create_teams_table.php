@@ -8,11 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('games', function (Blueprint $table) {
+        Schema::create('teams', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('game_id')->constrained('games');
             $table->string('name');
-            $table->string('status');
-            $table->string('template_class');
+            $table->integer('score')->default(0);
             $table->timestamps();
         });
     }

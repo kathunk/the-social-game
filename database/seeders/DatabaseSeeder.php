@@ -10,6 +10,7 @@ use App\Events\UserCreated;
 use Thunk\Verbs\Facades\Verbs;
 use Illuminate\Database\Seeder;
 use App\Events\UserAdmittedToGame;
+use App\GameTemplates\Laracon2025;
 use App\Events\UserPromotedToAdmin;
 
 class DatabaseSeeder extends Seeder
@@ -24,13 +25,7 @@ class DatabaseSeeder extends Seeder
             ['Daniel Coulbourne', 'daniel@thunk.dev'],
         ];
 
-        $game_id = GameCreated::fire(
-            name: 'Test Game',
-        )->game_id;
-
-        Verbs::commit();
-
-        $game = Game::find($game_id);
+        $game = (new Laracon2025())->createGame();
 
         foreach ($admin_data as $data) {
             $user = User::fromTemplate($data[0], $data[1], bcrypt('password'), $game)

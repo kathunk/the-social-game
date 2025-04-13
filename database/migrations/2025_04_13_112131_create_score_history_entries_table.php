@@ -8,11 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('games', function (Blueprint $table) {
+        Schema::create('score_history_entries', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('status');
-            $table->string('template_class');
+            $table->foreignId('team_id')->constrained('teams');
+            $table->foreignId('game_id')->constrained('games');
+            $table->integer('points');
+            $table->string('description');
             $table->timestamps();
         });
     }

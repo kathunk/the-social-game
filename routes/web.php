@@ -1,20 +1,15 @@
 <?php
 
 use Livewire\Volt\Volt;
+use App\Livewire\Dashboard;
 use App\Livewire\PreGameLobby;
 use App\Livewire\AdminDashboard;
+use App\Livewire\TeamPage;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
-
-Route::get('dashboard', function () {
-    if (! auth()->user()->currentPlayer) {
-        return redirect()->route('pre-game-lobby');
-    }
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -25,6 +20,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
     Route::get('/admin-dashboard', AdminDashboard::class)->name('admin-dashboard');
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
+    Route::get('/teams/{team}', TeamPage::class)->name('teams.show');
 });
 
 require __DIR__.'/auth.php';

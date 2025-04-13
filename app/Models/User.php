@@ -200,4 +200,9 @@ class User extends Authenticatable
 
         return $this->fresh();
     }
+
+    public function getGravatarAttribute(): string
+    {
+        return 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($this->email)));
+    }
 }

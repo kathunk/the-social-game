@@ -14,10 +14,13 @@ class GameCreated extends Event
 
     public string $name;
 
+    public string $template_class;
+
     public function applyToGame(GameState $game)
     {
         $game->name = $this->name;
         $game->status = 'active';
+        $game->template_class = $this->template_class;
     }
 
     public function handle()
@@ -26,6 +29,7 @@ class GameCreated extends Event
             'id' => $this->game_id,
             'name' => $this->name,
             'status' => 'active',
+            'template_class' => $this->template_class,
         ]);
     }
 }
