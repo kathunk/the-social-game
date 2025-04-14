@@ -4,7 +4,7 @@
     </flux:link>
 
     <flux:card>
-        <flux:heading>{{ $team->name }}</flux:heading>
+        <flux:heading size="lg">{{ $team->name }}</flux:heading>
         
         @if ($this->players->count() > 0)
             <flux:table>
@@ -15,8 +15,10 @@
                     @foreach ($this->players as $player)
                         <flux:table.row>
                             <flux:table.cell>
-                                <flux:avatar :src="$player->user->gravatar" />
-                                {{ $player->user->name }}
+                                <div class="flex items-center gap-2">
+                                    <flux:avatar :src="$player->user->gravatar" size="sm"/>
+                                    {{ $player->user->name }}
+                                </div>
                             </flux:table.cell>
                         </flux:table.row>
                     @endforeach
@@ -28,7 +30,7 @@
     </flux:card>
 
     <flux:card>
-        <flux:heading>Score: {{ $team->score }}</flux:heading>
+        <flux:heading size="lg">Score: {{ $team->score }}</flux:heading>
         
         @if ($this->scoreHistoryEntries->count() > 0)
             <flux:table>
@@ -41,12 +43,16 @@
                         <flux:table.row>
                             <flux:table.cell>
                                 <div class="flex flex-col">
-                                    <flux:subheading>{{ $entry->description }}</flux:subheading>
-                                    <flux:text>{{ $entry->created_at->diffForHumans() }}</flux:text>
+                                    <flux:heading size="sm">{{ $entry->description }}</flux:heading>
+                                    <flux:text class="text-xs">{{ $entry->created_at->diffForHumans() }}</flux:text>
                                 </div>
                             </flux:table.cell>
                             <flux:table.cell>
-                                {{ $entry->points }}
+                                @if ($entry->points > -1)
+                                    <flux:heading size="sm" class="text-green-500">+{{ $entry->points }}</flux:heading>
+                                @else
+                                    <flux:heading size="sm" class="text-red-500">{{ $entry->points }}</flux:heading>
+                                @endif
                             </flux:table.cell>
                         </flux:table.row>
                     @endforeach

@@ -21,18 +21,18 @@ class TeamState extends State
         $this->player_ids = collect();
     }
 
-    public function addToScoreHistory(int $points, string $title, string $description)
+    public function addToScoreHistory(int $points, string $description)
     {
         $this->score_history->push([
-            'points' => $points,
-            'title' => $title,
             'description' => $description,
+            'timestamp' => now(),
+            'points' => $points,
         ]);
     }
 
     public function score(): int
     {
-        return $this->score_history->sum();
+        return $this->score_history->sum('points');
     }
 
     public function game()

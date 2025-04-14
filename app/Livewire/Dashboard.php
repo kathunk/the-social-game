@@ -4,11 +4,13 @@ namespace App\Livewire;
 
 use App\Models\Team;
 use Livewire\Component;
+use Thunk\Verbs\Facades\Verbs;
 use Livewire\Attributes\Computed;
 
 class Dashboard extends Component
 {
     public string $selected_team_id;
+    public int $quit_points;
 
     #[Computed]
     public function user()
@@ -49,8 +51,28 @@ class Dashboard extends Component
 
     public function joinTeam()
     {
+        $this->validate([
+            'selected_team_id' => 'required|exists:teams,id',
+        ]);
+
+        // @todo freaky ass bug where joinTeam fails when you choose the first team in the select
+
         $team = Team::find($this->selected_team_id);
         $this->player->joinTeam($team);
+        $this->selected_team_id = '';
+
+        Verbs::commit();
+
+        redirect()->route('dashboard');
+    }
+
+    public function resign()
+    {
+        $this->player->resign($this->quit_points);
+
+        Verbs::commit();
+
+        redirect()->route('dashboard');
     }
 
     public function render()

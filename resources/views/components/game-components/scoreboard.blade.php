@@ -14,8 +14,11 @@
                 @foreach ($teams as $team)
                     <flux:table.row>
                         <flux:table.cell>
-                            <flux:button variant="ghost" size="sm" class="p-0" :href="route('teams.show', $team->id)">
+                            <flux:button :variant="((string) $team->id === (string) $this->player->team_id) ? 'filled' : 'ghost'" size="sm" class="p-0" :href="route('teams.show', $team->id)">
                                 {{ $team->name }}
+                                @if ((string) $team->id === (string) $this->player->team_id)
+                                    (your team)
+                                @endif
                             </flux:button>
                         </flux:table.cell>
                         <flux:table.cell>{{ $team->score }}</flux:table.cell>

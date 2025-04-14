@@ -79,6 +79,7 @@ class UserAdmittedToGame extends Event
         $player->user_id = $this->user_id;
         $player->game_id = $this->game_id;
         $player->status = 'active';
+        $player->name = $this->state(UserState::class)->name;
     }
 
     public function applyToApplication(GameApplicationState $application)
