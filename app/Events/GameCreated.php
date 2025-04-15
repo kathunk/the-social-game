@@ -2,9 +2,12 @@
 
 namespace App\Events;
 
+use Carbon\Carbon;
 use App\Models\Game;
 use Thunk\Verbs\Event;
+use App\Models\Challenge;
 use App\States\GameState;
+use Illuminate\Support\Collection;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 
 class GameCreated extends Event
@@ -16,11 +19,17 @@ class GameCreated extends Event
 
     public string $template_class;
 
+    public Carbon $starts_at;
+
+    public Carbon $ends_at;
+
     public function applyToGame(GameState $game)
     {
         $game->name = $this->name;
         $game->status = 'active';
         $game->template_class = $this->template_class;
+        $game->starts_at = $this->starts_at;
+        $game->ends_at = $this->ends_at;
     }
 
     public function handle()
@@ -30,6 +39,8 @@ class GameCreated extends Event
             'name' => $this->name,
             'status' => 'active',
             'template_class' => $this->template_class,
+            'starts_at' => $this->starts_at,
+            'ends_at' => $this->ends_at,
         ]);
     }
 }

@@ -2,16 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Game;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\User;
-use App\Events\GameCreated;
-use App\Events\UserCreated;
 use Thunk\Verbs\Facades\Verbs;
 use Illuminate\Database\Seeder;
-use App\Events\UserAdmittedToGame;
 use App\GameTemplates\Laracon2025;
-use App\Events\UserPromotedToAdmin;
 
 class DatabaseSeeder extends Seeder
 {
