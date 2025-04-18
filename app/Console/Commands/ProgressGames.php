@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Challenge;
 use App\Models\Game;
 use Illuminate\Console\Command;
+use Thunk\Verbs\Facades\Verbs;
 
 class ProgressGames extends Command
 {
@@ -27,6 +28,8 @@ class ProgressGames extends Command
      */
     public function handle()
     {
+        Verbs::commitImmediately();
+
         Game::where('status', 'upcoming')
             ->where('starts_at', '<=', now())
             ->each(function (Game $game) {

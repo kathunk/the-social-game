@@ -20,6 +20,7 @@ abstract class TestCase extends BaseTestCase
     public function createGame(?Carbon $starts_at = null)
     {
         $this->game = (new Laracon2025($starts_at))->createGame();
+        $this->game->start();
 
         return $this->game;
     }
@@ -41,5 +42,7 @@ abstract class TestCase extends BaseTestCase
             encrypted_password: 'password',
             game: $this->game,
         )->admitToGame($this->game, $this->admin);
+
+        return $this->player;
     }
 }

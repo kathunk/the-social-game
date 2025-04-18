@@ -4,6 +4,9 @@ namespace App\Challenges\Classes;
 
 use App\Models\Challenge;
 use App\States\ChallengeState;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\TeamState;
 
 abstract class BaseChallengeClass
 {
@@ -30,6 +33,21 @@ abstract class BaseChallengeClass
 
     public function onRoundEnded()
     {
+        // Optional override
+    }
+
+    public function onPlayerJoinedTeam(
+        PlayerState $player_state,
+        TeamState $team_state,
+        GameState $game_state,
+        ?TeamState $previous_team = null,
+    ) {
+        // Optional override
+    }
+
+    public function onChallengeEnded(
+        GameState $game_state,
+    ) {
         // Optional override
     }
 }

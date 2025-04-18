@@ -23,9 +23,9 @@ class TeamPage extends Component
     }
 
     #[Computed]
-    public function scoreHistoryEntries()
+    public function scoreHistoryEntries(): array
     {
-        return $this->team->scoreHistoryEntries;
+        return array_reverse($this->team->state()->score_history);
     }
 
     public function mount(Team $team)

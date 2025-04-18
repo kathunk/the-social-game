@@ -43,6 +43,12 @@ class Dashboard extends Component
         return $this->player->team;
     }
 
+    #[Computed]
+    public function challenge()
+    {
+        return $this->game->currentChallenge;
+    }
+
     public function mount()
     {
         if (! $this->player) {

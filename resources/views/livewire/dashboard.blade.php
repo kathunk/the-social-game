@@ -12,6 +12,13 @@
             <flux:button wire:click="joinTeam">Join</flux:button>
         </flux:card>
     @endif
+    @if ($this->challenge)
+        <flux:card>
+            <flux:heading size="lg">Challenge: {{ $this->challenge->handler()::NAME }}</flux:heading>
+            <flux:text variant="subtle" class="text-xs my-1">Ends {{ $this->challenge->ends_at->diffForHumans() }} (check back then to see the next challenge!)</flux:text>
+            <flux:text>{{ $this->challenge->handler()::DESCRIPTION }}</flux:text>
+        </flux:card>
+    @endif
     <x-game-components.scoreboard :teams="$this->teams" />
     @if ($this->current_team)
         <flux:card>

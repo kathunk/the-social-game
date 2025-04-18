@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Game;
 use App\Models\Player;
 use App\States\GameState;
 use App\States\PlayerState;
@@ -52,6 +53,16 @@ class PlayerJoinedTeam extends Event
         }
     }
 
+    public function applyToGame(GameState $game)
+    {
+        $game->currentChallenge()->handler()->onPlayerJoinedTeam(
+            player_state: $this->state(PlayerState::class),
+            team_state: $this->state(TeamState::class),
+            game_state: $this->state(GameState::class),
+            previous_team: $this->previous_team_id ? TeamState::load($this->previous_team_id) : null,
+        );
+    }
+
     public function applyToPlayer(PlayerState $player)
     {
         $player->team_id = $this->team_id;
@@ -82,5 +93,7 @@ class PlayerJoinedTeam extends Event
         }
 
         $player->save();
+
+        Game::find($this->game_id)->teams->each(fn ($t) => $t->update(['score' => $t->state()->score()]));
     }
 }
