@@ -2,8 +2,8 @@
 
 namespace App\States;
 
-use Thunk\Verbs\State;
 use Illuminate\Support\Collection;
+use Thunk\Verbs\State;
 
 class UserState extends State
 {

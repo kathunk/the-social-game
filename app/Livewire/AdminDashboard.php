@@ -2,13 +2,13 @@
 
 namespace App\Livewire;
 
-use Flux\Flux;
-use App\Models\Game;
-use Livewire\Component;
-use App\Models\GameApplication;
-use Livewire\Attributes\Computed;
 use App\Events\UserAdmittedToGame;
 use App\Events\UserRejectedFromGame;
+use App\Models\Game;
+use App\Models\GameApplication;
+use Flux\Flux;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class AdminDashboard extends Component
 {

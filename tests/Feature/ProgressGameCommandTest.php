@@ -1,7 +1,7 @@
 <?php
 
-use Thunk\Verbs\Facades\Verbs;
 use Illuminate\Support\Facades\Date;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

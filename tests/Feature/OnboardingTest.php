@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use App\Models\GameApplication;
 use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);

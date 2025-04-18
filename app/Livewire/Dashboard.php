@@ -3,13 +3,14 @@
 namespace App\Livewire;
 
 use App\Models\Team;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
-use Livewire\Attributes\Computed;
 
 class Dashboard extends Component
 {
     public string $selected_team_id;
+
     public int $quit_points;
 
     #[Computed]

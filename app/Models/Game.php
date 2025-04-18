@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\Player;
-use App\Events\GameEnded;
-use App\States\GameState;
-use App\Events\GameStarted;
-use App\Models\GameApplication;
 use App\Events\ChallengeStarted;
+use App\Events\GameEnded;
+use App\Events\GameStarted;
+use App\States\GameState;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
 

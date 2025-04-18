@@ -2,12 +2,12 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
 use App\Models\Challenge;
-use App\States\GameState;
 use App\States\ChallengeState;
+use App\States\GameState;
 use Illuminate\Support\Carbon;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class ChallengeCreated extends Event
 {

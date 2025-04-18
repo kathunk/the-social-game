@@ -3,11 +3,11 @@
 namespace App\Events;
 
 use App\Models\Player;
-use Thunk\Verbs\Event;
 use App\States\GameState;
-use App\States\TeamState;
 use App\States\PlayerState;
+use App\States\TeamState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class PlayerJoinedTeam extends Event
 {

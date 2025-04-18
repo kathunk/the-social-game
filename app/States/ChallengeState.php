@@ -2,11 +2,10 @@
 
 namespace App\States;
 
-use Thunk\Verbs\State;
-use App\States\GameState;
-use Illuminate\Support\Carbon;
 use App\Challenges\ChallengeRegistry;
 use App\Challenges\Classes\BaseChallengeClass;
+use Illuminate\Support\Carbon;
+use Thunk\Verbs\State;
 
 class ChallengeState extends State
 {
@@ -21,7 +20,7 @@ class ChallengeState extends State
     public Carbon $ends_at;
 
     public bool $allows_turncoat;
-    
+
     public function game(): GameState
     {
         return GameState::load($this->game_id);

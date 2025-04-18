@@ -2,11 +2,10 @@
 
 namespace App\Challenges;
 
+use App\Challenges\Classes\BaseChallengeClass;
 use App\Models\Challenge;
-use Illuminate\Support\Str;
 use App\States\ChallengeState;
 use Illuminate\Support\Facades\File;
-use App\Challenges\Classes\BaseChallengeClass;
 
 class ChallengeRegistry
 {
@@ -21,11 +20,17 @@ class ChallengeRegistry
         $classes = collect(File::allFiles(app_path('Challenges/Classes')))
             ->map(function ($file) {
                 $relative = $file->getRelativePathname();
-                $class = 'App\\Challenges\\Classes\\' . str_replace(['/', '.php'], ['\\', ''], $relative);
+                $class = 'App\\Challenges\\Classes\\'.str_replace(['/', '.php'], ['\\', ''], $relative);
 
-                if (!class_exists($class)) return null;
-                if (!is_subclass_of($class, BaseChallengeClass::class)) return null;
-                if ((new \ReflectionClass($class))->isAbstract()) return null;
+                if (! class_exists($class)) {
+                    return null;
+                }
+                if (! is_subclass_of($class, BaseChallengeClass::class)) {
+                    return null;
+                }
+                if ((new \ReflectionClass($class))->isAbstract()) {
+                    return null;
+                }
 
                 return new $class;
             })

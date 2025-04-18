@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use App\Events\PlayerResigned;
-use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerJoinedTeam;
+use App\Events\PlayerResigned;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
+use Thunk\Verbs\Facades\Verbs;
 
 class Player extends Model
 {

@@ -4,24 +4,23 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\States\UserState;
-use App\Events\UserCreated;
-use Illuminate\Support\Str;
-use Thunk\Verbs\Facades\Verbs;
-use App\Models\GameApplication;
-use App\Events\UserAppliedToGame;
 use App\Events\UserAdmittedToGame;
+use App\Events\UserAppliedToGame;
+use App\Events\UserCreated;
 use App\Events\UserPromotedToAdmin;
 use App\Events\UserRejectedFromGame;
+use App\States\UserState;
 use Glhd\Bits\Database\HasSnowflakes;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
+use Thunk\Verbs\Facades\Verbs;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasSnowflakes;
+    use HasFactory, HasSnowflakes, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -203,6 +202,6 @@ class User extends Authenticatable
 
     public function getGravatarAttribute(): string
     {
-        return 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($this->email)));
+        return 'https://www.gravatar.com/avatar/'.md5(strtolower(trim($this->email)));
     }
 }

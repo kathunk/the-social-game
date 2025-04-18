@@ -3,10 +3,10 @@
 namespace App\Events;
 
 use App\Models\Team;
-use Thunk\Verbs\Event;
 use App\States\GameState;
 use App\States\TeamState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class TeamCreated extends Event
 {

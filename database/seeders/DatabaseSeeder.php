@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\User;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Database\Seeder;
 use App\GameTemplates\Laracon2025;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Thunk\Verbs\Facades\Verbs;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,12 +20,12 @@ class DatabaseSeeder extends Seeder
             ['Daniel Coulbourne', 'daniel@thunk.dev'],
         ];
 
-        $game = (new Laracon2025())->createGame();
+        $game = (new Laracon2025)->createGame();
 
         foreach ($admin_data as $data) {
             $user = User::fromTemplate($data[0], $data[1], bcrypt('password'), $game)
                 ->promoteToAdmin($game);
-            
+
             $user->admitToGame($game, $user);
         }
 

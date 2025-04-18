@@ -1,11 +1,10 @@
 <?php
 
-use App\GameTemplates\Laracon2025;
-use App\Models\Team;
 use Thunk\Verbs\Facades\Verbs;
+
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-beforeEach(function() {
+beforeEach(function () {
     Verbs::commitImmediately();
     $this->createPlayer();
 });

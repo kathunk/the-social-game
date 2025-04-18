@@ -2,18 +2,18 @@
 
 namespace App\GameTemplates;
 
-use App\Models\Game;
+use App\Events\ChallengeCreated;
 use App\Events\GameCreated;
 use App\Events\TeamCreated;
+use App\Models\Game;
 use Illuminate\Support\Carbon;
 use Thunk\Verbs\Facades\Verbs;
-use App\Events\ChallengeCreated;
 
 class GameTemplate
 {
-    CONST GAME_NAME = 'name';
+    const GAME_NAME = 'name';
 
-    CONST TEAM_NAMES = [
+    const TEAM_NAMES = [
         'foo',
         'bar',
     ];
@@ -44,6 +44,7 @@ class GameTemplate
 
         $this->seedTeams();
         $this->seedChallenges();
+
         return $this->game;
     }
 

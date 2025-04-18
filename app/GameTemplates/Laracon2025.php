@@ -2,15 +2,15 @@
 
 namespace App\GameTemplates;
 
-use Illuminate\Support\Carbon;
-use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\PressTheButton;
+use App\Challenges\Classes\PyramidScheme;
+use Illuminate\Support\Carbon;
 
 class Laracon2025 extends GameTemplate
 {
-    CONST GAME_NAME = 'Laracon 2025';
+    const GAME_NAME = 'Laracon 2025';
 
-    CONST TEAM_NAMES = [
+    const TEAM_NAMES = [
         'Breeze',
         'Cashier',
         'Debugbar',

@@ -2,17 +2,19 @@
 
 namespace Tests;
 
-use App\Models\Game;
-use App\Models\User;
-use App\Models\Player;
-use Illuminate\Support\Carbon;
 use App\GameTemplates\Laracon2025;
+use App\Models\Game;
+use App\Models\Player;
+use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Carbon;
 
 abstract class TestCase extends BaseTestCase
 {
     public Game $game;
+
     public User $admin;
+
     public Player $player;
 
     public function createGame(?Carbon $starts_at = null)

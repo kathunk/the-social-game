@@ -2,11 +2,11 @@
 
 namespace App\Events;
 
-use Carbon\Carbon;
 use App\Models\Game;
-use Thunk\Verbs\Event;
 use App\States\GameState;
+use Carbon\Carbon;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class GameCreated extends Event
 {

@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class PreGameLobby extends Component
 {

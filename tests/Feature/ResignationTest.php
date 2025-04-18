@@ -1,9 +1,7 @@
 <?php
 
 use App\Models\Team;
-use App\Models\User;
 use Thunk\Verbs\Facades\Verbs;
-use App\GameTemplates\Laracon2025;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -30,7 +28,7 @@ it('grants a ', function () {
         'team_id' => $this->team->id,
         'game_id' => $this->game->id,
         'points' => 3,
-        'description' => $this->player->user->name . ' resigned',
+        'description' => $this->player->user->name.' resigned',
     ]);
 
     expect($this->team->players->count())->toBe(0);

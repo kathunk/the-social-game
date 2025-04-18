@@ -2,8 +2,8 @@
 
 namespace App\States;
 
-use Thunk\Verbs\State;
 use Illuminate\Support\Carbon;
+use Thunk\Verbs\State;
 
 class GameApplicationState extends State
 {

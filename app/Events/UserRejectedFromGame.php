@@ -2,12 +2,12 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\UserState;
 use App\Models\GameApplication;
 use App\States\GameApplicationState;
+use App\States\GameState;
+use App\States\UserState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class UserRejectedFromGame extends Event
 {

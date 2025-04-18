@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Game;
 use App\Models\Challenge;
+use App\Models\Game;
 use Illuminate\Console\Command;
 
 class ProgressGames extends Command

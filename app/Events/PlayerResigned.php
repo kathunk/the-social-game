@@ -2,14 +2,14 @@
 
 namespace App\Events;
 
-use App\Models\Team;
 use App\Models\Player;
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
 use App\Models\ScoreHistoryEntry;
+use App\Models\Team;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\TeamState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class PlayerResigned extends Event
 {
@@ -66,7 +66,7 @@ class PlayerResigned extends Event
     public function applyToTeam(TeamState $team)
     {
         $team->player_ids = $team->player_ids->reject(fn (int $player_id) => $player_id === $this->player_id);
-        $team->addToScoreHistory($this->points, $this->state(PlayerState::class)->name .' resigned');
+        $team->addToScoreHistory($this->points, $this->state(PlayerState::class)->name.' resigned');
     }
 
     public function handle()
@@ -80,7 +80,7 @@ class PlayerResigned extends Event
             'team_id' => $this->team_id,
             'game_id' => $this->game_id,
             'points' => $this->points,
-            'description' => $this->state(PlayerState::class)->name .' resigned',
+            'description' => $this->state(PlayerState::class)->name.' resigned',
         ]);
 
         $team = Team::find($this->team_id);

@@ -2,10 +2,9 @@
 
 namespace App\States;
 
-use Thunk\Verbs\State;
-use App\States\ChallengeState;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Thunk\Verbs\State;
 
 class GameState extends State
 {

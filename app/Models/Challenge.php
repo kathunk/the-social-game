@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use App\Events\ChallengeEnded;
-use App\States\ChallengeState;
-use App\Events\ChallengeStarted;
 use App\Challenges\ChallengeRegistry;
-use Illuminate\Database\Eloquent\Model;
 use App\Challenges\Classes\BaseChallengeClass;
+use App\Events\ChallengeEnded;
+use App\Events\ChallengeStarted;
+use App\States\ChallengeState;
+use Illuminate\Database\Eloquent\Model;
 
 class Challenge extends Model
 {
@@ -36,7 +36,7 @@ class Challenge extends Model
     public function start()
     {
         ChallengeStarted::fire(
-            challenge_id: $this->id, 
+            challenge_id: $this->id,
             game_id: $this->game_id
         );
     }

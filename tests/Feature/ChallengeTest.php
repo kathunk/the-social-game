@@ -1,8 +1,8 @@
 <?php
 
+use App\Challenges\Classes\BaseChallengeClass;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
-use App\Challenges\Classes\BaseChallengeClass;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -31,4 +31,3 @@ it('knows what the current challenge is', function () {
     expect($this->game->state()->currentChallenge()->id)->toBe($first_challenge->id);
     expect($this->game->state()->currentChallenge()->handler())->toBeInstanceOf(BaseChallengeClass::class);
 });
-

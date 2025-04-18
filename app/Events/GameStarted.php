@@ -3,9 +3,9 @@
 namespace App\Events;
 
 use App\Models\Game;
-use Thunk\Verbs\Event;
 use App\States\GameState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class GameStarted extends Event
 {
