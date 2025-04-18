@@ -35,6 +35,8 @@ class GameState extends State
 
     public Collection $challenge_ids;
 
+    public $current_challenge_id;
+
     public function __construct()
     {
         $this->player_ids = collect();
@@ -70,5 +72,10 @@ class GameState extends State
     public function challenges()
     {
         return $this->challenge_ids->map(fn (int $challenge_id) => ChallengeState::load($challenge_id));
+    }
+
+    public function currentChallenge()
+    {
+        return ChallengeState::load($this->current_challenge_id);
     }
 }

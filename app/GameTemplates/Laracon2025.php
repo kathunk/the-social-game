@@ -38,13 +38,13 @@ class Laracon2025 extends GameTemplate
         return collect([
             [
                 'class' => PyramidScheme::class,
-                'starts_at' => Carbon::parse('2025-07-29 5:00:00 MST'),
-                'ends_at' => Carbon::parse('2025-07-29 12:00:00 MST'),
+                'starts_at' => $this->starts_at->copy(),
+                'ends_at' => $this->starts_at->copy()->addHours(7),
             ],
             [
                 'class' => PressTheButton::class,
-                'starts_at' => Carbon::parse('2025-07-29 12:00:00 MST'),
-                'ends_at' => Carbon::parse('2025-07-30 13:00:00 MST'),
+                'starts_at' => $this->starts_at->copy()->addHours(7),
+                'ends_at' => $this->starts_at->copy()->addHours(14),
             ],
         ]);
     }

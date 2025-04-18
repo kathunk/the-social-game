@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('status');
+            $table->integer('current_challenge_id')->nullable();
             $table->string('template_class');
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');
