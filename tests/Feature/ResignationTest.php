@@ -12,6 +12,8 @@ beforeEach(function () {
     $this->createGame();
     $this->createPlayer();
     $this->team = Team::first();
+
+    $this->game->start();
 });
 
 it('grants a ', function () {
