@@ -61,3 +61,18 @@ it('progresses from one challenge to the next', function () {
     expect($second_challenge->fresh()->status)->toBe('active');
     expect($this->game->fresh()->currentChallenge->id)->toBe($second_challenge->id);
 });
+
+it('ends the game', function () {
+    Date::setTestNow(now()->addMinutes(60));
+    $this->artisan('app:progress-games');
+
+    $this->game->challenges->each(function ($challenge) {
+        Date::setTestNow($challenge->ends_at);
+        $this->artisan('app:progress-games');
+    });
+
+    Date::setTestNow($this->game->ends_at);
+    $this->artisan('app:progress-games');
+
+    expect($this->game->fresh()->status)->toBe('ended');
+});
