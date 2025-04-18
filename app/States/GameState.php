@@ -3,6 +3,8 @@
 namespace App\States;
 
 use Thunk\Verbs\State;
+use App\States\ChallengeState;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class GameState extends State
@@ -27,6 +29,14 @@ class GameState extends State
 
     public Collection $team_ids;
 
+    public Carbon $starts_at;
+
+    public Carbon $ends_at;
+
+    public Collection $challenge_ids;
+
+    public $current_challenge_id;
+
     public function __construct()
     {
         $this->player_ids = collect();
@@ -36,6 +46,7 @@ class GameState extends State
         $this->unaccepted_user_ids = collect();
         $this->team_ids = collect();
         $this->resigned_player_ids = collect();
+        $this->challenge_ids = collect();
     }
 
     public function players()
@@ -56,5 +67,15 @@ class GameState extends State
     public function teams()
     {
         return $this->team_ids->map(fn (int $team_id) => TeamState::load($team_id));
+    }
+
+    public function challenges()
+    {
+        return $this->challenge_ids->map(fn (int $challenge_id) => ChallengeState::load($challenge_id));
+    }
+
+    public function currentChallenge()
+    {
+        return ChallengeState::load($this->current_challenge_id);
     }
 }

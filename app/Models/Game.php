@@ -3,15 +3,29 @@
 namespace App\Models;
 
 use App\Models\Player;
+use App\Events\GameEnded;
+use App\States\GameState;
+use App\Events\GameStarted;
+use App\Models\GameApplication;
+use App\Events\ChallengeStarted;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\GameApplication;
 
 class Game extends Model
 {
     use HasSnowflakes;
 
     protected $guarded = [];
+
+    protected $casts = [
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
+    ];
+
+    public function state(): GameState
+    {
+        return GameState::load($this->id);
+    }
 
     public function players()
     {
@@ -31,5 +45,29 @@ class Game extends Model
     public function teams()
     {
         return $this->hasMany(Team::class);
+    }
+
+    public function challenges()
+    {
+        return $this->hasMany(Challenge::class);
+    }
+
+    public function currentChallenge()
+    {
+        return $this->belongsTo(Challenge::class, 'current_challenge_id');
+    }
+
+    public function start()
+    {
+        GameStarted::fire(game_id: $this->id);
+
+        $challenge = $this->challenges->sortBy('starts_at')->first();
+
+        ChallengeStarted::fire(challenge_id: $challenge->id, game_id: $this->id);
+    }
+
+    public function end()
+    {
+        GameEnded::fire(game_id: $this->id);
     }
 }

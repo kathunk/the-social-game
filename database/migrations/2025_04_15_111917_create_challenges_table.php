@@ -8,14 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('games', function (Blueprint $table) {
+        Schema::create('challenges', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('status');
-            $table->integer('current_challenge_id')->nullable();
-            $table->string('template_class');
+            $table->foreignId('game_id')->constrained();
+            $table->string('class_key');
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');
+            $table->string('status')->default('upcoming');
             $table->timestamps();
         });
     }
