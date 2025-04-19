@@ -15,7 +15,7 @@ it('creates 10 teams at the start of the game', function () {
     expect($this->game->fresh()->teams->count())->toBe(10);
 });
 
-it('new players can join a team', function () {
+test('new players can join a team', function () {
     $team = $this->game->teams->first();
     $this->player->joinTeam($team);
 
@@ -23,7 +23,7 @@ it('new players can join a team', function () {
     expect($team->fresh()->players->count())->toBe(1);
 });
 
-it('players can switch teams', function () {
+test('players can switch teams', function () {
     $team = $this->game->teams->skip(0)->first();
     $team2 = $this->game->teams->skip(1)->first();
     $team3 = $this->game->teams->skip(2)->first();
@@ -41,20 +41,20 @@ it('players can switch teams', function () {
     expect($team2->fresh()->players->count())->toBe(1);
     expect($this->player->fresh()->last_switched_team_at)->not->toBeNull();
 
-    expect($this->player->state()->previous_team_ids)->toContain($team->id);
+    expect($this->player->historicalTeams->pluck('id'))->toContain($team->id);
 
     $this->player->joinTeam($team3);
     $this->player->refresh();
-    expect($this->player->fresh()->team_id)->toBe($team3->id);
+    expect($this->player->team_id)->toBe($team3->id);
     expect($team3->fresh()->players->count())->toBe(1);
     expect($this->player->fresh()->last_switched_team_at)->not->toBeNull();
 
-    expect($this->player->state()->previous_team_ids)
+    expect($this->player->fresh()->historicalTeams->pluck('id'))
         ->toContain($team->id)
         ->toContain($team2->id);
 });
 
-it('players may only be on a particular team once', function () {
+test('players may only be on a particular team once', function () {
     $team = $this->game->teams->skip(0)->first();
     $team2 = $this->game->teams->skip(1)->first();
 
@@ -67,7 +67,7 @@ it('players may only be on a particular team once', function () {
     expect(fn() => $this->player->joinTeam($team))->toThrow('Player has already been on this team');
 });
 
-it('players will not be able to select previous teams', function () {
+test('players will not be able to select previous teams', function () {
     $team = $this->game->teams->skip(0)->first();
     $team2 = $this->game->teams->skip(1)->first();
 
