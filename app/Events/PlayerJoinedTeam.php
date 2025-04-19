@@ -92,7 +92,6 @@ class PlayerJoinedTeam extends Event
                 'player_id' => $this->player_id,
                 'team_id' => $this->previous_team_id,
                 'game_id' => $this->game_id,
-                'joined_at' => $this->state(PlayerState::class)->last_switched_team_at,
             ]);
         }
 

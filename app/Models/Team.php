@@ -17,7 +17,7 @@ class Team extends Model
         return $this->hasMany(Player::class);
     }
 
-    public function historicalTeams(): BelongsToMany
+    public function historicalPlayers(): BelongsToMany
     {
         return $this->belongsToMany(Player::class, 'historical_team_players', 'team_id', 'player_id')
             ->using(HistoricalTeamPlayer::class)

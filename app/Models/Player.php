@@ -17,11 +17,9 @@ class Player extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
+    public function state(): PlayerState
     {
-        return [
-            'previous_team_ids' => Collection::class,
-        ];
+        return PlayerState::load($this->id);
     }
 
     public function game()
@@ -80,10 +78,5 @@ class Player extends Model
         Verbs::commit();
 
         return $this->fresh();
-    }
-
-    public function state(): PlayerState
-    {
-        return PlayerState::load($this->id);
     }
 }

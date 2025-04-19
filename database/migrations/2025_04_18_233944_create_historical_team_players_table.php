@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('historical_team_players', function (Blueprint $table) {
@@ -16,14 +13,10 @@ return new class extends Migration
             $table->foreignId('player_id')->constrained('players')->cascadeOnDelete();
             $table->foreignId('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignId('game_id')->constrained('games')->cascadeOnDelete();
-            $table->timestamp('joined_at')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('historical_team_players');
