@@ -50,7 +50,8 @@ class Player extends Model
 
     public function canSwitchTeams(): bool
     {
-        return true; // @todo we will have game logic turn this on and off
+        // @todo we will have game logic turn this on and off
+        return true;
     }
 
     public function joinTeam(Team $team)

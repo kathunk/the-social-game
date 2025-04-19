@@ -12,30 +12,50 @@
             <flux:button wire:click="joinTeam">Join</flux:button>
         </flux:card>
     @endif
-    <x-game-components.scoreboard :teams="$this->teams" />
-    @if ($this->current_team)
-        @if ($this->player->canSwitchTeams())
-            <flux:card>
-                <flux:heading>Switch teams</flux:heading>
-                <flux:subheading>
-                    Join a new team.
-                    <strong>You will never be able to rejoin your current team if you do this.</strong>
-                </flux:subheading>
-                <flux:select wire:model="selected_team_id" class="my-4">
-                    <flux:select.option value="">Select a team</flux:select.option>
-                    @foreach ($this->remaining_teams as $team)
-                        @if(isset($this->player->historicalTeams) && $this->player->historicalTeams->contains($team->id))
-                            <flux:select.option :value="(string) $team->id" disabled>{{ $team->name }} (previous team)</flux:select.option>
-                        @else
-                            <flux:select.option :value="(string) $team->id">{{ $team->name }}</flux:select.option>
-                        @endif
-                    @endforeach
-                </flux:select>
-                <flux:button wire:click="joinTeam">Join</flux:button>
-            </flux:card>
-        @endif
 
+    <x-game-components.scoreboard :teams="$this->teams" />
+
+    @if ($this->current_team)
         <flux:card>
+            <flux:heading>Switch teams</flux:heading>
+
+            @if ($this->player->canSwitchTeams())
+                @if ($this->player->historicalTeams->count() === ($this->teams->count() - 1))
+                    <flux:subheading>You've switched to the last team.</flux:subheading>
+                @else
+                    <flux:subheading>
+                        Join a new team.
+                        <strong>You will never be able to rejoin your current team if you do this.</strong>
+                    </flux:subheading>
+
+                    <flux:select wire:model="selected_team_id" class="my-4">
+                        <flux:select.option value="">Select a team</flux:select.option>
+
+                        @foreach ($this->remaining_teams as $team)
+                            @if(isset($this->player->historicalTeams) && $this->player->historicalTeams->contains($team->id))
+                                <flux:select.option :value="(string) $team->id" disabled>
+                                    {{ $team->name }} (previous team)
+                                </flux:select.option>
+                            @else
+                                <flux:select.option :value="(string) $team->id">
+                                    {{ $team->name }}
+                                </flux:select.option>
+                            @endif
+                        @endforeach
+                    </flux:select>
+
+                    <flux:modal.trigger name="joinTeam" class="flex justify-end">
+                        <flux:button variant="danger">Join</flux:button>
+                    </flux:modal.trigger>
+                @endif
+            @else
+                <flux:subheading>
+                    You may not switch teams.
+                </flux:subheading>
+            @endif
+        </flux:card>
+
+       <flux:card>
             <flux:heading>Had enough?</flux:heading>
             <flux:subheading class="mb-4">You can quit the game at any time. When you quit, you can give your team +3 or -3 points.</flux:subheading>
             <flux:modal.trigger name="quit" class="flex justify-end">
@@ -43,6 +63,21 @@
             </flux:modal.trigger>
         </flux:card>
     @endif
+
+    <flux:modal name="joinTeam" class="md:w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ trans_choice('team.switch.label', $this->player->historicalTeams->count()) }}</flux:heading>
+            </div>
+
+            <div class="flex">
+                <flux:spacer />
+
+                <flux:button variant="danger" wire:click="joinTeam">{{ trans_choice('team.switch.response', $this->player->historicalTeams->count()) }}</flux:button>
+            </div>
+        </div>
+    </flux:modal>
+
     <flux:modal name="quit" class="md:w-96">
         <div class="space-y-6">
             <div>
