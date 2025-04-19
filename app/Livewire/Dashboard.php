@@ -49,6 +49,12 @@ class Dashboard extends Component
         return $this->game->currentChallenge;
     }
 
+    #[Computed]
+    public function challengeComponent()
+    {
+        return $this->challenge->handler()->frontendComponent();
+    }
+
     public function mount()
     {
         if (! $this->player) {
@@ -80,6 +86,11 @@ class Dashboard extends Component
         Verbs::commit();
 
         redirect()->route('dashboard');
+    }
+
+    public function callAction($action)
+    {
+        // $this->challenge->handler()->callAction($action);
     }
 
     public function render()

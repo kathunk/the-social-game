@@ -17,6 +17,26 @@ class PyramidScheme extends BaseChallengeClass
         return 'pyramid_scheme';
     }
 
+    public function frontendComponent(): array
+    {
+        return $this->form()
+            ->title('Pyramid Scheme')
+            ->subtitle('When a new player joins your team, gain 1 point. At the end of the challenge, the largest team\'s score will be set to zero.')
+            ->image('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Great_Pyramid_of_Giza_-_Pyramid_of_Khufu.jpg/960px-Great_Pyramid_of_Giza_-_Pyramid_of_Khufu.jpg', 'A pyramid')
+            ->divider()
+            ->buttonGroup()
+                ->button('Add Player', 'add_player')
+                ->button('Remove Player', 'remove_player')
+            ->endGroup()
+            // ->table([
+            //     'Team' => 'Score',
+            //     'Team 1' => '100',
+            //     'Team 2' => '80',
+            //     'Team 3' => '60',
+            // ])
+            ->build();
+    }
+
     public function onPlayerJoinedTeam(
         PlayerState $player_state,
         TeamState $team_state,

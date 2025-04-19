@@ -12,4 +12,30 @@ class PressTheButton extends BaseChallengeClass
     {
         return 'press_the_button';
     }
+
+    public function frontendComponent(): array
+    {
+        // if ($this->state->is_locked) {
+        //     return $this->form()
+        //         ->title('You pressed the button!')->subtitle('You can no longer press the button.')
+        //         ->table([
+        //             'Teammates who pressed the button' => $this->state->team->players->pluck('name')->implode(', '),
+        //         ])
+        //         ->build();
+        // }
+
+        // return $this->form()
+        //     ->button('Press the button')->action('pressButton')
+        //     ->build();
+    }
+
+    public function validate()
+    {
+        // validate they are allowed to press the button, based on the challenge state
+    }
+
+    public function pressButton()
+    {
+        // fire an event to record the button press
+    }
 }

@@ -3,10 +3,11 @@
 namespace App\Challenges\Classes;
 
 use App\Models\Challenge;
-use App\States\ChallengeState;
 use App\States\GameState;
-use App\States\PlayerState;
 use App\States\TeamState;
+use App\States\PlayerState;
+use App\States\ChallengeState;
+use App\Challenges\ChallengeFormBuilder;
 
 abstract class BaseChallengeClass
 {
@@ -49,5 +50,15 @@ abstract class BaseChallengeClass
         GameState $game_state,
     ) {
         // Optional override
+    }
+
+    public function form(): ChallengeFormBuilder
+    {
+        return new ChallengeFormBuilder();
+    }
+
+    public function frontendComponent(): array
+    {
+        return [];
     }
 }
