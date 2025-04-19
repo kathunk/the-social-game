@@ -1,11 +1,22 @@
 <?php
 
-use App\Livewire\AdminDashboard;
+use App\Models\User;
+use Livewire\Volt\Volt;
+use App\Livewire\TeamPage;
 use App\Livewire\Dashboard;
 use App\Livewire\PreGameLobby;
-use App\Livewire\TeamPage;
+use App\Livewire\AdminDashboard;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Livewire\Volt\Volt;
+
+if (config('auth.auto.login')
+    && app()->environment('local')
+    && ! Auth::check()
+) {
+    Auth::login(
+        User::firstWhere('name', config('auth.auto.name'))
+    );
+}
 
 Route::get('/', function () {
     return view('welcome');

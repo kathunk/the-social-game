@@ -112,4 +112,19 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Auto Login
+    |-------------------------------------------------------------------------
+
+    | Automatically log in a user without going through the login flow.
+    | This will only work locally, through the web.php file.
+    | You can specify the user's name in the .env file.
+    |
+    */
+
+    'auto' =>[
+        'login' => env('AUTO_LOGIN', false),
+        'name' => env('AUTO_LOGIN_NAME', 'John Rudolph Drexler'),
+    ],
 ];
