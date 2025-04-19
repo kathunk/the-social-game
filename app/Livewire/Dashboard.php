@@ -43,6 +43,12 @@ class Dashboard extends Component
         return $this->player->team;
     }
 
+    #[Computed]
+    public function remaining_teams()
+    {
+        return $this->teams->reject(fn ($team) => $team->id === $this->current_team?->id);
+    }
+
     public function mount()
     {
         if (! $this->player) {

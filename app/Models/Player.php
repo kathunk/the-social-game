@@ -2,17 +2,27 @@
 
 namespace App\Models;
 
-use App\Events\PlayerJoinedTeam;
+use App\States\PlayerState;
 use App\Events\PlayerResigned;
+use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerJoinedTeam;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
-use Thunk\Verbs\Facades\Verbs;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Player extends Model
 {
     use HasSnowflakes;
 
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'previous_team_ids' => Collection::class,
+        ];
+    }
 
     public function game()
     {
@@ -24,9 +34,23 @@ class Player extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function historicalTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'historical_team_players', 'player_id', 'team_id')
+            ->using(HistoricalTeamPlayer::class)
+            ->where('historical_team_players.game_id', $this->game_id)
+            ->withPivot(['player_id', 'team_id'])
+            ->withTimestamps();
+    }
+
     public function team()
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function canSwitchTeams(): bool
+    {
+        return true; // @todo we will have game logic turn this on and off
     }
 
     public function joinTeam(Team $team)
@@ -55,5 +79,10 @@ class Player extends Model
         Verbs::commit();
 
         return $this->fresh();
+    }
+
+    public function state(): PlayerState
+    {
+        return PlayerState::load($this->id);
     }
 }

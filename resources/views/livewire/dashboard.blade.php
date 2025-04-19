@@ -14,14 +14,33 @@
     @endif
     <x-game-components.scoreboard :teams="$this->teams" />
     @if ($this->current_team)
+        @if ($this->player->canSwitchTeams())
+            <flux:card>
+                <flux:heading>Switch teams</flux:heading>
+                <flux:subheading>
+                    Join a new team.
+                    <strong>You will never be able to rejoin your current team if you do this.</strong>
+                </flux:subheading>
+                <flux:select wire:model="selected_team_id" class="my-4">
+                    <flux:select.option value="">Select a team</flux:select.option>
+                    @foreach ($this->remaining_teams as $team)
+                        @if(isset($this->player->historicalTeams) && $this->player->historicalTeams->contains($team->id))
+                            <flux:select.option :value="(string) $team->id" disabled>{{ $team->name }} (previous team)</flux:select.option>
+                        @else
+                            <flux:select.option :value="(string) $team->id">{{ $team->name }}</flux:select.option>
+                        @endif
+                    @endforeach
+                </flux:select>
+                <flux:button wire:click="joinTeam">Join</flux:button>
+            </flux:card>
+        @endif
+
         <flux:card>
             <flux:heading>Had enough?</flux:heading>
             <flux:subheading class="mb-4">You can quit the game at any time. When you quit, you can give your team +3 or -3 points.</flux:subheading>
             <flux:modal.trigger name="quit" class="flex justify-end">
                 <flux:button variant="danger">I've had enough</flux:button>
             </flux:modal.trigger>
-
-
         </flux:card>
     @endif
     <flux:modal name="quit" class="md:w-96">

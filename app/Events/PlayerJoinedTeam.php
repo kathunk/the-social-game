@@ -3,11 +3,12 @@
 namespace App\Events;
 
 use App\Models\Player;
-use App\States\GameState;
-use App\States\PlayerState;
-use App\States\TeamState;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
+use App\States\GameState;
+use App\States\TeamState;
+use App\States\PlayerState;
+use App\Models\HistoricalTeamPlayer;
+use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 
 class PlayerJoinedTeam extends Event
 {
@@ -49,6 +50,11 @@ class PlayerJoinedTeam extends Event
                 TeamState::load($this->previous_team_id)->player_ids->contains($this->player_id),
                 'Player was not in the previous team',
             );
+
+            $this->assert(
+                $this->state(PlayerState::class)->previous_team_ids->doesntContain($this->team_id),
+                'Player has already been on this team',
+            );
         }
     }
 
@@ -58,6 +64,8 @@ class PlayerJoinedTeam extends Event
 
         if (isset($this->previous_team_id)) {
             $player->last_switched_team_at = now();
+
+            $player->previous_team_ids->push($this->previous_team_id);
         }
     }
 
@@ -79,6 +87,13 @@ class PlayerJoinedTeam extends Event
 
         if (isset($this->previous_team_id)) {
             $player->last_switched_team_at = $this->state(PlayerState::class)->last_switched_team_at;
+
+            HistoricalTeamPlayer::create([
+                'player_id' => $this->player_id,
+                'team_id' => $this->previous_team_id,
+                'game_id' => $this->game_id,
+                'joined_at' => $this->state(PlayerState::class)->last_switched_team_at,
+            ]);
         }
 
         $player->save();
