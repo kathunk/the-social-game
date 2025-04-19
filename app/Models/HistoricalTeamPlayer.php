@@ -12,6 +12,5 @@ class HistoricalTeamPlayer extends Pivot
         'player_id',
         'team_id',
         'game_id',
-        'joined_at',
     ];
 }
