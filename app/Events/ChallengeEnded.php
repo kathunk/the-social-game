@@ -37,6 +37,7 @@ class ChallengeEnded extends Event
 
     public function applyToGame(GameState $state)
     {
+        $state->currentChallenge()->handler()->onChallengeEnded($state);
         $state->current_challenge_id = null;
     }
 
@@ -47,7 +48,17 @@ class ChallengeEnded extends Event
 
     public function handle()
     {
-        Game::find($this->game_id)->update(['current_challenge_id' => null]);
-        Challenge::find($this->challenge_id)->update(['status' => 'ended']);
+        $game = Game::find($this->game_id);
+        $game->current_challenge_id = null;
+        $game->save();
+
+        $game->teams->each(function ($team) {
+            $team->score = $team->state()->score();
+            $team->save();
+        });
+
+        $challenge = Challenge::find($this->challenge_id);
+        $challenge->status = 'ended';
+        $challenge->save();
     }
 }

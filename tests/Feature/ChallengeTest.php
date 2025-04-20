@@ -9,7 +9,6 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 beforeEach(function () {
     Verbs::commitImmediately();
     $this->game = $this->createGame();
-    $this->game->fresh()->start();
 });
 
 it('provides a challenge handler', function () {

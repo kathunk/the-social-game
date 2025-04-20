@@ -32,7 +32,7 @@
     <flux:card>
         <flux:heading size="lg">Score: {{ $team->score }}</flux:heading>
         
-        @if ($this->scoreHistoryEntries->count() > 0)
+        @if (count($this->scoreHistoryEntries) > 0)
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column></flux:table.column>
@@ -43,15 +43,15 @@
                         <flux:table.row>
                             <flux:table.cell>
                                 <div class="flex flex-col">
-                                    <flux:heading size="sm">{{ $entry->description }}</flux:heading>
-                                    <flux:text class="text-xs">{{ $entry->created_at->diffForHumans() }}</flux:text>
+                                    <flux:heading size="sm">{{ $entry['description'] }}</flux:heading>
+                                    <flux:text class="text-xs">{{ Carbon\Carbon::parse($entry['timestamp'])->diffForHumans() }}</flux:text>
                                 </div>
                             </flux:table.cell>
                             <flux:table.cell>
-                                @if ($entry->points > -1)
-                                    <flux:heading size="sm" class="text-green-500">+{{ $entry->points }}</flux:heading>
+                                @if ($entry['points'] > -1)
+                                    <flux:heading size="sm" class="text-green-500">+{{ $entry['points'] }}</flux:heading>
                                 @else
-                                    <flux:heading size="sm" class="text-red-500">{{ $entry->points }}</flux:heading>
+                                    <flux:heading size="sm" class="text-red-500">{{ $entry['points'] }}</flux:heading>
                                 @endif
                             </flux:table.cell>
                         </flux:table.row>

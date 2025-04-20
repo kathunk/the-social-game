@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         $game = (new Laracon2025)->createGame();
+        $game->start();
 
         foreach ($admin_data as $data) {
             $user = User::fromTemplate($data[0], $data[1], bcrypt('password'), $game)

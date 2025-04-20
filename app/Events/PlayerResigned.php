@@ -3,7 +3,6 @@
 namespace App\Events;
 
 use App\Models\Player;
-use App\Models\ScoreHistoryEntry;
 use App\Models\Team;
 use App\States\GameState;
 use App\States\PlayerState;
@@ -75,13 +74,6 @@ class PlayerResigned extends Event
         $player->team_id = null;
         $player->status = 'resigned';
         $player->save();
-
-        ScoreHistoryEntry::create([
-            'team_id' => $this->team_id,
-            'game_id' => $this->game_id,
-            'points' => $this->points,
-            'description' => $this->state(PlayerState::class)->name.' resigned',
-        ]);
 
         $team = Team::find($this->team_id);
         $team->score = $this->state(TeamState::class)->score();

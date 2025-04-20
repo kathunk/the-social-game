@@ -1,5 +1,6 @@
 <?php
 
+use App\GameTemplates\Laracon2025;
 use Illuminate\Support\Facades\Date;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -7,7 +8,7 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     Verbs::commitImmediately();
-    $this->game = $this->createGame(starts_at: now()->addHours(1));
+    $this->game = (new Laracon2025(now()->addHours(1)))->createGame();
 });
 
 it('the game is upcoming by default', function () {

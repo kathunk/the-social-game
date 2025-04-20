@@ -63,8 +63,6 @@ class GameTemplate
         foreach ($this->challenges() as $challenge) {
             ChallengeCreated::fire(
                 game_id: $this->game->id,
-                name: $challenge['class']::NAME,
-                description: $challenge['class']::DESCRIPTION,
                 starts_at: $challenge['starts_at'],
                 ends_at: $challenge['ends_at'],
                 class_key: $challenge['class']::key(),

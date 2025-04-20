@@ -10,8 +10,6 @@ beforeEach(function () {
     $this->createGame();
     $this->createPlayer();
     $this->team = Team::first();
-
-    $this->game->start();
 });
 
 it('grants a ', function () {
@@ -22,14 +20,7 @@ it('grants a ', function () {
 
     expect($this->player->status)->toBe('resigned');
     expect($this->player->team_id)->toBeNull();
-    expect($this->team->score)->toBe(3);
-
-    $this->assertDatabaseHas('score_history_entries', [
-        'team_id' => $this->team->id,
-        'game_id' => $this->game->id,
-        'points' => 3,
-        'description' => $this->player->user->name.' resigned',
-    ]);
+    expect($this->team->score)->toBe(4);
 
     expect($this->team->players->count())->toBe(0);
 

@@ -11,28 +11,28 @@ class TeamState extends State
 
     public int $game_id;
 
-    public Collection $score_history;
+    public array $score_history;
 
     public Collection $player_ids;
 
     public function __construct()
     {
-        $this->score_history = collect();
+        $this->score_history = [];
         $this->player_ids = collect();
     }
 
     public function addToScoreHistory(int $points, string $description)
     {
-        $this->score_history->push([
+        $this->score_history[] = [
             'description' => $description,
             'timestamp' => now(),
             'points' => $points,
-        ]);
+        ];
     }
 
     public function score(): int
     {
-        return $this->score_history->sum('points');
+        return array_sum(array_column($this->score_history, 'points'));
     }
 
     public function game()
