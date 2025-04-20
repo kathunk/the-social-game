@@ -22,7 +22,7 @@ class ExampleChallenge extends BaseChallengeClass
             ->input(
                 property_name: 'pick_a_number',
                 label: 'Pick a number 1-10',
-                description: "If you pick a number that no other player chose, gain 5 points. If you pick the most common number, lose 5 points.",
+                description: 'If you pick a number that no other player chose, gain 5 points. If you pick the most common number, lose 5 points.',
                 validation_rules: 'required|numeric|min:1|max:10',
                 validation_messages: [
                     'required' => 'Pick a number',
@@ -32,18 +32,18 @@ class ExampleChallenge extends BaseChallengeClass
                 ]
             )
             ->buttonGroup()
-                ->button('Submit Number', 'submitNumber')
+            ->button('Submit Number', 'submitNumber')
             ->endGroup()
             ->divider()
             ->select(
-                property_name: "new_team_id",
-                options: $this->challenge->game->teams->mapWithKeys(fn($t) => [$t->id => $t->name])->toArray(),
-                label: "Select a new team",
-                description: "You will join this new team immediately.",
-                placeholder: "Select a team...",
-                validation_rules: "in:" . $this->challenge->game->teams->pluck('id')->join(','),
+                property_name: 'new_team_id',
+                options: $this->challenge->game->teams->mapWithKeys(fn ($t) => [$t->id => $t->name])->toArray(),
+                label: 'Select a new team',
+                description: 'You will join this new team immediately.',
+                placeholder: 'Select a team...',
+                validation_rules: 'in:'.$this->challenge->game->teams->pluck('id')->join(','),
                 validation_messages: [
-                    'in' => "Must select a valid team",
+                    'in' => 'Must select a valid team',
                 ],
             )
             ->build();
@@ -51,7 +51,7 @@ class ExampleChallenge extends BaseChallengeClass
 
     public function submitNumber($params)
     {
-        dd(implode(" ", $params));
+        dd(implode(' ', $params));
     }
 
     public function onPlayerJoinedTeam(

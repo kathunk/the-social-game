@@ -7,6 +7,7 @@ use App\Challenges\Classes\BaseChallengeClass;
 class ChallengeFormBuilder
 {
     protected array $elements = [];
+
     protected ?array $currentGroup = null;
 
     public function __construct(
@@ -17,8 +18,8 @@ class ChallengeFormBuilder
 
     public function button(string $label, string $action): static
     {
-        if (!method_exists($this->challenge_class, $action)) {
-            throw new \InvalidArgumentException("Method [{$action}] does not exist on [" . get_class($this->challenge_class) . "].");
+        if (! method_exists($this->challenge_class, $action)) {
+            throw new \InvalidArgumentException("Method [{$action}] does not exist on [".get_class($this->challenge_class).'].');
         }
 
         $button = [
@@ -57,14 +58,13 @@ class ChallengeFormBuilder
     }
 
     public function input(
-        string $label, 
+        string $label,
         string $property_name, // this will be the name of the property in livewire
         string $validation_rules,
         array $validation_messages,
-        ?string $description = null, 
+        ?string $description = null,
         ?string $placeholder = null,
-    ): static
-    {
+    ): static {
         $this->elements[] = [
             'type' => 'input',
             'property_name' => $property_name,
@@ -79,15 +79,14 @@ class ChallengeFormBuilder
     }
 
     public function select(
-        string $label, 
+        string $label,
         array $options,
         string $property_name, // this will be the name of the property in livewire
         string $validation_rules,
         array $validation_messages,
-        ?string $description = null, 
+        ?string $description = null,
         ?string $placeholder = null,
-    ): static
-    {
+    ): static {
         $this->elements[] = [
             'type' => 'select',
             'label' => $label,
@@ -165,7 +164,7 @@ class ChallengeFormBuilder
     public function build(): array
     {
         if ($this->currentGroup !== null) {
-            throw new \RuntimeException("You must call endGroup() before build()");
+            throw new \RuntimeException('You must call endGroup() before build()');
         }
 
         return [

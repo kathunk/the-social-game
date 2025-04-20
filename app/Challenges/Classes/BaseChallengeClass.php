@@ -2,17 +2,17 @@
 
 namespace App\Challenges\Classes;
 
-use App\Models\Challenge;
-use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
-use App\States\ChallengeState;
 use App\Challenges\ChallengeFormBuilder;
+use App\Models\Challenge;
+use App\States\ChallengeState;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\TeamState;
 
 abstract class BaseChallengeClass
 {
     abstract public static function key(): string;
-    
+
     public function __construct(
         public ?Challenge $challenge = null,
         public ?ChallengeState $state = null
@@ -62,8 +62,8 @@ abstract class BaseChallengeClass
     {
         $properties = [];
 
-        foreach($this->frontendComponent()['elements'] as $element) {
-            if(isset($element['property_name'])) {
+        foreach ($this->frontendComponent()['elements'] as $element) {
+            if (isset($element['property_name'])) {
                 $properties[$element['property_name']] = null;
             }
         }
@@ -77,9 +77,9 @@ abstract class BaseChallengeClass
             ->filter(fn ($element) => isset($element['property_name'], $element['validation_rules']))
             ->reduce(function ($carry, $element) {
                 $property = "challenge_properties.{$element['property_name']}";
-                
+
                 $carry['rules'][$property] = $element['validation_rules'];
-                
+
                 if (isset($element['validation_messages'])) {
                     $carry['messages'] = array_merge(
                         $carry['messages'] ?? [],
@@ -88,7 +88,7 @@ abstract class BaseChallengeClass
                             ->all()
                     );
                 }
-                
+
                 return $carry;
             }, ['rules' => [], 'messages' => []]);
     }
