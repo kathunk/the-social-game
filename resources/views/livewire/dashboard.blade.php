@@ -13,7 +13,7 @@
         </flux:card>
     @endif
     @if ($this->challenge)
-        {{-- <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challengeComponent" /> --}}
+        <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challengeComponent" />
     @endif
     <x-game-components.scoreboard :teams="$this->teams" />
     @if ($this->current_team)
@@ -23,8 +23,6 @@
             <flux:modal.trigger name="quit" class="flex justify-end">
                 <flux:button variant="danger">I've had enough</flux:button>
             </flux:modal.trigger>
-
-
         </flux:card>
     @endif
     <flux:modal name="quit" class="md:w-96">

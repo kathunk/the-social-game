@@ -2,16 +2,29 @@
 
 namespace App\Challenges;
 
+use App\Challenges\Classes\BaseChallengeClass;
+
 class ChallengeFormBuilder
 {
     protected array $elements = [];
     protected ?array $currentGroup = null;
 
-    public function button(string $label): static
+    public function __construct(
+        public BaseChallengeClass $challenge_class
+    ) {
+        //
+    }
+
+    public function button(string $label, string $action): static
     {
+        if (!method_exists($this->challenge_class, $action)) {
+            throw new \InvalidArgumentException("Method [{$action}] does not exist on [" . get_class($this->challenge_class) . "].");
+        }
+
         $button = [
             'type' => 'button',
             'label' => $label,
+            'action' => $action,
         ];
 
         if ($this->currentGroup !== null) {
@@ -43,21 +56,47 @@ class ChallengeFormBuilder
         return $this;
     }
 
-    public function input(string $name): static
+    public function input(
+        string $label, 
+        string $property_name, // this will be the name of the property in livewire
+        string $validation_rules,
+        array $validation_messages,
+        ?string $description = null, 
+        ?string $placeholder = null,
+    ): static
     {
         $this->elements[] = [
             'type' => 'input',
-            'name' => $name,
+            'property_name' => $property_name,
+            'label' => $label,
+            'description' => $description,
+            'placeholder' => $placeholder,
+            'validation_rules' => $validation_rules,
+            'validation_messages' => $validation_messages,
         ];
 
         return $this;
     }
 
-    public function select(string $name): static
+    public function select(
+        string $label, 
+        array $options,
+        string $property_name, // this will be the name of the property in livewire
+        string $validation_rules,
+        array $validation_messages,
+        ?string $description = null, 
+        ?string $placeholder = null,
+    ): static
     {
         $this->elements[] = [
             'type' => 'select',
-            'name' => $name,
+            'label' => $label,
+            'description' => $description,
+            'options' => $options,
+            'property_name' => $property_name,
+            'validation_rules' => $validation_rules,
+            'validation_messages' => $validation_messages,
+            'placeholder' => $placeholder,
         ];
 
         return $this;
@@ -133,36 +172,5 @@ class ChallengeFormBuilder
             'type' => 'form',
             'elements' => $this->elements,
         ];
-    }
-
-    public function action(string $method): static
-    {
-        return $this->updateLast(fn (&$el) => $el['action'] = $method);
-    }
-
-    public function placeholder(string $text): static
-    {
-        return $this->updateLast(fn (&$el) => $el['placeholder'] = $text);
-    }
-
-    public function validation(string $rule): static
-    {
-        return $this->updateLast(fn (&$el) => $el['validation'] = $rule);
-    }
-
-    public function options(array $choices): static
-    {
-        return $this->updateLast(fn (&$el) => $el['options'] = $choices);
-    }
-
-    protected function updateLast(callable $callback): static
-    {
-        $index = count($this->elements) - 1;
-
-        if ($index >= 0) {
-            $callback($this->elements[$index]);
-        }
-
-        return $this;
     }
 }

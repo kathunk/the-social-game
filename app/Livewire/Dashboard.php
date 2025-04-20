@@ -13,6 +13,10 @@ class Dashboard extends Component
 
     public int $quit_points;
 
+    public array $challenge_properties = [];
+
+    public array $challenge_validation_rules = [];
+
     #[Computed]
     public function user()
     {
@@ -50,9 +54,15 @@ class Dashboard extends Component
     }
 
     #[Computed]
+    public function challengeHandler()
+    {
+        return $this->challenge->handler();
+    }
+
+    #[Computed]
     public function challengeComponent()
     {
-        return $this->challenge->handler()->frontendComponent();
+        return $this->challenge_handler->frontendComponent();
     }
 
     public function mount()
@@ -60,6 +70,10 @@ class Dashboard extends Component
         if (! $this->player) {
             return redirect()->route('pre-game-lobby');
         }
+
+        $this->challenge_properties = $this->challenge_handler->propertiesForLivewire();
+        $validation = $this->challenge_handler->validationRulesForLivewire();
+        $this->challenge_validation_rules = $validation['rules'];
     }
 
     public function joinTeam()
@@ -88,9 +102,16 @@ class Dashboard extends Component
         redirect()->route('dashboard');
     }
 
-    public function callAction($action)
+    public function callChallengeAction(string $action, ?array $params = null)
     {
-        // $this->challenge->handler()->callAction($action);
+        $params = $params ?? $this->challenge_properties;
+
+        if (count($this->challenge_validation_rules) > 0) {
+            $validation = $this->challenge_handler->validationRulesForLivewire();
+            $this->validate($validation['rules'], $validation['messages']);
+        }
+
+        $this->challenge->handler()->{$action}($params);
     }
 
     public function render()
