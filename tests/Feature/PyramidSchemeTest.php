@@ -1,13 +1,25 @@
 <?php
 
+use App\Challenges\Classes\PyramidScheme;
+use App\GameTemplates\TestTemplate;
 use Illuminate\Support\Facades\Date;
 use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-it('has pyramidscheme page', function () {
+it('runs the Pyramid Scheme challenge', function () {
     Verbs::commitImmediately();
-    $this->game = $this->createGame();
+
+    $challenges = collect([
+        [
+            'class' => PyramidScheme::class,
+            'starts_at' => now(),
+            'ends_at' => now()->addHours(1),
+        ],
+    ]);
+
+    $this->game = (new TestTemplate(now(), $challenges))->createGame()->start();
+
     $team = $this->game->teams->first();
     $team_2 = $this->game->teams->skip(1)->first();
     $team_3 = $this->game->teams->skip(2)->first();

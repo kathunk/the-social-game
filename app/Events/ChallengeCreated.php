@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Events\Traits\HasGame;
 use App\Models\Challenge;
 use App\States\ChallengeState;
 use App\States\GameState;
@@ -11,11 +12,10 @@ use Thunk\Verbs\Event;
 
 class ChallengeCreated extends Event
 {
+    use HasGame;
+
     #[StateId(ChallengeState::class)]
     public ?int $challenge_id = null;
-
-    #[StateId(GameState::class)]
-    public int $game_id;
 
     public string $class_key;
 
@@ -30,6 +30,7 @@ class ChallengeCreated extends Event
         $challenge->starts_at = $this->starts_at;
         $challenge->ends_at = $this->ends_at;
         $challenge->status = 'upcoming';
+        $challenge->challenge_data = $challenge->handler()->dataArrayForState();
     }
 
     public function applyToGame(GameState $game)
@@ -46,6 +47,7 @@ class ChallengeCreated extends Event
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at,
             'status' => 'upcoming',
+            'challenge_data' => $this->state(ChallengeState::class)->challenge_data,
         ]);
     }
 }

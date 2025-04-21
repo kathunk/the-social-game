@@ -12,7 +12,7 @@
             <flux:button wire:click="joinTeam">Join</flux:button>
         </flux:card>
     @endif
-    @if ($this->challenge)
+    @if ($this->challenge && $this->current_team)
         <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challengeComponent" />
     @endif
     <x-game-components.scoreboard :teams="$this->teams" />

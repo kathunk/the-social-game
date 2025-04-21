@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Challenges\Classes;
+
+use App\Events\PlayerSubmittedStayOnMessage;
+use App\States\GameState;
+
+class StayOnMessage extends BaseChallengeClass
+{
+    public static function key(): string
+    {
+        return 'staying_on_message';
+    }
+
+    public function dataArrayForState(): array
+    {
+        return $this->challenge_state->game()->teams()->mapWithKeys(fn ($t) => [$t->id => []])->toArray();
+    }
+
+    public function frontendComponent(): array
+    {
+        if (isset($this->challenge->challenge_data[$this->player->team_id][$this->player->id])) {
+            return $this->form()
+                ->title('Stay on message')
+                ->subtitle('Your submission: '.$this->challenge->challenge_data[$this->player->team_id][$this->player->id])
+                ->build();
+        }
+
+        return $this->form()
+            ->title('Stay on message')
+            ->subtitle("Let's see how well you can work together. You have 1 hour to submit any 50 character string in the field below. At the end of the challenge, we will find your team's most commonly submitted string. Your team will receive (% of players who submitted your most popular string - 50%) * 100 points.")
+            ->input(
+                property_name: 'string_input',
+                validation_rules: 'required|min:50|max:50',
+                validation_messages: [
+                    'required' => 'I assure you, 0 is less than 50',
+                    'min' => "Don't be nervous. We need at least 50 characters from you.",
+                    'max' => "Slow down there John Updike, we don't need a novel",
+                ]
+            )
+            ->buttonGroup()
+            ->button('Submit', 'submitString')
+            ->endGroup()
+            ->build();
+    }
+
+    public function submitString($params)
+    {
+        PlayerSubmittedStayOnMessage::fire(
+            player_id: $this->player->id,
+            game_id: $this->challenge->game->id,
+            challenge_id: $this->challenge->id,
+            team_id: $this->player->team_id,
+            message: $params['string_input'],
+        );
+    }
+
+    public function onChallengeEnded(
+        GameState $game_state,
+    ) {
+        $game_state->teams()->each(function ($team) {
+            $member_count = $team->player_ids->count();
+
+            if ($member_count === 0) {
+                return;
+            }
+
+            $messages = $this->challenge_state->challenge_data[$team->id];
+
+            $most_common_message = array_count_values($messages) ?: [];
+            $most_common_message = ! empty($most_common_message) ? array_keys($most_common_message, max($most_common_message))[0] : null;
+
+            $count = empty($messages) ? 0 : max(array_count_values($messages));
+
+            $points = (($count / $member_count) - 0.5) * 100;
+
+            $team->addToScoreHistory((int) round($points, 0), 'Completed the Stay On Message challenge');
+        });
+    }
+}

@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Events\Traits\HasGame;
 use App\Models\Team;
 use App\States\GameState;
 use App\States\TeamState;
@@ -10,11 +11,10 @@ use Thunk\Verbs\Event;
 
 class TeamCreated extends Event
 {
+    use HasGame;
+
     #[StateId(TeamState::class)]
     public ?int $team_id = null;
-
-    #[StateId(GameState::class)]
-    public int $game_id;
 
     public string $name;
 

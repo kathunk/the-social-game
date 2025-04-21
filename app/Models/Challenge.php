@@ -16,6 +16,7 @@ class Challenge extends Model
     protected $casts = [
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
+        'challenge_data' => 'array',
     ];
 
     public function state(): ChallengeState

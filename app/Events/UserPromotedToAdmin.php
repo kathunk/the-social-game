@@ -2,20 +2,17 @@
 
 namespace App\Events;
 
+use App\Events\Traits\HasActiveGame;
+use App\Events\Traits\HasUser;
 use App\Models\Game;
 use App\Models\User;
 use App\States\GameState;
 use App\States\UserState;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
 class UserPromotedToAdmin extends Event
 {
-    #[StateId(UserState::class)]
-    public int $user_id;
-
-    #[StateId(GameState::class)]
-    public int $game_id;
+    use HasActiveGame, HasUser;
 
     public function validate()
     {

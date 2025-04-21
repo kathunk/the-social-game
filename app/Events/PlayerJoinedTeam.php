@@ -2,39 +2,24 @@
 
 namespace App\Events;
 
+use App\Events\Traits\HasActiveGame;
+use App\Events\Traits\HasActivePlayer;
+use App\Events\Traits\HasTeam;
 use App\Models\Game;
 use App\Models\Player;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
 class PlayerJoinedTeam extends Event
 {
-    #[StateId(PlayerState::class)]
-    public int $player_id;
-
-    #[StateId(TeamState::class)]
-    public int $team_id;
-
-    #[StateId(GameState::class)]
-    public int $game_id;
+    use HasActiveGame, HasActivePlayer, HasTeam;
 
     public ?int $previous_team_id = null;
 
     public function validate()
     {
-        $this->assert(
-            $this->game_id === $this->state(PlayerState::class)->game_id,
-            'Player is not in the game',
-        );
-
-        $this->assert(
-            $this->state(GameState::class)->team_ids->contains($this->team_id),
-            'Team is not in the game',
-        );
-
         $this->assert(
             ! $this->state(TeamState::class)->player_ids->contains($this->player_id),
             'Player is already in a team',
