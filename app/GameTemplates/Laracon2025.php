@@ -2,7 +2,7 @@
 
 namespace App\GameTemplates;
 
-use App\Challenges\Classes\PressTheButton;
+use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\StayOnMessage;
 use Illuminate\Support\Carbon;
 
@@ -37,15 +37,15 @@ class Laracon2025 extends GameTemplate
     {
         return collect([
             [
-                'class' => StayOnMessage::class,
+                'class' => PyramidScheme::class,
                 'starts_at' => $this->starts_at->copy(),
                 'ends_at' => $this->starts_at->copy()->addHours(7),
             ],
-            // [
-            //     'class' => PressTheButton::class,
-            //     'starts_at' => $this->starts_at->copy()->addHours(7),
-            //     'ends_at' => $this->starts_at->copy()->addHours(14),
-            // ],
+            [
+                'class' => StayOnMessage::class,
+                'starts_at' => $this->starts_at->copy()->addHours(7),
+                'ends_at' => $this->starts_at->copy()->addHours(8),
+            ],
         ]);
     }
 }

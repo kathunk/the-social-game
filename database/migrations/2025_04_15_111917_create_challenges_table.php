@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('class_key');
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');
-            $table->json('challenge_data')->nullable();
+            $table->json('challenge_data');
             $table->string('status')->default('upcoming');
             $table->timestamps();
         });
