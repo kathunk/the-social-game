@@ -21,6 +21,8 @@ class ChallengeState extends State
 
     public bool $allows_turncoat;
 
+    public array $challenge_data;
+
     public function game(): GameState
     {
         return GameState::load($this->game_id);

@@ -1,6 +1,8 @@
 <?php
 
-use App\GameTemplates\Laracon2025;
+use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\Classes\StayOnMessage;
+use App\GameTemplates\TestTemplate;
 use Illuminate\Support\Facades\Date;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -8,7 +10,21 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     Verbs::commitImmediately();
-    $this->game = (new Laracon2025(now()->addHours(1)))->createGame();
+
+    $challenges = collect([
+        [
+            'class' => PyramidScheme::class,
+            'starts_at' => now()->addHours(1),
+            'ends_at' => now()->addHours(8),
+        ],
+        [
+            'class' => StayOnMessage::class,
+            'starts_at' => now()->addHours(8),
+            'ends_at' => now()->addHours(15),
+        ],
+    ]);
+
+    $this->game = (new TestTemplate(now()->addHours(1), $challenges))->createGame();
 });
 
 it('the game is upcoming by default', function () {

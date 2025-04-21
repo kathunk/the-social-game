@@ -112,6 +112,8 @@ class Dashboard extends Component
         }
 
         $this->challenge->handler()->{$action}($params);
+
+        redirect()->route('dashboard');
     }
 
     public function render()

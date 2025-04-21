@@ -58,10 +58,10 @@ class ChallengeFormBuilder
     }
 
     public function input(
-        string $label,
         string $property_name, // this will be the name of the property in livewire
         string $validation_rules,
         array $validation_messages,
+        ?string $label = null,
         ?string $description = null,
         ?string $placeholder = null,
     ): static {

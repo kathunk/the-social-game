@@ -7,6 +7,7 @@ use App\Events\GameCreated;
 use App\Events\TeamCreated;
 use App\Models\Game;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Thunk\Verbs\Facades\Verbs;
 
 class GameTemplate
@@ -22,6 +23,7 @@ class GameTemplate
 
     public function __construct(
         public ?Carbon $starts_at = null,
+        public ?Collection $challenges = null,
     ) {
         $this->starts_at = $starts_at ?? $this->startTime();
         $this->ends_at = $this->ends_at();
@@ -60,7 +62,9 @@ class GameTemplate
 
     public function seedChallenges()
     {
-        foreach ($this->challenges() as $challenge) {
+        $challenges = $this->challenges ?? $this->challenges();
+
+        foreach ($challenges as $challenge) {
             ChallengeCreated::fire(
                 game_id: $this->game->id,
                 starts_at: $challenge['starts_at'],

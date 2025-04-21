@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Events\PlayerJoinedTeam;
 use App\Events\PlayerResigned;
+use App\States\PlayerState;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
 use Thunk\Verbs\Facades\Verbs;
@@ -13,6 +14,11 @@ class Player extends Model
     use HasSnowflakes;
 
     protected $guarded = [];
+
+    public function state(): PlayerState
+    {
+        return PlayerState::load($this->id);
+    }
 
     public function game()
     {

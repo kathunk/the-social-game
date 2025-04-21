@@ -30,6 +30,7 @@ class ChallengeCreated extends Event
         $challenge->starts_at = $this->starts_at;
         $challenge->ends_at = $this->ends_at;
         $challenge->status = 'upcoming';
+        $challenge->challenge_data = $challenge->handler()->dataArrayForState();
     }
 
     public function applyToGame(GameState $game)
@@ -46,6 +47,7 @@ class ChallengeCreated extends Event
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at,
             'status' => 'upcoming',
+            'challenge_data' => $this->state(ChallengeState::class)->challenge_data,
         ]);
     }
 }

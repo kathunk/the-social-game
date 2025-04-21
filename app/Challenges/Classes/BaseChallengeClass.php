@@ -4,6 +4,7 @@ namespace App\Challenges\Classes;
 
 use App\Challenges\ChallengeFormBuilder;
 use App\Models\Challenge;
+use App\Models\Player;
 use App\States\ChallengeState;
 use App\States\GameState;
 use App\States\PlayerState;
@@ -13,19 +14,30 @@ abstract class BaseChallengeClass
 {
     abstract public static function key(): string;
 
+    public ?Player $player = null;
+
+    public ?PlayerState $player_state = null;
+
     public function __construct(
         public ?Challenge $challenge = null,
-        public ?ChallengeState $state = null
-    ) {}
+        public ?ChallengeState $challenge_state = null,
+    ) {
+        $user = auth()->user();
+
+        if ($user) {
+            $this->player = $user->currentPlayer;
+            $this->player_state = $this->player->state();
+        }
+    }
 
     public static function fromModel(Challenge $challenge): static
     {
         return new static(challenge: $challenge);
     }
 
-    public static function fromState(ChallengeState $state): static
+    public static function fromState(ChallengeState $challenge): static
     {
-        return new static(state: $state);
+        return new static(challenge_state: $challenge);
     }
 
     public function onRoundEnded()
@@ -69,6 +81,11 @@ abstract class BaseChallengeClass
         }
 
         return $properties;
+    }
+
+    public function dataArrayForState(): array
+    {
+        return [];
     }
 
     public function validationRulesForLivewire(): array
