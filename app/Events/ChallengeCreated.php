@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Events\Traits\HasGame;
 use App\Models\Challenge;
 use App\States\ChallengeState;
 use App\States\GameState;
@@ -11,11 +12,10 @@ use Thunk\Verbs\Event;
 
 class ChallengeCreated extends Event
 {
+    use HasGame;
+
     #[StateId(ChallengeState::class)]
     public ?int $challenge_id = null;
-
-    #[StateId(GameState::class)]
-    public int $game_id;
 
     public string $class_key;
 

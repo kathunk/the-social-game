@@ -2,15 +2,14 @@
 
 namespace App\Events;
 
+use App\Events\Traits\HasGame;
 use App\Models\Game;
 use App\States\GameState;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
 class GameStarted extends Event
 {
-    #[StateId(GameState::class)]
-    public int $game_id;
+    use HasGame;
 
     public function validate()
     {

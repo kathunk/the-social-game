@@ -2,54 +2,23 @@
 
 namespace App\Events;
 
+use App\Events\Traits\HasActiveGame;
+use App\Events\Traits\HasPlayerOnTeam;
 use App\Models\Player;
 use App\Models\Team;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
 class PlayerResigned extends Event
 {
-    #[StateId(PlayerState::class)]
-    public int $player_id;
-
-    #[StateId(TeamState::class)]
-    public int $team_id;
-
-    #[StateId(GameState::class)]
-    public int $game_id;
+    use HasActiveGame, HasPlayerOnTeam;
 
     public int $points;
 
     public function validate()
     {
-        $this->assert(
-            $this->state(GameState::class)->player_ids->contains($this->player_id),
-            'Player is not in the game',
-        );
-
-        $this->assert(
-            $this->state(GameState::class)->resigned_player_ids->doesntContain($this->player_id),
-            'Player has already resigned',
-        );
-
-        $this->assert(
-            $this->state(GameState::class)->team_ids->contains($this->team_id),
-            'Team is not in the game',
-        );
-
-        $this->assert(
-            $this->state(TeamState::class)->player_ids->contains($this->player_id),
-            'Player is not in the team',
-        );
-
-        $this->assert(
-            $this->state(GameState::class)->status === 'active',
-            'Game is not active',
-        );
-
         $this->assert(
             $this->points === 3 || $this->points === -3,
             'Points must be 3 or -3',

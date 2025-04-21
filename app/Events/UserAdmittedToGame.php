@@ -2,6 +2,8 @@
 
 namespace App\Events;
 
+use App\Events\Traits\HasActiveGame;
+use App\Events\Traits\HasUser;
 use App\Models\GameApplication;
 use App\Models\Player;
 use App\Models\User;
@@ -14,14 +16,13 @@ use Thunk\Verbs\Event;
 
 class UserAdmittedToGame extends Event
 {
+    use HasActiveGame, HasUser;
+
     #[StateId(PlayerState::class)]
     public ?int $player_id = null;
 
     #[StateId(UserState::class)]
     public int $user_id;
-
-    #[StateId(GameState::class)]
-    public int $game_id;
 
     #[StateId(GameApplicationState::class)]
     public int $application_id;
