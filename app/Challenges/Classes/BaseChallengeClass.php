@@ -40,6 +40,11 @@ abstract class BaseChallengeClass
         return new static(challenge_state: $challenge);
     }
 
+    public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool
+    {
+        return false;
+    }
+
     public function onRoundEnded()
     {
         // Optional override

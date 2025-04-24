@@ -49,4 +49,9 @@ class Challenge extends Model
             game_id: $this->game_id
         );
     }
+
+    public function updateModelWithStateData()
+    {
+        $this->update(['challenge_data' => $this->state()->challenge_data]);
+    }
 }
