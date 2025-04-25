@@ -2,6 +2,7 @@
 
 namespace App\Challenges\Classes;
 
+use App\Models\Player;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
@@ -13,7 +14,7 @@ class ExampleChallenge extends BaseChallengeClass
         return 'example_challenge';
     }
 
-    public function frontendComponent(): array
+    public function frontendComponent(Player $player): array
     {
         return $this->form()
             ->title('Pyramid Scheme')

@@ -52,7 +52,7 @@
                         placeholder="{{ $element['placeholder'] }}"
                     >
                         @foreach($element['options'] as $key => $value)
-                            <flux:select.option value={{ $key }}>{{ $value }}</flux:select.option>
+                            <flux:select.option value="{{ $key }}">{{ $value }}</flux:select.option>
                         @endforeach
                     </flux:select>
                     @break

@@ -3,6 +3,8 @@
 namespace App\Challenges;
 
 use App\Challenges\Classes\BaseChallengeClass;
+use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
+use Illuminate\Support\Collection;
 
 class ChallengeFormBuilder
 {
@@ -20,6 +22,32 @@ class ChallengeFormBuilder
     {
         if (! method_exists($this->challenge_class, $action)) {
             throw new \InvalidArgumentException("Method [{$action}] does not exist on [".get_class($this->challenge_class).'].');
+        }
+
+        $method = new \ReflectionMethod($this->challenge_class, $action);
+        $params = $method->getParameters();
+
+        if (count($params) !== 2) {
+            throw new \InvalidArgumentException("Method [{$action}] on [".get_class($this->challenge_class).'] must have exactly two parameters: (Player $player, array $params).');
+        }
+
+        [$playerParam, $paramsParam] = $params;
+
+        // Validate first param is type Player
+        if (
+            ! $playerParam->hasType() ||
+            $playerParam->getType()->getName() !== \App\Models\Player::class
+        ) {
+            throw new \InvalidArgumentException("First parameter of method [{$action}] must be type-hinted as Player.");
+        }
+
+        // Validate second param is named 'params' and is an array
+        if (
+            $paramsParam->getName() !== 'params' ||
+            ! $paramsParam->hasType() ||
+            $paramsParam->getType()->getName() !== 'array'
+        ) {
+            throw new \InvalidArgumentException("Second parameter of method [{$action}] must be named 'params' and type-hinted as array.");
         }
 
         $button = [
@@ -171,5 +199,30 @@ class ChallengeFormBuilder
             'type' => 'form',
             'elements' => $this->elements,
         ];
+    }
+
+    public function teamSwap(
+        Collection $teams,
+        ?string $label = 'Choose a team to swap to',
+        ?string $description = 'You can swap teams once during this challenge.',
+    ) {
+        if (! $this->challenge_class instanceof SupportsTeamSwaps) {
+            throw new \RuntimeException('Challenge class must implement SupportsTeamSwaps interface');
+        }
+
+        $this->select(
+            label: $label,
+            description: $description,
+            options: $teams->mapWithKeys(fn ($team) => [$team->id => $team->name])->toArray(),
+            property_name: 'team_id',
+            validation_rules: 'required',
+            validation_messages: ['required' => 'Team is required'],
+        );
+
+        $this->buttonGroup();
+        $this->button('Swap Team', 'swapTeams');
+        $this->endGroup();
+
+        return $this;
     }
 }

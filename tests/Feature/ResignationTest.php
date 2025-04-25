@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Classes\PyramidScheme;
 use App\GameTemplates\TestTemplate;
 use App\Models\Team;
 use Thunk\Verbs\Facades\Verbs;
@@ -12,7 +12,7 @@ beforeEach(function () {
 
     $challenges = collect([
         [
-            'class' => StayOnMessage::class,
+            'class' => PyramidScheme::class,
             'starts_at' => now(),
             'ends_at' => now()->addHours(1),
         ],
@@ -24,7 +24,7 @@ beforeEach(function () {
     $this->team = Team::first();
 });
 
-it('grants a ', function () {
+it('grants points when a player resigns', function () {
     $this->player->joinTeam($this->team);
     $this->player->fresh()->resign(3);
     $this->player->refresh();
@@ -32,7 +32,7 @@ it('grants a ', function () {
 
     expect($this->player->status)->toBe('resigned');
     expect($this->player->team_id)->toBeNull();
-    expect($this->team->score)->toBe(3);
+    expect($this->team->score)->toBe(4);
 
     expect($this->team->players->count())->toBe(0);
 
