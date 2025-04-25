@@ -3,6 +3,7 @@
 namespace App\Challenges\Classes;
 
 use App\Events\PlayerSubmittedStayOnMessage;
+use App\Models\Player;
 use App\States\GameState;
 
 class StayOnMessage extends BaseChallengeClass
@@ -17,7 +18,7 @@ class StayOnMessage extends BaseChallengeClass
         return $this->challenge_state->game()->teams()->mapWithKeys(fn ($t) => [$t->id => []])->toArray();
     }
 
-    public function frontendComponent(): array
+    public function frontendComponent(Player $player): array
     {
         if (isset($this->challenge->challenge_data[$this->player->team_id][$this->player->id])) {
             return $this->form()
@@ -44,13 +45,13 @@ class StayOnMessage extends BaseChallengeClass
             ->build();
     }
 
-    public function submitString($params)
+    public function submitString(Player $player, array $params)
     {
         PlayerSubmittedStayOnMessage::fire(
-            player_id: $this->player->id,
-            game_id: $this->challenge->game->id,
+            player_id: $player->id,
+            game_id: $player->game_id,
             challenge_id: $this->challenge->id,
-            team_id: $this->player->team_id,
+            team_id: $player->team_id,
             message: $params['string_input'],
         );
     }

@@ -62,7 +62,7 @@ class Dashboard extends Component
     #[Computed]
     public function challengeComponent()
     {
-        return $this->challenge_handler->frontendComponent();
+        return $this->challenge_handler->frontendComponent($this->player);
     }
 
     public function mount()
@@ -71,8 +71,8 @@ class Dashboard extends Component
             return redirect()->route('pre-game-lobby');
         }
 
-        $this->challenge_properties = $this->challenge_handler->propertiesForLivewire();
-        $validation = $this->challenge_handler->validationRulesForLivewire();
+        $this->challenge_properties = $this->challenge_handler->propertiesForLivewire($this->player);
+        $validation = $this->challenge_handler->validationRulesForLivewire($this->player);
         $this->challenge_validation_rules = $validation['rules'];
     }
 
@@ -107,11 +107,11 @@ class Dashboard extends Component
         $params = $params ?? $this->challenge_properties;
 
         if (count($this->challenge_validation_rules) > 0) {
-            $validation = $this->challenge_handler->validationRulesForLivewire();
+            $validation = $this->challenge_handler->validationRulesForLivewire($this->player);
             $this->validate($validation['rules'], $validation['messages']);
         }
 
-        $this->challenge->handler()->{$action}($params);
+        $this->challenge->handler()->{$action}($this->player, $params);
 
         redirect()->route('dashboard');
     }

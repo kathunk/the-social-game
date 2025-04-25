@@ -36,6 +36,18 @@ class PlayerJoinedTeam extends Event
                 'Player was not in the previous team',
             );
         }
+
+        if ($this->previous_team_id && $this->state(GameState::class)->current_challenge_id) {
+            $this->assert(
+                $this->state(GameState::class)->currentChallenge()->handler()->supportsTeamSwaps(),
+                'Challenge does not support team swaps',
+            );
+
+            $this->assert(
+                $this->state(GameState::class)->currentChallenge()->handler()->playerCanSwapTeams(player_state: $this->state(PlayerState::class)),
+                'Challenge rules prevent this player from swapping teams',
+            );
+        }
     }
 
     public function applyToGame(GameState $game)
@@ -80,9 +92,9 @@ class PlayerJoinedTeam extends Event
         $player->save();
 
         $game = Game::find($this->game_id);
-        
+
         $game->teams->each(fn ($t) => $t->update(['score' => $t->state()->score()]));
 
-        $game->currentChallenge()->updateModelWithStateData();
+        $game->currentChallenge->updateModelWithStateData();
     }
 }

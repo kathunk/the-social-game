@@ -3,6 +3,7 @@
 namespace App\Challenges\Classes;
 
 use App\Challenges\ChallengeFormBuilder;
+use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 use App\Models\Challenge;
 use App\Models\Player;
 use App\States\ChallengeState;
@@ -65,21 +66,26 @@ abstract class BaseChallengeClass
         // Optional override
     }
 
+    public function supportsTeamSwaps(): bool
+    {
+        return $this instanceof SupportsTeamSwaps;
+    }
+
     public function form(): ChallengeFormBuilder
     {
         return new ChallengeFormBuilder($this);
     }
 
-    public function frontendComponent(): array
+    public function frontendComponent(Player $player): array
     {
         return [];
     }
 
-    public function propertiesForLivewire(): array
+    public function propertiesForLivewire(Player $player): array
     {
         $properties = [];
 
-        foreach ($this->frontendComponent()['elements'] as $element) {
+        foreach ($this->frontendComponent($player)['elements'] as $element) {
             if (isset($element['property_name'])) {
                 $properties[$element['property_name']] = null;
             }
@@ -93,9 +99,9 @@ abstract class BaseChallengeClass
         return [];
     }
 
-    public function validationRulesForLivewire(): array
+    public function validationRulesForLivewire(Player $player): array
     {
-        return collect($this->frontendComponent()['elements'])
+        return collect($this->frontendComponent($player)['elements'])
             ->filter(fn ($element) => isset($element['property_name'], $element['validation_rules']))
             ->reduce(function ($carry, $element) {
                 $property = "challenge_properties.{$element['property_name']}";

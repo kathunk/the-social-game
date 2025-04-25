@@ -2,36 +2,57 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
+use App\Challenges\Support\Traits\HasTeamSwaps;
 use App\Models\Player;
 use App\States\GameState;
-use App\States\TeamState;
 use App\States\PlayerState;
+use App\States\TeamState;
+use Illuminate\Support\Collection;
 
-class PyramidScheme extends BaseChallengeClass
+class PyramidScheme extends BaseChallengeClass implements SupportsTeamSwaps
 {
+    use HasTeamSwaps;
+
     public static function key(): string
     {
         return 'pyramid_scheme';
     }
 
-    public function frontendComponent(): array
+    public function dataArrayForState(): array
     {
+        return ['swapper_ids' => []];
+    }
+
+    public function frontendComponent(Player $player): array
+    {
+        if ($this->playerCanSwapTeams(player: $player)) {
+            return $this->form()
+                ->title('Pyramid Scheme')
+                ->subtitle('When a new player joins your team, gain 1 point. At the end of the challenge, the largest team\'s score will be set to zero.')
+                ->teamSwap($this->availableTeams($player))
+                ->build();
+        }
+
         return $this->form()
             ->title('Pyramid Scheme')
-            ->subtitle('When a new player joins your team, gain 1 point. At the end of the challenge, the largest team\'s score will be set to zero. You may change teams once during this challenge.')
-            // @todo this needs to take into account the player who is seeing this component
-            // ->teamSwap($this->game->teams->fil)
+            ->subtitle('When a new player joins your team, gain 1 point. At the end of the challenge, the largest team\'s score will be set to zero.')
             ->build();
+    }
+
+    public function availableTeams(Player $player): Collection
+    {
+        return $player->game->teams->filter(fn ($t) => $t->id !== $player->team_id);
     }
 
     public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool
     {
         if ($player) {
-            return !in_array($player_state->id, $this->challenge->challenge_data['swapper_ids']);
+            return ! in_array($player->id, $this->challenge->challenge_data['swapper_ids']);
         }
 
         if ($player_state) {
-            return !in_array($player_state->id, $this->challenge_state->challenge_data['swapper_ids']);
+            return ! in_array($player_state->id, $this->challenge_state->challenge_data['swapper_ids']);
         }
 
         return false;
@@ -45,6 +66,7 @@ class PyramidScheme extends BaseChallengeClass
     ) {
         if ($previous_team) {
             $this->challenge_state->challenge_data['swapper_ids'][] = $player_state->id;
+
             return;
         }
 
