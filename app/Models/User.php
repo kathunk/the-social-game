@@ -35,6 +35,7 @@ class User extends Authenticatable
         'status',
         'current_game_id',
         'current_player_id',
+        'is_super_admin',
     ];
 
     /**
@@ -45,6 +46,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'is_super_admin' => 'boolean',
     ];
 
     /**
@@ -125,6 +130,16 @@ class User extends Authenticatable
     public function currentPlayer()
     {
         return $this->belongsTo(Player::class, 'current_player_id');
+    }
+
+    public function memberships()
+    {
+        return $this->hasMany(Membership::class);
+    }
+
+    public function getIsMemberAttribute(): bool
+    {
+        return $this->memberships->filter(fn ($m) => $m->isActive())->isNotEmpty();
     }
 
     public function getIsAdminAttribute(): bool

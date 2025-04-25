@@ -25,6 +25,8 @@ class UserState extends State
 
     public Collection $application_ids;
 
+    public bool $is_super_admin;
+
     public function __construct()
     {
         $this->player_ids = collect();

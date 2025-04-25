@@ -36,6 +36,8 @@ class GameState extends State
 
     public $current_challenge_id;
 
+    public int $game_template_id;
+
     public function __construct()
     {
         $this->player_ids = collect();

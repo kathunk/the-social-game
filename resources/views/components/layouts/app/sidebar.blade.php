@@ -11,11 +11,21 @@
                 <x-app-logo />
             </a>
 
+            @php
+                $user = auth()->user();
+            @endphp
+
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
-                    @if (auth()->user()->is_admin)
+                    @if ($user->is_admin)
                         <flux:navlist.item icon="briefcase" :href="route('admin-dashboard')" :current="request()->routeIs('admin-dashboard')" wire:navigate>{{ __('Admin Dashboard') }}</flux:navlist.item>
+                    @endif
+                    @if ($user->is_member)
+                        <flux:navlist.item icon="plus" :href="route('admin-dashboard')" :current="request()->routeIs('admin-dashboard')" wire:navigate>{{ __('Create Game') }}</flux:navlist.item>
+                    @endif
+                    @if ($user->is_super_admin)
+                        <flux:navlist.item icon="briefcase" :href="route('admin-dashboard')" :current="request()->routeIs('admin-dashboard')" wire:navigate>{{ __('Manage Game Templates') }}</flux:navlist.item>
                     @endif
                 </flux:navlist.group>
             </flux:navlist>

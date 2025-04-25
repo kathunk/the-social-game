@@ -3,10 +3,18 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\GameTemplates\Laracon2025;
+use App\Models\Game;
 use App\Models\User;
-use Illuminate\Database\Seeder;
+use App\Models\GameTemplate;
 use Thunk\Verbs\Facades\Verbs;
+use Illuminate\Database\Seeder;
+use App\Events\GameTemplateAdded;
+use App\GameTemplates\Laracon2025;
+use App\Console\Commands\SeedProduction;
+use App\Events\UserPromotedToSuperAdmin;
+use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\Classes\StayOnMessage;
+use App\Events\UserGainedMembership;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,13 +28,48 @@ class DatabaseSeeder extends Seeder
             ['Daniel Coulbourne', 'daniel@thunk.dev'],
         ];
 
-        $game = (new Laracon2025)->createGame();
-        $game->start();
+        $templates = [
+            'Laracon 2025' => [
+                'name' => 'Laracon 2025',
+                'type' => 'team',
+                'min_players' => 0,
+                'max_players' => null,
+                'is_public' => false,
+                'team_names' => ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
+                'challenges' => [
+                    PyramidScheme::key() => 420,
+                    StayOnMessage::key() => 60,
+                ],
+            ]
+        ];
+
+        foreach ($templates as $name => $template) {
+            GameTemplateAdded::fire(
+                name: $name,
+                type: $template['type'],
+                min_players: $template['min_players'],
+                max_players: $template['max_players'],
+                is_public: $template['is_public'],
+                team_names: $template['team_names'],
+                challenges: $template['challenges'],
+            );
+        }
 
         foreach ($admin_data as $data) {
-            $user = User::fromTemplate($data[0], $data[1], bcrypt('password'), $game)
-                ->promoteToAdmin($game);
+            $user = User::fromTemplate($data[0], $data[1], bcrypt('password'));
+            UserPromotedToSuperAdmin::fire(user_id: $user->id);
+            UserGainedMembership::fire(user_id: $user->id);
+        }
 
+        $game = Game::fromTemplate(
+            template: GameTemplate::firstWhere('name', 'Laracon 2025'),
+            starts_at: now(),
+            user: User::firstWhere('email', 'john@thunk.dev'),
+        )->start();
+
+        foreach (User::all() as $user) {
+            $user->applyToGame($game);
+            $user->promoteToAdmin($game);
             $user->admitToGame($game, $user);
         }
 

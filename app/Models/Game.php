@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
-use App\Events\ChallengeStarted;
 use App\Events\GameEnded;
-use App\Events\GameStarted;
 use App\States\GameState;
+use App\Events\GameCreated;
+use App\Events\GameStarted;
+use App\Events\TeamCreated;
+use Illuminate\Support\Carbon;
+use App\Events\ChallengeCreated;
+use App\Events\ChallengeStarted;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
 
@@ -53,6 +57,57 @@ class Game extends Model
     public function currentChallenge()
     {
         return $this->belongsTo(Challenge::class, 'current_challenge_id');
+    }
+
+    public static function fromTemplate(
+        GameTemplate $template,
+        Carbon $starts_at,
+        User $user,
+        ?array $challenges = null
+    ): self
+    {
+        $game_id = GameCreated::fire(
+            user_id: $user->id,
+            name: $template->name,
+            game_template_id: $template->id,
+            type: $template->type,
+            min_players: $template->min_players,
+            max_players: $template->max_players,
+            is_public: $template->is_public,
+            team_names: $template->team_names,
+            challenges: $template->challenges,
+            starts_at: $starts_at,
+        )->game_id;
+
+        foreach ($template->team_names as $team_name) {
+            TeamCreated::fire(
+                game_id: $game_id,
+                name: $team_name,
+            );
+        }
+
+        $challenges = $challenges ?? $template->challenges;
+
+        $next_challenge_starts_at = $starts_at->copy();
+
+        $challenges_with_times = collect($challenges)->map(function ($duration, $class_key) use ($next_challenge_starts_at) {
+            return [
+                'starts_at' => $next_challenge_starts_at,
+                'ends_at' => $next_challenge_starts_at->copy()->addMinutes($duration),
+                'class_key' => $class_key,
+            ];
+        });
+
+        foreach ($challenges_with_times as $challenge) {
+            ChallengeCreated::fire(
+                game_id: $game_id,
+                starts_at: $challenge['starts_at'],
+                ends_at: $challenge['ends_at'],
+                class_key: $challenge['class_key'],
+            );
+        }
+
+        return self::find($game_id);
     }
 
     public function start()

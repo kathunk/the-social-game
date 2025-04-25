@@ -2,9 +2,10 @@
 
 namespace App\Challenges\Support\Traits;
 
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
-use App\Events\PlayerJoinedTeam;
 use App\Models\Player;
+use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerJoinedTeam;
+use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 
 trait HasTeamSwaps
 {
@@ -20,5 +21,7 @@ trait HasTeamSwaps
             game_id: $player->game_id,
             previous_team_id: $player->team_id,
         );
+
+        Verbs::commit();
     }
 }

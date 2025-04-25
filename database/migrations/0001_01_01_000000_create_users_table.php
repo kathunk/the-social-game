@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->foreignId('current_game_id')->nullable()->constrained('games');
             $table->foreignId('current_player_id')->nullable()->constrained('players');
+            $table->boolean('is_super_admin')->default(false);
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

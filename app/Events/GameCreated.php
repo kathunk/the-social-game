@@ -2,20 +2,24 @@
 
 namespace App\Events;
 
-use App\Models\Game;
-use App\States\GameState;
 use Carbon\Carbon;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use App\Models\Game;
 use Thunk\Verbs\Event;
+use App\States\GameState;
+use App\Models\GameTemplate;
+use App\Events\Traits\HasUser;
+use App\States\GameTemplateState;
+use App\Events\Traits\HasGameTemplate;
+use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 
 class GameCreated extends Event
 {
+    use HasUser, HasGameTemplate;
+
     #[StateId(GameState::class)]
     public ?int $game_id = null;
 
     public string $name;
-
-    public string $template_class;
 
     public Carbon $starts_at;
 
@@ -25,9 +29,12 @@ class GameCreated extends Event
     {
         $game->name = $this->name;
         $game->status = 'upcoming';
-        $game->template_class = $this->template_class;
+        $game->game_template_id = $this->game_template_id;
         $game->starts_at = $this->starts_at;
-        $game->ends_at = $this->ends_at;
+
+        $game->ends_at = $this->starts_at->addMinutes(
+            $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
+        );
     }
 
     public function handle()
@@ -36,9 +43,9 @@ class GameCreated extends Event
             'id' => $this->game_id,
             'name' => $this->name,
             'status' => 'upcoming',
-            'template_class' => $this->template_class,
+            'game_template_id' => $this->game_template_id,
             'starts_at' => $this->starts_at,
-            'ends_at' => $this->ends_at,
+            'ends_at' => $this->state(GameState::class)->ends_at,
         ]);
     }
 }

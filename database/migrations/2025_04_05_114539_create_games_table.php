@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('status');
             $table->integer('current_challenge_id')->nullable();
-            $table->string('template_class');
+            $table->foreignId('game_template_id')->constrained('game_templates');
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');
             $table->timestamps();
