@@ -201,15 +201,18 @@ class ChallengeFormBuilder
         ];
     }
 
-    public function teamSwap(Collection $teams)
-    {
+    public function teamSwap(
+        Collection $teams,
+        ?string $label = 'Choose a team to swap to',
+        ?string $description = 'You can swap teams once during this challenge.',
+    ) {
         if (! $this->challenge_class instanceof SupportsTeamSwaps) {
             throw new \RuntimeException('Challenge class must implement SupportsTeamSwaps interface');
         }
 
         $this->select(
-            label: 'Choose a team to swap to',
-            description: 'You can swap teams once during this challenge.',
+            label: $label,
+            description: $description,
             options: $teams->mapWithKeys(fn ($team) => [$team->id => $team->name])->toArray(),
             property_name: 'team_id',
             validation_rules: 'required',
