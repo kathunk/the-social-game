@@ -15,6 +15,7 @@ return new class extends Migration
             $table->integer('min_players')->nullable();
             $table->integer('max_players')->nullable();
             $table->boolean('is_public')->default(false);
+            $table->text('description')->nullable();
             $table->json('team_names');
             $table->json('challenges');
             $table->timestamps();

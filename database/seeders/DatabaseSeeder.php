@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
         $templates = [
             'Laracon 2025' => [
                 'name' => 'Laracon 2025',
+                'description' => 'A team game for the Laravel Conference 2025.',
                 'type' => 'team',
                 'min_players' => 0,
                 'max_players' => null,
@@ -46,6 +47,7 @@ class DatabaseSeeder extends Seeder
         foreach ($templates as $name => $template) {
             GameTemplateAdded::fire(
                 name: $name,
+                description: $template['description'],
                 type: $template['type'],
                 min_players: $template['min_players'],
                 max_players: $template['max_players'],

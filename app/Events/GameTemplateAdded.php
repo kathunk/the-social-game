@@ -15,6 +15,8 @@ class GameTemplateAdded extends Event
 
     public string $name;
 
+    public string $description;
+
     public string $type;
 
     public ?int $min_players;
@@ -36,6 +38,7 @@ class GameTemplateAdded extends Event
         $game_template->is_public = $this->is_public;
         $game_template->team_names = $this->team_names;
         $game_template->challenges = $this->challenges;
+        $game_template->description = $this->description;
     }
 
     public function handle()
@@ -51,11 +54,12 @@ class GameTemplateAdded extends Event
                 'is_public' => $this->is_public,
                 'team_names' => $this->team_names,
                 'challenges' => $this->challenges,
+                'description' => $this->description,
             ]);
 
             return;
         }
-        
+
         GameTemplate::create([
             'id' => $this->game_template_id,
             'name' => $this->name,
@@ -65,6 +69,7 @@ class GameTemplateAdded extends Event
             'is_public' => $this->is_public,
             'team_names' => $this->team_names,
             'challenges' => $this->challenges,
+            'description' => $this->description,
         ]);
     }
 }

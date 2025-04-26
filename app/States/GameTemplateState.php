@@ -8,6 +8,8 @@ class GameTemplateState extends State
 {
     public string $name;
 
+    public string $description;
+
     public string $type;
 
     public int $min_players;
