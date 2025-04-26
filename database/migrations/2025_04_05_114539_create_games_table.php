@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('game_template_id')->constrained('game_templates');
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');
+            $table->boolean('is_public')->default(false);
+            $table->boolean('requires_admin_approval_to_join')->default(false);
             $table->timestamps();
         });
     }

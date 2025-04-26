@@ -8,6 +8,7 @@ use App\Events\GameCreated;
 use App\Events\GameStarted;
 use App\Events\TeamCreated;
 use Illuminate\Support\Carbon;
+use Thunk\Verbs\Facades\Verbs;
 use App\Events\ChallengeCreated;
 use App\Events\ChallengeStarted;
 use Glhd\Bits\Database\HasSnowflakes;
@@ -63,7 +64,9 @@ class Game extends Model
         GameTemplate $template,
         Carbon $starts_at,
         User $user,
-        ?array $challenges = null
+        ?array $challenges = null,
+        bool $is_public,
+        bool $requires_admin_approval_to_join
     ): self
     {
         $game_id = GameCreated::fire(
@@ -74,6 +77,7 @@ class Game extends Model
             min_players: $template->min_players,
             max_players: $template->max_players,
             is_public: $template->is_public,
+            requires_admin_approval_to_join: $template->requires_admin_approval_to_join,
             team_names: $template->team_names,
             challenges: $template->challenges,
             starts_at: $starts_at,
@@ -106,6 +110,8 @@ class Game extends Model
                 class_key: $challenge['class_key'],
             );
         }
+
+        Verbs::commit();
 
         return self::find($game_id);
     }

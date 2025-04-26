@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Home;
 use Livewire\Volt\Volt;
 use App\Livewire\TeamPage;
 use App\Livewire\Dashboard;
@@ -19,9 +20,10 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/password', 'settings.password')->name('settings.password');
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 
-    Route::get('/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
-    Route::get('/admin-dashboard', AdminDashboard::class)->name('admin-dashboard');
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
+    Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
+    Route::get('/games/{game}/admin-dashboard', AdminDashboard::class)->name('admin-dashboard');
+    Route::get('/games/{game}/dashboard', Dashboard::class)->name('dashboard');
+    Route::get('/home', Home::class)->name('home');
     Route::get('/teams/{team}', TeamPage::class)->name('teams.show');
     Route::get('/create-game', CreateGame::class)->name('create-game');
 });

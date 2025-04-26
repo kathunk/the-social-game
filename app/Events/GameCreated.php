@@ -25,12 +25,18 @@ class GameCreated extends Event
 
     public Carbon $ends_at;
 
+    public bool $is_public;
+
+    public bool $requires_admin_approval_to_join;
+
     public function applyToGame(GameState $game)
     {
         $game->name = $this->name;
         $game->status = 'upcoming';
         $game->game_template_id = $this->game_template_id;
         $game->starts_at = $this->starts_at;
+        $game->is_public = $this->is_public;
+        $game->requires_admin_approval_to_join = $this->requires_admin_approval_to_join;
 
         $game->ends_at = $this->starts_at->addMinutes(
             $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
@@ -45,7 +51,9 @@ class GameCreated extends Event
             'status' => 'upcoming',
             'game_template_id' => $this->game_template_id,
             'starts_at' => $this->starts_at,
-            'ends_at' => $this->state(GameState::class)->ends_at,
+            'ends_at' => $this->ends_at,
+            'is_public' => $this->is_public,
+            'requires_admin_approval_to_join' => $this->requires_admin_approval_to_join,
         ]);
     }
 }

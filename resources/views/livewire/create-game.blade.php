@@ -1,8 +1,8 @@
 <div>
     <flux:card>
-        <div class="flex flex-col space-y-4">
-            <flux:heading>Create Game</flux:heading>
-            <flux:radio.group label="Select Game Variant">
+        <div class="flex flex-col space-y-6">
+            <flux:heading size="lg">Create Game</flux:heading>
+            <flux:radio.group label="Select Game Variant" wire:model="game_template_id">
                 @foreach ($this->game_templates as $game_template)
                     <flux:radio
                         name="game_template_id"
@@ -19,8 +19,12 @@
                 id="game_start_timecode"
                 wire:model="game_start_timecode"
                 min="{{ now()->addMinute()->second(0)->toIsoString() }}"
+                :default="now()->addHour()->toISOString()" 
                 required
             />
+        </div>
+        <div class="flex justify-end">
+            <flux:button variant="primary" wire:click="createGame" class="mt-4">Create Game</flux:button>
         </div>
     </flux:card>
 </div>

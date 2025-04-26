@@ -38,6 +38,10 @@ class GameState extends State
 
     public int $game_template_id;
 
+    public bool $is_public;
+
+    public bool $requires_admin_approval_to_join;
+
     public function __construct()
     {
         $this->player_ids = collect();
