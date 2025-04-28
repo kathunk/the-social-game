@@ -19,7 +19,7 @@ new class extends Component {
         $this->email = Auth::user()->email;
 
         if (auth()->user()->currentPlayer) {
-            redirect()->route('dashboard');
+            redirect()->route('home');
         }
     }
 

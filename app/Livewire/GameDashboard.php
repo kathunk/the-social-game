@@ -67,8 +67,8 @@ class GameDashboard extends Component
 
     public function mount()
     {
-        if (! $this->player) {
-            return redirect()->route('pre-game-lobby');
+        if (! $this->player || $this->game->status === 'upcoming') {
+            return redirect()->route('pre-game-lobby', ['game' => $this->game]);
         }
 
         $this->challenge_properties = $this->challenge_handler->propertiesForLivewire($this->player);

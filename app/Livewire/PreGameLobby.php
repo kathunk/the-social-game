@@ -2,8 +2,9 @@
 
 namespace App\Livewire;
 
-use Livewire\Attributes\Computed;
 use Livewire\Component;
+use App\Support\HtmlTransformer;
+use Livewire\Attributes\Computed;
 
 class PreGameLobby extends Component
 {
@@ -43,12 +44,18 @@ class PreGameLobby extends Component
         return $this->game->requires_admin_approval_to_join;
     }
 
+    #[Computed]
+    public function description()
+    {
+        return (new HtmlTransformer($this->game->gameTemplate->pre_game_lobby_message))->fluxify();
+    }
+
     public function checkStatus()
     {
         unset($this->application);
 
-        if ($this->application->status === 'accepted') {
-            return redirect()->route('home');
+        if ($this->application->status === 'accepted' && $this->game->status === 'active') {
+            return redirect()->route('game-dashboard', ['game' => $this->game]);
         }
     }
 

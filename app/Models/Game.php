@@ -11,10 +11,11 @@ use Illuminate\Support\Carbon;
 use Thunk\Verbs\Facades\Verbs;
 use App\Events\ChallengeCreated;
 use App\Events\ChallengeStarted;
-use App\Events\UserRequestedToJoinGame;
 use App\Events\UserAdmittedToGame;
 use Glhd\Bits\Database\HasSnowflakes;
+use App\Events\UserRequestedToJoinGame;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Game extends Model
 {
@@ -60,6 +61,11 @@ class Game extends Model
     public function currentChallenge()
     {
         return $this->belongsTo(Challenge::class, 'current_challenge_id');
+    }
+
+    public function gameTemplate()
+    {
+        return $this->belongsTo(GameTemplate::class);
     }
 
     public static function fromTemplate(
