@@ -40,19 +40,16 @@ class CreateGame extends Component
             return redirect()->route('dashboard');
         }
 
-        // @todo this works sometimes? if you refresh it works
-        $this->game_start_timecode = Carbon::now()->addHours(1);
+        $this->game_start_timecode = Carbon::now()->addHours(1)->setSeconds(0);
     }
 
     public function createGame()
     {
         $this->validate();
 
-        $game_start_time_rounded_down = Carbon::parse($this->game_start_timecode)->setSeconds(0);
-
         $game = Game::fromTemplate(
             template: GameTemplate::find($this->game_template_id),
-            starts_at: $game_start_time_rounded_down,
+            starts_at: $this->game_start_timecode->setSeconds(0),
             user: $this->user,
             is_public: $this->is_public,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
@@ -65,7 +62,7 @@ class CreateGame extends Component
     {
         return [
             'game_template_id' => 'required|exists:game_templates,id',
-            'game_start_timecode' => 'required|date|after:now',
+            'game_start_timecode' => ['required', 'date', 'after:' . now()],
         ];
     }
 

@@ -89,7 +89,7 @@ class Game extends Model
             team_names: $template->team_names,
             challenges: $template->challenges,
             starts_at: $starts_at,
-            ends_at: $starts_at->addMinutes($template->totalDuration),
+            ends_at: $starts_at->copy()->addMinutes($template->totalDuration),
         )->game_id;
 
         foreach ($template->team_names as $team_name) {

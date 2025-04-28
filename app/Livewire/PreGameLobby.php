@@ -47,7 +47,7 @@ class PreGameLobby extends Component
     #[Computed]
     public function description()
     {
-        return (new HtmlTransformer($this->game->gameTemplate->pre_game_lobby_message))->fluxify();
+        return (new HtmlTransformer($this->game->gameTemplate->pre_game_lobby_message))->formatted();
     }
 
     public function checkStatus()

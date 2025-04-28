@@ -8,6 +8,8 @@ use Illuminate\Database\Seeder;
 use App\Events\GameTemplateAdded;
 use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\StayOnMessage;
+use phpDocumentor\Reflection\DocBlock\Tags\Example;
+use App\Challenges\Classes\ExampleIndividualChallenge;
 
 class GameTemplateSeeder extends Seeder
 {
@@ -18,17 +20,39 @@ class GameTemplateSeeder extends Seeder
         $templates = [
             'Laracon 2025' => [
                 'description' => 'A team game for the Laravel Conference 2025.',
-                'pre_game_lobby_message' => 'Welcome to the Laravel Conference 2025!',
+                'pre_game_lobby_message' => "<h1>You're almost there!</h1><h3>Find the man with the bag of cash. He will let you into the game.</h3><p>The pyramid scheme will take place for the duration of the conference. At 5pm at the end of the conference, the team at the top of the leader board will split $1,500. There will be twists and turns along the way. To keep up with the latest, follow <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://twitter.com/johnrudolphdrex\"><strong><u>John's Twitter</u></strong></a>.</p><h3><strong>You're using your real name, right?</strong></h3><p>To join the game, your name must match your Laracon badge. If you didn't register using your real name, please update it <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"http://laracon-2025.test/settings/profile\"><strong><u>here</u></strong></a>.</p>",
                 'type' => 'team',
                 'min_players' => 0,
                 'max_players' => null,
                 'is_public' => false,
                 'team_names' => ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
                 'challenges' => [
-                    PyramidScheme::key() => 420,
-                    StayOnMessage::key() => 60,
+                    [
+                        'challenge_keys' => [PyramidScheme::key()],
+                        'duration' => 420,
+                    ],
+                    [
+                        'challenge_keys' => [StayOnMessage::key()],
+                        'duration' => 60,
+                    ],
                 ],
                 'players_can_join_late' => true,
+            ],
+            'Pecking Order' => [
+                'description' => 'The original!',
+                'pre_game_lobby_message' => "<h1>A popularity contest for horrible people</h1><h3>Climb to the top of the ranks.</h3><p>Every round, you will upvote and downvote your opponents. But you will also take quizzes about how you expect the votes to turn out. When you are right, you'll accumulate secret points that are revealed at the end of the game. Outsmart your opponents to be at the top of the Pecking Order!</p>",
+                'type' => 'individual',
+                'min_players' => 6,
+                'max_players' => 12,
+                'is_public' => false,
+                'team_names' => [],
+                'challenges' => [
+                    [
+                        'challenge_keys' => [ExampleIndividualChallenge::key()],
+                        'duration' => 420,
+                    ],
+                ],
+                'players_can_join_late' => false,
             ],
         ];
 
@@ -41,18 +65,9 @@ class GameTemplateSeeder extends Seeder
                 min_players: $template['min_players'],
                 max_players: $template['max_players'],
                 is_public: $template['is_public'],
-                team_names: ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
-                challenges: [
-                    [
-                        'challenge_keys' => [PyramidScheme::key()],
-                        'duration' => 420,
-                    ],
-                    [
-                        'challenge_keys' => [StayOnMessage::key()],
-                        'duration' => 60,
-                    ],
-                ],
-                players_can_join_late: true,
+                team_names: $template['team_names'],
+                challenges: $template['challenges'],
+                players_can_join_late: $template['players_can_join_late'],
             );
         }
     }

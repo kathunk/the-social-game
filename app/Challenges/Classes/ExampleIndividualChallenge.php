@@ -7,17 +7,17 @@ use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
 
-class ExampleChallenge extends BaseChallengeClass
+class ExampleIndividualChallenge extends BaseChallengeClass
 {
     const NAME = 'Example Challenge';
 
     const DESCRIPTION = 'Example Challenge description';
 
-    const TYPE = 'team'; // team or individual
+    const TYPE = 'individual'; // team or individual
 
     public static function key(): string
     {
-        return 'example_challenge';
+        return 'example_individual_challenge';
     }
 
     public function frontendComponent(Player $player): array

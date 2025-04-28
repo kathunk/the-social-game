@@ -10,7 +10,7 @@ class HtmlTransformer
         //
     }
     
-    public function fluxify(): string
+    public function formatted(): string
     {
         $dom = new \DOMDocument();
         libxml_use_internal_errors(true); // suppress warnings

@@ -38,14 +38,14 @@ class GameCreated extends Event
         $game->is_public = $this->is_public;
         $game->requires_admin_approval_to_join = $this->requires_admin_approval_to_join;
 
-        $game->ends_at = $this->starts_at->addMinutes(
+        $game->ends_at = $this->starts_at->copy()->addMinutes(
             $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
         );
     }
 
     public function handle()
     {
-        Game::create([
+        $game = Game::create([
             'id' => $this->game_id,
             'name' => $this->name,
             'status' => 'upcoming',

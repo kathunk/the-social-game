@@ -18,10 +18,9 @@
             <x-datetime
                 label="Start time"
                 name="game_start_timecode"
-                id="game_start_timecode"
                 wire:model="game_start_timecode"
+                description="You can change this any time before the game starts."
                 min="{{ now()->addMinute()->second(0)->toIsoString() }}"
-                :default="now()->addHour()->toISOString()" 
                 required
             />
         </div>
