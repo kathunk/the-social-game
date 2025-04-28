@@ -2,17 +2,17 @@
 
 namespace App\Events;
 
-use App\Events\Traits\HasActiveGame;
-use App\Events\Traits\HasUser;
 use App\Models\Game;
 use App\Models\User;
+use Thunk\Verbs\Event;
 use App\States\GameState;
 use App\States\UserState;
-use Thunk\Verbs\Event;
+use App\Events\Traits\HasGame;
+use App\Events\Traits\HasUser;
 
-class UserPromotedToAdmin extends Event
+class UserPromotedToGameAdmin extends Event
 {
-    use HasActiveGame, HasUser;
+    use HasGame, HasUser;
 
     public function validate()
     {

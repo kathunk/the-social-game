@@ -4,8 +4,8 @@ namespace App\Events;
 
 use Thunk\Verbs\Event;
 use App\Models\GameTemplate;
-use App\Events\Traits\HasUser;
 use App\States\GameTemplateState;
+use App\Challenges\ChallengeRegistry;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 
 class GameTemplateAdded extends Event
@@ -29,7 +29,45 @@ class GameTemplateAdded extends Event
 
     public array $challenges;
 
-    public function applyToGameTemplate(GameTemplateState $game_template)
+    public string $pre_game_lobby_message;
+
+    public bool $players_can_join_late;
+
+    public function validate()
+    {
+        $this->assert(
+            GameTemplate::all()->where('id', '!=', $this->game_template_id)->where('name', $this->name)->isEmpty(),
+            'A template with this name already exists.'
+        );
+
+        $challenge_keys = collect($this->challenges)->map(fn($c) => $c['challenge_keys'])
+            ->flatten()
+            ->map(fn($c) => ChallengeRegistry::retrieveFromKey($c));
+
+        $this->assert(
+            $challenge_keys->map(fn($c) => $c::TYPE)->unique()->count() === 1, 
+            'All challenges must be of the same type.'
+        );
+
+        $this->assert(
+            $challenge_keys->first()::TYPE === $this->type,
+            'The challenge type of all challenges must match the game type.'
+        );
+
+        collect($this->challenges)->each(function ($challenge) {
+            $this->assert(
+                collect($challenge['challenge_keys'])->isNotEmpty(),
+                'Challenge keys are required.'
+            );
+
+            $this->assert(
+                $challenge['duration'] > 0,
+                'Challenge duration must be greater than 0.'
+            );
+        });
+    }
+
+    public function applyToGame(GameTemplateState $game_template)
     {
         $game_template->name = $this->name;
         $game_template->type = $this->type;
@@ -39,6 +77,8 @@ class GameTemplateAdded extends Event
         $game_template->team_names = $this->team_names;
         $game_template->challenges = $this->challenges;
         $game_template->description = $this->description;
+        $game_template->pre_game_lobby_message = $this->pre_game_lobby_message;
+        $game_template->players_can_join_late = $this->players_can_join_late;
     }
 
     public function handle()
@@ -55,6 +95,8 @@ class GameTemplateAdded extends Event
                 'team_names' => $this->team_names,
                 'challenges' => $this->challenges,
                 'description' => $this->description,
+                'pre_game_lobby_message' => $this->pre_game_lobby_message,
+                'players_can_join_late' => $this->players_can_join_late,
             ]);
 
             return;
@@ -70,6 +112,8 @@ class GameTemplateAdded extends Event
             'team_names' => $this->team_names,
             'challenges' => $this->challenges,
             'description' => $this->description,
+            'pre_game_lobby_message' => $this->pre_game_lobby_message,
+            'players_can_join_late' => $this->players_can_join_late,
         ]);
     }
 }

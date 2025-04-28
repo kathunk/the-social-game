@@ -29,7 +29,7 @@ class GameCreated extends Event
 
     public bool $requires_admin_approval_to_join;
 
-    public function applyToGame(GameState $game)
+    public function apply(GameState $game)
     {
         $game->name = $this->name;
         $game->status = 'upcoming';

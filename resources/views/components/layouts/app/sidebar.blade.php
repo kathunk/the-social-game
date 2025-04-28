@@ -24,9 +24,9 @@
                     @if ($user->is_member)
                         <flux:navlist.item icon="plus" :href="route('create-game')" :current="request()->routeIs('create-game')" wire:navigate>{{ __('Create Game') }}</flux:navlist.item>
                     @endif
-                    {{-- @if ($user->is_super_admin)
-                        <flux:navlist.item icon="briefcase" :href="route('admin-dashboard')" :current="request()->routeIs('admin-dashboard')" wire:navigate>{{ __('Manage Game Templates') }}</flux:navlist.item>
-                    @endif --}}
+                    @if ($user->is_super_admin)
+                        <flux:navlist.item icon="cog" :href="route('game-templates.index')" :current="request()->routeIs('game-templates.index')" wire:navigate>{{ __('Manage Game Templates') }}</flux:navlist.item>
+                    @endif
                 </flux:navlist.group>
             </flux:navlist>
 

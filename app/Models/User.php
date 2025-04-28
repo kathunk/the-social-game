@@ -5,9 +5,9 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Events\UserAdmittedToGame;
-use App\Events\UserAppliedToGame;
+use App\Events\UserRequestedToJoinGame;
 use App\Events\UserCreated;
-use App\Events\UserPromotedToAdmin;
+use App\Events\UserPromotedToGameAdmin;
 use App\Events\UserRejectedFromGame;
 use App\States\UserState;
 use Glhd\Bits\Database\HasSnowflakes;
@@ -76,7 +76,7 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    public static function fromTemplate(string $name, string $email, string $encrypted_password, ?Game $game = null)
+    public static function fromTemplate(string $name, string $email, string $encrypted_password)
     {
         $user_id = UserCreated::fire(
             name: $name,
@@ -86,20 +86,7 @@ class User extends Authenticatable
 
         Verbs::commit();
 
-        $user = User::find($user_id);
-
-        if ($game) {
-            UserAppliedToGame::fire(
-                user_id: $user_id,
-                game_id: $game->id,
-            );
-
-            Verbs::commit();
-
-            $user->refresh();
-        }
-
-        return $user;
+        return User::find($user_id);
     }
 
     public function state(): UserState
@@ -110,6 +97,18 @@ class User extends Authenticatable
     public function players()
     {
         return $this->hasMany(Player::class);
+    }
+
+    public function games()
+    {
+        return $this->hasManyThrough(
+            Game::class,
+            Player::class,
+            'user_id', // Foreign key on players table
+            'id', // Local key on games table
+            'id', // Local key on users table
+            'game_id' // Foreign key on players table
+        );
     }
 
     public function gameApplications()
@@ -142,20 +141,14 @@ class User extends Authenticatable
         return $this->memberships->filter(fn ($m) => $m->isActive())->isNotEmpty();
     }
 
-    public function getIsAdminAttribute(): bool
+    public function isGameAdmin(Game $game): bool
     {
-        $current_game = $this->currentGame;
-
-        if (! $current_game) {
-            return false;
-        }
-
-        return $current_game->admins->pluck('id')->contains($this->id);
+        return $game->admins->pluck('id')->contains($this->id);
     }
 
-    public function promoteToAdmin(Game $game)
+    public function promoteToGameAdmin(Game $game)
     {
-        UserPromotedToAdmin::fire(
+        UserPromotedToGameAdmin::fire(
             user_id: $this->id,
             game_id: $game->id,
         );
@@ -163,19 +156,23 @@ class User extends Authenticatable
         return $this->fresh();
     }
 
-    public function applyToGame(Game $game)
+    public function requestToJoinGame(Game $game)
     {
-        UserAppliedToGame::fire(
+        UserRequestedToJoinGame::fire(
             user_id: $this->id,
             game_id: $game->id,
         );
 
         Verbs::commit();
 
-        return $this->fresh();
+        if ($game->requires_admin_approval_to_join) {
+            return $this->fresh();
+        }
+
+        $this->fresh()->admitToGame($game, $game->admins->first());
     }
 
-    public function admitToGame(Game $game, User $admin)
+    public function admitToGame(Game $game, ?User $admin = null)
     {
         $application = $this->gameApplications->firstWhere('game_id', $game->id);
 

@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Events\Traits\HasActiveGame;
+use App\Events\Traits\HasGame;
 use App\Events\Traits\HasUser;
 use App\Models\GameApplication;
 use App\Models\User;
@@ -12,9 +12,9 @@ use App\States\UserState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
-class UserAppliedToGame extends Event
+class UserRequestedToJoinGame extends Event
 {
-    use HasActiveGame, HasUser;
+    use HasGame, HasUser;
 
     #[StateId(GameApplicationState::class)]
     public ?int $application_id = null;

@@ -25,12 +25,30 @@ class PreGameLobby extends Component
         return $this->user->gameApplications->where('game_id', $this->game->id)->first();
     }
 
+    #[Computed]
+    public function is_super_admin()
+    {
+        return $this->user->is_super_admin;
+    }
+
+    #[Computed]
+    public function is_game_admin()
+    {
+        return $this->user->is_admin($this->game);
+    }
+
+    #[Computed]
+    public function requires_admin_approval_to_join()
+    {
+        return $this->game->requires_admin_approval_to_join;
+    }
+
     public function checkStatus()
     {
         unset($this->application);
 
         if ($this->application->status === 'accepted') {
-            return redirect()->route('dashboard');
+            return redirect()->route('home');
         }
     }
 

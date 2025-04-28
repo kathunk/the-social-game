@@ -13,6 +13,8 @@
                     />
                 @endforeach
             </flux:radio.group>
+            <flux:checkbox label="Open to all" wire:model="is_public" />
+            <flux:checkbox label="Requires your approval to join" wire:model="requires_admin_approval_to_join" />
             <x-datetime
                 label="Start time"
                 name="game_start_timecode"

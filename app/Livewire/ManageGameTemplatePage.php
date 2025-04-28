@@ -1,0 +1,177 @@
+<?php
+
+namespace App\Livewire;
+
+use Flux\Flux;
+use Livewire\Component;
+use App\Models\GameTemplate;
+use Thunk\Verbs\Facades\Verbs;
+use App\Events\GameTemplateAdded;
+use Livewire\Attributes\Computed;
+use App\Events\GameTemplateArchived;
+use App\Challenges\ChallengeRegistry;
+
+class ManageGameTemplatePage extends Component
+{
+    public ?GameTemplate $game_template = null;
+
+    public string $name;
+    public string $description;
+    public string $pre_game_lobby_message;
+    public ?int $min_players;
+    public ?int $max_players;
+    public bool $is_public;
+    public ?string $team_names;
+    public array $challenges;
+    public bool $players_can_join_late;
+    public string $gameType;
+
+    #[Computed]
+    public function allChallenges()
+    {
+        return collect(ChallengeRegistry::getAll())
+            ->filter(fn($c) => $c::TYPE === $this->gameType);
+    }
+
+    public function mount($game_template = null)
+    {
+        if ($game_template instanceof GameTemplate) {
+            $this->game_template = $game_template;
+    
+            $this->name = $game_template->name ?? '';
+            $this->description = $game_template->description ?? '';
+            $this->pre_game_lobby_message = $game_template->pre_game_lobby_message ?? '';
+            $this->min_players = $game_template->min_players ?? null;
+            $this->max_players = $game_template->max_players ?? null;
+            $this->is_public = $game_template->is_public ?? false;
+            $this->team_names = implode(', ', $game_template->team_names) ?? '';
+            $this->challenges = $game_template->challenges ?? [];
+            $this->players_can_join_late = $game_template->players_can_join_late ?? false;
+            $this->gameType = $game_template->type ?? 'individual';
+        } else {
+            $this->name = '';
+            $this->description = '';
+            $this->pre_game_lobby_message = '';
+            $this->min_players = null;
+            $this->max_players = null;
+            $this->is_public = false;
+            $this->team_names = '';
+            $this->challenges = [];
+            $this->players_can_join_late = false;
+            $this->gameType = 'individual';
+        }
+    }
+
+    public function addChallenge()
+    {
+        $this->challenges[] = [
+            'challenge_keys' => [],
+            'duration' => 10,
+        ];
+    }
+
+    public function removeChallenge($index)
+    {
+        unset($this->challenges[$index]);
+    }
+
+    public $rules = [
+        'name' => 'required|string|max:100',
+        'description' => 'required|string',
+        'pre_game_lobby_message' => 'required|string',
+        'min_players' => 'nullable|integer',
+        'max_players' => 'nullable|integer',
+        'is_public' => 'boolean',
+        'team_names' => 'nullable|string',
+        'challenges' => 'required|array|min:1',
+        'challenges.*.challenge_keys' => 'required|array|min:1',
+        'challenges.*.duration' => 'required|integer|min:1',
+        'players_can_join_late' => 'boolean',
+        'gameType' => 'required|string|in:individual,team',
+    ];
+
+    public function saveTemplate()
+    {
+        $this->validate();
+
+        // Validate that all challenge types match the game type
+        // foreach ($this->challenges as $index => $challenge) {
+        //     foreach ($challenge['challenge_keys'] as $challengeKey) {
+        //         $challengeClass = ChallengeRegistry::retrieveFromKey($challengeKey);
+        //         if ($challengeClass::TYPE !== $this->gameType) {
+        //             $this->addError(
+        //                 "challenges.{$index}.challenge_keys", 
+        //                 "Challenge '{$challengeKey}' is for {$challengeClass::TYPE} games, but this is a {$this->gameType} game"
+        //             );
+        //         }
+        //     }
+        // }
+
+        // If there are any validation errors, stop here
+        if ($this->getErrorBag()->isNotEmpty()) {
+            return;
+        }
+
+        $teams = array_map('trim', explode(',', $this->team_names));
+
+        // Cast challenge durations to integers
+        $challenges = array_map(function ($challenge) {
+            $challenge['duration'] = (int) $challenge['duration'];
+            return $challenge;
+        }, $this->challenges);
+
+        $id = $this->game_template->id ?? null;
+
+        GameTemplateAdded::fire(
+            game_template_id: $id,
+            name: $this->name,
+            description: $this->description,
+            pre_game_lobby_message: $this->pre_game_lobby_message,
+            type: $this->gameType,
+            min_players: $this->min_players ?? null,
+            max_players: $this->max_players ?? null,
+            is_public: $this->is_public,
+            team_names: $teams,
+            challenges: $challenges,
+            players_can_join_late: $this->players_can_join_late,
+        );
+
+        Verbs::commit();
+
+        Flux::toast('Template saved');
+    }
+
+    public function duplicateTemplate()
+    {
+        $id = GameTemplateAdded::fire(
+            name: $this->game_template->name . ' (copy)',
+            description: $this->game_template->description,
+            pre_game_lobby_message: $this->game_template->pre_game_lobby_message,
+            type: $this->gameType,
+            min_players: $this->game_template->min_players ?? null,
+            max_players: $this->game_template->max_players ?? null,
+            is_public: $this->game_template->is_public,
+            team_names: $this->game_template->team_names,
+            challenges: $this->game_template->challenges,
+            players_can_join_late: $this->game_template->players_can_join_late,
+        )->game_template_id;
+
+        Verbs::commit();
+
+        return redirect()->route('game-templates.show', $id);
+    }
+
+    public function archiveTemplate()
+    {
+        GameTemplateArchived::fire(game_template_id: $this->game_template->id);
+
+        Verbs::commit();
+
+        return redirect()->route('game-templates.index');
+    }
+
+    public function render()
+    {
+        return view('livewire.manage-game-template-page');
+    }
+}

@@ -13,6 +13,12 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
 {
     use HasTeamSwaps;
 
+    const NAME = 'Flatten the Curve';
+
+    const DESCRIPTION = "The current average team size is {average}. At the end of the game, every team will get: ({average} - {your_team_size}) * 5. For your current team, you will get: {score} points.";
+
+    const TYPE = 'team';
+
     public static function key(): string
     {
         return 'flatten_the_curve';
@@ -31,7 +37,7 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
 
         if ($this->playerCanSwapTeams(player: $player)) {
             return $this->form()
-                ->title('Flatten the Curve')
+                ->title(self::NAME)
                 ->subtitle('The current average team size is '.$average_team_size.'. At the end of the game, every team will get: ('.$average_team_size.' - {your_team_size}) * 5. For your current team, you will get: '.$score.' points.')
                 ->teamSwap(teams: $this->availableTeams($player))
                 ->build();

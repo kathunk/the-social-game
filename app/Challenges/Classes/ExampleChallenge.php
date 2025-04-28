@@ -9,6 +9,12 @@ use App\States\TeamState;
 
 class ExampleChallenge extends BaseChallengeClass
 {
+    const NAME = 'Example Challenge';
+
+    const DESCRIPTION = 'Example Challenge description';
+
+    const TYPE = 'team'; // team or individual
+
     public static function key(): string
     {
         return 'example_challenge';
@@ -17,8 +23,8 @@ class ExampleChallenge extends BaseChallengeClass
     public function frontendComponent(Player $player): array
     {
         return $this->form()
-            ->title('Pyramid Scheme')
-            ->subtitle('When a new player joins your team, gain 1 point. At the end of the challenge, the largest team\'s score will be set to zero.')
+            ->title(self::NAME)
+            ->subtitle(self::DESCRIPTION)
             ->image('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Great_Pyramid_of_Giza_-_Pyramid_of_Khufu.jpg/960px-Great_Pyramid_of_Giza_-_Pyramid_of_Khufu.jpg', 'A pyramid')
             ->input(
                 property_name: 'pick_a_number',

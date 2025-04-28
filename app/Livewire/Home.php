@@ -16,7 +16,7 @@ class Home extends Component
     #[Computed]
     public function games()
     {
-        return $this->user->games;
+        return $this->user->games()->orderBy('starts_at', 'desc')->get();
     }
 
     public function render()

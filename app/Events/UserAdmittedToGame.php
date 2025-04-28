@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Events\Traits\HasActiveGame;
+use App\Events\Traits\HasGame;
 use App\Events\Traits\HasUser;
 use App\Models\GameApplication;
 use App\Models\Player;
@@ -16,13 +16,10 @@ use Thunk\Verbs\Event;
 
 class UserAdmittedToGame extends Event
 {
-    use HasActiveGame, HasUser;
+    use HasGame, HasUser;
 
     #[StateId(PlayerState::class)]
     public ?int $player_id = null;
-
-    #[StateId(UserState::class)]
-    public int $user_id;
 
     #[StateId(GameApplicationState::class)]
     public int $application_id;
@@ -31,34 +28,36 @@ class UserAdmittedToGame extends Event
 
     public function validate()
     {
-        $this->assert(
-            $this->state(GameState::class)->admin_ids->contains($this->admin_id),
-            'Admin is not an admin of this game',
-        );
+        if ($this->state(GameState::class)->requires_admin_approval_to_join) {
+            $this->assert(
+                $this->state(GameState::class)->admin_ids->contains($this->admin_id),
+                'Admin is not an admin of this game',
+            );
+
+            $this->assert(
+                ! $this->state(GameState::class)->rejected_user_ids->contains($this->user_id),
+                'User is already rejected from this game',
+            );
+    
+            $this->assert(
+                $this->state(GameApplicationState::class)->user_id === $this->user_id,
+                'User does not match the application',
+            );
+    
+            $this->assert(
+                $this->state(GameApplicationState::class)->game_id === $this->game_id,
+                'Game does not match the application',
+            );
+    
+            $this->assert(
+                $this->state(GameApplicationState::class)->status === 'pending',
+                'Application has already been decided',
+            );
+        }
 
         $this->assert(
             ! $this->state(GameState::class)->user_ids->contains($this->user_id),
             'User is already a player of this game',
-        );
-
-        $this->assert(
-            ! $this->state(GameState::class)->rejected_user_ids->contains($this->user_id),
-            'User is already rejected from this game',
-        );
-
-        $this->assert(
-            $this->state(GameApplicationState::class)->user_id === $this->user_id,
-            'User does not match the application',
-        );
-
-        $this->assert(
-            $this->state(GameApplicationState::class)->game_id === $this->game_id,
-            'Game does not match the application',
-        );
-
-        $this->assert(
-            $this->state(GameApplicationState::class)->status === 'pending',
-            'Application has already been decided',
         );
     }
 
@@ -97,6 +96,7 @@ class UserAdmittedToGame extends Event
             'id' => $this->player_id,
             'user_id' => $this->user_id,
             'game_id' => $this->game_id,
+            'name' => $this->state(UserState::class)->name,
             'status' => 'active',
         ]);
 

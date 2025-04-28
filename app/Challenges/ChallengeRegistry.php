@@ -56,6 +56,13 @@ class ChallengeRegistry
         return $class::fromState($state);
     }
 
+    public static function retrieveFromKey(string $key): BaseChallengeClass
+    {
+        $class = self::getAll()[$key] ?? throw new \Exception("Unknown challenge type: $key");
+
+        return $class::fromKey($key);
+    }
+
     public static function options(): array
     {
         return array_keys(self::getAll());

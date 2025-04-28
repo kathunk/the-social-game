@@ -17,13 +17,17 @@ abstract class TestCase extends BaseTestCase
 
     public Player $player;
 
-    public function createGame(?Carbon $starts_at = null)
-    {
-        $this->game = (new Laracon2025($starts_at))->createGame();
-        $this->game->start();
+    // public function createGame(?GameTemplate $template = null, ?Carbon $starts_at = null)
+    // {
+    //     if ()
 
-        return $this->game;
-    }
+    //     $this->game = Game::fromTemplate(
+
+    //     )
+    //     $this->game->start();
+
+    //     return $this->game;
+    // }
 
     public function createPlayer()
     {

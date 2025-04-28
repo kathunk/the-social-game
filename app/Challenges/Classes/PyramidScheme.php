@@ -14,6 +14,12 @@ class PyramidScheme extends BaseChallengeClass implements SupportsTeamSwaps
 {
     use HasTeamSwaps;
 
+    const NAME = 'Pyramid Scheme';
+
+    const DESCRIPTION = "When a new player joins your team, gain 1 point. At the end of the challenge, the largest team's score will be set to zero.";
+
+    const TYPE = 'team';
+
     public static function key(): string
     {
         return 'pyramid_scheme';
@@ -28,8 +34,8 @@ class PyramidScheme extends BaseChallengeClass implements SupportsTeamSwaps
     {
         if ($this->playerCanSwapTeams(player: $player)) {
             return $this->form()
-                ->title('Pyramid Scheme')
-                ->subtitle('When a new player joins your team, gain 1 point. At the end of the challenge, the largest team\'s score will be set to zero.')
+                ->title(self::NAME)
+                ->subtitle(self::DESCRIPTION)
                 ->teamSwap($this->availableTeams($player))
                 ->build();
         }

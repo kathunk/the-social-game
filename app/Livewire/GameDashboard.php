@@ -7,7 +7,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
 
-class Dashboard extends Component
+class GameDashboard extends Component
 {
     public string $selected_team_id;
 
@@ -90,7 +90,7 @@ class Dashboard extends Component
 
         Verbs::commit();
 
-        redirect()->route('dashboard');
+        redirect()->route('game-dashboard');
     }
 
     public function resign()
@@ -99,7 +99,7 @@ class Dashboard extends Component
 
         Verbs::commit();
 
-        redirect()->route('dashboard');
+        redirect()->route('game-dashboard');
     }
 
     public function callChallengeAction(string $action, ?array $params = null)
@@ -113,11 +113,11 @@ class Dashboard extends Component
 
         $this->challenge->handler()->{$action}($this->player, $params);
 
-        redirect()->route('dashboard');
+        redirect()->route('game-dashboard');
     }
 
     public function render()
     {
-        return view('livewire.dashboard');
+        return view('livewire.game-dashboard');
     }
 }

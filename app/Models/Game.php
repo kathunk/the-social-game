@@ -11,6 +11,8 @@ use Illuminate\Support\Carbon;
 use Thunk\Verbs\Facades\Verbs;
 use App\Events\ChallengeCreated;
 use App\Events\ChallengeStarted;
+use App\Events\UserRequestedToJoinGame;
+use App\Events\UserAdmittedToGame;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
 
@@ -64,9 +66,9 @@ class Game extends Model
         GameTemplate $template,
         Carbon $starts_at,
         User $user,
-        ?array $challenges = null,
         bool $is_public,
-        bool $requires_admin_approval_to_join
+        bool $requires_admin_approval_to_join,
+        ?array $challenges = null,
     ): self
     {
         $game_id = GameCreated::fire(
@@ -76,11 +78,12 @@ class Game extends Model
             type: $template->type,
             min_players: $template->min_players,
             max_players: $template->max_players,
-            is_public: $template->is_public,
-            requires_admin_approval_to_join: $template->requires_admin_approval_to_join,
+            is_public: $is_public,
+            requires_admin_approval_to_join: $requires_admin_approval_to_join,
             team_names: $template->team_names,
             challenges: $template->challenges,
             starts_at: $starts_at,
+            ends_at: $starts_at->addMinutes($template->totalDuration),
         )->game_id;
 
         foreach ($template->team_names as $team_name) {
@@ -94,11 +97,11 @@ class Game extends Model
 
         $next_challenge_starts_at = $starts_at->copy();
 
-        $challenges_with_times = collect($challenges)->map(function ($duration, $class_key) use ($next_challenge_starts_at) {
+        $challenges_with_times = collect($challenges)->map(function ($challenge) use ($next_challenge_starts_at) {
             return [
                 'starts_at' => $next_challenge_starts_at,
-                'ends_at' => $next_challenge_starts_at->copy()->addMinutes($duration),
-                'class_key' => $class_key,
+                'ends_at' => $next_challenge_starts_at->copy()->addMinutes($challenge['duration']),
+                'class_key' => collect($challenge['challenge_keys'])->random(),
             ];
         });
 
@@ -112,6 +115,12 @@ class Game extends Model
         }
 
         Verbs::commit();
+
+        $game = self::find($game_id);
+
+        $user->promoteToGameAdmin($game);
+
+        $user->requestToJoinGame($game);
 
         return self::find($game_id);
     }
