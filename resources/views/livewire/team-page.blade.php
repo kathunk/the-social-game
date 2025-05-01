@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-4">
-    <flux:link :href="route('dashboard')" variant="ghost">
+    <flux:link :href="route('game-dashboard', $this->game)" variant="ghost">
         Back to dashboard
     </flux:link>
 
