@@ -90,6 +90,7 @@ class Game extends Model
             challenges: $template->challenges,
             starts_at: $starts_at,
             ends_at: $starts_at->copy()->addMinutes($template->totalDuration),
+            code: self::uniqueGameCode(),
         )->game_id;
 
         foreach ($template->team_names as $team_name) {
@@ -131,6 +132,17 @@ class Game extends Model
         return self::find($game_id);
     }
 
+    public static function uniqueGameCode()
+    {
+        $code = random_int(1000, 9999);
+
+        while (self::where('code', $code)->exists()) {
+            $code = random_int(1000, 9999);
+        }
+
+        return $code;
+    }
+
     public function start()
     {
         GameStarted::fire(game_id: $this->id);
@@ -140,6 +152,32 @@ class Game extends Model
         ChallengeStarted::fire(challenge_id: $challenge->id, game_id: $this->id);
 
         return $this->fresh();
+    }
+
+    public function getIsJoinableAttribute(): bool
+    {
+        if ($this->status === 'complete') {
+            return false;
+        }
+
+        if ($this->players->count() >= $this->gameTemplate->max_players) {
+            return false;
+        }
+
+        if ($this->players_can_join_late) {
+            return true;
+        }
+
+        if ($this->status === 'upcoming') {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getUrlAttribute(): string
+    {
+        return route('pre-game-lobby', $this->id);
     }
 
     public function end()

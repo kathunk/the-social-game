@@ -29,6 +29,8 @@ class GameCreated extends Event
 
     public bool $requires_admin_approval_to_join;
 
+    public int $code;
+
     public function apply(GameState $game)
     {
         $game->name = $this->name;
@@ -37,7 +39,7 @@ class GameCreated extends Event
         $game->starts_at = $this->starts_at;
         $game->is_public = $this->is_public;
         $game->requires_admin_approval_to_join = $this->requires_admin_approval_to_join;
-
+        $game->code = $this->code;
         $game->ends_at = $this->starts_at->copy()->addMinutes(
             $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
         );
@@ -54,6 +56,7 @@ class GameCreated extends Event
             'ends_at' => $this->ends_at,
             'is_public' => $this->is_public,
             'requires_admin_approval_to_join' => $this->requires_admin_approval_to_join,
+            'code' => $this->code,
         ]);
     }
 }

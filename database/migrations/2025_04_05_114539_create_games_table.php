@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('status');
             $table->integer('current_challenge_id')->nullable();
             $table->foreignId('game_template_id')->constrained('game_templates');
+            $table->integer('code');
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');
             $table->boolean('is_public')->default(false);

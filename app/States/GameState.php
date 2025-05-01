@@ -2,9 +2,10 @@
 
 namespace App\States;
 
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 use Thunk\Verbs\State;
+use Illuminate\Support\Carbon;
+use App\States\GameTemplateState;
+use Illuminate\Support\Collection;
 
 class GameState extends State
 {
@@ -82,5 +83,10 @@ class GameState extends State
     public function currentChallenge()
     {
         return ChallengeState::load($this->current_challenge_id);
+    }
+
+    public function template(): GameTemplateState
+    {
+        return GameTemplateState::load($this->game_template_id);
     }
 }
