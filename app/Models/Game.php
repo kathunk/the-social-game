@@ -139,15 +139,15 @@ class Game extends Model
                 $last_challenge = end($carry);
                 $starts_at = $last_challenge['ends_at'];
             }
-            
+
             $ends_at = $starts_at->copy()->addMinutes($challenge['duration']);
-            
+
             $carry[] = [
                 'starts_at' => $starts_at,
                 'ends_at' => $ends_at,
                 'class_key' => collect($challenge['challenge_keys'])->random(),
             ];
-            
+
             return $carry;
         }, []);
 
@@ -156,7 +156,9 @@ class Game extends Model
                 game_id: $this->id,
                 starts_at: $challenge['starts_at'],
                 ends_at: $challenge['ends_at'],
-                class_key: $challenge['class_key'],
+                // @todo
+                // class_key: $challenge['class_key'],
+                class_key: 'prisoners_dilemma_challenge',
             );
         }
 
