@@ -14,7 +14,7 @@ use App\Livewire\ManageGameTemplatePage;
 
 Route::get('/', function () {
     return view('welcome');
-})->name('home');
+})->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -25,7 +25,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/games/{game}/admin-dashboard', AdminDashboard::class)->name('admin-dashboard');
     Route::get('/games/{game}/dashboard', GameDashboard::class)->name('game-dashboard');
-    Route::get('/dashboard', Home::class)->name('home');
+    Route::get('/dashboard', Home::class)->name('dashboard');
     Route::get('/teams/{team}', TeamPage::class)->name('teams.show');
     Route::get('/create-game', CreateGame::class)->name('create-game');
     Route::get('/game-templates', GameTemplatesListPage::class)->name('game-templates.index');

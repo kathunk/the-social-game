@@ -79,7 +79,7 @@ class PreGameLobby extends Component
         $this->game = $game;
 
         if (! $this->is_joinable) {
-            return redirect()->route('home');
+            return redirect()->route('dashboard');
         }
 
         if ($this->application) {

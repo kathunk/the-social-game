@@ -93,34 +93,6 @@ class Game extends Model
             code: self::uniqueGameCode(),
         )->game_id;
 
-        foreach ($template->team_names as $team_name) {
-            TeamCreated::fire(
-                game_id: $game_id,
-                name: $team_name,
-            );
-        }
-
-        $challenges = $challenges ?? $template->challenges;
-
-        $next_challenge_starts_at = $starts_at->copy();
-
-        $challenges_with_times = collect($challenges)->map(function ($challenge) use ($next_challenge_starts_at) {
-            return [
-                'starts_at' => $next_challenge_starts_at,
-                'ends_at' => $next_challenge_starts_at->copy()->addMinutes($challenge['duration']),
-                'class_key' => collect($challenge['challenge_keys'])->random(),
-            ];
-        });
-
-        foreach ($challenges_with_times as $challenge) {
-            ChallengeCreated::fire(
-                game_id: $game_id,
-                starts_at: $challenge['starts_at'],
-                ends_at: $challenge['ends_at'],
-                class_key: $challenge['class_key'],
-            );
-        }
-
         Verbs::commit();
 
         $game = self::find($game_id);
@@ -128,6 +100,10 @@ class Game extends Model
         $user->promoteToGameAdmin($game);
 
         $user->requestToJoinGame($game);
+
+        if ($game->requires_admin_approval_to_join) {
+            $user->admitToGame($game, $user);
+        }
 
         return self::find($game_id);
     }
@@ -145,6 +121,39 @@ class Game extends Model
 
     public function start()
     {
+        foreach ($this->gameTemplate->team_names as $team_name) {
+            TeamCreated::fire(
+                game_id: $this->id,
+                name: $team_name,
+            );
+        }
+
+        $challenges = $this->gameTemplate->challenges;
+
+        $next_challenge_starts_at = $this->starts_at->copy();
+
+        $challenges_with_times = collect($challenges)->map(function ($challenge) use ($next_challenge_starts_at) {
+            $starts_at = $next_challenge_starts_at->copy();
+            $ends_at = $starts_at->addMinutes($challenge['duration']);
+
+            $next_challenge_starts_at = $ends_at;
+
+            return [
+                'starts_at' => $starts_at,
+                'ends_at' => $ends_at,
+                'class_key' => collect($challenge['challenge_keys'])->random(),
+            ];
+        });
+
+        foreach ($challenges_with_times as $challenge) {
+            ChallengeCreated::fire(
+                game_id: $this->id,
+                starts_at: $challenge['starts_at'],
+                ends_at: $challenge['ends_at'],
+                class_key: $challenge['class_key'],
+            );
+        }
+
         GameStarted::fire(game_id: $this->id);
 
         $challenge = $this->challenges->sortBy('starts_at')->first();

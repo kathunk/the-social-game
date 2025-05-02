@@ -23,7 +23,7 @@ class GameTemplatesListPage extends Component
     public function mount()
     {
         if (! $this->user->is_super_admin) {
-            return redirect()->route('home');
+            return redirect()->route('dashboard');
         }
     }
 

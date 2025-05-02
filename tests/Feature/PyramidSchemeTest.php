@@ -10,15 +10,16 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 it('runs the Pyramid Scheme challenge', function () {
     Verbs::commitImmediately();
 
-    $challenges = collect([
+    $challenges = [
         [
-            'class' => PyramidScheme::class,
-            'starts_at' => now(),
-            'ends_at' => now()->addHours(1),
+            'challenge_keys' => [PyramidScheme::key()],
+            'duration' => 10,
         ],
-    ]);
+    ];
 
-    $this->game = (new TestTemplate(now(), $challenges))->createGame()->start();
+    $this->mockGameTemplate(challenges: $challenges, type: 'team');
+
+    $this->createGame()->start();
 
     $team = $this->game->teams->first();
     $team_2 = $this->game->teams->skip(1)->first();

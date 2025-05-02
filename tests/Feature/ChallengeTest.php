@@ -1,14 +1,24 @@
 <?php
 
-use App\Challenges\Classes\BaseChallengeClass;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
+use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\Classes\BaseChallengeClass;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     Verbs::commitImmediately();
-    $this->game = $this->createGame();
+
+    $challenges = [
+        [
+            'challenge_keys' => [PyramidScheme::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    $this->mockGameTemplate(challenges: $challenges, type: 'team');
+    $this->createGame()->start();
 });
 
 it('provides a challenge handler', function () {

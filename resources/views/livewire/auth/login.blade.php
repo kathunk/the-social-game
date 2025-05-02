@@ -50,7 +50,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         if ($this->game) {
             $this->redirect(route('pre-game-lobby', ['game' => $this->game], absolute: false), navigate: true);
         } else {
-            $this->redirectIntended(default: route('home', absolute: false), navigate: true);
+            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
         }
     }
 

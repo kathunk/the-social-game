@@ -2,7 +2,6 @@
 
 use App\Challenges\Classes\StayOnMessage;
 use App\Events\PlayerSubmittedStayOnMessage;
-use App\GameTemplates\TestTemplate;
 use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
@@ -10,15 +9,16 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 it('runs the Stay on Message challenge', function () {
     Verbs::commitImmediately();
 
-    $challenges = collect([
+    $challenges = [
         [
-            'class' => StayOnMessage::class,
-            'starts_at' => now(),
-            'ends_at' => now()->addHours(1),
+            'challenge_keys' => [StayOnMessage::key()],
+            'duration' => 10,
         ],
-    ]);
+    ];
 
-    $this->game = (new TestTemplate(now(), $challenges))->createGame()->start();
+    $this->mockGameTemplate(challenges: $challenges, type: 'team');
+    $this->createGame()->start();
+
     $challenge = $this->game->challenges->first();
     $team_1 = $this->game->teams->first();
     $team_2 = $this->game->teams->skip(1)->first();

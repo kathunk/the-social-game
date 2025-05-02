@@ -2,7 +2,6 @@
 
 use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\StayOnMessage;
-use App\GameTemplates\TestTemplate;
 use Illuminate\Support\Facades\Date;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -11,20 +10,23 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 beforeEach(function () {
     Verbs::commitImmediately();
 
-    $challenges = collect([
+    $challenges = [
         [
-            'class' => PyramidScheme::class,
-            'starts_at' => now()->addHours(1),
-            'ends_at' => now()->addHours(8),
+            'challenge_keys' => [PyramidScheme::key()],
+            'duration' => 60,
         ],
         [
-            'class' => StayOnMessage::class,
-            'starts_at' => now()->addHours(8),
-            'ends_at' => now()->addHours(15),
+            'challenge_keys' => [StayOnMessage::key()],
+            'duration' => 60,
         ],
-    ]);
+    ];
 
-    $this->game = (new TestTemplate(now()->addHours(1), $challenges))->createGame();
+    $this->mockGameTemplate(
+        challenges: $challenges,
+        type: 'team',
+    );
+
+    $this->createGame(starts_at: now()->addMinutes(60));
 });
 
 it('the game is upcoming by default', function () {
@@ -46,13 +48,22 @@ it('starts the game and first challenge', function () {
     $this->artisan('app:progress-games');
     $this->game->refresh();
 
+    $challenge_1 = $this->game->challenges->first();
+    $challenge_2 = $this->game->challenges->skip(1)->first();
+
     expect($this->game->status)->toBe('active');
+    expect($challenge_1->status)->toBe('active');
+    expect($challenge_2->status)->toBe('upcoming');
     expect($this->game->currentChallenge)->not->toBeNull();
     expect($this->game->challenges->where('status', 'active')->count())->toBe(1);
     expect($this->game->currentChallenge->status)->toBe('active');
 });
 
 it('progresses from one challenge to the next', function () {
+    Date::setTestNow(now()->addMinutes(60));
+    $this->artisan('app:progress-games');
+    $this->game->refresh();
+
     $challenges = $this->game->challenges
         ->sortBy('starts_at');
 
@@ -62,16 +73,8 @@ it('progresses from one challenge to the next', function () {
 
     expect($first_challenge->ends_at->toDateTimeString())->toBe($second_challenge->starts_at->toDateTimeString());
 
-    // start the game and first challenge
-    Date::setTestNow(now()->addMinutes(60));
-    $this->artisan('app:progress-games');
-
-    // end the first challenge
+    // end the first challenge and start the second challenge
     Date::setTestNow($challenge_changeover_time);
-    $this->artisan('app:progress-games');
-
-    // start the second challenge
-    Date::setTestNow(now()->addMinutes(60));
     $this->artisan('app:progress-games');
 
     expect($first_challenge->fresh()->status)->toBe('ended');

@@ -32,8 +32,10 @@ class ProgressGames extends Command
 
         Game::where('status', 'upcoming')
             ->where('starts_at', '<=', now())
+            ->with('gameTemplate')
+            ->get()
             ->filter(function (Game $game) {
-                return $game->players->count() >= $game->game_template->min_players;
+                return $game->players->count() >= $game->gameTemplate->min_players;
             })
             ->each(function (Game $game) {
                 $game->start();
