@@ -25,6 +25,19 @@
             </flux:modal.trigger>
         </flux:card>
     @endif
+    @if ($this->game->gameTemplate->players_can_join_late)
+        <flux:card>
+            <flux:heading class="mb-2">Invite your friends</flux:heading>
+            <div class="flex gap-2">
+                <flux:modal.trigger name="qr-code">
+                    <flux:button variant="filled">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
+                </flux:modal.trigger>
+                <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
+                <flux:input icon="key" value="{{ $this->game->code }}" readonly copyable />
+            </div>
+        </flux:card>
+    @endif
+
     <flux:modal name="quit" class="md:w-96">
         <div class="space-y-6">
             <div>
@@ -42,6 +55,12 @@
 
                 <flux:button variant="danger" wire:click="resign">Resign</flux:button>
             </div>
+        </div>
+    </flux:modal>
+
+    <flux:modal name="qr-code">
+        <div class="flex justify-center p-6">
+            <x-qr :url="$this->game->url" />
         </div>
     </flux:modal>
 </div>
