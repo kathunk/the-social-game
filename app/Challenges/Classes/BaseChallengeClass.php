@@ -13,6 +13,12 @@ use App\States\TeamState;
 
 abstract class BaseChallengeClass
 {
+    const NAME = 'Base Challenge';
+
+    const DESCRIPTION = 'Base Challenge description';
+
+    const TYPE = 'team'; // team or individual
+
     abstract public static function key(): string;
 
     public ?Player $player = null;
@@ -22,14 +28,7 @@ abstract class BaseChallengeClass
     public function __construct(
         public ?Challenge $challenge = null,
         public ?ChallengeState $challenge_state = null,
-    ) {
-        $user = auth()->user();
-
-        if ($user) {
-            $this->player = $user->currentPlayer;
-            $this->player_state = $this->player->state();
-        }
-    }
+    ) {}
 
     public static function fromModel(Challenge $challenge): static
     {
@@ -39,6 +38,11 @@ abstract class BaseChallengeClass
     public static function fromState(ChallengeState $challenge): static
     {
         return new static(challenge_state: $challenge);
+    }
+
+    public static function fromKey(string $key): static
+    {
+        return new static;
     }
 
     public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool

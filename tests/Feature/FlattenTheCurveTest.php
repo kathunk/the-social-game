@@ -1,7 +1,6 @@
 <?php
 
 use App\Challenges\Classes\FlattenTheCurve;
-use App\GameTemplates\TestTemplate;
 use Illuminate\Support\Facades\Date;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -10,15 +9,19 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 it('runs the Flatten the Curve challenge', function () {
     Verbs::commitImmediately();
 
-    $challenges = collect([
+    $challenges = [
         [
-            'class' => FlattenTheCurve::class,
-            'starts_at' => now(),
-            'ends_at' => now()->addHours(1),
+            'challenge_keys' => [FlattenTheCurve::key()],
+            'duration' => 10,
         ],
-    ]);
+    ];
 
-    $this->game = (new TestTemplate(now(), $challenges))->createGame()->start();
+    $this->mockGameTemplate(
+        challenges: $challenges,
+        type: 'team',
+        team_names: ['Team 1', 'Team 2', 'Team 3', 'Team 4', 'Team 5', 'Team 6', 'Team 7', 'Team 8', 'Team 9', 'Team 10'],
+    );
+    $this->createGame()->start();
 
     $team = $this->game->teams->first();
     $team_2 = $this->game->teams->skip(1)->first();
@@ -39,8 +42,11 @@ it('runs the Flatten the Curve challenge', function () {
     $player_10 = $this->createPlayer()->joinTeam($team_3);
 
     expect($team->fresh()->score)->toBe(0);
+    expect($team->fresh()->players->count())->toBe(1);
     expect($team_2->fresh()->score)->toBe(0);
+    expect($team_2->fresh()->players->count())->toBe(2);
     expect($team_3->fresh()->score)->toBe(0);
+    expect($team_3->fresh()->players->count())->toBe(7);
 
     // challenge ends and the first place team loses all its points
     $end = $this->game->fresh()->currentChallenge->ends_at;

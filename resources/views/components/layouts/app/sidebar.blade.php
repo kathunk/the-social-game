@@ -4,8 +4,13 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-            <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
+        @php
+            $user = auth()->user();
+        @endphp
+
+        @if ($user)
+            <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+                <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
             <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                 <x-app-logo />
@@ -13,9 +18,12 @@
 
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
-                    @if (auth()->user()->is_admin)
-                        <flux:navlist.item icon="briefcase" :href="route('admin-dashboard')" :current="request()->routeIs('admin-dashboard')" wire:navigate>{{ __('Admin Dashboard') }}</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Home') }}</flux:navlist.item>
+                    @if ($user?->is_member)
+                        <flux:navlist.item icon="plus" :href="route('create-game')" :current="request()->routeIs('create-game')" wire:navigate>{{ __('Create Game') }}</flux:navlist.item>
+                    @endif
+                    @if ($user?->is_super_admin)
+                        <flux:navlist.item icon="cog" :href="route('game-templates.index')" :current="request()->routeIs('game-templates.index')" wire:navigate>{{ __('Manage Game Templates') }}</flux:navlist.item>
                     @endif
                 </flux:navlist.group>
             </flux:navlist>
@@ -25,8 +33,8 @@
             <!-- Desktop User Menu -->
             <flux:dropdown position="bottom" align="start">
                 <flux:profile
-                    :name="auth()->user()->name"
-                    :initials="auth()->user()->initials()"
+                    :name="$user?->name"
+                    :initials="$user?->initials()"
                     icon-trailing="chevrons-up-down"
                 />
 
@@ -38,19 +46,19 @@
                                     <span
                                         class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
                                     >
-                                        {{ auth()->user()->initials() }}
+                                        {{ $user?->initials() }}
                                     </span>
                                 </span>
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    <span class="truncate font-semibold">{{ $user?->name }}</span>
+                                    <span class="truncate text-xs">{{ $user?->email }}</span>
                                 </div>
                             </div>
                         </div>
                     </flux:menu.radio.group>
 
-                    @if (!auth()->user()->currentPlayer)
+                    @if (!$user?->currentPlayer)
                         <flux:menu.separator />
 
                         <flux:menu.radio.group>
@@ -78,7 +86,7 @@
 
             <flux:dropdown position="top" align="end">
                 <flux:profile
-                    :initials="auth()->user()->initials()"
+                    :initials="auth()->user()?->initials()"
                     icon-trailing="chevron-down"
                 />
 
@@ -90,13 +98,13 @@
                                     <span
                                         class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
                                     >
-                                        {{ auth()->user()->initials() }}
+                                        {{ $user?->initials() }}
                                     </span>
                                 </span>
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    <span class="truncate font-semibold">{{ $user?->name }}</span>
+                                    <span class="truncate text-xs">{{ $user?->email }}</span>
                                 </div>
                             </div>
                         </div>
@@ -119,6 +127,7 @@
                 </flux:menu>
             </flux:dropdown>
         </flux:header>
+        @endif
 
         {{ $slot }}
 

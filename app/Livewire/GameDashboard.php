@@ -2,13 +2,16 @@
 
 namespace App\Livewire;
 
+use App\Models\Game;
 use App\Models\Team;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
 
-class Dashboard extends Component
+class GameDashboard extends Component
 {
+    public Game $game;
+
     public string $selected_team_id;
 
     public int $quit_points;
@@ -24,15 +27,24 @@ class Dashboard extends Component
     }
 
     #[Computed]
-    public function player()
+    public function players()
     {
-        return $this->user->currentPlayer;
+        return $this->game->players;
     }
 
     #[Computed]
-    public function game()
+    public function player()
     {
-        return $this->player->game;
+        return $this->players->where('user_id', $this->user->id)
+            ->where('status', '!=', 'rejected')
+            ->where('status', '!=', 'removed')
+            ->first();
+    }
+
+    #[Computed]
+    public function is_game_admin()
+    {
+        return $this->user->isGameAdmin($this->game);
     }
 
     #[Computed]
@@ -65,10 +77,12 @@ class Dashboard extends Component
         return $this->challenge_handler->frontendComponent($this->player);
     }
 
-    public function mount()
+    public function mount(Game $game)
     {
-        if (! $this->player) {
-            return redirect()->route('pre-game-lobby');
+        $this->game = $game;
+
+        if (! $this->player || $this->game->status === 'upcoming') {
+            return redirect()->route('pre-game-lobby', ['game' => $this->game]);
         }
 
         $this->challenge_properties = $this->challenge_handler->propertiesForLivewire($this->player);
@@ -90,7 +104,7 @@ class Dashboard extends Component
 
         Verbs::commit();
 
-        redirect()->route('dashboard');
+        redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
     public function resign()
@@ -99,7 +113,7 @@ class Dashboard extends Component
 
         Verbs::commit();
 
-        redirect()->route('dashboard');
+        redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
     public function callChallengeAction(string $action, ?array $params = null)
@@ -113,11 +127,11 @@ class Dashboard extends Component
 
         $this->challenge->handler()->{$action}($this->player, $params);
 
-        redirect()->route('dashboard');
+        redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
     public function render()
     {
-        return view('livewire.dashboard');
+        return view('livewire.game-dashboard');
     }
 }

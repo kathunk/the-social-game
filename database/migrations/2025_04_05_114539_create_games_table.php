@@ -13,9 +13,13 @@ return new class extends Migration
             $table->string('name');
             $table->string('status');
             $table->integer('current_challenge_id')->nullable();
-            $table->string('template_class');
+            $table->foreignId('game_template_id')->constrained('game_templates');
+            $table->integer('code');
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');
+            $table->boolean('is_public')->default(false);
+            $table->boolean('requires_admin_approval_to_join')->default(false);
+            $table->boolean('players_can_join_late')->default(false);
             $table->timestamps();
         });
     }

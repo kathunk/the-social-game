@@ -13,9 +13,16 @@ class GameStarted extends Event
 
     public function validate()
     {
+        $game = $this->state(GameState::class);
+
         $this->assert(
-            $this->state(GameState::class)->status === 'upcoming',
+            $game->status === 'upcoming',
             'Game is not upcoming'
+        );
+
+        $this->assert(
+            $game->player_ids->count() >= $game->template()->min_players,
+            'Game does not have enough players'
         );
     }
 

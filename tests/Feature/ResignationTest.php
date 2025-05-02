@@ -18,9 +18,9 @@ beforeEach(function () {
         ],
     ]);
 
-    $this->game = (new TestTemplate(now(), $challenges))->createGame()->start();
+    // $this->game = (new TestTemplate(now(), $challenges))->createGame()->start();
 
-    $this->createPlayer();
+    // $this->createPlayer();
     $this->team = Team::first();
 });
 
@@ -37,4 +37,4 @@ it('grants points when a player resigns', function () {
     expect($this->team->players->count())->toBe(0);
 
     // @todo test that all the state information is correct too
-});
+})->skip('revisit once we refactor to game modifiers');

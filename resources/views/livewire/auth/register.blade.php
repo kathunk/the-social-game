@@ -7,12 +7,21 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use App\Events\UserCreated;
+use Thunk\Verbs\Facades\Verbs;
 
 new #[Layout('components.layouts.auth')] class extends Component {
     public string $name = '';
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
+    
+    public ?string $game = null;
+
+    public function mount(): void
+    {
+        $this->game = request()->query('game');
+    }
 
     /**
      * Handle an incoming registration request.
@@ -27,11 +36,25 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $validated['password'] = Hash::make($validated['password']);
 
-        event(new Registered(($user = User::create($validated))));
+        $user_id = UserCreated::fire(
+            name: $validated['name'],
+            email: $validated['email'],
+            encrypted_password: bcrypt($validated['password']),
+        )->user_id;
+
+        Verbs::commit();
+
+        $user = User::find($user_id);
+
+        event(new Registered($user));
 
         Auth::login($user);
 
-        $this->redirectIntended(route('dashboard', absolute: false), navigate: true);
+        if ($this->game) {
+            $this->redirect(route('pre-game-lobby', ['game' => $this->game], absolute: false), navigate: true);
+        } else {
+            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        }
     }
 }; ?>
 

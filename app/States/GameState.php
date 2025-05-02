@@ -24,6 +24,8 @@ class GameState extends State
 
     public Collection $resigned_player_ids;
 
+    public Collection $removed_player_ids;
+
     public Collection $admin_ids;
 
     public Collection $team_ids;
@@ -36,6 +38,16 @@ class GameState extends State
 
     public $current_challenge_id;
 
+    public int $game_template_id;
+
+    public bool $is_public;
+
+    public bool $requires_admin_approval_to_join;
+
+    public bool $players_can_join_late;
+
+    public int $code;
+
     public function __construct()
     {
         $this->player_ids = collect();
@@ -46,6 +58,7 @@ class GameState extends State
         $this->team_ids = collect();
         $this->resigned_player_ids = collect();
         $this->challenge_ids = collect();
+        $this->removed_player_ids = collect();
     }
 
     public function players()
@@ -76,5 +89,10 @@ class GameState extends State
     public function currentChallenge()
     {
         return ChallengeState::load($this->current_challenge_id);
+    }
+
+    public function template(): GameTemplateState
+    {
+        return GameTemplateState::load($this->game_template_id);
     }
 }

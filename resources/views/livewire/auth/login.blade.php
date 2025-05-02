@@ -19,6 +19,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $password = '';
 
     public bool $remember = false;
+    
+    public ?string $game = null;
+
+    public function mount(): void
+    {
+        $this->game = request()->query('game');
+    }
 
     /**
      * Handle an incoming authentication request.
@@ -40,7 +47,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        if ($this->game) {
+            $this->redirect(route('pre-game-lobby', ['game' => $this->game], absolute: false), navigate: true);
+        } else {
+            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        }
     }
 
     /**

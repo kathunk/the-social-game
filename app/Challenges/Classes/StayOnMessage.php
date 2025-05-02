@@ -8,6 +8,12 @@ use App\States\GameState;
 
 class StayOnMessage extends BaseChallengeClass
 {
+    const NAME = 'Stay on message';
+
+    const DESCRIPTION = "Let's see how well you can work together. You have 1 hour to submit any 50 character string in the field below. At the end of the challenge, we will find your team's most commonly submitted string. Your team will receive (% of teammates who submitted your most popular string - 50%) * 100 points.";
+
+    const TYPE = 'team';
+
     public static function key(): string
     {
         return 'staying_on_message';
@@ -20,16 +26,16 @@ class StayOnMessage extends BaseChallengeClass
 
     public function frontendComponent(Player $player): array
     {
-        if (isset($this->challenge->challenge_data[$this->player->team_id][$this->player->id])) {
+        if (isset($this->challenge->challenge_data[$player->team_id][$player->id])) {
             return $this->form()
                 ->title('Stay on message')
-                ->subtitle('Your submission: '.$this->challenge->challenge_data[$this->player->team_id][$this->player->id])
+                ->subtitle('Your submission: '.$this->challenge->challenge_data[$player->team_id][$player->id])
                 ->build();
         }
 
         return $this->form()
-            ->title('Stay on message')
-            ->subtitle("Let's see how well you can work together. You have 1 hour to submit any 50 character string in the field below. At the end of the challenge, we will find your team's most commonly submitted string. Your team will receive (% of players who submitted your most popular string - 50%) * 100 points.")
+            ->title(self::NAME)
+            ->subtitle(self::DESCRIPTION)
             ->input(
                 property_name: 'string_input',
                 validation_rules: 'required|min:50|max:50',

@@ -1,7 +1,10 @@
 <?php
 
-use App\Livewire\AdminDashboard;
-use App\Livewire\Dashboard;
+use App\Livewire\CreateGame;
+use App\Livewire\GameDashboard;
+use App\Livewire\GameTemplatesListPage;
+use App\Livewire\Home;
+use App\Livewire\ManageGameTemplatePage;
 use App\Livewire\PreGameLobby;
 use App\Livewire\TeamPage;
 use Illuminate\Support\Facades\Route;
@@ -9,7 +12,7 @@ use Livewire\Volt\Volt;
 
 Route::get('/', function () {
     return view('welcome');
-})->name('home');
+})->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -18,10 +21,15 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/password', 'settings.password')->name('settings.password');
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 
-    Route::get('/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
-    Route::get('/admin-dashboard', AdminDashboard::class)->name('admin-dashboard');
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
+    Route::get('/games/{game}/dashboard', GameDashboard::class)->name('game-dashboard');
+    Route::get('/dashboard', Home::class)->name('dashboard');
     Route::get('/teams/{team}', TeamPage::class)->name('teams.show');
+    Route::get('/create-game', CreateGame::class)->name('create-game');
+    Route::get('/game-templates', GameTemplatesListPage::class)->name('game-templates.index');
+    Route::get('/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');
+    Route::get('/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
 });
+
+Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
 
 require __DIR__.'/auth.php';

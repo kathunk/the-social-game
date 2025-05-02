@@ -34,10 +34,19 @@ class ChallengeRegistry
 
                 return new $class;
             })
-            ->filter()
-            ->mapWithKeys(function ($instance) {
-                return [$instance->key() => $instance::class];
-            });
+            ->filter();
+
+        // Check for duplicate keys before mapping
+        $keys = $classes->map(fn ($instance) => $instance->key());
+        $duplicates = $keys->duplicates();
+
+        if ($duplicates->isNotEmpty()) {
+            throw new \Exception('Duplicate challenge keys found: '.$duplicates->implode(', '));
+        }
+
+        $classes = $classes->mapWithKeys(function ($instance) {
+            return [$instance->key() => $instance::class];
+        });
 
         return self::$map = $classes->toArray();
     }
@@ -54,6 +63,13 @@ class ChallengeRegistry
         $class = self::getAll()[$key] ?? throw new \Exception("Unknown challenge type: $key");
 
         return $class::fromState($state);
+    }
+
+    public static function retrieveFromKey(string $key): BaseChallengeClass
+    {
+        $class = self::getAll()[$key] ?? throw new \Exception("Unknown challenge type: $key");
+
+        return $class::fromKey($key);
     }
 
     public static function options(): array
