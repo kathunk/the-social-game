@@ -8,6 +8,7 @@ use App\Challenges\Classes\PrisonersDilemma;
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
+    Verbs::fake();
     Verbs::commitImmediately();
 
     $challenges = [

@@ -3,9 +3,7 @@
 use App\Models\Team;
 use Thunk\Verbs\Event;
 use App\States\TeamState;
-use App\States\PlayerState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
-
 
 function incrementScore(Team $team, int $points)
 {
