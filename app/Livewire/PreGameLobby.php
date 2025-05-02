@@ -10,6 +10,7 @@ use App\Support\HtmlTransformer;
 use Livewire\Attributes\Computed;
 use App\Events\PlayerRemovedFromGame;
 use App\Events\UserPromotedToGameAdmin;
+use App\Events\UserDemotedFromGameAdmin;
 
 class PreGameLobby extends Component
 {
@@ -40,9 +41,9 @@ class PreGameLobby extends Component
     }
 
     #[Computed]
-    public function isCreator()
+    public function creator()
     {
-        return $this->admins->pluck('id')->first() === $this->user->id;
+        return $this->game->admins->first();
     }
 
     #[Computed]
@@ -84,10 +85,6 @@ class PreGameLobby extends Component
     public function mount(Game $game)
     {
         $this->game = $game;
-
-        if (! $this->is_joinable) {
-            return redirect()->route('dashboard');
-        }
 
         if ($this->application) {
             $this->checkStatus();
@@ -132,14 +129,24 @@ class PreGameLobby extends Component
     {
         $player = Player::find($player_id);
 
-        if (! $player) {
-
-            dd($player_id, $this->game->players->pluck('id'));
-        }
-
         UserPromotedToGameAdmin::fire(
             user_id: $player->user_id,
             game_id: $this->game->id,
+            admin_id: $this->user->id,
+        );
+
+        Verbs::commit();
+        unset($this->admins);
+    }
+
+    public function demoteFromAdmin(string $player_id)
+    {
+        $player = Player::find($player_id);
+
+        UserDemotedFromGameAdmin::fire(
+            user_id: $player->user_id,
+            game_id: $this->game->id,
+            admin_id: $this->user->id,
         );
 
         Verbs::commit();

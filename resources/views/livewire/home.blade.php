@@ -12,7 +12,7 @@
                 <flux:table.rows>
                     @foreach ($this->games as $game)
                         <flux:table.row>
-                            <flux:table.cell>
+                            <flux:table.cell class="align-top">
                                 <div class="flex flex-col space-y-2">
                                     <div class="flex flex-row items-center space-x-2">
                                         @if ($game->status === 'upcoming')

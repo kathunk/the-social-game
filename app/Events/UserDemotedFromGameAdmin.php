@@ -14,8 +14,15 @@ class UserDemotedFromGameAdmin extends Event
 {
     use HasGame, HasUser;
 
+    public int $admin_id;
+
     public function validate()
     {
+        $this->assert(
+            $this->state(GameState::class)->admin_ids->contains($this->admin_id),
+            'Admin ID is not an admin of this game',
+        );
+        
         $this->assert(
             $this->state(GameState::class)->admin_ids->contains($this->user_id),
             'User is not an admin of this game',

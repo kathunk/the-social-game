@@ -35,7 +35,7 @@ class Laracon2025Seeder extends Seeder
         $game->refresh();
 
         foreach ($admins as $admin) {
-            $admin->promoteToGameAdmin($game);
+            $admin->promoteToGameAdmin($game, $john);
             $admin->requestToJoinGame($game);
             $admin->admitToGame($game, $john);
         }

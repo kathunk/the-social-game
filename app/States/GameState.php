@@ -45,6 +45,8 @@ class GameState extends State
 
     public bool $requires_admin_approval_to_join;
 
+    public bool $players_can_join_late;
+
     public int $code;
 
     public function __construct()

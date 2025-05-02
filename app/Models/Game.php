@@ -97,7 +97,7 @@ class Game extends Model
 
         $game = self::find($game_id);
 
-        $user->promoteToGameAdmin($game);
+        $user->promoteToGameAdmin($game, $user);
 
         $user->requestToJoinGame($game);
 

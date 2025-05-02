@@ -146,11 +146,12 @@ class User extends Authenticatable
         return $game->admins->pluck('id')->contains($this->id);
     }
 
-    public function promoteToGameAdmin(Game $game)
+    public function promoteToGameAdmin(Game $game, User $admin)
     {
         UserPromotedToGameAdmin::fire(
             user_id: $this->id,
             game_id: $game->id,
+            admin_id: $admin->id,
         );
 
         return $this->fresh();

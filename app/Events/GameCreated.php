@@ -43,6 +43,7 @@ class GameCreated extends Event
         $game->ends_at = $this->starts_at->copy()->addMinutes(
             $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
         );
+        $game->players_can_join_late = $this->state(GameTemplateState::class)->players_can_join_late;
     }
 
     public function handle()
@@ -57,6 +58,7 @@ class GameCreated extends Event
             'is_public' => $this->is_public,
             'requires_admin_approval_to_join' => $this->requires_admin_approval_to_join,
             'code' => $this->code,
+            'players_can_join_late' => $this->state(GameTemplateState::class)->players_can_join_late,
         ]);
     }
 }

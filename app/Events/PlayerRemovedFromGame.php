@@ -38,6 +38,7 @@ class PlayerRemovedFromGame extends Event
     {
         $game->removed_player_ids->push($this->player_id);
         $game->player_ids = $game->player_ids->reject(fn ($player_id) => $player_id === $this->player_id);
+        $game->admin_ids = $game->admin_ids->reject(fn ($admin_id) => $admin_id === $this->user_id);
     }
 
     public function applyToUser(UserState $user)
@@ -67,6 +68,7 @@ class PlayerRemovedFromGame extends Event
         $user = User::find($this->user_id);
         $user->current_game_id = null;
         $user->current_player_id = null;
+        $user->adminGames()->detach($this->game_id);
         $user->save();
 
         $application = GameApplication::find($this->application_id);

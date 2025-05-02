@@ -35,7 +35,6 @@
     @endif
 
     @if ($this->application?->status === 'accepted' && $this->game->status === 'active')
-        <flux:heading>We're live!</flux:heading>
         <flux:button variant="primary" href="{{ route('game-dashboard', ['game' => $this->game]) }}">
             Go to game
         </flux:button>
@@ -77,31 +76,53 @@
                             </div>
                         </flux:table.cell>
                         <flux:table.cell>
-                            {{-- Remove button: Only creator can remove, and not themselves --}}
-                            @if ($this->is_creator && $this->user->id !== $player->user_id)
-                                <div class="flex gap-1">
-                                    <flux:modal.trigger name="remove-player-{{ $player->id }}">
-                                        <flux:button variant="subtle" size="sm" icon="x-circle">Remove</flux:button>
-                                    </flux:modal.trigger>
-                                </div>
-                            @endif
+                            <div class="flex gap-1 justify-end">
+                                @if (
+                                    ($this->creator->id === $this->user?->id || $this->is_game_admin)
+                                    && $player->user_id !== $this->user?->id
+                                    && $player->user_id !== $this->creator->id
+                                    && (
+                                        ! $this->admins->pluck('id')->contains($player->user_id)
+                                        || $this->creator->id === $this->user->id
+                                    )
+                                )
+                                    <div class="flex gap-1">
+                                        <flux:modal.trigger name="remove-player-{{ $player->id }}">
+                                            <flux:button variant="subtle" size="sm" icon="x-circle">Remove</flux:button>
+                                        </flux:modal.trigger>
+                                    </div>
+                                @endif
 
-                            {{-- Promote button: Any game admin can promote non-admin, non-creator, not themselves --}}
-                            @if (
-                                $this->is_game_admin
-                                && ! $this->admins->pluck('id')->contains($player->user_id)
-                                && ! $player->user->id === $this->creator_id
-                                && $this->user->id !== $player->user_id
-                            )
-                                <div class="flex gap-1">
-                                    <flux:button variant="subtle" size="sm" wire:click="promoteToAdmin('{{ $player->id }}')">
-                                        <div class="flex items-center gap-2">
-                                            <x-icons.crown class="w-4 h-4" />
-                                            Promote 
-                                        </div>
-                                    </flux:button>
-                                </div>
-                            @endif
+                                @if (
+                                    $this->user?->id === $this->creator->id &&
+                                    ! $this->admins->pluck('id')->contains($player->user_id) &&
+                                    $this->user?->id !== $player->user_id
+                                )
+                                    <div class="flex gap-1">
+                                        <flux:button variant="subtle" size="sm" wire:click="promoteToAdmin('{{ $player->id }}')">
+                                            <div class="flex items-center gap-2">
+                                                <x-icons.crown class="w-4 h-4" />
+                                                Promote 
+                                            </div>
+                                        </flux:button>
+                                    </div>
+                                @endif
+
+                                @if (
+                                    $this->user?->id === $this->creator->id &&
+                                    $this->admins->pluck('id')->contains($player->user_id) &&
+                                    $this->user?->id !== $player->user_id
+                                )
+                                    <div class="flex gap-1">
+                                        <flux:button variant="subtle" size="sm" wire:click="demoteFromAdmin('{{ $player->id }}')">
+                                            <div class="flex items-center gap-2">
+                                                <x-icons.crown-slash class="w-4 h-4" />
+                                                Demote 
+                                            </div>
+                                        </flux:button>
+                                    </div>
+                                @endif
+                            </div>
                         </flux:table.cell>
                     </flux:table.row>
                 @endforeach

@@ -43,7 +43,7 @@ it('accepts a new user', function () {
 
 it('promotes a user to admin', function () {
     $user = User::fromTemplate('Test User', 'test@test.com', 'password', $this->game);
-    $user->promoteToGameAdmin($this->game);
+    $user->promoteToGameAdmin($this->game, $this->admin);
     $user->refresh();
 
     expect($user->fresh()->isGameAdmin($this->game->fresh()))->toBeTrue();

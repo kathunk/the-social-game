@@ -1,4 +1,10 @@
 <div class="flex flex-col gap-4">
+    @if ($this->is_game_admin)
+
+            <flux:button icon="cog" :href="route('pre-game-lobby', $this->game)" variant="filled">Manage game</flux:button>
+
+    @endif
+
     @if (! $this->current_team && $this->player->status === 'active')
         <flux:card>
             <flux:heading>Join a team</flux:heading>
