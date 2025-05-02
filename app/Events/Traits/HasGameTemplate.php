@@ -10,4 +10,3 @@ trait HasGameTemplate
     #[StateId(GameTemplateState::class)]
     public int $game_template_id;
 }
-

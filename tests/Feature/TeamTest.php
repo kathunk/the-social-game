@@ -1,7 +1,7 @@
 <?php
 
-use Thunk\Verbs\Facades\Verbs;
 use App\Challenges\Classes\PyramidScheme;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -32,4 +32,3 @@ it('new players can join a team', function () {
     expect($player->fresh()->team_id)->toBe($team->id);
     expect($team->fresh()->players->count())->toBe(1);
 });
-

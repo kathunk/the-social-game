@@ -4,7 +4,13 @@
 >
     @if ($this->game->status === 'upcoming')
         <div class="mx-auto w-full text-center">
-            <flux:text>Starts {{ $this->game->starts_at->diffForHumans() }}</flux:text>
+            <flux:text>
+                @if ($this->game->starts_at->isFuture())
+                    Starts {{ $this->game->starts_at->diffForHumans() }}
+                @else
+                    Game did not start because the player count is not correct.
+                @endif
+            </flux:text>
         </div>
     @endif
 
@@ -63,31 +69,58 @@
         </div>
     </flux:card>
 
+    @if ($this->hasTooManyPlayers)
+        <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameTemplate->name }} only allows {{ $this->game->gameTemplate->max_players }} players. Remove some players, or change the game template." />
+    @endif
+
+    @if ($this->hasTooFewPlayers)
+        <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameTemplate->name }} requires {{ $this->game->gameTemplate->min_players }} players. Add more players, or change the game template." />
+    @endif
+
     @if ($this->is_game_admin && $this->game->status === 'upcoming')
-        <flux:card>
+        <flux:card x-data="{editGameSettings: false}">
             <flux:heading class="mb-4">Game Settings</flux:heading>
-            <x-datetime
-                label="Start time"
-                name="game_start_timecode"
-                wire:model="game_start_timecode"
-                min="{{ now()->addMinute()->second(0)->toIsoString() }}"
-                required
-            />
-            <flux:select wire:model="game_template_id" variant="listbox" label="Game template" searchable placeholder="Choose game template...">
-                @foreach ($this->gameTemplates as $gameTemplate)
-                    <flux:select.option :value="(string) $gameTemplate->id">
-                        {{ $gameTemplate->name }}
-                    </flux:select.option>
-                @endforeach
-            </flux:select>
-
-            <div class="flex flex-col gap-2 mt-4">
-                <flux:checkbox label="Open to all" wire:model="is_public" />
-                <flux:checkbox label="Requires your approval to join" wire:model="requires_admin_approval_to_join" />
+            <div x-show="!editGameSettings" class="flex gap-2">
+                <flux:button 
+                    variant="primary" 
+                    wire:click="startGame" 
+                    icon="rocket-launch"
+                    :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers"
+                >
+                    Start Game Now
+                </flux:button>
+                <flux:button @click="editGameSettings = true" icon="pencil">Edit</flux:button>
             </div>
+            <div x-show="editGameSettings">
+                <x-datetime
+                    label="Start time"
+                    name="game_start_timecode"
+                    wire:model="game_start_timecode"
+                    min="{{ now()->addMinute()->second(0)->toIsoString() }}"
+                    required
+                />
+                <flux:select wire:model="game_template_id" variant="listbox" label="Game template" searchable placeholder="Choose game template...">
+                    @foreach ($this->gameTemplates as $gameTemplate)
+                        <flux:select.option :value="(string) $gameTemplate->id">
+                            {{ $gameTemplate->name }}
+                        </flux:select.option>
+                    @endforeach
+                </flux:select>
 
-            <div class="flex justify-end mt-4 gap-2">
-                <flux:button wire:click="updateGameSettings">Update</flux:button>
+                <div class="flex flex-col gap-2 mt-4">
+                    <flux:checkbox label="Open to all" wire:model="is_public" />
+                    <flux:checkbox label="Requires your approval to join" wire:model="requires_admin_approval_to_join" />
+                </div>
+
+                <div class="flex justify-end mt-4 gap-2" x-data="{cancelGame: false}">
+                    <div x-show="cancelGame">
+                        <flux:button variant="danger" wire:click="cancelGame">Seriously cancel?</flux:button>
+                    </div>
+                    <div x-show="!cancelGame">
+                        <flux:button variant="ghost" @click="cancelGame = true">Cancel Game</flux:button>
+                    </div>
+                    <flux:button @click="editGameSettings = false" wire:click="updateGameSettings">Update</flux:button>
+                </div>
             </div>
         </flux:card>
     @endif
@@ -210,7 +243,3 @@
 
     <flux:toast />
 </div>
-
-{{-- @todo --}}
-{{-- game needs reschedule --}}
-{{-- cancel game? --}}

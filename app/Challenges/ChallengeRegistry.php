@@ -37,11 +37,11 @@ class ChallengeRegistry
             ->filter();
 
         // Check for duplicate keys before mapping
-        $keys = $classes->map(fn($instance) => $instance->key());
+        $keys = $classes->map(fn ($instance) => $instance->key());
         $duplicates = $keys->duplicates();
-        
+
         if ($duplicates->isNotEmpty()) {
-            throw new \Exception('Duplicate challenge keys found: ' . $duplicates->implode(', '));
+            throw new \Exception('Duplicate challenge keys found: '.$duplicates->implode(', '));
         }
 
         $classes = $classes->mapWithKeys(function ($instance) {

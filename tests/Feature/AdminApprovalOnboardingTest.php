@@ -2,11 +2,10 @@
 
 use App\Models\Game;
 use App\Models\User;
-use App\Models\GameTemplate;
-use Thunk\Verbs\Facades\Verbs;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\Laracon2025Seeder;
 use Database\Seeders\GameTemplateSeeder;
+use Database\Seeders\Laracon2025Seeder;
+use Database\Seeders\UserSeeder;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

@@ -2,22 +2,22 @@
 
 namespace App\Livewire;
 
-use Flux\Flux;
-use App\Models\Game;
-use App\Models\Player;
-use Livewire\Component;
 use App\Events\GameUpdated;
-use App\Models\GameTemplate;
-use Illuminate\Support\Carbon;
-use Thunk\Verbs\Facades\Verbs;
-use App\Models\GameApplication;
-use App\Support\HtmlTransformer;
-use Livewire\Attributes\Computed;
-use App\Events\UserAdmittedToGame;
-use App\Events\UserRejectedFromGame;
 use App\Events\PlayerRemovedFromGame;
-use App\Events\UserPromotedToGameAdmin;
+use App\Events\UserAdmittedToGame;
 use App\Events\UserDemotedFromGameAdmin;
+use App\Events\UserPromotedToGameAdmin;
+use App\Events\UserRejectedFromGame;
+use App\Models\Game;
+use App\Models\GameApplication;
+use App\Models\GameTemplate;
+use App\Models\Player;
+use App\Support\HtmlTransformer;
+use Flux\Flux;
+use Illuminate\Support\Carbon;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Thunk\Verbs\Facades\Verbs;
 
 class PreGameLobby extends Component
 {
@@ -61,11 +61,11 @@ class PreGameLobby extends Component
                 // First compare admin status
                 $aIsAdmin = $this->admins->pluck('id')->contains($a->user_id);
                 $bIsAdmin = $this->admins->pluck('id')->contains($b->user_id);
-                
+
                 if ($aIsAdmin !== $bIsAdmin) {
                     return $aIsAdmin ? -1 : 1;
                 }
-                
+
                 // If admin status is the same, sort by name
                 return strcasecmp($a->name, $b->name);
             })
@@ -144,6 +144,22 @@ class PreGameLobby extends Component
         return $this->game->players->map(fn ($player) => $player->user->name);
     }
 
+    #[Computed]
+    public function hasTooManyPlayers()
+    {
+        $max = $this->game->gameTemplate->max_players;
+
+        return $max && $this->players->count() > $max;
+    }
+
+    #[Computed]
+    public function hasTooFewPlayers()
+    {
+        $min = $this->game->gameTemplate->min_players;
+
+        return $min && $this->players->count() < $min;
+    }
+
     public function mount(Game $game)
     {
         $this->game = $game;
@@ -159,7 +175,7 @@ class PreGameLobby extends Component
 
     public function checkStatus()
     {
-        if (!$this->application) {
+        if (! $this->application) {
             return;
         }
 
@@ -191,7 +207,7 @@ class PreGameLobby extends Component
         Verbs::commit();
         unset($this->players);
 
-        Flux::toast(variant: 'success', heading: 'User removed', text: $player->user->name . ' has been removed from the game.');
+        Flux::toast(variant: 'success', heading: 'User removed', text: $player->user->name.' has been removed from the game.');
     }
 
     public function promoteToAdmin(string $player_id)
@@ -207,7 +223,7 @@ class PreGameLobby extends Component
         Verbs::commit();
         unset($this->admins);
 
-        Flux::toast(variant: 'success', heading: 'User promoted', text: $player->user->name . ' has been promoted to admin.');
+        Flux::toast(variant: 'success', heading: 'User promoted', text: $player->user->name.' has been promoted to admin.');
     }
 
     public function demoteFromAdmin(string $player_id)
@@ -223,7 +239,7 @@ class PreGameLobby extends Component
         Verbs::commit();
         unset($this->admins);
 
-        Flux::toast(variant: 'success', heading: 'User demoted', text: $player->user->name . ' has been demoted from admin.');
+        Flux::toast(variant: 'success', heading: 'User demoted', text: $player->user->name.' has been demoted from admin.');
     }
 
     public function approveUser()
@@ -291,6 +307,39 @@ class PreGameLobby extends Component
         Verbs::commit();
 
         return redirect()->route('pre-game-lobby', $this->game->id);
+    }
+
+    public function startGame()
+    {
+        $duration = GameTemplate::find($this->game_template_id)->total_duration;
+        $ends_at = Carbon::parse(now())->addMinutes($duration);
+
+        GameUpdated::fire(
+            game_id: $this->game->id,
+            user_id: $this->user->id,
+            game_template_id: (int) $this->game_template_id,
+            starts_at: now(),
+            ends_at: $ends_at,
+            is_public: $this->is_public,
+            requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
+        );
+
+        Verbs::commit();
+
+        $this->game->fresh()->start();
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', $this->game->id);
+    }
+
+    public function cancelGame()
+    {
+        $this->game->cancel($this->user);
+
+        Verbs::commit();
+
+        return redirect()->route('dashboard');
     }
 
     public function render()

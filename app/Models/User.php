@@ -5,10 +5,10 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Events\UserAdmittedToGame;
-use App\Events\UserRequestedToJoinGame;
 use App\Events\UserCreated;
 use App\Events\UserPromotedToGameAdmin;
 use App\Events\UserRejectedFromGame;
+use App\Events\UserRequestedToJoinGame;
 use App\States\UserState;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

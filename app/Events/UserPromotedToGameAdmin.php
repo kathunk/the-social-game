@@ -2,13 +2,13 @@
 
 namespace App\Events;
 
-use App\Models\Game;
-use App\Models\User;
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\UserState;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasUser;
+use App\Models\Game;
+use App\Models\User;
+use App\States\GameState;
+use App\States\UserState;
+use Thunk\Verbs\Event;
 
 class UserPromotedToGameAdmin extends Event
 {

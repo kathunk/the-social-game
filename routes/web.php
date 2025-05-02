@@ -1,16 +1,14 @@
 <?php
 
-use App\Livewire\Home;
-use Livewire\Volt\Volt;
-use App\Livewire\TeamPage;
-use App\Livewire\Dashboard;
 use App\Livewire\CreateGame;
-use App\Livewire\PreGameLobby;
 use App\Livewire\GameDashboard;
-use App\Livewire\AdminDashboard;
-use Illuminate\Support\Facades\Route;
 use App\Livewire\GameTemplatesListPage;
+use App\Livewire\Home;
 use App\Livewire\ManageGameTemplatePage;
+use App\Livewire\PreGameLobby;
+use App\Livewire\TeamPage;
+use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 Route::get('/', function () {
     return view('welcome');

@@ -2,42 +2,51 @@
 
 namespace App\Livewire;
 
-use Flux\Flux;
-use Livewire\Component;
-use App\Models\GameTemplate;
-use Thunk\Verbs\Facades\Verbs;
-use App\Events\GameTemplateAdded;
-use Livewire\Attributes\Computed;
-use App\Events\GameTemplateArchived;
 use App\Challenges\ChallengeRegistry;
+use App\Events\GameTemplateAdded;
+use App\Events\GameTemplateArchived;
+use App\Models\GameTemplate;
+use Flux\Flux;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Thunk\Verbs\Facades\Verbs;
 
 class ManageGameTemplatePage extends Component
 {
     public ?GameTemplate $game_template = null;
 
     public string $name;
+
     public string $description;
+
     public string $pre_game_lobby_message;
+
     public ?int $min_players;
+
     public ?int $max_players;
+
     public bool $is_public;
+
     public ?string $team_names;
+
     public array $challenges;
+
     public bool $players_can_join_late;
+
     public string $gameType;
 
     #[Computed]
     public function allChallenges()
     {
         return collect(ChallengeRegistry::getAll())
-            ->filter(fn($c) => $c::TYPE === $this->gameType);
+            ->filter(fn ($c) => $c::TYPE === $this->gameType);
     }
 
     public function mount($game_template = null)
     {
         if ($game_template instanceof GameTemplate) {
             $this->game_template = $game_template;
-    
+
             $this->name = $game_template->name ?? '';
             $this->description = $game_template->description ?? '';
             $this->pre_game_lobby_message = $game_template->pre_game_lobby_message ?? '';
@@ -100,7 +109,7 @@ class ManageGameTemplatePage extends Component
         //         $challengeClass = ChallengeRegistry::retrieveFromKey($challengeKey);
         //         if ($challengeClass::TYPE !== $this->gameType) {
         //             $this->addError(
-        //                 "challenges.{$index}.challenge_keys", 
+        //                 "challenges.{$index}.challenge_keys",
         //                 "Challenge '{$challengeKey}' is for {$challengeClass::TYPE} games, but this is a {$this->gameType} game"
         //             );
         //         }
@@ -117,6 +126,7 @@ class ManageGameTemplatePage extends Component
         // Cast challenge durations to integers
         $challenges = array_map(function ($challenge) {
             $challenge['duration'] = (int) $challenge['duration'];
+
             return $challenge;
         }, $this->challenges);
 
@@ -144,7 +154,7 @@ class ManageGameTemplatePage extends Component
     public function duplicateTemplate()
     {
         $id = GameTemplateAdded::fire(
-            name: $this->game_template->name . ' (copy)',
+            name: $this->game_template->name.' (copy)',
             description: $this->game_template->description,
             pre_game_lobby_message: $this->game_template->pre_game_lobby_message,
             type: $this->gameType,

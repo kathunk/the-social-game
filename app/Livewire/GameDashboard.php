@@ -4,9 +4,9 @@ namespace App\Livewire;
 
 use App\Models\Game;
 use App\Models\Team;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
-use Livewire\Attributes\Computed;
 
 class GameDashboard extends Component
 {

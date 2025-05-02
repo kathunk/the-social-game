@@ -28,8 +28,7 @@ abstract class BaseChallengeClass
     public function __construct(
         public ?Challenge $challenge = null,
         public ?ChallengeState $challenge_state = null,
-    ) {
-    }
+    ) {}
 
     public static function fromModel(Challenge $challenge): static
     {
@@ -43,7 +42,7 @@ abstract class BaseChallengeClass
 
     public static function fromKey(string $key): static
     {
-        return new static();
+        return new static;
     }
 
     public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool

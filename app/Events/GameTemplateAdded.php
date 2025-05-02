@@ -2,11 +2,11 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
+use App\Challenges\ChallengeRegistry;
 use App\Models\GameTemplate;
 use App\States\GameTemplateState;
-use App\Challenges\ChallengeRegistry;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class GameTemplateAdded extends Event
 {
@@ -40,12 +40,12 @@ class GameTemplateAdded extends Event
             'A template with this name already exists.'
         );
 
-        $challenge_keys = collect($this->challenges)->map(fn($c) => $c['challenge_keys'])
+        $challenge_keys = collect($this->challenges)->map(fn ($c) => $c['challenge_keys'])
             ->flatten()
-            ->map(fn($c) => ChallengeRegistry::retrieveFromKey($c));
+            ->map(fn ($c) => ChallengeRegistry::retrieveFromKey($c));
 
         $this->assert(
-            $challenge_keys->map(fn($c) => $c::TYPE)->unique()->count() === 1, 
+            $challenge_keys->map(fn ($c) => $c::TYPE)->unique()->count() === 1,
             'All challenges must be of the same type.'
         );
 

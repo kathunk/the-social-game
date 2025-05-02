@@ -15,7 +15,7 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
 
     const NAME = 'Flatten the Curve';
 
-    const DESCRIPTION = "The current average team size is {average}. At the end of the game, every team will get: ({average} - {your_team_size}) * 5. For your current team, you will get: {score} points.";
+    const DESCRIPTION = 'The current average team size is {average}. At the end of the game, every team will get: ({average} - {your_team_size}) * 5. For your current team, you will get: {score} points.';
 
     const TYPE = 'team';
 

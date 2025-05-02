@@ -3,10 +3,10 @@
 namespace App\Livewire;
 
 use App\Models\Game;
-use Livewire\Component;
 use App\Models\GameTemplate;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class CreateGame extends Component
 {
@@ -36,7 +36,7 @@ class CreateGame extends Component
 
     public function mount()
     {
-        if (!$this->user->is_member) {
+        if (! $this->user->is_member) {
             return redirect()->route('dashboard');
         }
 
@@ -62,7 +62,7 @@ class CreateGame extends Component
     {
         return [
             'game_template_id' => 'required|exists:game_templates,id',
-            'game_start_timecode' => ['required', 'date', 'after:' . now()],
+            'game_start_timecode' => ['required', 'date', 'after:'.now()],
         ];
     }
 

@@ -2,9 +2,9 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\GameTemplate;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class GameTemplatesListPage extends Component
 {

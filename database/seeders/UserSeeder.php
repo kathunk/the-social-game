@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\User;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Database\Seeder;
-use App\Events\UserPromotedToSuperAdmin;
 use App\Events\UserGainedMembership;
+use App\Events\UserPromotedToSuperAdmin;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Thunk\Verbs\Facades\Verbs;
 
 class UserSeeder extends Seeder
 {
@@ -78,8 +78,6 @@ class UserSeeder extends Seeder
         //     );
         // }
 
-
-
         // $game = Game::fromTemplate(
         //     template: GameTemplate::firstWhere('name', 'Laracon 2025'),
         //     starts_at: now(),
@@ -96,6 +94,5 @@ class UserSeeder extends Seeder
 
         // $admin = $game->admins->first();
 
-        
     }
 }

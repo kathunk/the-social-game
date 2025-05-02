@@ -2,18 +2,18 @@
 
 namespace App\Events;
 
-use Carbon\Carbon;
-use App\Models\Game;
-use Thunk\Verbs\Event;
-use App\States\GameState;
 use App\Events\Traits\HasGame;
-use App\Events\Traits\HasUser;
-use App\States\GameTemplateState;
 use App\Events\Traits\HasGameTemplate;
+use App\Events\Traits\HasUser;
+use App\Models\Game;
+use App\States\GameState;
+use App\States\GameTemplateState;
+use Carbon\Carbon;
+use Thunk\Verbs\Event;
 
 class GameUpdated extends Event
 {
-    use HasGame, HasUser, HasGameTemplate;
+    use HasGame, HasGameTemplate, HasUser;
 
     public Carbon $starts_at;
 

@@ -2,13 +2,13 @@
 
 namespace App\Events;
 
-use App\Models\Game;
-use App\Models\User;
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\UserState;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasUser;
+use App\Models\Game;
+use App\Models\User;
+use App\States\GameState;
+use App\States\UserState;
+use Thunk\Verbs\Event;
 
 class UserDemotedFromGameAdmin extends Event
 {
@@ -22,7 +22,7 @@ class UserDemotedFromGameAdmin extends Event
             $this->state(GameState::class)->admin_ids->contains($this->admin_id),
             'Admin ID is not an admin of this game',
         );
-        
+
         $this->assert(
             $this->state(GameState::class)->admin_ids->contains($this->user_id),
             'User is not an admin of this game',

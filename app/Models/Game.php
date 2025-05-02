@@ -2,20 +2,18 @@
 
 namespace App\Models;
 
-use App\Events\GameEnded;
-use App\States\GameState;
-use App\Events\GameCreated;
-use App\Events\GameStarted;
-use App\Events\TeamCreated;
-use Illuminate\Support\Carbon;
-use Thunk\Verbs\Facades\Verbs;
 use App\Events\ChallengeCreated;
 use App\Events\ChallengeStarted;
-use App\Events\UserAdmittedToGame;
+use App\Events\GameCanceled;
+use App\Events\GameCreated;
+use App\Events\GameEnded;
+use App\Events\GameStarted;
+use App\Events\TeamCreated;
+use App\States\GameState;
 use Glhd\Bits\Database\HasSnowflakes;
-use App\Events\UserRequestedToJoinGame;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
+use Thunk\Verbs\Facades\Verbs;
 
 class Game extends Model
 {
@@ -77,8 +75,7 @@ class Game extends Model
         bool $is_public,
         bool $requires_admin_approval_to_join,
         ?array $challenges = null,
-    ): self
-    {
+    ): self {
         $game_id = GameCreated::fire(
             user_id: $user->id,
             name: $template->name,
@@ -141,15 +138,15 @@ class Game extends Model
                 $last_challenge = end($carry);
                 $starts_at = $last_challenge['ends_at'];
             }
-            
+
             $ends_at = $starts_at->copy()->addMinutes($challenge['duration']);
-            
+
             $carry[] = [
                 'starts_at' => $starts_at,
                 'ends_at' => $ends_at,
                 'class_key' => collect($challenge['challenge_keys'])->random(),
             ];
-            
+
             return $carry;
         }, []);
 
@@ -162,11 +159,17 @@ class Game extends Model
             );
         }
 
+        Verbs::commit();
+
         GameStarted::fire(game_id: $this->id);
+
+        Verbs::commit();
 
         $challenge = $this->challenges->sortBy('starts_at')->first();
 
         ChallengeStarted::fire(challenge_id: $challenge->id, game_id: $this->id);
+
+        Verbs::commit();
 
         return $this->fresh();
     }
@@ -178,7 +181,7 @@ class Game extends Model
         }
 
         if (
-            !is_null($this->gameTemplate->max_players) &&
+            ! is_null($this->gameTemplate->max_players) &&
             $this->players->count() >= $this->gameTemplate->max_players
         ) {
             return false;
@@ -203,5 +206,13 @@ class Game extends Model
     public function end()
     {
         GameEnded::fire(game_id: $this->id);
+    }
+
+    public function cancel(User $admin)
+    {
+        GameCanceled::fire(
+            game_id: $this->id,
+            admin_id: $admin->id,
+        );
     }
 }

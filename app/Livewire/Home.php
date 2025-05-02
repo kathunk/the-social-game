@@ -2,9 +2,8 @@
 
 namespace App\Livewire;
 
-use App\Models\Game;
-use Livewire\Component;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class Home extends Component
 {
@@ -17,12 +16,23 @@ class Home extends Component
     #[Computed]
     public function games()
     {
-        return $this->user->games()->orderBy('starts_at', 'desc')->get();
-    }
+        $statusOrder = [
+            'active' => 1,
+            'upcoming' => 2,
+            'completed' => 3,
+            'canceled' => 4,
+        ];
 
-    public function mount()
-    {
-        // dd(Game::first()->players->map(fn ($p) => $p->user_id), $this->user->id);
+        return $this->user->games()
+            ->orderByRaw("CASE 
+                WHEN games.status = 'active' THEN 1
+                WHEN games.status = 'upcoming' THEN 2
+                WHEN games.status = 'completed' THEN 3
+                WHEN games.status = 'canceled' THEN 4
+                ELSE 5
+            END")
+            ->orderBy('starts_at', 'desc')
+            ->get();
     }
 
     public function render()

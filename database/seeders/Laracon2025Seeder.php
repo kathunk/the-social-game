@@ -4,13 +4,10 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Game;
-use App\Models\User;
 use App\Models\GameTemplate;
-use Thunk\Verbs\Facades\Verbs;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use App\Events\GameTemplateAdded;
-use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\StayOnMessage;
+use Thunk\Verbs\Facades\Verbs;
 
 class Laracon2025Seeder extends Seeder
 {

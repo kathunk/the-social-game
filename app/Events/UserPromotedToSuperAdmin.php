@@ -2,10 +2,10 @@
 
 namespace App\Events;
 
-use App\Models\User;
-use Thunk\Verbs\Event;
-use App\States\UserState;
 use App\Events\Traits\HasUser;
+use App\Models\User;
+use App\States\UserState;
+use Thunk\Verbs\Event;
 
 class UserPromotedToSuperAdmin extends Event
 {

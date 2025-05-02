@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Events\UserCreated;
-use Illuminate\Console\Command;
-use App\Events\GameTemplateAdded;
-use App\Events\UserPromotedToSuperAdmin;
 use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\StayOnMessage;
+use App\Events\GameTemplateAdded;
+use App\Events\UserCreated;
+use App\Events\UserPromotedToSuperAdmin;
+use Illuminate\Console\Command;
 
 class SeedProduction extends Command
 {

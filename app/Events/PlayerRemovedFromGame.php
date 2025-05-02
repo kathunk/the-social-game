@@ -2,22 +2,22 @@
 
 namespace App\Events;
 
-use App\Models\User;
-use App\Models\Player;
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\UserState;
-use App\States\PlayerState;
 use App\Events\Traits\HasGame;
+use App\Events\Traits\HasGameApplication;
+use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasUser;
 use App\Models\GameApplication;
-use App\Events\Traits\HasPlayer;
+use App\Models\Player;
+use App\Models\User;
 use App\States\GameApplicationState;
-use App\Events\Traits\HasGameApplication;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\UserState;
+use Thunk\Verbs\Event;
 
 class PlayerRemovedFromGame extends Event
 {
-    use HasGame, HasUser, HasPlayer, HasGameApplication;
+    use HasGame, HasGameApplication, HasPlayer, HasUser;
 
     public int $admin_id;
 

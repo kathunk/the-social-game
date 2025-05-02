@@ -3,17 +3,16 @@
 namespace App\Events;
 
 use App\Events\Traits\HasActiveGame;
-use App\Events\Traits\HasUser;
 use App\Events\Traits\HasGameApplication;
+use App\Events\Traits\HasUser;
 use App\Models\GameApplication;
 use App\States\GameApplicationState;
 use App\States\GameState;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
 class UserRejectedFromGame extends Event
 {
-    use HasActiveGame, HasUser, HasGameApplication;
+    use HasActiveGame, HasGameApplication, HasUser;
 
     public int $admin_id;
 
