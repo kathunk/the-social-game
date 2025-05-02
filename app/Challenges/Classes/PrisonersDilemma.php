@@ -18,15 +18,14 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
 
     const NAME = "Prisoner's Dilemma";
 
-    // IDK how we get the team's pair into this description
-    const DESCRIPTION = "You're in a showdown with {paired_team}.
+    const DESCRIPTION = "Your team is in a showdown with {paired_team}.
         Below is a button to play dirty.
         If 50% of your team votes to play dirty, you will.
         If both teams play dirty, they will each get -20 points.
         If neither plays dirty, they will each get +20 points.
         If you play dirty and they do not, you will get +50 points.";
 
-    const TYPE = 'team'; // team or individual
+    const TYPE = 'team';
 
     public static function key(): string
     {
@@ -35,7 +34,7 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
 
     public function dataArrayForState(): array
     {
-        $teams = $this->challenge_state->game()->teams();
+        $teams = $this->challenge_state->game()->teams()->sortByDesc('score')->pluck('id');
 
         $paired_teams = $this->pair($teams);
 
@@ -48,17 +47,11 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
 
     public function pair(Collection $teams): array
     {
+        // @todo in the future: account for scenarios where there is an odd number of teams
         $paired_teams = collect();
 
-        $teams_ids = $teams->pluck('id');
-
-        // @todo In the future, if the amount of teams is odd
-        // if (count($available_teams) % 2 !== 0) {
-            // return $this->evenOutTeams($available_teams);
-        // }
-
-        while ($teams_ids->count() >= 2) {
-            [$team1, $team2] = $teams_ids->splice(0, 2);
+        while ($teams->count() >= 2) {
+            [$team1, $team2] = $teams->splice(0, 2);
 
             $paired_teams
                 ->put($team1, $team2)
@@ -90,14 +83,12 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
 
             $form->subtitle($description)
                 ->buttonGroup()
-                ->button('Play Dirty', 'submitBool')
+                ->button('Play Dirty', 'submit')
                 ->endGroup();
         } else {
             $form->subtitle('You have chosen to play dirty.');
         }
 
-        // @todo find a way to have two forms on the same page
-        // so we can have the play dirty button and the team swap button, with validation
         if ($this->playerCanSwapTeams($player)) {
             $form
                 ->divider()
@@ -110,8 +101,10 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
         return $form->build();
     }
 
-    public function submitBool(Player $player, array $params): void
+    public function submit(Player $player, array $params): void
     {
+        dump($this);
+
         PlayerSubmittedPlayDirty::fire(
             player_id: $player->id,
             game_id: $player->game_id,
@@ -138,7 +131,7 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
     ) {
         $teams = $game_state->teams();
 
-        $played_dirty[] = $teams->map(function ($team) {
+        $played_dirty = $teams->map(function ($team) {
             $member_count = $team->player_ids->count();
 
             if ($member_count === 0) {
@@ -164,27 +157,30 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
             }
         });
 
-        $team_pairs = $this->challenge->challenge_data['team_pairs'];
+        $team_pairs = $this->challenge_state->challenge_data['team_pairs'];
 
         foreach($team_pairs as $team_id => $paired_team_id) {
 
-            $team = $teams->find($team_id);
+            $team = TeamState::load($team_id);
 
-            $containsTeamId = collect($played_dirty)->contains($team_id);
-            $containsPairedTeamId = collect($played_dirty)->contains($paired_team_id);
+            $containsTeamId = $played_dirty->contains($team_id);
+            $containsPairedTeamId = $played_dirty->contains($paired_team_id);
 
-            if ( // both teams play dirty, they will each get -20 points.
+            if (
                 $containsTeamId
                 && $containsPairedTeamId
             ) {
-                $team->increment('score', -20);
-            } elseif ( // you play dirty and they do not, you will get +50 points.
+                $team->addToScoreHistory(-20, 'Both teams played dirty');
+            } elseif (
                 $containsTeamId
                 && ! $containsPairedTeamId
             ) {
-                $team->increment('score', 50);
-            } else { // neither plays dirty, they will each get +20 points.
-                $team->increment('score', 20);
+                $team->addToScoreHistory(50, 'You played dirty and they did not');
+            } elseif (
+                ! $containsTeamId
+                && ! $containsPairedTeamId
+            ) {
+                $team->addToScoreHistory(20, 'Neither team played dirty');
             }
         }
     }
