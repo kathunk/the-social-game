@@ -2,13 +2,16 @@
 
 namespace App\Livewire;
 
+use App\Models\Game;
 use App\Models\Team;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
+use Livewire\Attributes\Computed;
 
 class GameDashboard extends Component
 {
+    public Game $game;
+
     public string $selected_team_id;
 
     public int $quit_points;
@@ -24,15 +27,21 @@ class GameDashboard extends Component
     }
 
     #[Computed]
-    public function player()
+    public function players()
     {
-        return $this->user->currentPlayer;
+        return $this->game->players;
     }
 
     #[Computed]
-    public function game()
+    public function player()
     {
-        return $this->player->game;
+        return $this->players->firstWhere('user_id', $this->user->id);
+    }
+
+    #[Computed]
+    public function is_game_admin()
+    {
+        return $this->user->isGameAdmin($this->game);
     }
 
     #[Computed]
@@ -65,8 +74,10 @@ class GameDashboard extends Component
         return $this->challenge_handler->frontendComponent($this->player);
     }
 
-    public function mount()
+    public function mount(Game $game)
     {
+        $this->game = $game;
+
         if (! $this->player || $this->game->status === 'upcoming') {
             return redirect()->route('pre-game-lobby', ['game' => $this->game]);
         }

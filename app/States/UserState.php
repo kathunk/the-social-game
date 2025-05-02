@@ -19,9 +19,9 @@ class UserState extends State
 
     public Collection $is_admin_of_game_ids;
 
-    public int $current_player_id;
+    public ?int $current_player_id;
 
-    public int $current_game_id;
+    public ?int $current_game_id;
 
     public Collection $application_ids;
 

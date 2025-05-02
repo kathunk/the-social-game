@@ -34,6 +34,13 @@
         </flux:card>
     @endif
 
+    @if ($this->application?->status === 'accepted' && $this->game->status === 'active')
+        <flux:heading>We're live!</flux:heading>
+        <flux:button variant="primary" href="{{ route('game-dashboard', ['game' => $this->game]) }}">
+            Go to game
+        </flux:button>
+    @endif
+
     <flux:card>
         <div class="flex flex-col gap-2">
             {!! $this->description !!}
@@ -69,7 +76,33 @@
                                 @endif
                             </div>
                         </flux:table.cell>
-                        <flux:table.cell>button</flux:table.cell>
+                        <flux:table.cell>
+                            {{-- Remove button: Only creator can remove, and not themselves --}}
+                            @if ($this->is_creator && $this->user->id !== $player->user_id)
+                                <div class="flex gap-1">
+                                    <flux:modal.trigger name="remove-player-{{ $player->id }}">
+                                        <flux:button variant="subtle" size="sm" icon="x-circle">Remove</flux:button>
+                                    </flux:modal.trigger>
+                                </div>
+                            @endif
+
+                            {{-- Promote button: Any game admin can promote non-admin, non-creator, not themselves --}}
+                            @if (
+                                $this->is_game_admin
+                                && ! $this->admins->pluck('id')->contains($player->user_id)
+                                && ! $player->user->id === $this->creator_id
+                                && $this->user->id !== $player->user_id
+                            )
+                                <div class="flex gap-1">
+                                    <flux:button variant="subtle" size="sm" wire:click="promoteToAdmin('{{ $player->id }}')">
+                                        <div class="flex items-center gap-2">
+                                            <x-icons.crown class="w-4 h-4" />
+                                            Promote 
+                                        </div>
+                                    </flux:button>
+                                </div>
+                            @endif
+                        </flux:table.cell>
                     </flux:table.row>
                 @endforeach
             </flux:table.rows>
@@ -81,10 +114,14 @@
             <x-qr :url="$this->game->url" />
         </div>
     </flux:modal>
+
+    <flux:modal name="remove-player-{{ $player->id }}">
+        <flux:heading>Remove {{ $player->name }} from the game?</flux:heading>
+        <flux:button variant="danger" wire:click="removePlayer({{ $player->id }})">Remove</flux:button>
+    </flux:modal>
 </div>
 
 {{-- @todo --}}
-{{-- guest visits page --}}
 {{-- auth'd user with no application --}}
 {{-- rejected user --}}
 {{-- accepted user --}}

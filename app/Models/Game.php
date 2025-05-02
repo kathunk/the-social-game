@@ -175,7 +175,10 @@ class Game extends Model
             return false;
         }
 
-        if ($this->players->count() >= $this->gameTemplate->max_players) {
+        if (
+            !is_null($this->gameTemplate->max_players) &&
+            $this->players->count() >= $this->gameTemplate->max_players
+        ) {
             return false;
         }
 

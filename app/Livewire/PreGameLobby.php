@@ -8,6 +8,7 @@ use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
 use App\Support\HtmlTransformer;
 use Livewire\Attributes\Computed;
+use App\Events\PlayerRemovedFromGame;
 use App\Events\UserPromotedToGameAdmin;
 
 class PreGameLobby extends Component
@@ -39,6 +40,12 @@ class PreGameLobby extends Component
     }
 
     #[Computed]
+    public function isCreator()
+    {
+        return $this->admins->pluck('id')->first() === $this->user->id;
+    }
+
+    #[Computed]
     public function application()
     {
         return $this->user?->gameApplications->where('game_id', $this->game->id)->first();
@@ -53,7 +60,7 @@ class PreGameLobby extends Component
     #[Computed]
     public function is_game_admin()
     {
-        return $this->user->is_admin($this->game);
+        return $this->user?->isGameAdmin($this->game);
     }
 
     #[Computed]
@@ -94,10 +101,6 @@ class PreGameLobby extends Component
         }
 
         unset($this->application);
-
-        if ($this->application->status === 'accepted' && $this->game->status === 'active') {
-            return redirect()->route('game-dashboard', ['game' => $this->game]);
-        }
     }
 
     public function joinGame()
@@ -112,12 +115,27 @@ class PreGameLobby extends Component
 
     public function removePlayer(string $player_id)
     {
-        //
+        $player = Player::find($player_id);
+
+        PlayerRemovedFromGame::fire(
+            player_id: $player->id,
+            user_id: $player->user_id,
+            game_id: $this->game->id,
+            admin_id: $this->user->id,
+        );
+
+        Verbs::commit();
+        unset($this->players);
     }
 
     public function promoteToAdmin(string $player_id)
     {
         $player = Player::find($player_id);
+
+        if (! $player) {
+
+            dd($player_id, $this->game->players->pluck('id'));
+        }
 
         UserPromotedToGameAdmin::fire(
             user_id: $player->user_id,
