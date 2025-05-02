@@ -26,6 +26,8 @@ class Game extends Model
     protected $casts = [
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
+        'is_public' => 'boolean',
+        'requires_admin_approval_to_join' => 'boolean',
     ];
 
     public function state(): GameState

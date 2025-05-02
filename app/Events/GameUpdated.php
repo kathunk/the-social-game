@@ -37,7 +37,7 @@ class GameUpdated extends Event
 
     public function handle()
     {
-        Game::find($this->game_id)->update([
+        $game = Game::find($this->game_id)->update([
             'game_template_id' => $this->game_template_id,
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at,

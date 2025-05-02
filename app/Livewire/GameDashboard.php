@@ -35,7 +35,10 @@ class GameDashboard extends Component
     #[Computed]
     public function player()
     {
-        return $this->players->firstWhere('user_id', $this->user->id);
+        return $this->players->where('user_id', $this->user->id)
+            ->where('status', '!=', 'rejected')
+            ->where('status', '!=', 'removed')
+            ->first();
     }
 
     #[Computed]

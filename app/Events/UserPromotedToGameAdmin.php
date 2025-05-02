@@ -19,11 +19,6 @@ class UserPromotedToGameAdmin extends Event
     public function validate()
     {
         $this->assert(
-            $this->state(GameState::class)->admin_ids->contains($this->admin_id),
-            'Admin ID is not an admin of this game',
-        );
-
-        $this->assert(
             ! $this->state(GameState::class)->admin_ids->contains($this->user_id),
             'User is already an admin of this game',
         );

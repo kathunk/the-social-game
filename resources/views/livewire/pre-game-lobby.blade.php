@@ -34,6 +34,10 @@
             @if ($this->application?->status === 'rejected')
                 <flux:heading>You were rejected from the game.</flux:heading>
             @endif
+
+            @if ($this->application?->status === 'pending')
+                <flux:heading>Waiting for an admin to approve your application.</flux:heading>
+            @endif
         </flux:card>
     @endif
 
@@ -58,6 +62,35 @@
             </flux:modal.trigger>
         </div>
     </flux:card>
+
+    @if ($this->is_game_admin && $this->game->status === 'upcoming')
+        <flux:card>
+            <flux:heading class="mb-4">Game Settings</flux:heading>
+            <x-datetime
+                label="Start time"
+                name="game_start_timecode"
+                wire:model="game_start_timecode"
+                min="{{ now()->addMinute()->second(0)->toIsoString() }}"
+                required
+            />
+            <flux:select wire:model="game_template_id" variant="listbox" label="Game template" searchable placeholder="Choose game template...">
+                @foreach ($this->gameTemplates as $gameTemplate)
+                    <flux:select.option :value="(string) $gameTemplate->id">
+                        {{ $gameTemplate->name }}
+                    </flux:select.option>
+                @endforeach
+            </flux:select>
+
+            <div class="flex flex-col gap-2 mt-4">
+                <flux:checkbox label="Open to all" wire:model="is_public" />
+                <flux:checkbox label="Requires your approval to join" wire:model="requires_admin_approval_to_join" />
+            </div>
+
+            <div class="flex justify-end mt-4 gap-2">
+                <flux:button wire:click="updateGameSettings">Update</flux:button>
+            </div>
+        </flux:card>
+    @endif
 
     @if ($this->is_game_admin && $this->game->requires_admin_approval_to_join)
         <flux:card>
@@ -179,13 +212,5 @@
 </div>
 
 {{-- @todo --}}
-{{-- auth'd user with no application --}}
-{{-- rejected user --}}
-{{-- accepted user --}}
 {{-- game needs reschedule --}}
-{{-- admin can move start time --}}
-{{-- admin can add admins --}}
-{{-- admin can remove admins --}}
 {{-- cancel game? --}}
-{{-- change game template? feels like that's just a cancel --}}
-{{-- toggle ability  --}}
