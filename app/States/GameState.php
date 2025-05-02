@@ -2,10 +2,9 @@
 
 namespace App\States;
 
-use Thunk\Verbs\State;
 use Illuminate\Support\Carbon;
-use App\States\GameTemplateState;
 use Illuminate\Support\Collection;
+use Thunk\Verbs\State;
 
 class GameState extends State
 {
@@ -25,6 +24,8 @@ class GameState extends State
 
     public Collection $resigned_player_ids;
 
+    public Collection $removed_player_ids;
+
     public Collection $admin_ids;
 
     public Collection $team_ids;
@@ -43,6 +44,8 @@ class GameState extends State
 
     public bool $requires_admin_approval_to_join;
 
+    public bool $players_can_join_late;
+
     public int $code;
 
     public function __construct()
@@ -55,6 +58,7 @@ class GameState extends State
         $this->team_ids = collect();
         $this->resigned_player_ids = collect();
         $this->challenge_ids = collect();
+        $this->removed_player_ids = collect();
     }
 
     public function players()

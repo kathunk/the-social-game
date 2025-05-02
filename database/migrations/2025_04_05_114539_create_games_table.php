@@ -19,6 +19,7 @@ return new class extends Migration
             $table->dateTime('ends_at');
             $table->boolean('is_public')->default(false);
             $table->boolean('requires_admin_approval_to_join')->default(false);
+            $table->boolean('players_can_join_late')->default(false);
             $table->timestamps();
         });
     }

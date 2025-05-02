@@ -35,7 +35,21 @@ class ProgressGames extends Command
             ->with('gameTemplate')
             ->get()
             ->filter(function (Game $game) {
-                return $game->players->count() >= $game->gameTemplate->min_players;
+                $min = $game->gameTemplate->min_players;
+                $max = $game->gameTemplate->max_players;
+                $playerCount = $game->players->count();
+
+                $playerCountIsOk = true;
+
+                if ($min) {
+                    $playerCountIsOk = $playerCountIsOk && ($playerCount >= $min);
+                }
+
+                if ($max) {
+                    $playerCountIsOk = $playerCountIsOk && ($playerCount <= $max);
+                }
+
+                return $playerCountIsOk;
             })
             ->each(function (Game $game) {
                 $game->start();

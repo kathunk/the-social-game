@@ -2,10 +2,10 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
+use App\Events\Traits\HasGameTemplate;
 use App\Models\GameTemplate;
 use App\States\GameTemplateState;
-use App\Events\Traits\HasGameTemplate;
+use Thunk\Verbs\Event;
 
 class GameTemplateArchived extends Event
 {

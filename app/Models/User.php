@@ -5,10 +5,10 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Events\UserAdmittedToGame;
-use App\Events\UserRequestedToJoinGame;
 use App\Events\UserCreated;
 use App\Events\UserPromotedToGameAdmin;
 use App\Events\UserRejectedFromGame;
+use App\Events\UserRequestedToJoinGame;
 use App\States\UserState;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -146,11 +146,12 @@ class User extends Authenticatable
         return $game->admins->pluck('id')->contains($this->id);
     }
 
-    public function promoteToGameAdmin(Game $game)
+    public function promoteToGameAdmin(Game $game, User $admin)
     {
         UserPromotedToGameAdmin::fire(
             user_id: $this->id,
             game_id: $game->id,
+            admin_id: $admin->id,
         );
 
         return $this->fresh();

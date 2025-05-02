@@ -2,12 +2,12 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\Models\Membership;
 use App\Events\Traits\HasUser;
-use Illuminate\Support\Carbon;
+use App\Models\Membership;
 use App\States\MembershipState;
+use Illuminate\Support\Carbon;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class UserGainedMembership extends Event
 {

@@ -1,7 +1,6 @@
 <?php
 
 use App\Challenges\Classes\PyramidScheme;
-use App\GameTemplates\TestTemplate;
 use Illuminate\Support\Facades\Date;
 use Thunk\Verbs\Facades\Verbs;
 

@@ -2,19 +2,18 @@
 
 namespace App\Events;
 
-use Carbon\Carbon;
-use App\Models\Game;
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\Models\GameTemplate;
-use App\Events\Traits\HasUser;
-use App\States\GameTemplateState;
 use App\Events\Traits\HasGameTemplate;
+use App\Events\Traits\HasUser;
+use App\Models\Game;
+use App\States\GameState;
+use App\States\GameTemplateState;
+use Carbon\Carbon;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class GameCreated extends Event
 {
-    use HasUser, HasGameTemplate;
+    use HasGameTemplate, HasUser;
 
     #[StateId(GameState::class)]
     public ?int $game_id = null;
@@ -43,6 +42,7 @@ class GameCreated extends Event
         $game->ends_at = $this->starts_at->copy()->addMinutes(
             $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
         );
+        $game->players_can_join_late = $this->state(GameTemplateState::class)->players_can_join_late;
     }
 
     public function handle()
@@ -57,6 +57,7 @@ class GameCreated extends Event
             'is_public' => $this->is_public,
             'requires_admin_approval_to_join' => $this->requires_admin_approval_to_join,
             'code' => $this->code,
+            'players_can_join_late' => $this->state(GameTemplateState::class)->players_can_join_late,
         ]);
     }
 }

@@ -2,14 +2,13 @@
 
 namespace Tests;
 
-use App\Models\Game;
-use App\Models\User;
-use App\Models\Player;
-use App\Models\GameTemplate;
-use Illuminate\Support\Carbon;
 use App\Events\GameTemplateAdded;
-use App\GameTemplates\Laracon2025;
+use App\Models\Game;
+use App\Models\GameTemplate;
+use App\Models\Player;
+use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Carbon;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -81,8 +80,7 @@ abstract class TestCase extends BaseTestCase
         ?int $max_players = null,
         ?bool $is_public = null,
         ?array $team_names = null,
-    )
-    {
+    ) {
         if (! isset($team_names)) {
             $team_names = $type === 'team' ? ['team1', 'team2', 'team3'] : [];
         }

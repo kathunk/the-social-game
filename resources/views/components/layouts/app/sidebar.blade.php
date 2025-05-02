@@ -18,7 +18,7 @@
 
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('dashboard') }}</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Home') }}</flux:navlist.item>
                     @if ($user?->is_member)
                         <flux:navlist.item icon="plus" :href="route('create-game')" :current="request()->routeIs('create-game')" wire:navigate>{{ __('Create Game') }}</flux:navlist.item>
                     @endif

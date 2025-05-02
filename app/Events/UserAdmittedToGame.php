@@ -38,17 +38,17 @@ class UserAdmittedToGame extends Event
                 ! $this->state(GameState::class)->rejected_user_ids->contains($this->user_id),
                 'User is already rejected from this game',
             );
-    
+
             $this->assert(
                 $this->state(GameApplicationState::class)->user_id === $this->user_id,
                 'User does not match the application',
             );
-    
+
             $this->assert(
                 $this->state(GameApplicationState::class)->game_id === $this->game_id,
                 'Game does not match the application',
             );
-    
+
             $this->assert(
                 $this->state(GameApplicationState::class)->status === 'pending',
                 'Application has already been decided',

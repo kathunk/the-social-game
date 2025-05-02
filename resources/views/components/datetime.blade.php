@@ -1,4 +1,4 @@
-<div class="text-steel-95" x-data="datetime" {{ $attributes->wire('model') }}>
+<div class="text-steel-95 text-sm" x-data="datetime" {{ $attributes->wire('model') }}>
     <div class="mb-2">
         <flux:heading>{{ $label }}</flux:heading>
         @if(isset($description))
@@ -10,7 +10,7 @@
         x-ref="picker"
         type="datetime-local"
         @change="changeDate"
-        class="mb-4 bg-steel-20 p-2 relative text-steel-95 block border-2 border-gray-200 rounded-[10px]
+        class="mb-4 bg-steel-20 p-2 relative text-steel-95 block border-1 border-gray-200 dark:border-gray-500 rounded-[10px]
                focus:bg-steel-20 focus:outline-none"
         {{
             $attributes->filter(

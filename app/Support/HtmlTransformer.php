@@ -9,24 +9,24 @@ class HtmlTransformer
     ) {
         //
     }
-    
+
     public function formatted(): string
     {
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument;
         libxml_use_internal_errors(true); // suppress warnings
 
-        $dom->loadHTML('<?xml encoding="utf-8" ?>' . $this->html);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$this->html);
 
         $tagReplacements = [
-            'h1' => fn($node, $html) => "<h1 class=\"text-2xl font-bold mb-3\">{$html}</h1>",
-            'h2' => fn($node, $html) => "<h2 class=\"text-xl font-semibold mb-3\">{$html}</h2>",
-            'h3' => fn($node, $html) => "<h3 class=\"text-lg font-semibold mb-2\">{$html}</h3>",
-            'p' => fn($node, $html) => "<p class=\"text-sm mb-4\">{$html}</p>",
-            'ul' => fn($node, $html) => "<ul class=\"list-disc pl-5 mb-4\">{$html}</ul>",
-            'ol' => fn($node, $html) => "<ol class=\"list-decimal pl-5 mb-4\">{$html}</ol>",
-            'li' => fn($node, $html) => "<li class=\"mb-2\">{$html}</li>",
-            'a' => fn($node, $html) => "<a href=\"{$node->getAttribute('href')}\" class=\"dark:text-blue-400 text-blue-600 underline hover:text-blue-800\">{$html}</a>",
-            'blockquote' => fn($node, $html) => "<blockquote class=\"border-l-4 pl-4 italic text-gray-600 mb-4\">{$html}</blockquote>",
+            'h1' => fn ($node, $html) => "<h1 class=\"text-2xl font-bold mb-3\">{$html}</h1>",
+            'h2' => fn ($node, $html) => "<h2 class=\"text-xl font-semibold mb-3\">{$html}</h2>",
+            'h3' => fn ($node, $html) => "<h3 class=\"text-lg font-semibold mb-2\">{$html}</h3>",
+            'p' => fn ($node, $html) => "<p class=\"text-sm mb-4\">{$html}</p>",
+            'ul' => fn ($node, $html) => "<ul class=\"list-disc pl-5 mb-4\">{$html}</ul>",
+            'ol' => fn ($node, $html) => "<ol class=\"list-decimal pl-5 mb-4\">{$html}</ol>",
+            'li' => fn ($node, $html) => "<li class=\"mb-2\">{$html}</li>",
+            'a' => fn ($node, $html) => "<a href=\"{$node->getAttribute('href')}\" class=\"dark:text-blue-400 text-blue-600 underline hover:text-blue-800\">{$html}</a>",
+            'blockquote' => fn ($node, $html) => "<blockquote class=\"border-l-4 pl-4 italic text-gray-600 mb-4\">{$html}</blockquote>",
         ];
 
         $body = $dom->getElementsByTagName('body')->item(0);

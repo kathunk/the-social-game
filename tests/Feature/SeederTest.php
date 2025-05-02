@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\Game;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\Laracon2025Seeder;
 use Database\Seeders\GameTemplateSeeder;
+use Database\Seeders\Laracon2025Seeder;
+use Database\Seeders\UserSeeder;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

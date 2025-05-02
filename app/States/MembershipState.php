@@ -3,7 +3,6 @@
 namespace App\States;
 
 use Thunk\Verbs\State;
-use App\States\UserState;
 
 class MembershipState extends State
 {
