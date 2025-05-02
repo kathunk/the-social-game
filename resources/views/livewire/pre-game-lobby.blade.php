@@ -1,4 +1,7 @@
-<div wire:poll="checkStatus" class="flex flex-col gap-4">
+<div 
+    wire:poll="checkStatus" 
+    class="flex flex-col gap-4"
+>
     @if ($this->game->status === 'upcoming')
         <div class="mx-auto w-full text-center">
             <flux:text>Starts {{ $this->game->starts_at->diffForHumans() }}</flux:text>
@@ -49,13 +52,33 @@
     <flux:card>
         <flux:heading class="mb-2">Invite your friends</flux:heading>
         <div class="flex gap-2">
+            <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
             <flux:modal.trigger name="qr-code">
                 <flux:button variant="filled">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
             </flux:modal.trigger>
-            <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
-            <flux:input icon="key" value="{{ $this->game->code }}" readonly copyable />
         </div>
     </flux:card>
+
+    @if ($this->is_game_admin && $this->game->requires_admin_approval_to_join)
+        <flux:card>
+            <flux:heading class="mb-4">Pending Players</flux:heading>
+
+            <flux:select wire:model="selected_application_id" variant="listbox" searchable placeholder="Choose player...">
+                @foreach ($this->newApplications as $application)
+                    <flux:select.option :value="(string) $application->id">
+                        {{ $application->user->name }} ({{ $application->user->email }})
+                        @if ($this->acceptedUserNames->contains($application->user->name))
+                            <flux:badge class="ml-2" size="sm" color="red">Duplicate Name</flux:badge>
+                        @endif
+                    </flux:select.option>
+                @endforeach
+            </flux:select>
+            <div class="flex justify-end mt-4 gap-2">
+                <flux:button variant="primary" wire:click="approveUser">Approve</flux:button>
+                <flux:button variant="danger" wire:click="rejectUser">Reject</flux:button>
+            </div>
+        </flux:card>
+    @endif
 
     <flux:card>
         <flux:table>
@@ -66,7 +89,7 @@
 
             <flux:table.rows>
                 @foreach ($this->players as $player)
-                    <flux:table.row>
+                    <flux:table.row wire:key="player-{{ $player->id }}">
                         <flux:table.cell>
                             <div class="flex items-center gap-1">
                                 <flux:text>{{ $player->name }}</flux:text>
@@ -86,10 +109,26 @@
                                         || $this->creator->id === $this->user->id
                                     )
                                 )
-                                    <div class="flex gap-1">
-                                        <flux:modal.trigger name="remove-player-{{ $player->id }}">
-                                            <flux:button variant="subtle" size="sm" icon="x-circle">Remove</flux:button>
-                                        </flux:modal.trigger>
+                                    <div class="flex gap-1" x-data="{showConfirmation: false}">
+                                        <div x-show="showConfirmation">
+                                            <flux:button
+                                                variant="danger"
+                                                size="sm"
+                                                wire:click="removePlayer('{{ $player->id }}')"
+                                            >
+                                                Seriously?
+                                            </flux:button>
+                                        </div>
+                                        <div x-show="!showConfirmation">
+                                            <flux:button
+                                                variant="subtle"
+                                                size="sm"
+                                                icon="x-circle"
+                                                @click="showConfirmation = true"
+                                            >
+                                                Remove
+                                            </flux:button>
+                                        </div>
                                     </div>
                                 @endif
 
@@ -136,10 +175,7 @@
         </div>
     </flux:modal>
 
-    <flux:modal name="remove-player-{{ $player->id }}">
-        <flux:heading>Remove {{ $player->name }} from the game?</flux:heading>
-        <flux:button variant="danger" wire:click="removePlayer({{ $player->id }})">Remove</flux:button>
-    </flux:modal>
+    <flux:toast />
 </div>
 
 {{-- @todo --}}

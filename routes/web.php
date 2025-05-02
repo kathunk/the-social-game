@@ -23,7 +23,6 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/password', 'settings.password')->name('settings.password');
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 
-    Route::get('/games/{game}/admin-dashboard', AdminDashboard::class)->name('admin-dashboard');
     Route::get('/games/{game}/dashboard', GameDashboard::class)->name('game-dashboard');
     Route::get('/dashboard', Home::class)->name('dashboard');
     Route::get('/teams/{team}', TeamPage::class)->name('teams.show');
