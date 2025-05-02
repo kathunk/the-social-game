@@ -155,9 +155,7 @@ class Game extends Model
                 game_id: $this->id,
                 starts_at: $challenge['starts_at'],
                 ends_at: $challenge['ends_at'],
-                // @todo
-                // class_key: $challenge['class_key'],
-                class_key: 'prisoners_dilemma_challenge',
+                class_key: $challenge['class_key'],
             );
         }
 
