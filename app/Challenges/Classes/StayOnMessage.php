@@ -10,7 +10,7 @@ class StayOnMessage extends BaseChallengeClass
 {
     const NAME = 'Stay on message';
 
-    const DESCRIPTION = "Let's see how well you can work together. You have 1 hour to submit any 50 character string in the field below. At the end of the challenge, we will find your team's most commonly submitted string. Your team will receive (% of players who submitted your most popular string - 50%) * 100 points.";
+    const DESCRIPTION = "Let's see how well you can work together. You have 1 hour to submit any 50 character string in the field below. At the end of the challenge, we will find your team's most commonly submitted string. Your team will receive (% of teammates who submitted your most popular string - 50%) * 100 points.";
 
     const TYPE = 'team';
 

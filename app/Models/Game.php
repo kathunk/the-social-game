@@ -132,18 +132,24 @@ class Game extends Model
 
         $next_challenge_starts_at = $this->starts_at->copy();
 
-        $challenges_with_times = collect($challenges)->map(function ($challenge) use ($next_challenge_starts_at) {
-            $starts_at = $next_challenge_starts_at->copy();
-            $ends_at = $starts_at->addMinutes($challenge['duration']);
-
-            $next_challenge_starts_at = $ends_at;
-
-            return [
+        $challenges_with_times = collect($challenges)->reduce(function ($carry, $challenge) use ($next_challenge_starts_at) {
+            if (empty($carry)) {
+                $starts_at = $next_challenge_starts_at;
+            } else {
+                $last_challenge = end($carry);
+                $starts_at = $last_challenge['ends_at'];
+            }
+            
+            $ends_at = $starts_at->copy()->addMinutes($challenge['duration']);
+            
+            $carry[] = [
                 'starts_at' => $starts_at,
                 'ends_at' => $ends_at,
                 'class_key' => collect($challenge['challenge_keys'])->random(),
             ];
-        });
+            
+            return $carry;
+        }, []);
 
         foreach ($challenges_with_times as $challenge) {
             ChallengeCreated::fire(

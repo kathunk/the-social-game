@@ -90,7 +90,7 @@ class GameDashboard extends Component
 
         Verbs::commit();
 
-        redirect()->route('game-dashboard');
+        redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
     public function resign()
@@ -99,7 +99,7 @@ class GameDashboard extends Component
 
         Verbs::commit();
 
-        redirect()->route('game-dashboard');
+        redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
     public function callChallengeAction(string $action, ?array $params = null)
@@ -113,7 +113,7 @@ class GameDashboard extends Component
 
         $this->challenge->handler()->{$action}($this->player, $params);
 
-        redirect()->route('game-dashboard');
+        redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
     public function render()
