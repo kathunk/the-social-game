@@ -101,16 +101,34 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
         return $form->build();
     }
 
+    public function availableTeams(Player $player): Collection
+    {
+        return $this->playerCanSwapTeams($player)
+            ? $player->game->teams->filter(fn ($t) => $t->id !== $player->team_id)
+            : collect();
+    }
+
+    public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool
+    {
+        if ($player) {
+            return ! in_array($player->id, $this->challenge->challenge_data['swapper_ids']);
+        }
+
+        if ($player_state) {
+            return ! in_array($player_state->id, $this->challenge_state->challenge_data['swapper_ids']);
+        }
+
+        return true;
+    }
+
     public function submit(Player $player, array $params): void
     {
-        dump($this);
-
         PlayerSubmittedPlayDirty::fire(
             player_id: $player->id,
             game_id: $player->game_id,
             challenge_id: $this->challenge->id,
             team_id: $player->team_id,
-        );;
+        );
     }
 
     public function onPlayerJoinedTeam(
@@ -126,9 +144,7 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
         }
     }
 
-    public function onChallengeEnded(
-        GameState $game_state,
-    ) {
+    public function onChallengeEnded(GameState $game_state) {
         $teams = $game_state->teams();
 
         $played_dirty = $teams->map(function ($team) {
@@ -144,8 +160,8 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
                 return;
             }
 
-            // if any of the players are no longer on the team, remove them from voters
-            $team_voters = collect($team_voters)->filter(fn ($voter) => $team->player_ids->contains($voter));
+            // If any of the players who voted are no longer on the team, remove them from team_voters
+            $team_voters = $team_voters->filter(fn ($voter) => $team->player_ids->contains($voter));
 
             if (count($team_voters) === 0) {
                 return;
@@ -160,7 +176,6 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
         $team_pairs = $this->challenge_state->challenge_data['team_pairs'];
 
         foreach($team_pairs as $team_id => $paired_team_id) {
-
             $team = TeamState::load($team_id);
 
             $containsTeamId = $played_dirty->contains($team_id);
@@ -183,25 +198,5 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
                 $team->addToScoreHistory(20, 'Neither team played dirty');
             }
         }
-    }
-
-    public function availableTeams(Player $player): Collection
-    {
-        return $this->playerCanSwapTeams($player)
-            ? $player->game->teams->filter(fn ($t) => $t->id !== $player->team_id)
-            : collect();
-    }
-
-    public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool
-    {
-        if ($player) {
-            return ! in_array($player->id, $this->challenge->challenge_data['swapper_ids']);
-        }
-
-        if ($player_state) {
-            return ! in_array($player_state->id, $this->challenge_state->challenge_data['swapper_ids']);
-        }
-
-        return true;
     }
 }

@@ -59,7 +59,7 @@ function playDirty($player)
     );;
 }
 
-it('both teams play dirty they will each get -20 points', function () {
+it('if both teams play dirty they will each get -20 points', function () {
     playDirty($this->player_1);
     playDirty($this->player_3);
 
@@ -72,7 +72,7 @@ it('both teams play dirty they will each get -20 points', function () {
     expect($this->team_2->score)->toBe(0);
 });
 
-it('if you play dirty and they do not you will get 50 points', function () {
+it('if your team play dirty and your paired_team does not you will get 50 points', function () {
     playDirty($this->player_1);
 
     // end challenge
@@ -84,7 +84,7 @@ it('if you play dirty and they do not you will get 50 points', function () {
     expect($this->team_2->fresh()->score)->toBe(20);
 });
 
-it('if neither plays dirty they will each get 20 points', function () {
+it('if neither team plays dirty they will each get 20 points', function () {
     // end challenge
     $end = $this->game->fresh()->currentChallenge->ends_at;
     Date::setTestNow($end->addSeconds(1));
@@ -92,4 +92,28 @@ it('if neither plays dirty they will each get 20 points', function () {
 
     expect($this->team_1->fresh()->score)->toBe(40);
     expect($this->team_2->fresh()->score)->toBe(40);
+    expect($this->team_3->fresh()->score)->toBe(30);
+    expect($this->team_4->fresh()->score)->toBe(30);
+});
+
+it('when a player plays dirty on a team then leaves the previous team score is not affected', function () {
+    playDirty($this->player_1);
+
+    $this->player_1->joinTeam($this->team_3);
+
+    // a majority of team 3 plays dirty
+    playDirty($this->player_1->fresh());
+    playDirty($this->player_5->fresh());
+
+    // end challenge
+    $end = $this->game->fresh()->currentChallenge->ends_at;
+    Date::setTestNow($end->addSeconds(1));
+    $this->artisan('app:progress-games');
+
+    // considers neither team played dirty since the player left
+    expect($this->team_1->fresh()->score)->toBe(40);
+    expect($this->team_2->fresh()->score)->toBe(40);
+
+    expect($this->team_3->fresh()->score)->toBe(60);
+    expect($this->team_4->fresh()->score)->toBe(10);
 });
