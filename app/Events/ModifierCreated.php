@@ -2,12 +2,12 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
+use App\Events\Traits\HasGame;
 use App\Models\Modifier;
 use App\States\GameState;
 use App\States\ModifierState;
-use App\Events\Traits\HasGame;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class ModifierCreated extends Event
 {

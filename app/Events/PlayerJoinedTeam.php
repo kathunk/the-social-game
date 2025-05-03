@@ -2,16 +2,16 @@
 
 namespace App\Events;
 
-use App\Models\Game;
-use App\Models\Player;
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
-use App\States\ModifierState;
-use App\Events\Traits\HasTeam;
 use App\Events\Traits\HasActiveGame;
 use App\Events\Traits\HasActivePlayer;
+use App\Events\Traits\HasTeam;
+use App\Models\Game;
+use App\Models\Player;
+use App\States\GameState;
+use App\States\ModifierState;
+use App\States\PlayerState;
+use App\States\TeamState;
+use Thunk\Verbs\Event;
 
 class PlayerJoinedTeam extends Event
 {

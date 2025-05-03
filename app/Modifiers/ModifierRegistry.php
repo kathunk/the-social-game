@@ -2,8 +2,8 @@
 
 namespace App\Modifiers;
 
-use App\Modifiers\Classes\BaseModifierClass;
 use App\Models\Modifier;
+use App\Modifiers\Classes\BaseModifierClass;
 use App\States\ModifierState;
 use Illuminate\Support\Facades\File;
 

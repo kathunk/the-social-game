@@ -2,9 +2,8 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Player;
-use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerResignedInTeamGame;
+use App\Models\Player;
 
 class TeamResignation extends BaseModifierClass
 {

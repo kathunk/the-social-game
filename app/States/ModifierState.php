@@ -2,9 +2,9 @@
 
 namespace App\States;
 
-use Thunk\Verbs\State;
-use App\Modifiers\ModifierRegistry;
 use App\Modifiers\Classes\BaseModifierClass;
+use App\Modifiers\ModifierRegistry;
+use Thunk\Verbs\State;
 
 class ModifierState extends State
 {

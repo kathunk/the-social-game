@@ -2,12 +2,12 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\Models\GameTemplate;
-use App\States\GameTemplateState;
-use App\Modifiers\ModifierRegistry;
 use App\Challenges\ChallengeRegistry;
+use App\Models\GameTemplate;
+use App\Modifiers\ModifierRegistry;
+use App\States\GameTemplateState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class GameTemplateAdded extends Event
 {
@@ -30,7 +30,7 @@ class GameTemplateAdded extends Event
 
     public array $challenges;
 
-    public array $modifiers;
+    public ?array $modifiers = [];
 
     public string $pre_game_lobby_message;
 

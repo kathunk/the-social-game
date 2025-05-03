@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Events\PlayerJoinedTeam;
-use App\Events\PlayerResigned;
 use App\States\PlayerState;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;

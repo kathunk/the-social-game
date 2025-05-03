@@ -2,12 +2,12 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Player;
 use App\Models\Modifier;
+use App\Models\Player;
 use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
 use App\States\ModifierState;
+use App\States\PlayerState;
+use App\States\TeamState;
 use App\Support\FormBuilder;
 
 abstract class BaseModifierClass

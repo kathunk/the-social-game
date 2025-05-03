@@ -3,14 +3,13 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Database\Seeder;
-use App\Events\GameTemplateAdded;
+use App\Challenges\Classes\ExampleIndividualChallenge;
 use App\Challenges\Classes\StayOnMessage;
+use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\TeamResignation;
 use App\Modifiers\Classes\TeamSecretAlliance;
-use App\Challenges\Classes\TeamPrisonersDilemma;
-use App\Challenges\Classes\ExampleIndividualChallenge;
+use Illuminate\Database\Seeder;
+use Thunk\Verbs\Facades\Verbs;
 
 class GameTemplateSeeder extends Seeder
 {

@@ -2,7 +2,6 @@
 
 namespace App\Challenges\Classes;
 
-use App\Support\FormBuilder;
 use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 use App\Models\Challenge;
 use App\Models\Player;
@@ -10,6 +9,7 @@ use App\States\ChallengeState;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
+use App\Support\FormBuilder;
 
 abstract class BaseChallengeClass
 {

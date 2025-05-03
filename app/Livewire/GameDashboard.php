@@ -18,13 +18,17 @@ class GameDashboard extends Component
 
     public array $challenge_component = [];
 
-    public array $challenge_properties = [];
+    public array $modifier_component = [];
 
-    public array $challenge_validation_rules = [];
+    public array $challenge_properties = [];
 
     public array $modifier_properties = [];
 
+    public array $challenge_validation_rules = [];
+
     public array $modifier_validation_rules = [];
+
+    public array $modifier_validation_messages = [];
 
     #[Computed]
     public function user()
@@ -93,21 +97,13 @@ class GameDashboard extends Component
 
         $player_needs_to_join_team = $this->game->gameTemplate->type === 'team' && ! $this->player->team;
 
-        $this->challenge_component = $player_needs_to_join_team
-            ? []
-            : $this->challenge_handler->frontendComponent($this->player);
+        if ($player_needs_to_join_team) {
+            return;
+        }
 
-        $this->challenge_properties = $player_needs_to_join_team
-            ? []
-            : $this->challenge_handler->propertiesForLivewire($this->player);
-
-        $validation = $player_needs_to_join_team
-            ? []
-            : $this->challenge_handler->validationRulesForLivewire($this->player);
-
-        $this->challenge_validation_rules = $player_needs_to_join_team
-            ? []
-            : $validation['rules'];
+        $this->challenge_component = $this->challenge_handler->frontendComponent($this->player);
+        $this->challenge_properties = $this->challenge_handler->propertiesForLivewire($this->player);
+        $this->challenge_validation_rules = $this->challenge_handler->validationRulesForLivewire($this->player);
     }
 
     public function joinTeam()
@@ -130,19 +126,24 @@ class GameDashboard extends Component
     public function callChallengeAction(string $action, ?array $params = null)
     {
         $params = $params ?? $this->challenge_properties;
-    
-        $component = $this->challenge_component;
-    
-        $button = $this->findButtonByAction($component['elements'] ?? [], $action);
-    
-        $fields = $button['validate'] ?? [];
+        $component = $this->challenge_handler->frontendComponent($this->player);
 
-        dd($button);
-        dd($fields);
-    
-        if (!empty($fields)) {
+        $all_elements = collect($component['elements'])->flatMap(function ($el) {
+            return [
+                $el,
+                ...collect($el['elements'] ?? [])->all(),
+                ...collect($el['buttons'] ?? [])->all(),
+            ];
+        });
+
+        $button = $all_elements->firstWhere(fn ($el) => ($el['type'] ?? null) === 'button' && ($el['action'] ?? null) === $action
+        );
+
+        $fields = $button['properties_to_validate'] ?? [];
+
+        if (! empty($fields)) {
             $validation = $this->challenge_validation_rules;
-    
+
             $filtered_rules = [];
             $filtered_messages = [];
             foreach ($fields as $field) {
@@ -159,13 +160,11 @@ class GameDashboard extends Component
                 }
             }
 
-            dd($filtered_rules, $filtered_messages);
-    
             $this->validate($filtered_rules, $filtered_messages);
         }
-    
+
         $this->challenge->handler()->{$action}($this->player, $params);
-    
+
         redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
@@ -180,23 +179,6 @@ class GameDashboard extends Component
         $modifier->handler()->{$action}($this->player, $params);
 
         redirect()->route('game-dashboard', ['game' => $this->game]);
-    }
-
-    protected function findButtonByAction(array $elements, string $action)
-    {
-        foreach ($elements as $el) {
-            if (($el['type'] ?? null) === 'button' && ($el['action'] ?? null) === $action) {
-                return $el;
-            }
-            // If this element has children (e.g., a button_group), search recursively
-            if (isset($el['elements']) && is_array($el['elements'])) {
-                $found = $this->findButtonByAction($el['elements'], $action);
-                if ($found) {
-                    return $found;
-                }
-            }
-        }
-        return null;
     }
 
     public function render()

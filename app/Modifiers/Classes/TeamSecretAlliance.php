@@ -3,8 +3,8 @@
 namespace App\Modifiers\Classes;
 
 use App\States\GameState;
-use App\States\TeamState;
 use App\States\PlayerState;
+use App\States\TeamState;
 
 class TeamSecretAlliance extends BaseModifierClass
 {

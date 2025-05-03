@@ -2,10 +2,10 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Collection;
-use App\Modifiers\Classes\BaseModifierClass;
 use App\Challenges\Classes\BaseChallengeClass;
 use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
+use App\Modifiers\Classes\BaseModifierClass;
+use Illuminate\Support\Collection;
 
 class FormBuilder
 {
@@ -26,8 +26,8 @@ class FormBuilder
 
         // @todo ensure that the properties to validate are valid properties of the target class
 
-        if (!$target_class) {
-            throw new \InvalidArgumentException("Neither challenge_class nor modifier_class is set.");
+        if (! $target_class) {
+            throw new \InvalidArgumentException('Neither challenge_class nor modifier_class is set.');
         }
 
         if (! method_exists($target_class, $action)) {
@@ -231,7 +231,7 @@ class FormBuilder
         );
 
         $this->buttonGroup();
-        $this->button('Swap Team', 'swapTeams');
+        $this->button('Swap Team', 'swapTeams', ['team_id']);
         $this->endGroup();
 
         return $this;

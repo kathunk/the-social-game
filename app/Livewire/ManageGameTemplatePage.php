@@ -2,15 +2,15 @@
 
 namespace App\Livewire;
 
-use Flux\Flux;
-use Livewire\Component;
-use App\Models\GameTemplate;
-use Thunk\Verbs\Facades\Verbs;
-use App\Events\GameTemplateAdded;
-use Livewire\Attributes\Computed;
-use App\Modifiers\ModifierRegistry;
-use App\Events\GameTemplateArchived;
 use App\Challenges\ChallengeRegistry;
+use App\Events\GameTemplateAdded;
+use App\Events\GameTemplateArchived;
+use App\Models\GameTemplate;
+use App\Modifiers\ModifierRegistry;
+use Flux\Flux;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Thunk\Verbs\Facades\Verbs;
 
 class ManageGameTemplatePage extends Component
 {

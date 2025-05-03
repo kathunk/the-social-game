@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use App\States\ModifierState;
+use App\Modifiers\Classes\BaseModifierClass;
 use App\Modifiers\ModifierRegistry;
+use App\States\ModifierState;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
-use App\Modifiers\Classes\BaseModifierClass;
 
 class Modifier extends Model
 {
