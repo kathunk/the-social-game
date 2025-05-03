@@ -16,6 +16,8 @@ class GameDashboard extends Component
 
     public int $quit_points;
 
+    public array $challenge_component = [];
+
     public array $challenge_properties = [];
 
     public array $challenge_validation_rules = [];
@@ -71,12 +73,6 @@ class GameDashboard extends Component
         return $this->challenge->handler();
     }
 
-    #[Computed]
-    public function challengeComponent()
-    {
-        return $this->challenge_handler->frontendComponent($this->player);
-    }
-
     public function mount(Game $game)
     {
         $this->game = $game;
@@ -85,9 +81,23 @@ class GameDashboard extends Component
             return redirect()->route('pre-game-lobby', ['game' => $this->game]);
         }
 
-        $this->challenge_properties = $this->challenge_handler->propertiesForLivewire($this->player);
-        $validation = $this->challenge_handler->validationRulesForLivewire($this->player);
-        $this->challenge_validation_rules = $validation['rules'];
+        $player_needs_to_join_team = $this->game->gameTemplate->type === 'team' && ! $this->player->team;
+
+        $this->challenge_component = $player_needs_to_join_team
+            ? []
+            : $this->challenge_handler->frontendComponent($this->player);
+
+        $this->challenge_properties = $player_needs_to_join_team
+            ? []
+            : $this->challenge_handler->propertiesForLivewire($this->player);
+
+        $validation = $player_needs_to_join_team
+            ? []
+            : $this->challenge_handler->validationRulesForLivewire($this->player);
+
+        $this->challenge_validation_rules = $player_needs_to_join_team
+            ? []
+            : $validation['rules'];
     }
 
     public function joinTeam()

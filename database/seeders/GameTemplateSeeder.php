@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Challenges\Classes\ExampleIndividualChallenge;
-use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Classes\TeamPrisonersDilemma;
 use App\Events\GameTemplateAdded;
 use Illuminate\Database\Seeder;
 use Thunk\Verbs\Facades\Verbs;
@@ -27,8 +27,8 @@ class GameTemplateSeeder extends Seeder
                 'team_names' => ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
                 'challenges' => [
                     [
-                        'challenge_keys' => [PyramidScheme::key()],
-                        'duration' => 420,
+                        'challenge_keys' => [TeamPrisonersDilemma::key()],
+                        'duration' => 60,
                     ],
                     [
                         'challenge_keys' => [StayOnMessage::key()],

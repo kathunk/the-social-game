@@ -215,7 +215,6 @@ class ChallengeFormBuilder
             description: $description,
             options: $teams->mapWithKeys(fn ($team) => [$team->id => $team->name])->toArray(),
             property_name: 'team_id',
-            // @todo require that the value is contained in the options
             validation_rules: 'required',
             validation_messages: ['required' => 'Team is required'],
         );
