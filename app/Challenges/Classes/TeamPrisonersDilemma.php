@@ -9,27 +9,22 @@ use App\States\TeamState;
 use App\States\PlayerState;
 use Illuminate\Support\Collection;
 use App\Events\PlayerSubmittedPlayDirty;
-use App\Challenges\Support\Traits\HasTeamSwaps;
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 
-class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
+class TeamPrisonersDilemma extends BaseChallengeClass
 {
-    use HasTeamSwaps;
-
     const NAME = "Prisoner's Dilemma";
 
-    const DESCRIPTION = "Your team is in a showdown with {paired_team}.
-        Below is a button to play dirty.
+    const DESCRIPTION = "{player_team} (your team) is in a showdown with {paired_team}.
         If 50% of your team votes to play dirty, you will.
-        If both teams play dirty, they will each get -20 points.
-        If neither plays dirty, they will each get +20 points.
-        If you play dirty and they do not, you will get +50 points.";
+        If both teams play dirty, {player_team} will each get -20 points.
+        If neither plays dirty, {player_team} will get +20 points.
+        If {player_team} plays dirty and {paired_team} does not, {player_team} will get +50 points.";
 
     const TYPE = 'team';
 
     public static function key(): string
     {
-        return 'prisoners_dilemma_challenge';
+        return 'team_prisoners_dilemma';
     }
 
     public function dataArrayForState(): array
@@ -40,7 +35,6 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
 
         return [
             'team_voters' => $this->challenge_state->game()->teams()->mapWithKeys(fn ($t) => [$t->id => []])->toArray(),
-            'swapper_ids' => [],
             'team_pairs' => $paired_teams,
         ];
     }
@@ -63,11 +57,12 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
 
     public function frontendComponent(Player $player): array
     {
+        // @todo this is a hack to make the frontend not blow up.
         if (! $player->team) {
-            return $this->form()
+            return self::form()
                 ->title(self::NAME)
                 ->subtitle('You are not on a team.')
-                ->build();
+                ->build();  
         }
 
         $form = $this->form()->title(self::NAME);
@@ -79,6 +74,7 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
 
             $description = strtr(self::DESCRIPTION, [
                 '{paired_team}' => Team::find($paired_team_id)->name,
+                '{player_team}' => $player->team->name,
             ]);
 
             $form->subtitle($description)
@@ -87,15 +83,6 @@ class PrisonersDilemma extends BaseChallengeClass implements SupportsTeamSwaps
                 ->endGroup();
         } else {
             $form->subtitle('You have chosen to play dirty.');
-        }
-
-        if ($this->playerCanSwapTeams($player)) {
-            $form
-                ->divider()
-                ->teamSwap(
-                    teams: $this->availableTeams($player),
-                    required: false
-                );
         }
 
         return $form->build();

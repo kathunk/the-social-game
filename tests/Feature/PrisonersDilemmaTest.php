@@ -3,7 +3,7 @@
 use Thunk\Verbs\Facades\Verbs;
 use Illuminate\Support\Facades\Date;
 use App\Events\PlayerSubmittedPlayDirty;
-use App\Challenges\Classes\PrisonersDilemma;
+use App\Challenges\Classes\TeamPrisonersDilemma;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -13,7 +13,7 @@ beforeEach(function () {
 
     $challenges = [
         [
-            'challenge_keys' => [PrisonersDilemma::key()],
+            'challenge_keys' => [TeamPrisonersDilemma::key()],
             'duration' => 10,
         ],
     ];

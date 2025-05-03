@@ -5,7 +5,7 @@
 
     @endif
 
-    @if (! $this->current_team && $this->player->status === 'active')
+    @if (! $this->current_team && $this->game->gameTemplate->type === 'team' && $this->player->status === 'active')
         <flux:card>
             <flux:heading>Join a team</flux:heading>
             <flux:subheading>To start playing, join a team. At certain points in the game, you will be able to switch teams.</flux:subheading>
@@ -35,11 +35,10 @@
         <flux:card>
             <flux:heading class="mb-2">Invite your friends</flux:heading>
             <div class="flex gap-2">
+                <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
                 <flux:modal.trigger name="qr-code">
                     <flux:button variant="filled">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
                 </flux:modal.trigger>
-                <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
-                <flux:input icon="key" value="{{ $this->game->code }}" readonly copyable />
             </div>
         </flux:card>
     @endif
