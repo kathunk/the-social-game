@@ -14,6 +14,7 @@ class GameTemplate extends Model
     protected $casts = [
         'team_names' => 'array',
         'challenges' => 'array',
+        'modifiers' => 'array',
         'players_can_join_late' => 'boolean',
         'is_archived' => 'boolean',
         'is_public' => 'boolean',

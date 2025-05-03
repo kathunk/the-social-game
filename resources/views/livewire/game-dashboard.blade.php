@@ -22,15 +22,6 @@
         <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challenge_component" />
     @endif
     <x-game-components.scoreboard :teams="$this->teams" />
-    @if ($this->current_team)
-        <flux:card>
-            <flux:heading>Had enough?</flux:heading>
-            <flux:subheading class="mb-4">You can quit the game at any time. When you quit, you can give your team +3 or -3 points.</flux:subheading>
-            <flux:modal.trigger name="quit" class="flex justify-end">
-                <flux:button variant="danger">I've had enough</flux:button>
-            </flux:modal.trigger>
-        </flux:card>
-    @endif
     @if ($this->game->gameTemplate->players_can_join_late)
         <flux:card>
             <flux:heading class="mb-2">Invite your friends</flux:heading>
@@ -43,25 +34,9 @@
         </flux:card>
     @endif
 
-    <flux:modal name="quit" class="md:w-96">
-        <div class="space-y-6">
-            <div>
-                <flux:heading size="lg">Quit the game</flux:heading>
-                <flux:text class="mt-2">We get it. Not everyone is a champion.</flux:text>
-            </div>
-
-            <flux:radio.group wire:model="quit_points" label="When I quit, I want to give my team:">
-                <flux:radio value="3" label="+3 points" checked />
-                <flux:radio value="-3" label="-3 points" />
-            </flux:radio.group>
-
-            <div class="flex">
-                <flux:spacer />
-
-                <flux:button variant="danger" wire:click="resign">Resign</flux:button>
-            </div>
-        </div>
-    </flux:modal>
+    @foreach ($this->modifiers as $modifier)
+        <x-game-components.modifier :modifier="$modifier" :modifierComponent="$modifier->handler()->frontendComponent($this->player)" />
+    @endforeach
 
     <flux:modal name="qr-code">
         <div class="flex justify-center p-6">

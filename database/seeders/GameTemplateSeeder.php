@@ -5,8 +5,9 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Challenges\Classes\ExampleIndividualChallenge;
 use App\Challenges\Classes\StayOnMessage;
-use App\Challenges\Classes\TeamPrisonersDilemma;
 use App\Events\GameTemplateAdded;
+use App\Modifiers\Classes\TeamResignation;
+use App\Modifiers\Classes\TeamSecretAlliance;
 use Illuminate\Database\Seeder;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -27,13 +28,17 @@ class GameTemplateSeeder extends Seeder
                 'team_names' => ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
                 'challenges' => [
                     [
-                        'challenge_keys' => [TeamPrisonersDilemma::key()],
+                        'challenge_keys' => [StayOnMessage::key()],
                         'duration' => 60,
                     ],
                     [
                         'challenge_keys' => [StayOnMessage::key()],
                         'duration' => 60,
                     ],
+                ],
+                'modifiers' => [
+                    TeamResignation::key(),
+                    TeamSecretAlliance::key(),
                 ],
                 'players_can_join_late' => true,
             ],
@@ -51,6 +56,7 @@ class GameTemplateSeeder extends Seeder
                         'duration' => 420,
                     ],
                 ],
+                'modifiers' => [],
                 'players_can_join_late' => false,
             ],
         ];
@@ -66,6 +72,7 @@ class GameTemplateSeeder extends Seeder
                 is_public: $template['is_public'],
                 team_names: $template['team_names'],
                 challenges: $template['challenges'],
+                modifiers: $template['modifiers'],
                 players_can_join_late: $template['players_can_join_late'],
             );
         }

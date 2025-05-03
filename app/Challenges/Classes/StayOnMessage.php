@@ -46,7 +46,11 @@ class StayOnMessage extends BaseChallengeClass
                 ]
             )
             ->buttonGroup()
-            ->button('Submit', 'submitString')
+            ->button(
+                label: 'Submit',
+                action: 'submitString',
+                properties_to_validate: ['string_input'],
+            )
             ->endGroup()
             ->build();
     }

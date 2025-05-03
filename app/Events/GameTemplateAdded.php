@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\Challenges\ChallengeRegistry;
 use App\Models\GameTemplate;
+use App\Modifiers\ModifierRegistry;
 use App\States\GameTemplateState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
@@ -29,6 +30,8 @@ class GameTemplateAdded extends Event
 
     public array $challenges;
 
+    public ?array $modifiers = [];
+
     public string $pre_game_lobby_message;
 
     public bool $players_can_join_late;
@@ -44,14 +47,18 @@ class GameTemplateAdded extends Event
             ->flatten()
             ->map(fn ($c) => ChallengeRegistry::retrieveFromKey($c));
 
+        $modifier_keys = collect($this->modifiers)->map(fn ($c) => ModifierRegistry::retrieveFromKey($c));
+
+        $keys = $challenge_keys->merge($modifier_keys);
+
         $this->assert(
-            $challenge_keys->map(fn ($c) => $c::TYPE)->unique()->count() === 1,
-            'All challenges must be of the same type.'
+            $keys->map(fn ($c) => $c::TYPE)->unique()->count() === 1,
+            'All challenges and modifiers must be of the same type.'
         );
 
         $this->assert(
-            $challenge_keys->first()::TYPE === $this->type,
-            'The challenge type of all challenges must match the game type.'
+            $keys->first()::TYPE === $this->type,
+            'The challenge type of all challenges and modifiers must match the game type.'
         );
 
         collect($this->challenges)->each(function ($challenge) {
@@ -76,6 +83,7 @@ class GameTemplateAdded extends Event
         $game_template->is_public = $this->is_public;
         $game_template->team_names = $this->team_names;
         $game_template->challenges = $this->challenges;
+        $game_template->modifiers = $this->modifiers;
         $game_template->description = $this->description;
         $game_template->pre_game_lobby_message = $this->pre_game_lobby_message;
         $game_template->players_can_join_late = $this->players_can_join_late;
@@ -94,6 +102,7 @@ class GameTemplateAdded extends Event
                 'is_public' => $this->is_public,
                 'team_names' => $this->team_names,
                 'challenges' => $this->challenges,
+                'modifiers' => $this->modifiers,
                 'description' => $this->description,
                 'pre_game_lobby_message' => $this->pre_game_lobby_message,
                 'players_can_join_late' => $this->players_can_join_late,
@@ -111,6 +120,7 @@ class GameTemplateAdded extends Event
             'is_public' => $this->is_public,
             'team_names' => $this->team_names,
             'challenges' => $this->challenges,
+            'modifiers' => $this->modifiers,
             'description' => $this->description,
             'pre_game_lobby_message' => $this->pre_game_lobby_message,
             'players_can_join_late' => $this->players_can_join_late,

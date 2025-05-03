@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Events\PlayerJoinedTeam;
-use App\Events\PlayerResigned;
 use App\States\PlayerState;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
@@ -42,20 +41,6 @@ class Player extends Model
             team_id: $team->id,
             game_id: $this->game_id,
             previous_team_id: $this->team_id,
-        );
-
-        Verbs::commit();
-
-        return $this->fresh();
-    }
-
-    public function resign(int $points)
-    {
-        PlayerResigned::fire(
-            player_id: $this->id,
-            points: $points,
-            game_id: $this->game_id,
-            team_id: $this->team_id,
         );
 
         Verbs::commit();
