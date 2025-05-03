@@ -205,7 +205,6 @@ class ChallengeFormBuilder
         Collection $teams,
         ?string $label = 'Choose a team to swap to',
         ?string $description = 'You can swap teams once during this challenge.',
-        bool $required = true,
     ) {
         if (! $this->challenge_class instanceof SupportsTeamSwaps) {
             throw new \RuntimeException('Challenge class must implement SupportsTeamSwaps interface');
@@ -216,8 +215,7 @@ class ChallengeFormBuilder
             description: $description,
             options: $teams->mapWithKeys(fn ($team) => [$team->id => $team->name])->toArray(),
             property_name: 'team_id',
-            // @todo require that the value is contained in the options
-            validation_rules: $required ? 'required' : 'nullable',
+            validation_rules: 'required',
             validation_messages: ['required' => 'Team is required'],
         );
 

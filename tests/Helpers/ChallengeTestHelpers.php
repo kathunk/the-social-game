@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\Team;
-use Thunk\Verbs\Event;
 use App\States\TeamState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 function incrementScore(Team $team, int $points)
 {

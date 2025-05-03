@@ -3,13 +3,12 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Database\Seeder;
-use App\Events\GameTemplateAdded;
-use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\Classes\ExampleIndividualChallenge;
 use App\Challenges\Classes\StayOnMessage;
 use App\Challenges\Classes\TeamPrisonersDilemma;
-use App\Challenges\Classes\ExampleIndividualChallenge;
+use App\Events\GameTemplateAdded;
+use Illuminate\Database\Seeder;
+use Thunk\Verbs\Facades\Verbs;
 
 class GameTemplateSeeder extends Seeder
 {
@@ -29,7 +28,7 @@ class GameTemplateSeeder extends Seeder
                 'challenges' => [
                     [
                         'challenge_keys' => [TeamPrisonersDilemma::key()],
-                        'duration' => 420,
+                        'duration' => 60,
                     ],
                     [
                         'challenge_keys' => [StayOnMessage::key()],

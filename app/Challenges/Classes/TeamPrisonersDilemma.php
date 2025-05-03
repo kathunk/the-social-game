@@ -2,23 +2,22 @@
 
 namespace App\Challenges\Classes;
 
-use App\Models\Team;
+use App\Events\PlayerSubmittedPlayDirty;
 use App\Models\Player;
+use App\Models\Team;
 use App\States\GameState;
 use App\States\TeamState;
-use App\States\PlayerState;
 use Illuminate\Support\Collection;
-use App\Events\PlayerSubmittedPlayDirty;
 
 class TeamPrisonersDilemma extends BaseChallengeClass
 {
     const NAME = "Prisoner's Dilemma";
 
-    const DESCRIPTION = "{player_team} (your team) is in a showdown with {paired_team}.
+    const DESCRIPTION = '{player_team} (your team) is in a showdown with {paired_team}.
         If 50% of your team votes to play dirty, you will.
         If both teams play dirty, {player_team} will each get -20 points.
         If neither plays dirty, {player_team} will get +20 points.
-        If {player_team} plays dirty and {paired_team} does not, {player_team} will get +50 points.";
+        If {player_team} plays dirty and {paired_team} does not, {player_team} will get +50 points.';
 
     const TYPE = 'team';
 
@@ -57,19 +56,11 @@ class TeamPrisonersDilemma extends BaseChallengeClass
 
     public function frontendComponent(Player $player): array
     {
-        // @todo this is a hack to make the frontend not blow up.
-        if (! $player->team) {
-            return self::form()
-                ->title(self::NAME)
-                ->subtitle('You are not on a team.')
-                ->build();  
-        }
-
         $form = $this->form()->title(self::NAME);
 
-        $canVoteForCurrentTeam = collect($this->challenge->challenge_data['team_voters'][$player->team_id])->doesntContain($player->id);
+        $has_voted = collect($this->challenge->challenge_data['team_voters'][$player->team_id])->contains($player->id);
 
-        if ($canVoteForCurrentTeam) {
+        if (! $has_voted) {
             $paired_team_id = $this->challenge->challenge_data['team_pairs'][$player->team_id];
 
             $description = strtr(self::DESCRIPTION, [
@@ -79,36 +70,16 @@ class TeamPrisonersDilemma extends BaseChallengeClass
 
             $form->subtitle($description)
                 ->buttonGroup()
-                ->button('Play Dirty', 'submit')
+                ->button('Play Dirty', 'playDirty')
                 ->endGroup();
         } else {
-            $form->subtitle('You have chosen to play dirty.');
+            $form->subtitle('You played dirty.');
         }
 
         return $form->build();
     }
 
-    public function availableTeams(Player $player): Collection
-    {
-        return $this->playerCanSwapTeams($player)
-            ? $player->game->teams->filter(fn ($t) => $t->id !== $player->team_id)
-            : collect();
-    }
-
-    public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool
-    {
-        if ($player) {
-            return ! in_array($player->id, $this->challenge->challenge_data['swapper_ids']);
-        }
-
-        if ($player_state) {
-            return ! in_array($player_state->id, $this->challenge_state->challenge_data['swapper_ids']);
-        }
-
-        return true;
-    }
-
-    public function submit(Player $player, array $params): void
+    public function playDirty(Player $player, array $params): void
     {
         PlayerSubmittedPlayDirty::fire(
             player_id: $player->id,
@@ -118,20 +89,8 @@ class TeamPrisonersDilemma extends BaseChallengeClass
         );
     }
 
-    public function onPlayerJoinedTeam(
-        PlayerState $player_state,
-        TeamState $team_state,
-        GameState $game_state,
-        ?TeamState $previous_team = null,
-    ) {
-        if ($previous_team) {
-            $this->challenge_state->challenge_data['swapper_ids'][] = $player_state->id;
-
-            return;
-        }
-    }
-
-    public function onChallengeEnded(GameState $game_state) {
+    public function onChallengeEnded(GameState $game_state)
+    {
         $teams = $game_state->teams();
 
         $played_dirty = $teams->map(function ($team) {
@@ -162,7 +121,7 @@ class TeamPrisonersDilemma extends BaseChallengeClass
 
         $team_pairs = $this->challenge_state->challenge_data['team_pairs'];
 
-        foreach($team_pairs as $team_id => $paired_team_id) {
+        foreach ($team_pairs as $team_id => $paired_team_id) {
             $team = TeamState::load($team_id);
 
             $containsTeamId = $played_dirty->contains($team_id);
