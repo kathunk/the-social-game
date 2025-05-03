@@ -7,10 +7,13 @@ use App\Challenges\Classes\BaseChallengeClass;
 use App\Events\ChallengeEnded;
 use App\Events\ChallengeStarted;
 use App\States\ChallengeState;
+use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
 
 class Challenge extends Model
 {
+    use HasSnowflakes;
+
     protected $guarded = [];
 
     protected $casts = [

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->json('team_names');
             $table->json('challenges');
+            $table->json('modifiers');
             $table->timestamps();
         });
     }

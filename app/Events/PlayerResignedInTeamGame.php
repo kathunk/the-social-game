@@ -11,7 +11,7 @@ use App\States\PlayerState;
 use App\States\TeamState;
 use Thunk\Verbs\Event;
 
-class PlayerResigned extends Event
+class PlayerResignedInTeamGame extends Event
 {
     use HasActiveGame, HasPlayerOnTeam;
 

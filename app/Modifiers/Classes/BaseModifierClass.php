@@ -1,21 +1,20 @@
 <?php
 
-namespace App\Challenges\Classes;
+namespace App\Modifiers\Classes;
 
-use App\Support\FormBuilder;
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
-use App\Models\Challenge;
 use App\Models\Player;
-use App\States\ChallengeState;
+use App\Models\Modifier;
 use App\States\GameState;
-use App\States\PlayerState;
 use App\States\TeamState;
+use App\States\PlayerState;
+use App\States\ModifierState;
+use App\Support\FormBuilder;
 
-abstract class BaseChallengeClass
+abstract class BaseModifierClass
 {
-    const NAME = 'Base Challenge';
+    const NAME = 'Base Modifier';
 
-    const DESCRIPTION = 'Base Challenge description';
+    const DESCRIPTION = 'Base Modifier description';
 
     const TYPE = 'team'; // team or individual
 
@@ -26,28 +25,23 @@ abstract class BaseChallengeClass
     public ?PlayerState $player_state = null;
 
     public function __construct(
-        public ?Challenge $challenge = null,
-        public ?ChallengeState $challenge_state = null,
+        public ?Modifier $modifier = null,
+        public ?ModifierState $modifier_state = null,
     ) {}
 
-    public static function fromModel(Challenge $challenge): static
+    public static function fromModel(Modifier $modifier): static
     {
-        return new static(challenge: $challenge);
+        return new static(modifier: $modifier);
     }
 
-    public static function fromState(ChallengeState $challenge): static
+    public static function fromState(ModifierState $modifier_state): static
     {
-        return new static(challenge_state: $challenge);
+        return new static(modifier_state: $modifier_state);
     }
 
     public static function fromKey(string $key): static
     {
         return new static;
-    }
-
-    public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool
-    {
-        return false;
     }
 
     public function onRoundEnded()
@@ -70,14 +64,9 @@ abstract class BaseChallengeClass
         // Optional override
     }
 
-    public function supportsTeamSwaps(): bool
-    {
-        return $this instanceof SupportsTeamSwaps;
-    }
-
     public function form(): FormBuilder
     {
-        return new FormBuilder(challenge_class: $this);
+        return new FormBuilder(modifier_class: $this);
     }
 
     public function frontendComponent(Player $player): array

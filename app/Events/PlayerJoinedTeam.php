@@ -2,15 +2,16 @@
 
 namespace App\Events;
 
-use App\Events\Traits\HasActiveGame;
-use App\Events\Traits\HasActivePlayer;
-use App\Events\Traits\HasTeam;
 use App\Models\Game;
 use App\Models\Player;
-use App\States\GameState;
-use App\States\PlayerState;
-use App\States\TeamState;
 use Thunk\Verbs\Event;
+use App\States\GameState;
+use App\States\TeamState;
+use App\States\PlayerState;
+use App\States\ModifierState;
+use App\Events\Traits\HasTeam;
+use App\Events\Traits\HasActiveGame;
+use App\Events\Traits\HasActivePlayer;
 
 class PlayerJoinedTeam extends Event
 {
@@ -58,6 +59,13 @@ class PlayerJoinedTeam extends Event
             game_state: $this->state(GameState::class),
             previous_team: $this->previous_team_id ? TeamState::load($this->previous_team_id) : null,
         );
+
+        $game->modifiers()->each(fn (ModifierState $modifier) => $modifier->handler()->onPlayerJoinedTeam(
+            player_state: $this->state(PlayerState::class),
+            team_state: $this->state(TeamState::class),
+            game_state: $this->state(GameState::class),
+            previous_team: $this->previous_team_id ? TeamState::load($this->previous_team_id) : null,
+        ));
     }
 
     public function applyToPlayer(PlayerState $player)

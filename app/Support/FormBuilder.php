@@ -1,34 +1,44 @@
 <?php
 
-namespace App\Challenges;
+namespace App\Support;
 
+use Illuminate\Support\Collection;
+use App\Modifiers\Classes\BaseModifierClass;
 use App\Challenges\Classes\BaseChallengeClass;
 use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
-use Illuminate\Support\Collection;
 
-class ChallengeFormBuilder
+class FormBuilder
 {
     protected array $elements = [];
 
     protected ?array $currentGroup = null;
 
     public function __construct(
-        public BaseChallengeClass $challenge_class
+        public ?BaseChallengeClass $challenge_class = null,
+        public ?BaseModifierClass $modifier_class = null,
     ) {
         //
     }
 
-    public function button(string $label, string $action): static
+    public function button(string $label, string $action, array $properties_to_validate = []): static
     {
-        if (! method_exists($this->challenge_class, $action)) {
-            throw new \InvalidArgumentException("Method [{$action}] does not exist on [".get_class($this->challenge_class).'].');
+        $target_class = $this->challenge_class ?? $this->modifier_class;
+
+        // @todo ensure that the properties to validate are valid properties of the target class
+
+        if (!$target_class) {
+            throw new \InvalidArgumentException("Neither challenge_class nor modifier_class is set.");
         }
 
-        $method = new \ReflectionMethod($this->challenge_class, $action);
+        if (! method_exists($target_class, $action)) {
+            throw new \InvalidArgumentException("Method [{$action}] does not exist on [".get_class($target_class).'].');
+        }
+
+        $method = new \ReflectionMethod($target_class, $action);
         $params = $method->getParameters();
 
         if (count($params) !== 2) {
-            throw new \InvalidArgumentException("Method [{$action}] on [".get_class($this->challenge_class).'] must have exactly two parameters: (Player $player, array $params).');
+            throw new \InvalidArgumentException("Method [{$action}] on [".get_class($target_class).'] must have exactly two parameters: (Player $player, array $params).');
         }
 
         [$playerParam, $paramsParam] = $params;
@@ -54,6 +64,7 @@ class ChallengeFormBuilder
             'type' => 'button',
             'label' => $label,
             'action' => $action,
+            'properties_to_validate' => $properties_to_validate,
         ];
 
         if ($this->currentGroup !== null) {

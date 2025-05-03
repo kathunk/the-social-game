@@ -25,12 +25,40 @@
                 <flux:radio value="team" label="Team" />
             </flux:radio.group>
 
+            <div class="flex flex-row gap-2 items-center">
+                <flux:heading size="sm">Modifiers</flux:heading>
+                <flux:modal.trigger name="show-modifiers">
+                    <flux:link class="text-sm">show all</flux:link>
+                </flux:modal.trigger>
+            </div>
+            <div x-data="{ editingModifiers: false }">
+                <div x-show="! editingModifiers" class="flex flex-row gap-2 items-center">
+                    <flux:text>
+                        @if (count($this->modifiers) > 0)
+                            {{ collect($this->modifiers)->map(fn($m) => App\Modifiers\ModifierRegistry::retrieveFromKey($m)::NAME)->join(', ') }}
+                        @else
+                            No modifiers selected
+                        @endif
+                    </flux:text>
+                    <flux:button size="xs" icon="pencil" variant="subtle" @click="editingModifiers = true"></flux:button>
+                </div>
+                <div x-show="editingModifiers">
+                    <flux:select variant="listbox" multiple searchable wire:model="modifiers">
+                        @foreach ($this->allModifiers as $modifier)
+                            <flux:select.option value="{{ $modifier::key() }}">{{ $modifier::NAME }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+                    <flux:button size="xs" icon="check" class="mt-2 w-full" variant="filled" @click="editingModifiers = false" wire:click="saveTemplate">done editing</flux:button>
+                </div>
+            </div>
+
+
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>
                         <div class="flex flex-col gap-2">
                             <div class="flex flex-row gap-2">
-                            <flux:heading size="sm">Challenges</flux:heading>
+                                <flux:heading size="sm">Challenges</flux:heading>
                                 <flux:modal.trigger name="show-challenges">
                                     <flux:link>show all</flux:link>
                                 </flux:modal.trigger>
@@ -115,6 +143,33 @@
                             <flux:table.row>
                                 <flux:table.cell>{{ $challenge::NAME }}</flux:table.cell>
                                 <flux:table.cell class="whitespace-normal break-words">{{ $challenge::DESCRIPTION }}</flux:table.cell>
+                            </flux:table.row>
+                        </template>
+                    @endforeach
+                </flux:table.rows>
+            </flux:table>
+        </div>
+    </flux:modal>
+
+    <flux:modal name="show-modifiers" class="w-full">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Modifiers</flux:heading>
+                <flux:text class="mt-2">This is filtered by the game type selected.</flux:text>
+            </div>
+
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column>Name</flux:table.column>
+                    <flux:table.column>Description</flux:table.column>
+                </flux:table.columns>
+
+                <flux:table.rows>
+                    @foreach ($this->allModifiers as $modifier)
+                        <template x-if="gameType === '{{ $modifier::TYPE }}'">
+                            <flux:table.row>
+                                <flux:table.cell>{{ $modifier::NAME }}</flux:table.cell>
+                                <flux:table.cell class="whitespace-normal break-words">{{ $modifier::DESCRIPTION }}</flux:table.cell>
                             </flux:table.row>
                         </template>
                     @endforeach

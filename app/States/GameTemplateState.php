@@ -22,6 +22,8 @@ class GameTemplateState extends State
 
     public array $challenges;
 
+    public array $modifiers;
+
     public bool $players_can_join_late = false;
 
     public string $pre_game_lobby_message;

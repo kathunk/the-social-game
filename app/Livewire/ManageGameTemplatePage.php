@@ -2,14 +2,15 @@
 
 namespace App\Livewire;
 
-use App\Challenges\ChallengeRegistry;
-use App\Events\GameTemplateAdded;
-use App\Events\GameTemplateArchived;
-use App\Models\GameTemplate;
 use Flux\Flux;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
+use App\Models\GameTemplate;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\GameTemplateAdded;
+use Livewire\Attributes\Computed;
+use App\Modifiers\ModifierRegistry;
+use App\Events\GameTemplateArchived;
+use App\Challenges\ChallengeRegistry;
 
 class ManageGameTemplatePage extends Component
 {
@@ -35,11 +36,20 @@ class ManageGameTemplatePage extends Component
 
     public string $gameType;
 
+    public array $modifiers;
+
     #[Computed]
     public function allChallenges()
     {
         return collect(ChallengeRegistry::getAll())
             ->filter(fn ($c) => $c::TYPE === $this->gameType);
+    }
+
+    #[Computed]
+    public function allModifiers()
+    {
+        return collect(ModifierRegistry::getAll())
+            ->filter(fn ($m) => $m::TYPE === $this->gameType);
     }
 
     public function mount($game_template = null)
@@ -55,6 +65,7 @@ class ManageGameTemplatePage extends Component
             $this->is_public = $game_template->is_public ?? false;
             $this->team_names = implode(', ', $game_template->team_names) ?? '';
             $this->challenges = $game_template->challenges ?? [];
+            $this->modifiers = $game_template->modifiers ?? [];
             $this->players_can_join_late = $game_template->players_can_join_late ?? false;
             $this->gameType = $game_template->type ?? 'individual';
         } else {
@@ -66,6 +77,7 @@ class ManageGameTemplatePage extends Component
             $this->is_public = false;
             $this->team_names = '';
             $this->challenges = [];
+            $this->modifiers = [];
             $this->players_can_join_late = false;
             $this->gameType = 'individual';
         }
@@ -103,23 +115,8 @@ class ManageGameTemplatePage extends Component
     {
         $this->validate();
 
-        // Validate that all challenge types match the game type
-        // foreach ($this->challenges as $index => $challenge) {
-        //     foreach ($challenge['challenge_keys'] as $challengeKey) {
-        //         $challengeClass = ChallengeRegistry::retrieveFromKey($challengeKey);
-        //         if ($challengeClass::TYPE !== $this->gameType) {
-        //             $this->addError(
-        //                 "challenges.{$index}.challenge_keys",
-        //                 "Challenge '{$challengeKey}' is for {$challengeClass::TYPE} games, but this is a {$this->gameType} game"
-        //             );
-        //         }
-        //     }
-        // }
-
-        // If there are any validation errors, stop here
-        if ($this->getErrorBag()->isNotEmpty()) {
-            return;
-        }
+        // @todo validate that all challenge and modifier types match the game type
+        // we validate this in the events, but we should validate here too
 
         $teams = array_map('trim', explode(',', $this->team_names));
 
@@ -143,6 +140,7 @@ class ManageGameTemplatePage extends Component
             is_public: $this->is_public,
             team_names: $teams,
             challenges: $challenges,
+            modifiers: $this->modifiers,
             players_can_join_late: $this->players_can_join_late,
         );
 
@@ -163,6 +161,7 @@ class ManageGameTemplatePage extends Component
             is_public: $this->game_template->is_public,
             team_names: $this->game_template->team_names,
             challenges: $this->game_template->challenges,
+            modifiers: $this->game_template->modifiers,
             players_can_join_late: $this->game_template->players_can_join_late,
         )->game_template_id;
 
