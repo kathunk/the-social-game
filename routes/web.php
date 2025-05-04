@@ -5,6 +5,7 @@ use App\Livewire\GameDashboard;
 use App\Livewire\GameTemplatesListPage;
 use App\Livewire\Home;
 use App\Livewire\ManageGameTemplatePage;
+use App\Livewire\PlayerPage;
 use App\Livewire\PreGameLobby;
 use App\Livewire\TeamPage;
 use Illuminate\Support\Facades\Route;
@@ -23,7 +24,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/games/{game}/dashboard', GameDashboard::class)->name('game-dashboard');
     Route::get('/dashboard', Home::class)->name('dashboard');
-    Route::get('/teams/{team}', TeamPage::class)->name('teams.show');
+    Route::get('/games/{game}/teams/{team}', TeamPage::class)->name('teams.show');
+    Route::get('/games/{game}/players/{player}', PlayerPage::class)->name('players.show');
     Route::get('/create-game', CreateGame::class)->name('create-game');
     Route::get('/game-templates', GameTemplatesListPage::class)->name('game-templates.index');
     Route::get('/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');

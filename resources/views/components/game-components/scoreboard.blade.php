@@ -21,7 +21,7 @@
                     @foreach ($teams as $team)
                         <flux:table.row>
                             <flux:table.cell>
-                                <flux:button :variant="((string) $team->id === (string) $this->player->team_id) ? 'filled' : 'ghost'" size="sm" class="p-0" :href="route('teams.show', $team->id)">
+                                <flux:button :variant="((string) $team->id === (string) $this->player->team_id) ? 'filled' : 'ghost'" size="sm" class="p-0" :href="route('teams.show', [$team->game_id, $team->id])">
                                     {{ $team->name }}
                                     @if ((string) $team->id === (string) $this->player->team_id)
                                         (your team)
@@ -34,12 +34,16 @@
                 @else
                     @foreach ($players as $player)
                         <flux:table.row>
-                            <flux:table.cell>{{ $player->name }}</flux:table.cell>
+                            <flux:table.cell>
+                                <flux:button :variant="((string) $player->id === (string) $this->player->id) ? 'filled' : 'ghost'" size="sm" class="p-0" :href="route('players.show', [$player->game_id, $player->id])">
+                                    {{ $player->name }}
+                                </flux:button>
+                            </flux:table.cell>
                             <flux:table.cell>
                                 <div class="flex items-center gap-2">
                                     {{ $player->score }}
                                     @if ($player->id === $this->player->id && $player->hidden_score > $player->score)
-                                        <flux:text color="green">
+                                        <flux:text class="text-purple-500 dark:text-purple-300">
                                             +{{ $player->hidden_score - $player->score }}
                                         </flux:text>
                                     @endif
