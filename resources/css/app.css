@@ -9,34 +9,43 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-    --color-amber-50: #fffbeb;
-    --color-amber-100: #fef3c7;
-    --color-amber-200: #fde68a;
-    --color-amber-300: #fcd34d;
-    --color-amber-400: #fbbf24;
-    --color-amber-500: #f59e0b;
-    --color-amber-600: #d97706;
-    --color-amber-700: #b45309;
-    --color-amber-800: #92400e;
-    --color-amber-900: #78350f;
-    --color-amber-950: #451a03;
+    /* colors */
+    --color-sand-50: #fefae6;
+    --color-sand-100: #fde6b0;
+    --color-sand-200: #fcd49e;
+    --color-sand-300: #f6bf84;
+    --color-sand-400: #ec9f66;
+    --color-sand-500: #de8a55;
+    --color-sand-600: #c7743d;
+    --color-sand-700: #a95d2b;
+    --color-sand-800: #844622;
+    --color-sand-900: #5b321b;
+    --color-sand-950: #321f12;
 
-    --color-indigo-50: #eef2ff;
-    --color-indigo-900: #312e81;
-    --color-indigo-950: #1e1b4b;
+    --color-blue-600: #007bff;
 
-    --color-neutral-800: #262626;
+    --color-black: #000000;
+    --color-white: #ffffff;
 
-    --color-orange-400: #fb923c;
-    --color-orange-500: #f97316;
-    --color-orange-600: #ea580c;
+    --color-sky-300: #7dd3fc;
+    --color-twilight: #180F30;
 
-    --color-red-400: #f87171;
-    --color-red-500: #ef4444;
-    --color-red-600: #dc2626;
+    /* gradients */
+    --gradient-day: linear-gradient(to right, #4682b4 0%, #87ceeb 50%, #cceeff 100%);
+    --gradient-dusk: linear-gradient(to right, #4B0082 0%, #2F005F 50%, #191970 100%);
+    --gradient-night: linear-gradient(to right, #000000 0%, #150020 50%, #2C003E 100%);
 
-    --color-yellow-50: #fefce8;
-    --color-yellow-950: #422006;
+    --gradient-sand-50: linear-gradient(to right, #fefae6 0%, #fceec0 50%, #f8d98b 100%);
+    --gradient-sand-100: linear-gradient(to right, #fde6b0 0%, #fcd38e 50%, #f8b463 100%);
+    --gradient-sand-200: linear-gradient(to right, #fcd49e 0%, #f5b475 50%, #e78f50 100%);
+    --gradient-sand-300: linear-gradient(to right, #f6bf84 0%, #e8a261 50%, #cf7948 100%);
+    --gradient-sand-400: linear-gradient(to right, #ec9f66 0%, #c66c40 50%, #a94e2f 100%);
+    --gradient-sand-500: linear-gradient(to right, #de8a55 0%, #b85a35 50%, #933a20 100%);
+    --gradient-sand-600: linear-gradient(to right, #c7743d 0%, #a8512c 50%, #843619 100%);
+    --gradient-sand-700: linear-gradient(to right, #a95d2b 0%, #8a3c1b 50%, #62280f 100%);
+    --gradient-sand-800: linear-gradient(to right, #844622 0%, #5e2e15 50%, #3b1c0b 100%);
+    --gradient-sand-900: linear-gradient(to right, #5b321b 0%, #381e0e 50%, #1f0f06 100%);
+    --gradient-sand-950: linear-gradient(to right, #321f12 0%, #1c0e07 50%, #0c0502 100%);
 }
 
 @theme {
@@ -44,33 +53,49 @@
 }
 
 @layer theme {
-    /* Pecking Order */
-    .pecking-order {
-        --color-background: #f1f5f9; /* slate-100 */
+    /* Default */
+    .default {
+        --color-background: #f1f5f9;
 
-        --color-zinc-50: #fafafa;
-        --color-zinc-100: #f5f5f5;
-        --color-zinc-200: #e5e5e5;
-        --color-zinc-300: #d4d4d4;
-        --color-zinc-400: #a3a3a3;
-        --color-zinc-500: #737373;
-        --color-zinc-600: #525252;
-        --color-zinc-700: #404040;
-        --color-zinc-800: #262626;
-        --color-zinc-900: #171717;
-        --color-zinc-950: #0a0a0a;
+        --color-zinc-50: var(--color-slate-50);
+        --color-zinc-100: var(--color-slate-100);
+        --color-zinc-200: var(--color-slate-200);
+        --color-zinc-300: var(--color-slate-300);
+        --color-zinc-400: var(--color-slate-400);
+        --color-zinc-500: var(--color-slate-500);
+        --color-zinc-600: var(--color-slate-600);
+        --color-zinc-700: var(--color-slate-700);
+        --color-zinc-800: var(--color-slate-800);
+        --color-zinc-900: var(--color-slate-900);
+        --color-zinc-950: var(--color-slate-950);
 
-        --color-white: #ffffff;
-        --color-black: #000000;
+        --color-white: var(--color-white);
+        --color-black: var(--color-black);
 
         --color-accent: var(--color-zinc-800);
         --color-accent-content: var(--color-zinc-800);
         --color-accent-foreground: var(--color-white);
     }
 
-    .dark .pecking-order {
+    .dark .default {
         --color-background: #1e293b; /* slate-800 */
     }
+
+    /* Desert */
+    .desert {
+        --color-accent: var(--color-blue-600); /* primary color */
+        --color-accent-content: var(--color-sand-600); /* secondary color */
+        --color-accent-foreground: var(--color-white); /* text color */
+    }
+
+    .desert .fill-dunes-foreground { fill: var(--color-sand-50); }
+    .desert .fill-dunes-background { fill: var(--color-sand-200); }
+
+    .dark .desert .fill-dunes-foreground { fill: var(--color-sand-700); }
+    .dark .desert .fill-dunes-background { fill: var(--color-sand-900); }
+
+    .desert.bg-background { background-image: var(--gradient-day); }
+    .dark .desert.bg-background { background-image: var(--gradient-night);}
 
     /* Laravel */
     .laravel {
@@ -84,56 +109,51 @@
         --color-accent-content: #f61500;
         --color-background: #111110;
     }
+}
 
-    /* Laracon 2025 */
-    .laracon-2025 {
-        /* yellow-50 */
-        /* --color-background: #fefce8;  */
+/* Flux Overrides */
 
-        --color-background: var(--color-sky-300);
-
-        --color-zinc-50: var(--color-amber-50);
-        --color-zinc-100: var(--color-amber-100);
-        --color-zinc-200: var(--color-amber-200);
-        --color-zinc-300: var(--color-amber-300);
-        --color-zinc-400: var(--color-orange-400);
-        --color-zinc-500: var(--color-orange-500);
-        --color-zinc-600: var(--color-orange-600);
-        --color-zinc-700: var(--color-amber-700);
-        --color-zinc-800: var(--color-amber-800);
-        --color-zinc-900: var(--color-amber-900);
-        --color-zinc-950: var(--color-amber-950);
-
-        --color-white: var(--color-yellow-50);
-        --color-black: var(--color-indigo-950);
-
-        --color-accent: var(--color-amber-800);
-        --color-accent-content: var(--color-amber-800);
-        --color-accent-foreground: var(--color-white);
+/* Laravel */
+.laravel {
+    [data-flux-card] {
+        @apply bg-inherit;
     }
 
-    .dark .laracon-2025 {
-        --color-background: #0b0c1a;
+    [data-flux-sidebar] {
+        background-color: var(--color-background);
+        @apply lg:bg-inherit;
     }
 }
 
-/* Component Overrides */
-.laravel [data-flux-card] {
-    background-color: inherit;
-}
+/* Desert */
+.desert {
+    [data-flux-card] {
+        --color-white: rgba(255, 255, 255, 0.5);
+    }
 
-.laravel [data-flux-sidebar] {
-    background-color: inherit;
-}
+    [data-flux-sidebar] {
+        background: var(--color-sand-300);
+        --color-zinc-400: var(--color-zinc-700);
+    }
 
-.laracon-2025 [data-flux-card] {
-    background-color: var(--color-amber-100);
-    border-color: var(--color-amber-300);
-}
+    [data-flux-sidebar-toggle] {
+        --color-zinc-400: var(--color-zinc-700);
+    }
 
-html.dark .laracon-2025 [data-flux-card] {
-    background-color: var(--color-amber-500);
-    border-color: var(--color-amber-500);
+    .dark & {
+        [data-flux-card] {
+            --color-white: rgba(255, 255, 255);
+        }
+
+        [data-flux-sidebar] {
+            background: var(--color-sand-950);
+            --color-zinc-400: var(--color-zinc-500);
+        }
+
+        [data-flux-sidebar-toggle] {
+            // --color-zinc-400: var(--color-blue-600);
+        }
+    }
 }
 
 @layer base {
@@ -142,7 +162,7 @@ html.dark .laracon-2025 [data-flux-card] {
     ::before,
     ::backdrop,
     ::file-selector-button {
-        border-color: var(--color-gray-200, currentColor);
+        @apply border-gray-200 border-current;
     }
 }
 
@@ -151,7 +171,7 @@ html.dark .laracon-2025 [data-flux-card] {
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
 input:focus[data-flux-control],

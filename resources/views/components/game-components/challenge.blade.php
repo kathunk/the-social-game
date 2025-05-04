@@ -34,7 +34,6 @@
                             <flux:button
                                 variant="primary"
                                 wire:click="callChallengeAction('{{ $btn['action'] }}')"
-                                class="px-4 py-2 bg-blue-600 text-white rounded"
                             >
                                 {{ $btn['label'] }}
                             </flux:button>

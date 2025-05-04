@@ -10,10 +10,19 @@
         @class([
             'min-h-screen',
             'bg-white dark:bg-zinc-800' => !$user?->currentGame,
-            {{-- "{$user->currentGame->theme()} bg-background dark:bg-background" => $user->currentGame, --}}
-            'laravel bg-background dark:bg-background' => $user?->currentGame,
+            "{$user->currentGame->theme()} bg-background" => $user->currentGame,
         ])
     >
+        @if ($user?->currentGame->theme() === 'desert')
+            <div class="fixed inset-0 -z-10 bg-inherit">
+                <x-icons.dunes class="absolute inset-x-0 bottom-0 w-full" />
+            </div>
+        @endif
+
+        <div class="hidden lg:block fixed top-2.5 right-12 z-50">
+            <x-dark-mode-toggle />
+        </div>
+
         @if ($user)
             <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
                 <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
@@ -35,8 +44,6 @@
             </flux:navlist>
 
             <flux:spacer />
-
-            <x-dark-mode-toggle />
 
             <!-- Desktop User Menu -->
             <flux:dropdown position="bottom" align="start">
@@ -91,7 +98,6 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
-
 
             <x-dark-mode-toggle />
 

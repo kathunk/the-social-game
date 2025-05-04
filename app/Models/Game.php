@@ -77,9 +77,9 @@ class Game extends Model
     public function theme(): string
     {
         return match($this->gameTemplate->name) {
-            'Laracon 2025' => 'laracon-2025',
-            'Pecking Order' => 'pecking-order',
-            default => 'laracon-2025',
+            'Laracon 2025' => 'laravel',
+            'Pecking Order' => 'desert',
+            default => 'default',
         };
     }
 
