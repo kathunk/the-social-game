@@ -53,7 +53,7 @@ class PlayerState extends State
         }
 
         return collect($this->score_history)
-            ->filter(fn($item) => !$item['is_hidden'])
+            ->filter(fn ($item) => ! $item['is_hidden'])
             ->sum('points');
     }
 }

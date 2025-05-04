@@ -2,14 +2,11 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Traits\HasPeckingOrderBallots;
+use App\Events\PlayerSubmittedQuizGuess;
 use App\Models\Player;
 use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
-use App\Events\PlayerSubmittedQuizGuess;
-use App\Events\PlayerSubmittedPeckingOrderBallot;
-use App\Challenges\Support\Traits\HasPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {
@@ -81,13 +78,12 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
                     ],
                 )
                 ->buttonGroup()
-                    ->button('Submit Guess', 'guess')
+                ->button('Submit Guess', 'guess')
                 ->endGroup()
                 ->divider()
                 ->subtitle('You have already voted.')
                 ->build();
         }
-        
 
         return $this->form()
             ->title(self::NAME)
@@ -104,7 +100,7 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
                 ],
             )
             ->buttonGroup()
-                ->button('Submit Guess', 'guess')
+            ->button('Submit Guess', 'guess')
             ->endGroup()
             ->divider()
             ->peckingOrderBallot(
@@ -129,9 +125,9 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
     ) {
         $this->applyVotesToScore($game_state);
 
-        $highest_score = $game_state->players()->max(fn($p) => $p->score());
+        $highest_score = $game_state->players()->max(fn ($p) => $p->score());
 
-        $leader_ids = $game_state->players()->filter(fn($p) => $p->score() === $highest_score)->pluck('id');
+        $leader_ids = $game_state->players()->filter(fn ($p) => $p->score() === $highest_score)->pluck('id');
 
         $game_state->players()->each(function ($player) use ($leader_ids) {
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];

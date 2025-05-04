@@ -1,12 +1,10 @@
 <?php
 
+use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Events\PlayerSubmittedPeckingOrderBallot;
+use App\Events\PlayerSubmittedQuizGuess;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
-use App\Events\PlayerSubmittedQuizGuess;
-use App\Events\PlayerSubmittedPeckingOrderBallot;
-use App\Challenges\Classes\IndividualHighScoreQuiz;
-
-
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

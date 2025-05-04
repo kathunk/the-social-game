@@ -2,11 +2,11 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Collection;
-use App\Modifiers\Classes\BaseModifierClass;
 use App\Challenges\Classes\BaseChallengeClass;
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
+use App\Modifiers\Classes\BaseModifierClass;
+use Illuminate\Support\Collection;
 
 class FormBuilder
 {

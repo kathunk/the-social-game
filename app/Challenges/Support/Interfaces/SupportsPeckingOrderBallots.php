@@ -4,7 +4,6 @@ namespace App\Challenges\Support\Interfaces;
 
 use App\Models\Player;
 use App\States\PlayerState;
-use Illuminate\Support\Collection;
 
 interface SupportsPeckingOrderBallots
 {

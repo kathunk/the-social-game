@@ -2,17 +2,17 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\Models\Challenge;
-use App\States\GameState;
-use App\Events\Traits\HasGame;
-use App\States\ChallengeState;
-use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasChallenge;
+use App\Events\Traits\HasGame;
+use App\Events\Traits\HasPlayer;
+use App\Models\Challenge;
+use App\States\ChallengeState;
+use App\States\GameState;
+use Thunk\Verbs\Event;
 
 class PlayerSubmittedPeckingOrderBallot extends Event
 {
-    use HasPlayer, HasGame, HasChallenge;
+    use HasChallenge, HasGame, HasPlayer;
 
     public int $downvote_player_id;
 

@@ -2,16 +2,16 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\Models\Challenge;
-use App\Events\Traits\HasGame;
-use App\States\ChallengeState;
-use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasChallenge;
+use App\Events\Traits\HasGame;
+use App\Events\Traits\HasPlayer;
+use App\Models\Challenge;
+use App\States\ChallengeState;
+use Thunk\Verbs\Event;
 
 class PlayerSubmittedQuizGuess extends Event
 {
-    use HasPlayer, HasChallenge, HasGame;
+    use HasChallenge, HasGame, HasPlayer;
 
     public array $guess;
 
