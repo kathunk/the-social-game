@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Events\GameUpdated;
 use App\Models\Challenge;
 use App\Models\Game;
 use Illuminate\Console\Command;
@@ -52,7 +53,24 @@ class ProgressGames extends Command
                 return $playerCountIsOk;
             })
             ->each(function (Game $game) {
-                $game->start();
+                // this accounts for an edge case where the game was scheduled in the past, but they
+                // had the wrong player count. Then they fixed the problem, and we want to be sure the
+                // game has a sensible start time.
+
+                if ($game->starts_at < now()->subMinutes(2)) {
+                    GameUpdated::fire(
+                        game_id: $game->id,
+                        game_template_id: $game->game_template_id,
+                        starts_at: now(),
+                        ends_at: now()->addMinutes($game->gameTemplate->total_duration),
+                        is_public: $game->is_public,
+                        requires_admin_approval_to_join: $game->requires_admin_approval_to_join,
+                    );
+
+                    Verbs::commit();
+                }
+
+                $game->fresh()->start();
             });
 
         Challenge::where('status', 'active')
