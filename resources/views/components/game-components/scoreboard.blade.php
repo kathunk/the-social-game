@@ -43,7 +43,7 @@
                                 <div class="flex items-center gap-2">
                                     {{ $player->score }}
                                     @if ($player->id === $this->player->id && $player->hidden_score > $player->score)
-                                        <flux:text color="green">
+                                        <flux:text class="text-purple-500 dark:text-purple-300">
                                             +{{ $player->hidden_score - $player->score }}
                                         </flux:text>
                                     @endif
