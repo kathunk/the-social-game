@@ -78,7 +78,7 @@ class Game extends Model
     {
         return match($this->gameTemplate->name) {
             'Laracon 2025' => 'laravel',
-            'Pecking Order' => 'desert',
+            'Pecking Order' => 'default',
             default => 'default',
         };
     }

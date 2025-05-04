@@ -22,7 +22,7 @@
     --color-sand-900: #5b321b;
     --color-sand-950: #321f12;
 
-    --color-blue-600: #007bff;
+    --color-blue-600: #2563eb;
 
     --color-black: #000000;
     --color-white: #ffffff;
@@ -54,8 +54,12 @@
 }
 
 @layer theme {
-    /* Default */
-    .default {
+     /* Default */
+     .default {
+        --color-accent: var(--color-blue-600);
+        --color-accent-content: #262626; /* zinc-800 */
+        --color-accent-foreground: var(--color-white);
+
         --color-background: #f1f5f9;
 
         --color-zinc-50: #fafafa;
@@ -70,28 +74,15 @@
         --color-zinc-900: #171717;
         --color-zinc-950: #0a0a0a;
 
-        --color-accent: var(--color-neutral-800);
-        --color-accent-content: var(--color-neutral-800);
-        --color-accent-foreground: var(--color-white);
-
-        --color-white: var(--color-white);
-        --color-black: var(--color-black);
-
-        --color-accent: #262626; // zinc-800
-        --color-accent-content: #262626; // zinc-800
-        --color-accent-foreground: var(--color-white);
-
         .dark {
-            --color-accent: var(--color-white);
+            --color-accent: var(--color-blue-600);
             --color-accent-content: var(--color-white);
             --color-accent-foreground: var(--color-neutral-800);
 
             --color-background: #1e293b; /* slate-800 */
         }
     }
-}
 
-@layer theme {
     /* Desert */
     .desert {
         --color-accent: var(--color-blue-600); /* primary color */
@@ -122,7 +113,7 @@
     }
 }
 
-/* Flux Overrides */
+/* Flux Component Overrides */
 
 /* Laravel */
 .laravel {
@@ -162,7 +153,7 @@
         }
 
         [data-flux-sidebar-toggle] {
-            // --color-zinc-400: var(--color-blue-600);
+            /* --color-zinc-400: var(--color-blue-600); */
         }
     }
 }

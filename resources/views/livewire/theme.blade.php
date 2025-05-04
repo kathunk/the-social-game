@@ -7,7 +7,7 @@
 
         <div class="grid grid-cols-2 gap-8 mb-8">
             <!-- Default Theme -->
-            <div class="base p-6 rounded-lg bg-background">
+            <div class="default p-6 rounded-lg bg-background">
                 <h2 class="text-2xl font-bold mb-2">Default Theme</h2>
                 <p class="mb-4">This uses <code>class="default"</code></p>
 
@@ -15,9 +15,9 @@
                     <x-theme.bg />
                 </div>
 
-                <button class="mt-4 px-4 py-2 bg-accent text-accent-foreground rounded">
+                <flux:button variant="primary">
                     Accent Button
-                </button>
+                </flux:button>
             </div>
 
             <!-- Desert Theme -->
@@ -29,9 +29,9 @@
                     <x-theme.bg />
                 </div>
 
-                <button class="mt-4 px-4 py-2 bg-accent text-accent-foreground rounded">
+                <flux:button variant="primary">
                     Accent Button
-                </button>
+                </flux:button>
             </div>
 
             <!-- Laravel -->
@@ -43,9 +43,9 @@
                     <x-theme.bg />
                 </div>
 
-                <button class="mt-4 px-4 py-2 bg-accent text-accent-foreground rounded">
+                <flux:button variant="primary">
                     Accent Button
-                </button>
+                </flux:button>
             </div>
         </div>
 
