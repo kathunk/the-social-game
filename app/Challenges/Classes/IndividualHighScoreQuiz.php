@@ -37,58 +37,15 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-
         $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
         $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
-
-        if ($has_guessed && $has_voted) {
-            return $this->form()
-                ->title(self::NAME)
-                ->subtitle(self::DESCRIPTION)
-                ->subtitle('You have already guessed and voted.')
-                ->build();
-        }
-
-        if ($has_guessed) {
-            return $this->form()
-                ->title(self::NAME)
-                ->subtitle(self::DESCRIPTION)
-                ->subtitle('You have already guessed.')
-                ->divider()
-                ->peckingOrderBallot(
-                    upvote_targets: $players->reject(fn ($p) => $p->id === $player->id),
-                    downvote_targets: $players->reject(fn ($p) => $p->id === $player->id)
-                )
-                ->build();
-        }
-
-        if ($has_voted) {
-            return $this->form()
-                ->title(self::NAME)
-                ->subtitle(self::DESCRIPTION)
-                ->select(
-                    property_name: 'guess_player_id',
-                    options: $players->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
-                    label: 'Guess which player will be at the top of the scoreboard',
-                    placeholder: 'Select a player...',
-                    validation_rules: 'required|in:'.implode(',', $players->pluck('id')->toArray()),
-                    validation_messages: [
-                        'required' => 'Must select a player',
-                        'in' => 'Must select a valid player',
-                    ],
-                )
-                ->buttonGroup()
-                ->button('Submit Guess', 'guess')
-                ->endGroup()
-                ->divider()
-                ->subtitle('You have already voted.')
-                ->build();
-        }
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->select(
+            ->when($has_guessed, fn ($form) => $form->subtitle('You have already guessed.')
+            )
+            ->when(! $has_guessed, fn ($form) => $form->select(
                 property_name: 'guess_player_id',
                 options: $players->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
                 label: 'Guess which player will be at the top of the scoreboard',
@@ -99,13 +56,18 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
                     'in' => 'Must select a valid player',
                 ],
             )
-            ->buttonGroup()
-            ->button('Submit Guess', 'guess')
-            ->endGroup()
-            ->divider()
-            ->peckingOrderBallot(
+                ->buttonGroup()
+                ->button('Submit Guess', 'guess')
+                ->endGroup()
+            )
+            ->when(! $has_guessed || ! $has_voted, fn ($form) => $form->divider()
+            )
+            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            )
+            ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $players->reject(fn ($p) => $p->id === $player->id),
                 downvote_targets: $players->reject(fn ($p) => $p->id === $player->id)
+            )
             )
             ->build();
     }
