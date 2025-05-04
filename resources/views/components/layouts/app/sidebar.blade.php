@@ -8,9 +8,9 @@
     @endphp
     <body
         @class([
-            'min-h-screen',
-            'bg-white dark:bg-zinc-800' => !$user?->currentGame,
-            "{$user->currentGame->theme()} bg-background" => $user->currentGame,
+            'min-h-screen bg-background',
+            'default' => !$user?->currentGame,
+            "{$user->currentGame->theme()}" => $user->currentGame,
         ])
     >
         @if ($user?->currentGame->theme() === 'desert')

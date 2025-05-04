@@ -26,6 +26,7 @@
 
     --color-black: #000000;
     --color-white: #ffffff;
+    --color-neutral-800: #1e293b;
 
     --color-sky-300: #7dd3fc;
     --color-twilight: #180F30;
@@ -57,30 +58,40 @@
     .default {
         --color-background: #f1f5f9;
 
-        --color-zinc-50: var(--color-slate-50);
-        --color-zinc-100: var(--color-slate-100);
-        --color-zinc-200: var(--color-slate-200);
-        --color-zinc-300: var(--color-slate-300);
-        --color-zinc-400: var(--color-slate-400);
-        --color-zinc-500: var(--color-slate-500);
-        --color-zinc-600: var(--color-slate-600);
-        --color-zinc-700: var(--color-slate-700);
-        --color-zinc-800: var(--color-slate-800);
-        --color-zinc-900: var(--color-slate-900);
-        --color-zinc-950: var(--color-slate-950);
+        --color-zinc-50: #fafafa;
+        --color-zinc-100: #f5f5f5;
+        --color-zinc-200: #e5e5e5;
+        --color-zinc-300: #d4d4d4;
+        --color-zinc-400: #a3a3a3;
+        --color-zinc-500: #737373;
+        --color-zinc-600: #525252;
+        --color-zinc-700: #404040;
+        --color-zinc-800: #262626;
+        --color-zinc-900: #171717;
+        --color-zinc-950: #0a0a0a;
+
+        --color-accent: var(--color-neutral-800);
+        --color-accent-content: var(--color-neutral-800);
+        --color-accent-foreground: var(--color-white);
 
         --color-white: var(--color-white);
         --color-black: var(--color-black);
 
-        --color-accent: var(--color-zinc-800);
-        --color-accent-content: var(--color-zinc-800);
+        --color-accent: #262626; // zinc-800
+        --color-accent-content: #262626; // zinc-800
         --color-accent-foreground: var(--color-white);
-    }
 
-    .dark .default {
-        --color-background: #1e293b; /* slate-800 */
-    }
+        .dark {
+            --color-accent: var(--color-white);
+            --color-accent-content: var(--color-white);
+            --color-accent-foreground: var(--color-neutral-800);
 
+            --color-background: #1e293b; /* slate-800 */
+        }
+    }
+}
+
+@layer theme {
     /* Desert */
     .desert {
         --color-accent: var(--color-blue-600); /* primary color */
