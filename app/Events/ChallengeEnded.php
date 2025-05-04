@@ -36,6 +36,12 @@ class ChallengeEnded extends Event
             $team->save();
         });
 
+        $game->players->each(function ($player) {
+            $player->score = $player->state()->score();
+            $player->hidden_score = $player->state()->score(include_hidden: true);
+            $player->save();
+        });
+
         $challenge = Challenge::find($this->challenge_id);
         $challenge->status = 'ended';
         $challenge->save();

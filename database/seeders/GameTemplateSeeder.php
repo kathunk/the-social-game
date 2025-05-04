@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Challenges\Classes\ExampleIndividualChallenge;
+use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\StayOnMessage;
 use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\TeamResignation;
@@ -52,8 +52,12 @@ class GameTemplateSeeder extends Seeder
                 'team_names' => [],
                 'challenges' => [
                     [
-                        'challenge_keys' => [ExampleIndividualChallenge::key()],
-                        'duration' => 420,
+                        'challenge_keys' => [IndividualHighScoreQuiz::key()],
+                        'duration' => 1,
+                    ],
+                    [
+                        'challenge_keys' => [IndividualHighScoreQuiz::key()],
+                        'duration' => 100,
                     ],
                 ],
                 'modifiers' => [],

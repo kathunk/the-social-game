@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('game_id')->constrained('games');
+            $table->integer('score')->default(0);
+            $table->integer('hidden_score')->default(0);
             $table->string('name');
             $table->string('status');
             $table->foreignId('team_id')->nullable()->constrained('teams');

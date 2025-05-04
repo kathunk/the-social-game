@@ -45,6 +45,11 @@ abstract class BaseChallengeClass
         return new static;
     }
 
+    public function dataArrayForState(): array
+    {
+        return [];
+    }
+
     public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool
     {
         return false;
@@ -96,11 +101,6 @@ abstract class BaseChallengeClass
         }
 
         return $properties;
-    }
-
-    public function dataArrayForState(): array
-    {
-        return [];
     }
 
     public function validationRulesForLivewire(Player $player): array

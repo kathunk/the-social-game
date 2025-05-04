@@ -21,8 +21,6 @@
                 @case('input')
                     <flux:input 
                         label="{{ $element['label']}}" 
-                        {{-- @todo looks bad if description or label is null --}}
-                        description="{{ $element['description']}}"
                         placeholder="{{$element['placeholder']}}" 
                         wire:model="modifier_properties.{{ $element['property_name']}}"
                     />
@@ -33,7 +31,6 @@
                             <flux:button
                                 wire:click="callModifierAction('{{ $modifier->key }}', '{{ $btn['action'] }}')"
                                 class="px-4 py-2 bg-blue-600 text-white rounded"
-                                :disabled="!$this->current_team"
                             >
                                 {{ $btn['label'] }}
                             </flux:button>
@@ -44,7 +41,6 @@
                     {{-- @todo same issue here where first option in list is not placeholder, and is not real --}}
                     <flux:select
                         label="{{ $element['label'] }}"
-                        description="{{ $element['description'] }}"
                         wire:model="modifier_properties.{{ $element['property_name']}}"
                         placeholder="{{ $element['placeholder'] }}"
                     >

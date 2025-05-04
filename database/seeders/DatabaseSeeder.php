@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             GameTemplateSeeder::class,
             UserSeeder::class,
             Laracon2025Seeder::class,
+            PeckingOrderSeeder::class,
         ]);
     }
 }
