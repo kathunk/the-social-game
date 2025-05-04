@@ -22,9 +22,9 @@
                     <flux:table :rows="$element['rows']" />
                     @break
                 @case('input')
-                    <flux:input 
-                        label="{{ $element['label']}}" 
-                        placeholder="{{$element['placeholder']}}" 
+                    <flux:input
+                        label="{{ $element['label']}}"
+                        placeholder="{{$element['placeholder']}}"
                         wire:model="challenge_properties.{{ $element['property_name']}}"
                     />
                     @break
@@ -32,6 +32,7 @@
                     <div class="flex space-x-2 mt-4 justify-end">
                         @foreach ($element['buttons'] as $btn)
                             <flux:button
+                                variant="primary"
                                 wire:click="callChallengeAction('{{ $btn['action'] }}')"
                                 class="px-4 py-2 bg-blue-600 text-white rounded"
                             >

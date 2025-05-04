@@ -15,7 +15,7 @@
                     <flux:select.option :value="(string) $team->id">{{ $team->name }}</flux:select.option>
                 @endforeach
             </flux:select>
-            <flux:button wire:click="joinTeam">Join</flux:button>
+            <flux:button variant="primary" wire:click="joinTeam">Join</flux:button>
         </flux:card>
     @endif
     @if ($this->challengeComponent)

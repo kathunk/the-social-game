@@ -1,14 +1,19 @@
 <?php
 
-use App\Livewire\CreateGame;
-use App\Livewire\GameDashboard;
-use App\Livewire\GameTemplatesListPage;
 use App\Livewire\Home;
-use App\Livewire\ManageGameTemplatePage;
-use App\Livewire\PreGameLobby;
-use App\Livewire\TeamPage;
-use Illuminate\Support\Facades\Route;
+use App\Livewire\Theme;
 use Livewire\Volt\Volt;
+use App\Livewire\TeamPage;
+use App\Livewire\CreateGame;
+use App\Livewire\PreGameLobby;
+use App\Livewire\GameDashboard;
+use Illuminate\Support\Facades\Route;
+use App\Livewire\GameTemplatesListPage;
+use App\Livewire\ManageGameTemplatePage;
+
+if (app()->environment('local')) {
+    Route::get('/theme', Theme::class)->name('theme');
+}
 
 Route::get('/', function () {
     return view('welcome');

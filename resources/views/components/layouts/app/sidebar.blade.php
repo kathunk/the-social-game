@@ -1,13 +1,19 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        @php
-            $user = auth()->user();
-        @endphp
-
+    @php
+        $user = auth()->user();
+    @endphp
+    <body
+        @class([
+            'min-h-screen',
+            'bg-white dark:bg-zinc-800' => !$user?->currentGame,
+            {{-- "{$user->currentGame->theme()} bg-background dark:bg-background" => $user->currentGame, --}}
+            'laravel bg-background dark:bg-background' => $user?->currentGame,
+        ])
+    >
         @if ($user)
             <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
                 <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
@@ -29,6 +35,8 @@
             </flux:navlist>
 
             <flux:spacer />
+
+            <x-dark-mode-toggle />
 
             <!-- Desktop User Menu -->
             <flux:dropdown position="bottom" align="start">
@@ -83,6 +91,9 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+
+            <x-dark-mode-toggle />
 
             <flux:dropdown position="top" align="end">
                 <flux:profile
