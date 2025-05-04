@@ -1,0 +1,52 @@
+<div class="flex flex-col gap-4">
+    <flux:link :href="route('game-dashboard', $this->game)" variant="ghost">
+        Back to dashboard
+    </flux:link>
+
+    <flux:card>
+        <flux:heading size="lg">{{ $player->name }}</flux:heading>
+    </flux:card>
+
+    <flux:card>
+        <flux:heading size="lg">
+            <div class="flex items-center gap-2">
+                Score: {{ $this->player->score }}
+                @if ($this->showHiddenPoints && $this->player->hidden_score !== $this->player->score)
+                    <flux:text size="lg" class="text-purple-500 dark:text-purple-300">+{{ $this->player->hidden_score - $this->player->score }}</flux:text>
+                @endif
+            </div>
+        </flux:heading>
+        
+        @if (count($this->scoreHistoryEntries) > 0)
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column></flux:table.column>
+                    <flux:table.column></flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+                    @foreach ($this->scoreHistoryEntries as $entry)
+                        <flux:table.row>
+                            <flux:table.cell>
+                                <div class="flex flex-col">
+                                    <flux:heading size="sm" class="{{ $entry['is_hidden'] ? 'text-purple-500 dark:text-purple-300' : '' }}">{{ $entry['description'] }}</flux:heading>
+                                    <flux:text class="text-xs">{{ Carbon\Carbon::parse($entry['timestamp'])->diffForHumans() }}</flux:text>
+                                </div>
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                @if ($entry['is_hidden'])
+                                    <flux:heading size="sm" class="text-purple-500 dark:text-purple-300">+{{ $entry['points'] }}</flux:heading>
+                                @elseif ($entry['points'] > -1)
+                                    <flux:heading size="sm" class="text-green-500">+{{ $entry['points'] }}</flux:heading>
+                                @else
+                                    <flux:heading size="sm" class="text-red-500">{{ $entry['points'] }}</flux:heading>
+                                @endif
+                            </flux:table.cell>
+                        </flux:table.row>
+                    @endforeach
+                </flux:table.rows>
+            </flux:table>
+        @else
+            <flux:subheading>No score history yet</flux:subheading>
+        @endif
+    </flux:card>
+</div>
