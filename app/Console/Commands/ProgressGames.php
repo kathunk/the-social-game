@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Game;
-use App\Models\Challenge;
 use App\Events\GameUpdated;
-use Thunk\Verbs\Facades\Verbs;
+use App\Models\Challenge;
+use App\Models\Game;
 use Illuminate\Console\Command;
+use Thunk\Verbs\Facades\Verbs;
 
 class ProgressGames extends Command
 {
@@ -53,9 +53,10 @@ class ProgressGames extends Command
                 return $playerCountIsOk;
             })
             ->each(function (Game $game) {
-                // this accounts for an edge case where the game was scheduled in the past, but they 
-                // had the wrong player count. Then they fixed the problem, and we want to be sure the 
+                // this accounts for an edge case where the game was scheduled in the past, but they
+                // had the wrong player count. Then they fixed the problem, and we want to be sure the
                 // game has a sensible start time.
+
                 if ($game->starts_at < now()->subMinutes(2)) {
                     GameUpdated::fire(
                         game_id: $game->id,
@@ -69,7 +70,7 @@ class ProgressGames extends Command
                     Verbs::commit();
                 }
 
-                $game->start();
+                $game->fresh()->start();
             });
 
         Challenge::where('status', 'active')

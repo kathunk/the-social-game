@@ -4,16 +4,20 @@ namespace App\Events;
 
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasGameTemplate;
-use App\Events\Traits\HasUser;
 use App\Models\Game;
 use App\States\GameState;
 use App\States\GameTemplateState;
+use App\States\UserState;
 use Carbon\Carbon;
+use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
 class GameUpdated extends Event
 {
-    use HasGame, HasGameTemplate, HasUser;
+    use HasGame, HasGameTemplate;
+
+    #[StateId(UserState::class)]
+    public ?int $user_id = null;
 
     public Carbon $starts_at;
 
