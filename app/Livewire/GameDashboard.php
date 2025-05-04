@@ -39,7 +39,7 @@ class GameDashboard extends Component
     #[Computed]
     public function players()
     {
-        return $this->game->players;
+        return $this->game->players->sortByDesc('score');
     }
 
     #[Computed]
@@ -82,6 +82,26 @@ class GameDashboard extends Component
     }
 
     #[Computed]
+    public function challengeComponent()
+    {
+        if (! $this->challenge) {
+            return null;
+        }
+
+        if ($this->template->type === 'team' && ! $this->current_team) {
+            return null;
+        }
+
+        return $this->challenge_handler->frontendComponent($this->player);
+    }
+
+    #[Computed]
+    public function template()
+    {
+        return $this->game->gameTemplate;
+    }
+
+    #[Computed]
     public function modifiers()
     {
         return $this->game->modifiers;
@@ -95,7 +115,7 @@ class GameDashboard extends Component
             return redirect()->route('pre-game-lobby', ['game' => $this->game]);
         }
 
-        $player_needs_to_join_team = $this->game->gameTemplate->type === 'team' && ! $this->player->team;
+        $player_needs_to_join_team = $this->template->type === 'team' && ! $this->player->team;
 
         if ($player_needs_to_join_team) {
             return;

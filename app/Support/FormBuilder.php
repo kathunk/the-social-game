@@ -2,10 +2,11 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Collection;
+use App\Modifiers\Classes\BaseModifierClass;
 use App\Challenges\Classes\BaseChallengeClass;
 use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
-use App\Modifiers\Classes\BaseModifierClass;
-use Illuminate\Support\Collection;
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 class FormBuilder
 {
@@ -101,14 +102,12 @@ class FormBuilder
         string $validation_rules,
         array $validation_messages,
         ?string $label = null,
-        ?string $description = null,
         ?string $placeholder = null,
     ): static {
         $this->elements[] = [
             'type' => 'input',
             'property_name' => $property_name,
             'label' => $label,
-            'description' => $description,
             'placeholder' => $placeholder,
             'validation_rules' => $validation_rules,
             'validation_messages' => $validation_messages,
@@ -123,13 +122,11 @@ class FormBuilder
         string $property_name, // this will be the name of the property in livewire
         string $validation_rules,
         array $validation_messages,
-        ?string $description = null,
         ?string $placeholder = null,
     ): static {
         $this->elements[] = [
             'type' => 'select',
             'label' => $label,
-            'description' => $description,
             'options' => $options,
             'property_name' => $property_name,
             'validation_rules' => $validation_rules,
@@ -215,7 +212,6 @@ class FormBuilder
     public function teamSwap(
         Collection $teams,
         ?string $label = 'Choose a team to swap to',
-        ?string $description = 'You can swap teams once during this challenge.',
     ) {
         if (! $this->challenge_class instanceof SupportsTeamSwaps) {
             throw new \RuntimeException('Challenge class must implement SupportsTeamSwaps interface');
@@ -223,7 +219,6 @@ class FormBuilder
 
         $this->select(
             label: $label,
-            description: $description,
             options: $teams->mapWithKeys(fn ($team) => [$team->id => $team->name])->toArray(),
             property_name: 'team_id',
             validation_rules: 'required',
@@ -232,6 +227,41 @@ class FormBuilder
 
         $this->buttonGroup();
         $this->button('Swap Team', 'swapTeams', ['team_id']);
+        $this->endGroup();
+
+        return $this;
+    }
+
+    public function peckingOrderBallot(
+        ?Collection $upvote_targets,
+        ?Collection $downvote_targets,
+        ?string $upvote_label = 'Choose a player to upvote',
+        ?string $downvote_label = 'Choose a player to downvote',
+    ) {
+        if (! $this->challenge_class instanceof SupportsPeckingOrderBallots) {
+            throw new \RuntimeException('Challenge class must implement SupportsPeckingOrderBallots interface');
+        }
+
+        $this->select(
+            label: $upvote_label,
+            options: $upvote_targets->mapWithKeys(fn ($player) => [$player->id => $player->name])->toArray(),
+            property_name: 'upvote_player_id',
+            placeholder: 'Select a player...',
+            validation_rules: 'required|in:'.implode(',', $upvote_targets->pluck('id')->toArray()),
+            validation_messages: ['required' => 'Player is required', 'in' => 'Player is invalid'],
+        );
+
+        $this->select(
+            label: $downvote_label,
+            options: $downvote_targets->mapWithKeys(fn ($player) => [$player->id => $player->name])->toArray(),
+            property_name: 'downvote_player_id',
+            placeholder: 'Select a player...',
+            validation_rules: 'required|in:'.implode(',', $downvote_targets->pluck('id')->toArray()),
+            validation_messages: ['required' => 'Player is required', 'in' => 'Player is invalid'],
+        );
+
+        $this->buttonGroup();
+        $this->button('Vote', 'vote', ['upvote_player_id', 'downvote_player_id']);
         $this->endGroup();
 
         return $this;

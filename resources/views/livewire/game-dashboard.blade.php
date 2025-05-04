@@ -5,7 +5,7 @@
 
     @endif
 
-    @if (! $this->current_team && $this->game->gameTemplate->type === 'team' && $this->player->status === 'active')
+    @if (! $this->current_team && $this->template->type === 'team' && $this->player->status === 'active')
         <flux:card>
             <flux:heading>Join a team</flux:heading>
             <flux:subheading>To start playing, join a team. At certain points in the game, you will be able to switch teams.</flux:subheading>
@@ -18,11 +18,11 @@
             <flux:button wire:click="joinTeam">Join</flux:button>
         </flux:card>
     @endif
-    @if ($this->challenge && $this->current_team)
-        <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challenge_component" />
+    @if ($this->challengeComponent)
+        <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challengeComponent" />
     @endif
-    <x-game-components.scoreboard :teams="$this->teams" />
-    @if ($this->game->gameTemplate->players_can_join_late)
+    <x-game-components.scoreboard :teams="$this->teams" :players="$this->players" :type="$this->template->type" />
+    @if ($this->template->players_can_join_late)
         <flux:card>
             <flux:heading class="mb-2">Invite your friends</flux:heading>
             <div class="flex gap-2">

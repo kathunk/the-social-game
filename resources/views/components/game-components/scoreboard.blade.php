@@ -1,4 +1,4 @@
-@props(['teams'])
+@props(['teams', 'players', 'type'])
 
 <div>
     <flux:card>
@@ -6,24 +6,48 @@
 
         <flux:table>
             <flux:table.columns>
-                <flux:table.column>Team</flux:table.column>
+                <flux:table.column>
+                    @if ($type === 'team')
+                        Team
+                    @else
+                        Player
+                    @endif
+                </flux:table.column>
                 <flux:table.column>Score</flux:table.column>
             </flux:table.columns>
 
             <flux:table.rows>
-                @foreach ($teams as $team)
-                    <flux:table.row>
-                        <flux:table.cell>
-                            <flux:button :variant="((string) $team->id === (string) $this->player->team_id) ? 'filled' : 'ghost'" size="sm" class="p-0" :href="route('teams.show', $team->id)">
-                                {{ $team->name }}
-                                @if ((string) $team->id === (string) $this->player->team_id)
-                                    (your team)
-                                @endif
-                            </flux:button>
-                        </flux:table.cell>
-                        <flux:table.cell>{{ $team->score }}</flux:table.cell>
-                    </flux:table.row>
-                @endforeach
+                @if ($type === 'team')
+                    @foreach ($teams as $team)
+                        <flux:table.row>
+                            <flux:table.cell>
+                                <flux:button :variant="((string) $team->id === (string) $this->player->team_id) ? 'filled' : 'ghost'" size="sm" class="p-0" :href="route('teams.show', $team->id)">
+                                    {{ $team->name }}
+                                    @if ((string) $team->id === (string) $this->player->team_id)
+                                        (your team)
+                                    @endif
+                                </flux:button>
+                            </flux:table.cell>
+                            <flux:table.cell>{{ $team->score }}</flux:table.cell>
+                        </flux:table.row>
+                    @endforeach
+                @else
+                    @foreach ($players as $player)
+                        <flux:table.row>
+                            <flux:table.cell>{{ $player->name }}</flux:table.cell>
+                            <flux:table.cell>
+                                <div class="flex items-center gap-2">
+                                    {{ $player->score }}
+                                    @if ($player->id === $this->player->id && $player->hidden_score > $player->score)
+                                        <flux:text color="green">
+                                            +{{ $player->hidden_score - $player->score }}
+                                        </flux:text>
+                                    @endif
+                                </div>
+                            </flux:table.cell>
+                        </flux:table.row>
+                    @endforeach
+                @endif
             </flux:table.rows>
         </flux:table>
     </flux:card>
