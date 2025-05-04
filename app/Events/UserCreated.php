@@ -28,7 +28,7 @@ class UserCreated extends Event
 
     public function handle()
     {
-        User::create([
+        return User::create([
             'id' => $this->user_id,
             'name' => $this->name,
             'email' => $this->email,

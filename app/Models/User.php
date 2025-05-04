@@ -78,15 +78,11 @@ class User extends Authenticatable
 
     public static function fromTemplate(string $name, string $email, string $encrypted_password)
     {
-        $user_id = UserCreated::fire(
+        return UserCreated::commit(
             name: $name,
             email: $email,
             encrypted_password: $encrypted_password,
-        )->user_id;
-
-        Verbs::commit();
-
-        return User::find($user_id);
+        );
     }
 
     public function state(): UserState
