@@ -92,7 +92,7 @@ class UserAdmittedToGame extends Event
 
     public function handle()
     {
-        Player::create([
+        $player =Player::create([
             'id' => $this->player_id,
             'user_id' => $this->user_id,
             'game_id' => $this->game_id,
@@ -110,5 +110,7 @@ class UserAdmittedToGame extends Event
             'decided_by_id' => $this->admin_id,
             'decided_at' => now(),
         ]);
+
+        return $player;
     }
 }
