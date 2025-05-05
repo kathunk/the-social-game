@@ -22,9 +22,9 @@
                     <flux:table :rows="$element['rows']" />
                     @break
                 @case('input')
-                    <flux:input 
-                        label="{{ $element['label']}}" 
-                        placeholder="{{$element['placeholder']}}" 
+                    <flux:input
+                        label="{{ $element['label']}}"
+                        placeholder="{{$element['placeholder']}}"
                         wire:model="challenge_properties.{{ $element['property_name']}}"
                     />
                     @break
@@ -45,8 +45,10 @@
                     <flux:select
                         label="{{ $element['label'] }}"
                         wire:model="challenge_properties.{{ $element['property_name']}}"
-                        placeholder="{{ $element['placeholder'] }}"
                     >
+                    @isset($element['placeholder'])
+                        <flux:select.option value="" selected class="placeholder">{{ $element['placeholder'] }}</flux:select.option>
+                    @endisset
                         @foreach($element['options'] as $key => $value)
                             <flux:select.option value="{{ $key }}">{{ $value }}</flux:select.option>
                         @endforeach
