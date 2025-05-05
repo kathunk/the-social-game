@@ -1,19 +1,19 @@
 <?php
 
-use App\Challenges\Classes\IndividualHighScoreQuiz;
-use App\Events\PlayerSubmittedPeckingOrderBallot;
-use App\Events\PlayerSubmittedQuizGuess;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerSubmittedQuizGuess;
+use App\Events\PlayerSubmittedPeckingOrderBallot;
+use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-it('runs the individual high score quiz', function () {
+it('runs the individual no score change quiz', function () {
     Verbs::commitImmediately();
 
     $challenges = [
         [
-            'challenge_keys' => [IndividualHighScoreQuiz::key()],
+            'challenge_keys' => [IndividualNoScoreChangeQuiz::key()],
             'duration' => 10,
         ],
     ];
@@ -47,7 +47,7 @@ it('runs the individual high score quiz', function () {
         challenge_id: $challenge->id,
         game_id: $this->game->id,
         downvote_player_id: $player_4->id,
-        upvote_player_id: $player_1->id,
+        upvote_player_id: $player_2->id,
     );
 
     // player 3 and player 1 are tied at 1 point
@@ -65,7 +65,7 @@ it('runs the individual high score quiz', function () {
         player_id: $player_2->id,
         challenge_id: $challenge->id,
         game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_3->id],
+        guess: ['guess_player_id' => $player_2->id],
     );
 
     // player 3 is incorrect
@@ -73,21 +73,21 @@ it('runs the individual high score quiz', function () {
         player_id: $player_3->id,
         challenge_id: $challenge->id,
         game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_4->id],
+        guess: ['guess_player_id' => $player_3->id],
     );
 
     $challenge->refresh();
     $challenge->end();
 
     // visible scores show this
-    expect($player_1->fresh()->score)->toBe(1);
-    expect($player_2->fresh()->score)->toBe(-1);
+    expect($player_1->fresh()->score)->toBe(0);
+    expect($player_2->fresh()->score)->toBe(0);
     expect($player_3->fresh()->score)->toBe(1);
     expect($player_4->fresh()->score)->toBe(-1);
 
     // but with hidden scores included, we see this
-    expect($player_1->fresh()->state()->score(include_hidden: true))->toBe(2);
-    expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(0);
+    expect($player_1->fresh()->state()->score(include_hidden: true))->toBe(1);
+    expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(1);
     expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(1);
     expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(-1);
 });
