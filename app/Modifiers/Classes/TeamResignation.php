@@ -31,7 +31,7 @@ class TeamResignation extends BaseModifierClass
             ->title('Had enough?')
             ->subtitle('You can resign at any time.')
             ->select(
-                label: 'points',
+                label: 'How many points should we give your team?',
                 placeholder: 'Select a number...',
                 options: [
                     // @todo I'm still running into this issue where the first option in the select looks real but has no value
@@ -66,6 +66,7 @@ class TeamResignation extends BaseModifierClass
             )
         ) {
             return back()->withErrors([
+                // this will not show up in the UI because we are not validating yet
                 'points' => 'Points are required.',
             ]);
         }
