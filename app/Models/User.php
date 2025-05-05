@@ -78,15 +78,11 @@ class User extends Authenticatable
 
     public static function fromTemplate(string $name, string $email, string $encrypted_password)
     {
-        $user_id = UserCreated::fire(
+        return UserCreated::commit(
             name: $name,
             email: $email,
             encrypted_password: $encrypted_password,
-        )->user_id;
-
-        Verbs::commit();
-
-        return User::find($user_id);
+        );
     }
 
     public function state(): UserState
@@ -164,9 +160,8 @@ class User extends Authenticatable
             game_id: $game->id,
         );
 
-        Verbs::commit();
-
         if ($game->requires_admin_approval_to_join) {
+            Verbs::commit();
             return $this->fresh();
         }
 
@@ -181,16 +176,12 @@ class User extends Authenticatable
             throw new \Exception('User has not applied to this game');
         }
 
-        $player_id = UserAdmittedToGame::fire(
+        return UserAdmittedToGame::commit(
             user_id: $this->id,
             admin_id: $admin->id,
             game_id: $game->id,
             application_id: $application->id,
-        )->player_id;
-
-        Verbs::commit();
-
-        return Player::find($player_id);
+        );
     }
 
     public function rejectFromGame(Game $game, User $admin)

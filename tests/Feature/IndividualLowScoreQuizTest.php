@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Challenges\Classes\IndividualLowScoreQuiz;
 use App\Events\PlayerSubmittedPeckingOrderBallot;
 use App\Events\PlayerSubmittedQuizGuess;
 use App\Models\Challenge;
@@ -8,12 +8,12 @@ use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-it('runs the individual high score quiz', function () {
+it('runs the individual low score quiz', function () {
     Verbs::commitImmediately();
 
     $challenges = [
         [
-            'challenge_keys' => [IndividualHighScoreQuiz::key()],
+            'challenge_keys' => [IndividualLowScoreQuiz::key()],
             'duration' => 10,
         ],
     ];
@@ -57,7 +57,7 @@ it('runs the individual high score quiz', function () {
         player_id: $player_1->id,
         challenge_id: $challenge->id,
         game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_1->id],
+        guess: ['guess_player_id' => $player_2->id],
     );
 
     // player 2 is correct
@@ -65,7 +65,7 @@ it('runs the individual high score quiz', function () {
         player_id: $player_2->id,
         challenge_id: $challenge->id,
         game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_3->id],
+        guess: ['guess_player_id' => $player_4->id],
     );
 
     // player 3 is incorrect
@@ -73,7 +73,7 @@ it('runs the individual high score quiz', function () {
         player_id: $player_3->id,
         challenge_id: $challenge->id,
         game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_4->id],
+        guess: ['guess_player_id' => $player_1->id],
     );
 
     $challenge->refresh();
