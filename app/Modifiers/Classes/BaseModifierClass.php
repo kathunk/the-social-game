@@ -79,7 +79,16 @@ abstract class BaseModifierClass
         $properties = [];
 
         foreach ($this->frontendComponent($player)['elements'] as $element) {
-            if (isset($element['property_name'])) {
+            if (
+                isset($element['property_name'])
+                && isset($element['type'])
+                && $element['type'] === 'select'
+            ) {
+                // null selects must be empty strings for LW
+                $properties[$element['property_name']] = '';
+            } elseif (
+                isset($element['property_name'])
+            ) {
                 $properties[$element['property_name']] = null;
             }
         }

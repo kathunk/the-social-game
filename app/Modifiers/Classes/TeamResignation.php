@@ -31,25 +31,26 @@ class TeamResignation extends BaseModifierClass
             ->title('Had enough?')
             ->subtitle('You can resign at any time.')
             ->select(
-                label: 'How many points should we give your team?',
+                label: 'points',
+                placeholder: 'Select a number...',
                 options: [
                     // @todo I'm still running into this issue where the first option in the select looks real but has no value
-                    3 => '+3',
-                    -3 => '-3',
+                    '3' => '+3',
+                    '-3' => '-3',
                 ],
                 property_name: 'points',
-                validation_rules: 'required|integer|min:-3|max:3',
+                validation_rules: 'required|string|in:' . "['-3', '3']",
                 validation_messages: [
                     'points.required' => 'Please select a number.',
-                    'points.integer' => 'Please select a number.',
-                    'points.min' => 'Please select a number between -3 and 3.',
-                    'points.max' => 'Please select a number between -3 and 3.',
+                    'points.string' => 'Please select a number.',
+                    'in' => 'Please select between -3 and 3.',
                 ],
             )
             ->buttonGroup()
             ->button(
                 label: 'Resign',
                 action: 'resign',
+                properties_to_validate: ['points'],
             )
             ->endGroup()
             ->build();
@@ -57,11 +58,21 @@ class TeamResignation extends BaseModifierClass
 
     public function resign(Player $player, array $params)
     {
-        $points = $params['points'];
+        // @todo replace this when we finish validation logic for modifiers
+        if(
+            ! isset($params['points'])
+            || (
+                $params['points'] === ''
+            )
+        ) {
+            return back()->withErrors([
+                'points' => 'Points are required.',
+            ]);
+        }
 
         PlayerResignedInTeamGame::fire(
             player_id: $player->id,
-            points: (int) $points,
+            points: (int) $params['points'],
             game_id: $player->game_id,
             team_id: $player->team_id,
         );
