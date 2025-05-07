@@ -17,13 +17,21 @@ class PlayerAssignedSecretAllyInTeamGame extends Event
 
     public function validate()
     {
+        $paired_player_ids = collect($this->state(ModifierState::class)->modifier_data['pairs'])
+            ->reduce(function ($carry, $pair) {
+                $carry[] = $pair['player_1_id'];
+                $carry[] = $pair['player_2_id'];
+
+                return $carry;
+            }, []);
+
         $this->assert(
-            !isset($this->modifier->modifier_data['ally_pair_ids'][$this->player_id]),
+            !$paired_player_ids->contains($this->player_id),
             'Player already has an ally'
         );
 
         $this->assert(
-            !isset($this->modifier->modifier_data['ally_pair_ids'][$this->ally_id]),
+            !$paired_player_ids->contains($this->ally_id),
             'Ally already has an ally'
         );
 
@@ -40,8 +48,15 @@ class PlayerAssignedSecretAllyInTeamGame extends Event
 
     public function apply(ModifierState $modifier)
     {
-        $modifier->modifier_data['ally_pair_ids'][$this->player_id] = $this->ally_id;
-        $modifier->modifier_data['ally_pair_ids'][$this->ally_id] = $this->player_id;
+        $ally = PlayerState::load($this->ally_id);
+
+        $modifier->modifier_data['pairs'][] = [
+            'player_1_id' => $this->player_id,
+            'player_2_id' => $this->ally_id,
+            'player_1_original_team_id' => $this->state($this->player_id)->team_id,
+            'player_2_original_team_id' => $ally->team_id,
+            'has_connected' => false,
+        ];
     }
 
     public function handle()

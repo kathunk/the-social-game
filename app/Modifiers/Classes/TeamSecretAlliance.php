@@ -26,31 +26,23 @@ class TeamSecretAlliance extends BaseModifierClass
 
     public function dataArrayForState(): array
     {
-        return ['ally_pair_ids' => []];
+        return ['ally_pairs' => []];
     }
 
     public function frontendComponent(Player $player): array
     {
-        $has_ally = isset($this->modifier->modifier_data['ally_pair_ids'][$player->id]);
-        $ally = null;
-        $elligible_partner_exists = false;
-
-        if ($has_ally) {
-            $ally = Player::find($this->modifier->modifier_data['ally_pair_ids'][$player->id]);
-        } else {
-            
-        }
-
-        $description = strtr(self::DESCRIPTION, [
-            '{player_name}' => $ally->name,
-            // '{ally_team_name}' => $ally->team->name,
-        ]);
-
+        $ally = $this->ally($player);
+        $elligible_partner_exists = $ally ? false : $this->elligiblePartners($player)->count() > 0;
         $player_is_active = $player->status === 'active';
         $player_is_on_dashboard = Route::currentRouteName() === 'game-dashboard';
         $player_is_lucky = rand(0, 100) > 0;
 
-        if ($player_is_active && $player_is_on_dashboard && ! $player_has_ally && $player_is_lucky) {
+        $description = strtr(self::DESCRIPTION, [
+            '{player_name}' => $ally->name,
+            '{ally_team_name}' => $ally->team->name,
+        ]);
+
+        if ($player_is_active && $player_is_on_dashboard && ! $ally && $elligible_partner_exists && $player_is_lucky) {
             return $this->form()
                 ->title(static::NAME)
                 ->subtitle("You discovered a secret! A friend is waiting for you.")
@@ -60,10 +52,17 @@ class TeamSecretAlliance extends BaseModifierClass
                 ->build();
         }
 
-        if ($player_is_active && ! $player_is_on_dashboard) {
+        if ($player_is_active && ! $player_is_on_dashboard && $ally) {
             return $this->form()
                 ->title(static::NAME)
                 ->subtitle($description)
+                ->build();
+        }
+
+        if (! $elligible_partner_exists) {
+            return $this->form()
+                ->title(static::NAME)
+                ->subtitle('Unfortunately there are no eligible partners for you right now. Try again later.')
                 ->build();
         }
 
@@ -75,17 +74,58 @@ class TeamSecretAlliance extends BaseModifierClass
         return redirect()->route('games.secrets', ['game' => $player->game, 'modifier' => $this->modifier]);
     }
 
+    public function alliedPlayerIds(Player $player)
+    {
+        return collect($this->modifier->modifier_data['pairs'])
+            ->reduce(function ($carry, $pair) {
+                $carry[] = $pair['player_1_id'];
+                $carry[] = $pair['player_2_id'];
+
+                return $carry;
+            }, []);
+    }
+
+    public function ally(Player $player)
+    {
+        return collect($this->modifier->modifier_data['pairs'])
+            ->filter(fn($pair) => $pair['player_1_id'] === $player->id || $pair['player_2_id'] === $player->id)
+            ->first()
+            ?->map(function($pair) {
+                if ($pair['player_1_id'] === $player->id) {
+                    return Player::find($pair['player_2_id']);
+                }
+
+                return Player::find($pair['player_1_id']);
+            });
+    }
+
     public function elligiblePartners(Player $player)
     {
+        $paired_player_ids = collect($this->modifier->modifier_data['pairs'])
+            ->reduce(function ($carry, $pair) {
+                $carry[] = $pair['player_1_id'];
+                $carry[] = $pair['player_2_id'];
+
+                return $carry;
+            }, []);
+
         return $player->game->players->where('status', 'active')
-            ->reject(fn($p) => collect($this->modifier->modifier_data['ally_pair_ids'])->contains($p->id))
+            ->reject(fn($p) => $paired_player_ids->contains($p->id))
             ->filter(fn($p) => $p->id === $player->id)
             ->filter(fn($p) => $p->team_id !== null && $p->team_id === $player->team_id);
     }
 
     public function onSecretDiscovered(Player $player)
     {
-        if (collect($this->modifier->modifier_data['ally_pair_ids'])->contains($player->id)) {
+        $paired_player_ids = collect($this->modifier->modifier_data['pairs'])
+            ->reduce(function ($carry, $pair) {
+                $carry[] = $pair['player_1_id'];
+                $carry[] = $pair['player_2_id'];
+
+                return $carry;
+            }, []);
+
+        if ($paired_player_ids->contains($player->id)) {
             return;
         }
 
