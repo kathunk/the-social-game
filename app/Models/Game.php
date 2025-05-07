@@ -74,15 +74,6 @@ class Game extends Model
         return $this->belongsTo(GameTemplate::class);
     }
 
-    public function theme(): string
-    {
-        return match($this->gameTemplate->name) {
-            'Laracon 2025' => 'laravel',
-            'Pecking Order' => 'default',
-            default => 'default',
-        };
-    }
-
     public static function fromTemplate(
         GameTemplate $template,
         Carbon $starts_at,

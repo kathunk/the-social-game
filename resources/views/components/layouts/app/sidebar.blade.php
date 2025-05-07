@@ -6,33 +6,43 @@
     @php
         $user = auth()->user();
     @endphp
-    <body
-        @class([
-            'min-h-screen bg-background',
-            'default' => !$user?->currentGame,
-            "{$user->currentGame->theme()}" => $user->currentGame,
-        ])
-    >
-        @if ($user?->currentGame->theme() === 'desert')
-            <div class="fixed inset-0 -z-10 bg-inherit">
-                <x-icons.dunes class="absolute inset-x-0 bottom-0 w-full" />
-            </div>
-        @endif
-
+    <body @class([
+        'default' => !$user?->currentPlayer,
+        "{$user->currentPlayer?->team?->theme()}" => $user->currentPlayer?->team?->theme(),
+        'min-h-screen bg-[var(--color-background)]',
+    ])>
         <div class="hidden lg:block fixed top-2.5 right-12 z-50">
             <x-dark-mode-toggle />
         </div>
 
         @if ($user)
-            <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-                <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
+            <flux:sidebar sticky stashable @class([
+                "border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900",
+                'dark' => $user->currentPlayer?->team?->forceDark(),
+            ])>
 
-            <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
-                <x-app-logo />
-            </a>
+            <div class="flex items-center">
+                <flux:brand href="{{ route('dashboard') }}" wire:navigate>
+                    <x-slot name="name">
+                        <span class="font-bold text-accent-foreground">The Social Game™</span>
+                    </x-slot>
+                    <x-slot name="logo">
+                        <div class="rounded w-12 bg-accent text-accent-foreground">
+                            <x-app-logo />
+                        </div>
+                    </x-slot>
+                </flux:brand>
+                <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
+            </div>
+
+                        {{-- <flux:brand href="#" name="Acme Inc." class="px-2">
+                            <x-slot name="logo">
+                                <div class="size-6 rounded shrink-0 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] flex items-center justify-center"><i class="font-serif font-bold">A</i></div>
+                            </x-slot>
+                        </flux:brand> --}}
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
+                <flux:navlist.group :heading="__('Games')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Home') }}</flux:navlist.item>
                     @if ($user?->is_member)
                         <flux:navlist.item icon="plus" :href="route('create-game')" :current="request()->routeIs('create-game')" wire:navigate>{{ __('Create Game') }}</flux:navlist.item>
@@ -99,7 +109,9 @@
 
             <flux:spacer />
 
-            <x-dark-mode-toggle />
+            <div class="mt-1.5 mr-1.5">
+                <x-dark-mode-toggle />
+            </div>
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

@@ -26,4 +26,25 @@ class Team extends Model
     {
         return $this->belongsTo(Game::class);
     }
+
+    public function theme(): string
+    {
+        return match($this->name) {
+            'Elixir' => 'elixir',
+            'Go' => 'go',
+            'Javascript' => 'javascript',
+            'Laravel' => 'laravel',
+            'Node' => 'node',
+            'PHP' => 'php',
+            'Python' => 'python',
+            'React' => 'react',
+            'Ruby' => 'ruby',
+            'Vue' => 'vue',
+        };
+    }
+
+    public function forceDark(): bool
+    {
+        return in_array($this->theme(), ['PHP']);
+    }
 }

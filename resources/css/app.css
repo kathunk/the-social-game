@@ -6,7 +6,7 @@
 @source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
 @source '../../vendor/livewire/flux/stubs/**/*.blade.php';
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *):not(:has(.light), .light *));
 
 :root {
     /* colors */
@@ -24,6 +24,8 @@
 
     --color-blue-600: #2563eb;
 
+    /* --color-background: #ffffff; */
+
     --color-black: #000000;
     --color-white: #ffffff;
     --color-neutral-800: #1e293b;
@@ -32,9 +34,9 @@
     --color-twilight: #180F30;
 
     /* gradients */
-    --gradient-day: linear-gradient(to right, #4682b4 0%, #87ceeb 50%, #cceeff 100%);
-    --gradient-dusk: linear-gradient(to right, #4B0082 0%, #2F005F 50%, #191970 100%);
-    --gradient-night: linear-gradient(to right, #000000 0%, #150020 50%, #2C003E 100%);
+    --gradient-day: linear-gradient(to top, #0ea5e9 33%, #87ceeb 90%, #cceeff 100%);
+    --gradient-dusk: linear-gradient(to top, #4B0082 33%, #2F005F 90%, #191970 100%);
+    --gradient-night: linear-gradient(to top, #030375 33%, #2C003E 90%, #000000 100%);
 
     --gradient-sand-50: linear-gradient(to right, #fefae6 0%, #fceec0 50%, #f8d98b 100%);
     --gradient-sand-100: linear-gradient(to right, #fde6b0 0%, #fcd38e 50%, #f8b463 100%);
@@ -60,7 +62,7 @@
         --color-accent-content: #262626; /* zinc-800 */
         --color-accent-foreground: var(--color-white);
 
-        --color-background: #f1f5f9;
+        /* --color-background: #f1f5f9; */
 
         --color-zinc-50: #fafafa;
         --color-zinc-100: #f5f5f5;
@@ -73,21 +75,28 @@
         --color-zinc-800: #262626;
         --color-zinc-900: #171717;
         --color-zinc-950: #0a0a0a;
+    }
 
-        .dark {
-            --color-accent: var(--color-blue-600);
-            --color-accent-content: var(--color-white);
-            --color-accent-foreground: var(--color-neutral-800);
+    .dark .default {
+        --color-accent: var(--color-blue-600);
+        --color-accent-content: var(--color-white);
+        --color-accent-foreground: var(--color-indigo-200);
 
-            --color-background: #1e293b; /* slate-800 */
-        }
+        /* --color-background: #1e293b;  */
+        /* slate-800 */
     }
 
     /* Desert */
     .desert {
-        --color-accent: var(--color-blue-600); /* primary color */
-        --color-accent-content: var(--color-sand-600); /* secondary color */
-        --color-accent-foreground: var(--color-white); /* text color */
+        --color-accent: var(--color-sand-50); /* primary color */
+        --color-accent-content: var(--color-sand-700); /* secondary color */
+        --color-accent-foreground: var(--color-sand-700); /* text color */
+    }
+
+    .dark .desert {
+        --color-accent: var(--color-sand-600);
+        --color-accent-foreground: var(--color-sand-50);
+        /* text color */
     }
 
     .desert .fill-dunes-foreground { fill: var(--color-sand-50); }
@@ -111,6 +120,199 @@
         --color-accent-content: #f61500;
         --color-background: #111110;
     }
+
+    /* Elixir */
+    .elixir {
+        --color-zinc-50: #f8fafc;   /* Slate-50 */
+        --color-zinc-100: #f1f5f9;
+        --color-zinc-200: #e2e8f0;
+        --color-zinc-300: #cbd5e1;
+        --color-zinc-400: #94a3b8;
+        --color-zinc-500: #64748b;
+        --color-zinc-600: #475569;
+        --color-zinc-700: #334155;
+        --color-zinc-800: #1e293b;
+        --color-zinc-900: #0f172a;
+        --color-zinc-950: #020617;
+
+        --color-accent: #4B275F;
+        --color-accent-content: #6E4C7D;
+        --color-accent-foreground: #D8B4E2;
+    }
+
+    .dark .elixir {
+        --color-accent: #6E4C7D;
+        --color-accent-content: #D8B4E2;
+        --color-accent-foreground: #1A0B24;
+        --color-background: #1A0B24;
+    }
+
+    /* Go */
+    .go {
+        --color-zinc-50: #f9fafb;   /* Neutral-50 */
+        --color-zinc-100: #f3f4f6;
+        --color-zinc-200: #e5e7eb;
+        --color-zinc-300: #d1d5db;
+        --color-zinc-400: #9ca3af;
+        --color-zinc-500: #6b7280;
+        --color-zinc-600: #4b5563;
+        --color-zinc-700: #374151;
+        --color-zinc-800: #1f2937;
+        --color-zinc-900: #111827;
+        --color-zinc-950: #030712;
+
+        --color-accent: #00ADD8;
+        --color-accent-content: #007D9C;
+        --color-accent-foreground: #B3E5FC;
+    }
+
+    .dark .go {
+        --color-accent: #00ADD8;
+        --color-accent-content: #B3E5FC;
+        --color-accent-foreground: #082f49;
+        --color-background: #082f49;
+    }
+
+    /* JavaScript */
+    .javascript {
+        --color-zinc-50: #f8fafc; /* Slate-50 */
+        --color-zinc-100: #f1f5f9;
+        --color-zinc-200: #e2e8f0;
+        --color-zinc-300: #cbd5e1;
+        --color-zinc-400: #94a3b8;
+        --color-zinc-500: #64748b;
+        --color-zinc-600: #475569;
+        --color-zinc-700: #334155;
+        --color-zinc-800: #1e293b;
+        --color-zinc-900: #0f172a;
+        --color-zinc-950: #020617;
+
+        --color-accent: #f7df1e;
+        --color-accent-content: #a29f00;
+        --color-accent-foreground: #000000;
+    }
+
+    .dark .javascript {
+        --color-accent: #f7df1e;
+        --color-accent-content: #f7df1e;
+        --color-accent-foreground: #000000;
+        --color-background: #121212;
+    }
+
+    /* PHP */
+/*
+1. "Documentation" section (image with Downloads & Documentation)
+Highlight background (Downloads): #4f5595
+
+Regular background (Documentation): #52598e
+
+Text color: #e7ebff (a very light bluish white)
+
+2. "Fibers" text
+Text color: #764261 (a deep mauve/purple)
+
+3. Light background
+Color: #f1f1f1 (a light gray)
+
+4. Dark background
+Color: #2e2e2e (a near-black charcoal) */
+
+    .php {
+        --color-dark-blue: #4a4e86;
+        --color-medium-blue: #52598e;
+        --color-light-blue: #e7ebff;
+
+        --color-dark-magenta: #793862;
+        --color-medium-magenta: #764261;
+
+        --color-periwinkle: #a1a2dc;
+
+        --color-text-white: #ffffff;
+
+        --color-zinc-50:  #f9f9fa;
+        --color-zinc-100: #f2f2f4;
+        --color-zinc-200: #e6e7ea;
+        --color-zinc-300: #d5d6db;
+        --color-zinc-400: #babcc3;
+        --color-zinc-500: #9fa1aa;
+        --color-zinc-600: #7e8089;
+        --color-zinc-700: #5f616a;
+        --color-zinc-800: #47484f;
+        --color-zinc-900: #2f3035;
+        --color-zinc-950: #1f2023;
+
+        --color-accent: var(--color-dark-blue);
+        --color-accent-content: var(--color-medium-magenta);
+        --color-accent-foreground: var(--color-light-blue);
+
+        --color-background: #F2F2F2;
+    }
+
+    .dark .php {
+        --color-accent-content: var(--color-dark-magenta);
+
+        --color-background: #2C2C2C;
+    }
+
+    /* React */
+    .react {
+        --color-zinc-50: #f0f9ff; /* Sky-50 */
+        --color-zinc-100: #e0f2fe;
+        --color-zinc-200: #bae6fd;
+        --color-zinc-300: #7dd3fc;
+        --color-zinc-400: #38bdf8;
+        --color-zinc-500: #0ea5e9;
+        --color-zinc-600: #0284c7;
+        --color-zinc-700: #0369a1;
+        --color-zinc-800: #075985;
+        --color-zinc-900: #0c4a6e;
+        --color-zinc-950: #082f49;
+
+        --color-accent: #61dafb;
+        --color-accent-content: #21a1c4;
+        --color-accent-foreground: #e0f9ff;
+    }
+
+    .dark .react {
+        --color-accent: #61dafb;
+        --color-accent-content: #e0f9ff;
+        --color-accent-foreground: #082f49;
+        --color-background: #082f49;
+    }
+
+    /* Ruby */
+    .ruby {
+        --color-zinc-50: #fef2f2; /* Rose-50 */
+        --color-zinc-100: #fee2e2;
+        --color-zinc-200: #fecaca;
+        --color-zinc-300: #fca5a5;
+        --color-zinc-400: #f87171;
+        --color-zinc-500: #ef4444;
+        --color-zinc-600: #dc2626;
+        --color-zinc-700: #b91c1c;
+        --color-zinc-800: #991b1b;
+        --color-zinc-900: #7f1d1d;
+        --color-zinc-950: #450a0a;
+
+        --color-accent: #cc342d;
+        --color-accent-content: #a72b26;
+        --color-accent-foreground: #fcd7d5;
+    }
+
+    .dark .ruby {
+        --color-accent: #cc342d;
+        --color-accent-content: #fcd7d5;
+        --color-accent-foreground: #450a0a;
+        --color-background: #450a0a;
+    }
+}
+
+.dark .light {
+    color-scheme: light;
+}
+
+.light .dark {
+    color-scheme: dark;
 }
 
 /* Flux Component Overrides */
@@ -124,6 +326,61 @@
     [data-flux-sidebar] {
         background-color: var(--color-background);
         @apply lg:bg-inherit;
+    }
+}
+
+.php {
+    [data-flux-sidebar] {
+        --color-zinc-50: var(--color-medium-blue);
+        --color-zinc-500: var(--color-light-blue);
+        --color-zinc-900: var(--color-medium-blue);
+
+        a:hover {
+            @apply bg-[var(--color-dark-blue)];
+            @apply text-[var(--color-white)];
+        }
+
+        /* user dropdown */
+        [data-flux-dropdown]:hover {
+            @apply bg-[var(--color-dark-blue)];
+            @apply text-[var(--color-white)];
+
+            [data-flux-avatar] {
+                @apply text-[var(--color-medium-magenta)];
+            }
+
+            span:not([data-flux-avatar] span, [data-flux-menu] span) {
+                @apply text-[var(--color-white)];
+            }
+
+            /* Only target icons that are direct children or within specific elements,
+               but NOT inside menus */
+            & > [data-flux-icon],
+            [data-flux-profile] [data-flux-icon] {
+                @apply text-[var(--color-white)];
+            }
+        }
+    }
+
+    /* Menu styles with higher specificity */
+    [data-flux-menu] {
+        @apply bg-[var(--color-light-blue)];
+        @apply text-[var(--color-medium-magenta)];
+
+        /* This ensures menu items are always magenta,
+           even when the dropdown is hovered */
+        [data-flux-menu-item],
+        [data-flux-icon],
+        span {
+            @apply text-[var(--color-medium-magenta)];
+        }
+    }
+}
+
+.dark .php {
+    [data-flux-card] {
+        @apply bg-[var(--color-background)];
+        @apply border-[var(--color-dark-periwinkle)];
     }
 }
 
@@ -144,7 +401,9 @@
 
     .dark & {
         [data-flux-card] {
-            --color-white: rgba(255, 255, 255);
+            /* --color-white: rgba(255, 255, 255); */
+            background: rgba(255, 255, 255, .05);
+            --text-color-white: var(--color-sand-50);
         }
 
         [data-flux-sidebar] {
