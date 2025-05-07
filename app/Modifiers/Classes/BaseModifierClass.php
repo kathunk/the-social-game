@@ -18,6 +18,8 @@ abstract class BaseModifierClass
 
     const TYPE = 'team'; // team or individual
 
+    const IS_SECRET = false;
+
     abstract public static function key(): string;
 
     public ?Player $player = null;
@@ -42,6 +44,16 @@ abstract class BaseModifierClass
     public static function fromKey(string $key): static
     {
         return new static;
+    }
+
+    public function dataArrayForState(): array
+    {
+        return [];
+    }
+
+    public function onSecretDiscovered(Player $player)
+    {
+        // Optional override
     }
 
     public function onRoundEnded()
@@ -94,11 +106,6 @@ abstract class BaseModifierClass
         }
 
         return $properties;
-    }
-
-    public function dataArrayForState(): array
-    {
-        return [];
     }
 
     public function validationRulesForLivewire(Player $player): array

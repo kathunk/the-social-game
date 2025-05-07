@@ -3,7 +3,6 @@
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerSubmittedQuizGuess;
-use App\Events\PlayerSubmittedPeckingOrderBallot;
 use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);

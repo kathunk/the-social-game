@@ -194,11 +194,15 @@ class GameDashboard extends Component
 
         // @todo validate params
 
-        $modifier = $this->modifiers->firstWhere('key', $modifier_key);
-
+        $modifier = $this->modifiers->firstWhere('class_key', $modifier_key);
         $modifier->handler()->{$action}($this->player, $params);
 
-        redirect()->route('game-dashboard', ['game' => $this->game]);
+        $response = $modifier->handler()->{$action}($this->player, $params);
+
+        return $response instanceof \Illuminate\Http\RedirectResponse
+            || $response instanceof \Livewire\Features\SupportRedirects\Redirector
+            ? $response
+            : redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
     public function render()

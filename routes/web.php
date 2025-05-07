@@ -1,15 +1,16 @@
 <?php
 
-use App\Livewire\CreateGame;
-use App\Livewire\GameDashboard;
-use App\Livewire\GameTemplatesListPage;
 use App\Livewire\Home;
-use App\Livewire\ManageGameTemplatePage;
-use App\Livewire\PlayerPage;
-use App\Livewire\PreGameLobby;
-use App\Livewire\TeamPage;
-use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Livewire\TeamPage;
+use App\Livewire\CreateGame;
+use App\Livewire\PlayerPage;
+use App\Livewire\SecretsPage;
+use App\Livewire\PreGameLobby;
+use App\Livewire\GameDashboard;
+use Illuminate\Support\Facades\Route;
+use App\Livewire\GameTemplatesListPage;
+use App\Livewire\ManageGameTemplatePage;
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,6 +31,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/game-templates', GameTemplatesListPage::class)->name('game-templates.index');
     Route::get('/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');
     Route::get('/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
+    Route::get('/games/{game}/secrets/{modifier}', SecretsPage::class)->name('games.secrets');
 });
 
 Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');

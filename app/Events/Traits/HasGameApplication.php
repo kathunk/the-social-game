@@ -2,6 +2,7 @@
 
 namespace App\Events\Traits;
 
+use App\Models\GameApplication;
 use App\States\GameApplicationState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 
@@ -21,5 +22,10 @@ trait HasGameApplication
             $this->state(GameApplicationState::class)->game_id === $this->game_id,
             'Application does not match the game',
         );
+    }
+
+    public function gameApplication()
+    {
+        return GameApplication::find($this->application_id);
     }
 }

@@ -20,9 +20,6 @@ class TeamResignation extends BaseModifierClass
 
     public function frontendComponent(Player $player): array
     {
-        // @todo implement
-        $player_has_resigned = false;
-
         if (! $player->team) {
             return [];
         }
@@ -34,7 +31,6 @@ class TeamResignation extends BaseModifierClass
                 label: 'How many points should we give your team?',
                 placeholder: 'Select a number...',
                 options: [
-                    // @todo I'm still running into this issue where the first option in the select looks real but has no value
                     '3' => '+3',
                     '-3' => '-3',
                 ],
