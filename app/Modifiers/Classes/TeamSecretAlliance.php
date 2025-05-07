@@ -31,8 +31,15 @@ class TeamSecretAlliance extends BaseModifierClass
 
     public function frontendComponent(Player $player): array
     {
-        // @todo delete this
-        $ally = Player::where('game_id', $player->game_id)->where('id', '!=', $player->id)->inRandomOrder()->first();
+        $has_ally = isset($this->modifier->modifier_data['ally_pair_ids'][$player->id]);
+        $ally = null;
+        $elligible_partner_exists = false;
+
+        if ($has_ally) {
+            $ally = Player::find($this->modifier->modifier_data['ally_pair_ids'][$player->id]);
+        } else {
+            
+        }
 
         $description = strtr(self::DESCRIPTION, [
             '{player_name}' => $ally->name,
@@ -41,8 +48,6 @@ class TeamSecretAlliance extends BaseModifierClass
 
         $player_is_active = $player->status === 'active';
         $player_is_on_dashboard = Route::currentRouteName() === 'game-dashboard';
-        // @todo check if they already have an ally
-        $player_has_ally = false;
         $player_is_lucky = rand(0, 100) > 0;
 
         if ($player_is_active && $player_is_on_dashboard && ! $player_has_ally && $player_is_lucky) {
@@ -70,18 +75,21 @@ class TeamSecretAlliance extends BaseModifierClass
         return redirect()->route('games.secrets', ['game' => $player->game, 'modifier' => $this->modifier]);
     }
 
+    public function elligiblePartners(Player $player)
+    {
+        return $player->game->players->where('status', 'active')
+            ->reject(fn($p) => collect($this->modifier->modifier_data['ally_pair_ids'])->contains($p->id))
+            ->filter(fn($p) => $p->id === $player->id)
+            ->filter(fn($p) => $p->team_id !== null && $p->team_id === $player->team_id);
+    }
+
     public function onSecretDiscovered(Player $player)
     {
-        $allied_player_ids = collect($this->modifier->modifier_data['ally_pair_ids']);
-
-        if ($allied_player_ids->contains($player->id)) {
+        if (collect($this->modifier->modifier_data['ally_pair_ids'])->contains($player->id)) {
             return;
         }
 
-        $unallied_player_ids = $player->game->players->where('status', 'active')
-            ->get()
-            ->reject(fn($p) => $allied_player_ids->contains($p->id))
-            ->filter(fn($p) => $p->id === $player->id);
+        $unallied_player_ids = $this->elligiblePartners($player)->pluck('id');
 
         if ($unallied_player_ids->count() === 0) {
             return;
