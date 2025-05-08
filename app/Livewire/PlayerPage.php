@@ -42,9 +42,9 @@ class PlayerPage extends Component
             ->values();
     }
 
-    public function mount(Game $game, Player $player)
+    public function mount(string $snowflake, Player $player)
     {
-        $this->game = $game;
+        $this->game = Game::findOrFail($snowflake);
         $this->player = $player;
     }
 

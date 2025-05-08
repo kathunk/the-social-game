@@ -2,12 +2,14 @@
 
 namespace App\Livewire;
 
+use App\Models\Game;
 use App\Models\Team;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\Attributes\Computed;
 
 class TeamPage extends Component
 {
+    public Game $game;
     public Team $team;
 
     #[Computed]
@@ -17,19 +19,14 @@ class TeamPage extends Component
     }
 
     #[Computed]
-    public function game()
-    {
-        return $this->team->game;
-    }
-
-    #[Computed]
     public function scoreHistoryEntries(): array
     {
         return array_reverse($this->team->state()->score_history);
     }
 
-    public function mount(Team $team)
+    public function mount(string $snowflake, Team $team)
     {
+        $this->game = Game::findOrFail($snowflake);
         $this->team = $team;
     }
 

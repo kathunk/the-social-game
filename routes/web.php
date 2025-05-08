@@ -22,16 +22,22 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/password', 'settings.password')->name('settings.password');
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 
-    Route::get('/games/{game}/dashboard', GameDashboard::class)->name('game-dashboard');
     Route::get('/dashboard', Home::class)->name('dashboard');
-    Route::get('/games/{game}/teams/{team}', TeamPage::class)->name('teams.show');
-    Route::get('/games/{game}/players/{player}', PlayerPage::class)->name('players.show');
     Route::get('/create-game', CreateGame::class)->name('create-game');
+
+    Route::middleware(['game-exists'])->group(function () {
+        Route::get('/games/{snowflake}/dashboard', GameDashboard::class)->name('game-dashboard');
+        Route::get('/games/{snowflake}/teams/{team}', TeamPage::class)->name('teams.show');
+        Route::get('/games/{snowflake}/players/{player}', PlayerPage::class)->name('players.show');
+    });
+
     Route::get('/game-templates', GameTemplatesListPage::class)->name('game-templates.index');
     Route::get('/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');
     Route::get('/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
 });
 
-Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
+Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)
+    ->name('pre-game-lobby')
+    ->middleware('game-exists');
 
 require __DIR__.'/auth.php';
