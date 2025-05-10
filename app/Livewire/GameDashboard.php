@@ -107,9 +107,9 @@ class GameDashboard extends Component
         return $this->game->modifiers;
     }
 
-    public function mount(string $snowflake)
+    public function mount(Game $game)
     {
-        $this->game = Game::findOrFail($snowflake);
+        $this->game = $game;
 
         if (! $this->player || $this->game->status === 'upcoming') {
             return redirect()->route('pre-game-lobby', ['game' => $this->game]);

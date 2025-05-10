@@ -1,15 +1,15 @@
 <?php
 
-use App\Livewire\CreateGame;
-use App\Livewire\GameDashboard;
-use App\Livewire\GameTemplatesListPage;
 use App\Livewire\Home;
-use App\Livewire\ManageGameTemplatePage;
+use Livewire\Volt\Volt;
+use App\Livewire\TeamPage;
+use App\Livewire\CreateGame;
 use App\Livewire\PlayerPage;
 use App\Livewire\PreGameLobby;
-use App\Livewire\TeamPage;
+use App\Livewire\GameDashboard;
 use Illuminate\Support\Facades\Route;
-use Livewire\Volt\Volt;
+use App\Livewire\GameTemplatesListPage;
+use App\Livewire\ManageGameTemplatePage;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,12 +25,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', Home::class)->name('dashboard');
     Route::get('/create-game', CreateGame::class)->name('create-game');
 
-    Route::middleware(['game-exists'])->group(function () {
-        Route::get('/games/{snowflake}/dashboard', GameDashboard::class)->name('game-dashboard');
-        Route::get('/games/{snowflake}/teams/{team}', TeamPage::class)->name('teams.show');
-        Route::get('/games/{snowflake}/players/{player}', PlayerPage::class)->name('players.show');
-        Route::get('/games/{snowflake}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
-    });
+    Route::get('/games/{game}/dashboard', GameDashboard::class)->name('game-dashboard');
+    Route::get('/games/{game}/teams/{team}', TeamPage::class)->name('teams.show');
+    Route::get('/games/{game}/players/{player}', PlayerPage::class)->name('players.show');
+    Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
 
     Route::get('/game-templates', GameTemplatesListPage::class)->name('game-templates.index');
     Route::get('/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');

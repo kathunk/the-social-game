@@ -19,7 +19,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $password = '';
 
     public bool $remember = false;
-    
     public ?string $game = null;
 
     public function mount(): void
@@ -48,9 +47,15 @@ new #[Layout('components.layouts.auth')] class extends Component {
         Session::regenerate();
 
         if ($this->game) {
-            $this->redirect(route('pre-game-lobby', ['game' => $this->game], absolute: false), navigate: true);
+            $this->redirect(route('dashboard', absolute: false), navigate: true);
         } else {
-            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+            if (Session::has('url.intended') && str_contains(Session::get('url.intended'), '/games/')) {
+                dump(request()->query('game'));
+                Session::forget('url.intended');
+                $this->redirect(route('dashboard', absolute: false), navigate: true);
+            } else {
+                $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+            }
         }
     }
 

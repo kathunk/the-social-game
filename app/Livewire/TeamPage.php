@@ -2,15 +2,12 @@
 
 namespace App\Livewire;
 
-use App\Models\Game;
 use App\Models\Team;
-use Livewire\Component;
 use Livewire\Attributes\Computed;
-use Illuminate\Support\Facades\Log;
+use Livewire\Component;
 
 class TeamPage extends Component
 {
-    public Game $game;
     public Team $team;
 
     #[Computed]
@@ -20,43 +17,20 @@ class TeamPage extends Component
     }
 
     #[Computed]
+    public function game()
+    {
+        return $this->team->game;
+    }
+
+    #[Computed]
     public function scoreHistoryEntries(): array
     {
         return array_reverse($this->team->state()->score_history);
     }
 
-    public function mount(string $snowflake, Team $team)
+    public function mount(Team $team)
     {
-        Log::debug('TeamPage mount', [
-            'snowflake' => $snowflake,
-            'team_id' => $team->id,
-            'game_exists' => Game::where('id', $snowflake)->exists(),
-            'team_game_id' => $team->game_id ?? 'unknown'
-        ]);
-
-        // First check if game exists
-        if (!Game::where('id', $snowflake)->exists()) {
-            Log::debug('Game does not exist, redirecting');
-            return redirect()->route('dashboard');
-        }
-
-        try {
-            $this->game = Game::findOrFail($snowflake);
-
-            // Check if team belongs to this game
-            if ($team->game_id != $snowflake) {
-                Log::debug('Team does not belong to this game, redirecting');
-                return redirect()->route('dashboard');
-            }
-
-            $this->team = $team;
-        } catch (\Exception $e) {
-            Log::error('Error mounting TeamPage', [
-                'error' => $e->getMessage(),
-                'snowflake' => $snowflake
-            ]);
-            return redirect()->route('dashboard');
-        }
+        $this->team = $team;
     }
 
     public function render()
