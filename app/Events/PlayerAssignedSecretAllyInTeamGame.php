@@ -53,7 +53,7 @@ class PlayerAssignedSecretAllyInTeamGame extends Event
         $modifier->modifier_data['pairs'][] = [
             'player_1_id' => $this->player_id,
             'player_2_id' => $this->ally_id,
-            'player_1_original_team_id' => $this->state($this->player_id)->team_id,
+            'player_1_original_team_id' => $this->state(PlayerState::class)->team_id,
             'player_2_original_team_id' => $ally->team_id,
             'has_connected' => false,
         ];

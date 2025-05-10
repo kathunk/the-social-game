@@ -65,6 +65,7 @@ abstract class BaseModifierClass
         PlayerState $player_state,
         TeamState $team_state,
         GameState $game_state,
+        ModifierState $modifier_state,
         ?TeamState $previous_team = null,
     ) {
         // Optional override

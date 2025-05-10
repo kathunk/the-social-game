@@ -3,6 +3,10 @@
 namespace App\Modifiers\Classes;
 
 use App\Models\Player;
+use App\States\GameState;
+use App\States\TeamState;
+use App\States\PlayerState;
+use App\States\ModifierState;
 use Thunk\Verbs\Facades\Verbs;
 use Illuminate\Support\Facades\Route;
 use App\Events\PlayerResignedInTeamGame;
@@ -26,13 +30,15 @@ class TeamSecretAlliance extends BaseModifierClass
 
     public function dataArrayForState(): array
     {
-        return ['ally_pairs' => []];
+        return ['pairs' => []];
     }
 
     public function frontendComponent(Player $player): array
     {
-        $ally = $this->ally($player);
-        $elligible_partner_exists = $ally ? false : $this->elligiblePartners($player)->count() > 0;
+        $pair_data = new TeamSecretAlliancePairData(player: $player, modifier: $this->modifier);
+        $ally = $pair_data->ally();
+        $elligible_partner_exists = $pair_data->ally() ? false : $this->elligiblePartners($player)->count() > 0;
+        $has_connected = $pair_data->hasConnected();
         $player_is_active = $player->status === 'active';
         $player_is_on_dashboard = Route::currentRouteName() === 'game-dashboard';
         $player_is_lucky = rand(0, 100) > 0;
@@ -49,6 +55,13 @@ class TeamSecretAlliance extends BaseModifierClass
                 ->buttonGroup()
                     ->button('Learn more', 'learnMore')
                 ->endGroup()
+                ->build();
+        }
+
+        if ($has_connected) {
+            return $this->form()
+                ->title(static::NAME)
+                ->subtitle('Congratulations! You have found your star crossed ally, and your team was rewarded.')
                 ->build();
         }
 
@@ -72,31 +85,6 @@ class TeamSecretAlliance extends BaseModifierClass
     public function learnMore(Player $player, array $params)
     {
         return redirect()->route('games.secrets', ['game' => $player->game, 'modifier' => $this->modifier]);
-    }
-
-    public function alliedPlayerIds(Player $player)
-    {
-        return collect($this->modifier->modifier_data['pairs'])
-            ->reduce(function ($carry, $pair) {
-                $carry[] = $pair['player_1_id'];
-                $carry[] = $pair['player_2_id'];
-
-                return $carry;
-            }, []);
-    }
-
-    public function ally(Player $player)
-    {
-        return collect($this->modifier->modifier_data['pairs'])
-            ->filter(fn($pair) => $pair['player_1_id'] === $player->id || $pair['player_2_id'] === $player->id)
-            ->first()
-            ?->map(function($pair) {
-                if ($pair['player_1_id'] === $player->id) {
-                    return Player::find($pair['player_2_id']);
-                }
-
-                return Player::find($pair['player_1_id']);
-            });
     }
 
     public function elligiblePartners(Player $player)
@@ -148,4 +136,91 @@ class TeamSecretAlliance extends BaseModifierClass
 
         return redirect()->route('games.secrets', [$player->game, $this->modifier]);
     }
+
+    public function onPlayerJoinedTeam(
+        PlayerState $player_state,
+        TeamState $team_state,
+        GameState $game_state,
+        ModifierState $modifier_state,
+        ?TeamState $previous_team = null,
+    ) {
+        $pair_data = $this->pairData($player_state);
+        $ally = $this->ally($player_state);
+
+        if ( ! $pair_data) {
+            return;
+        }
+
+        if ($ally->team_id !== $team_state->id) {
+            return;
+        }
+
+        if ($pair_data['has_connected']) {
+            return;
+        }
+
+        if ($pair_data['player_1_original_team_id'] === $team_state->id || $pair_data['player_2_original_team_id'] === $team_state->id) {
+            return;
+        }
+
+        $team_state->addToScoreHistory(5, 'Secret alliance bonus');
+
+        $modifier_state->modifier_data['pairs'] = collect($modifier_state->modifier_data['pairs'])
+            ->map(function ($pair) use ($pair_data) {
+                if ($pair['player_1_id'] === $pair_data['player_1_id'] && $pair['player_2_id'] === $pair_data['player_2_id']) {
+                    $pair['has_realized_reward'] = true;
+                }
+
+                return $pair;
+            });
+    }
 }
+
+class TeamSecretAlliancePairData
+{
+    public function __construct(
+        public int $player_id,
+        public ?ModifierState $modifier_state = null,
+        public ?Modifier $modifier = null,
+    ) {
+        return $this->pairData();
+    }
+
+    public function pairData()
+    {
+        if ( ! $this->modifier_state || ! $this->modifier) {
+            return null;
+        }
+
+        if ($this->modifier) {
+            return collect($this->modifier->modifier_data['pairs'])
+                ->filter(fn($pair) => $pair['player_1_id'] === $this->player_id || $pair['player_2_id'] === $this->player_id)
+                ->first();
+        }
+
+        return collect($this->modifier_state->modifier_data['pairs'])
+            ->filter(fn($pair) => $pair['player_1_id'] === $this->player_id || $pair['player_2_id'] === $this->player_id)
+            ->first();
+    }
+
+    public function hasConnected()
+    {
+        return $this->pairData()['has_connected'];
+    }
+
+    public function originalTeamIds()
+    {
+        return [
+            $this->pairData()['player_1_original_team_id'],
+            $this->pairData()['player_2_original_team_id'],
+        ];
+    }
+
+    public function ally()
+    {
+        return $this->pairData()['player_1_id'] === $this->player_id 
+            ? $this->pairData()['player_2_id'] 
+            : $this->pairData()['player_1_id'];
+    }
+}
+
