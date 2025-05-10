@@ -13,8 +13,13 @@ class MissingGameHandler
         $params = collect($request->route()->parameters());
 
         if ($params->has('game')) {
-            $game_id = $params->get('game');
-            $game = Game::firstWhere('id', $game_id);
+            $game = $params->get('game');
+
+            $game = $game instanceof Game
+                ? $game
+                : Game::firstWhere('id', $game);
+
+            isset($game);
 
             return isset($game)
                 ? Redirect::route('game-dashboard', ['game' => $game])
