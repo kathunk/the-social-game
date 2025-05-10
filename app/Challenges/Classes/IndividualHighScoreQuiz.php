@@ -50,14 +50,18 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
                 options: $players->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
                 label: 'Guess which player will be at the top of the scoreboard',
                 placeholder: 'Select a player...',
-                validation_rules: 'required|in:'.implode(',', $players->pluck('id')->toArray()),
+                validation_rules: 'required|string|in:'.implode(',', $players->pluck('id')->toArray()),
                 validation_messages: [
                     'required' => 'Must select a player',
                     'in' => 'Must select a valid player',
                 ],
             )
                 ->buttonGroup()
-                ->button('Submit Guess', 'guess')
+                ->button(
+                    label: 'Submit Guess',
+                    action: 'guess',
+                    properties_to_validate: ['guess_player_id'],
+                )
                 ->endGroup()
             )
             ->when(! $has_guessed || ! $has_voted, fn ($form) => $form->divider()
