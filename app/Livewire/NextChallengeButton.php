@@ -19,12 +19,12 @@ class NextChallengeButton extends Component
         }
 
         return ($game->challenges->last()->id !== $game->currentChallenge->id)
-                && app()->environment('local');
+                && config('app.env') === 'local';
     }
 
     public function nextChallenge()
     {
-        if (! app()->environment('local')) {
+        if (config('app.env') !== 'local') {
             abort(403, 'This action is unauthorized.');
         }
 

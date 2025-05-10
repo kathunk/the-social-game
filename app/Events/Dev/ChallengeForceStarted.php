@@ -15,7 +15,7 @@ class ChallengeForceStarted extends Event
     public function validate()
     {
         $this->assert(
-            app()->environment('local'),
+            config('app.env') === 'local',
             'This command is only available in local environment'
         );
     }
