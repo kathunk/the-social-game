@@ -9,7 +9,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class BountySeeder extends Seeder
+class Laracon2025TeamPlayerSeeder extends Seeder
 {
     public function run(): void
     {
