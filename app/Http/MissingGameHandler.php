@@ -19,7 +19,6 @@ class MissingGameHandler
                 ? $game
                 : Game::firstWhere('id', $game);
 
-
             return isset($game)
                 ? Redirect::route('game-dashboard', ['game' => $game])
                 : Redirect::route('dashboard');

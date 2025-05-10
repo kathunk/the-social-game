@@ -19,14 +19,19 @@ class TeamPage extends Component
     }
 
     #[Computed]
+    public function game()
+    {
+        return $this->team->game;
+    }
+
+    #[Computed]
     public function scoreHistoryEntries(): array
     {
         return array_reverse($this->team->state()->score_history);
     }
 
-    public function mount(Game $game, Team $team)
+    public function mount(Team $team)
     {
-        $this->game = $game;
         $this->team = $team;
     }
 
