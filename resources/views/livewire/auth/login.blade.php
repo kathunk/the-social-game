@@ -47,7 +47,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         Session::regenerate();
 
         if ($this->game) {
-            $this->redirect(route('dashboard', absolute: false), navigate: true);
+            $this->redirect(route('pre-game-lobby', ['game' => $this->game], absolute: false), navigate: true);
         } else {
             if (Session::has('url.intended') && str_contains(Session::get('url.intended'), '/games/')) {
                 Session::forget('url.intended');
