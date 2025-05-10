@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Team;
 use App\Models\Player;
 use Thunk\Verbs\Facades\Verbs;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Queue\Middleware\Skip;
 use App\Challenges\Classes\TeamBounty;
 use App\Challenges\Classes\PyramidScheme;
 
@@ -69,39 +71,55 @@ it('assigns bounties to teams on challenge start', function () {
     expect(count($bounties))->toBe(4);
     expect(collect($bounties)->every(fn($bounty) => count($bounty) === 3))->toBeTrue();
 
-    // Each team's bounty list should have players from other teams
-    foreach ($bounties as $team_id => $player_ids) {
-        expect(count($player_ids))->toBe(3);
+    foreach ($bounties as $assigned_team_id => $bounty_player_ids) {
+        $bounty_players = collect($bounty_player_ids)->map(fn($id) => Player::find($id));
+        $bounty_players_team_ids = $bounty_players->map(fn($p) => $p->team_id);
 
-        $players = collect($player_ids)->map(fn($id) => Player::find($id));
-        $players->each(function($player) use ($team_id) {
-            expect($player->team_id)->not->toBe($team_id);
-        });
+        // bounty players should not be from their assigned team
+        expect($bounty_players_team_ids->doesntContain($assigned_team_id))->toBeTrue();
+
+        // each bounty player should be from a unique team
+        expect($bounty_players_team_ids->count() === $bounty_players_team_ids->unique()->count())->toBeTrue();
     }
 });
 
 it('only awards points when a team recruits their bounty', function () {
-    $bounties = $this->challenge->challenge_data['team_bounties'];
+    $this->challenge = $this->game->fresh()->currentChallenge;
 
-    // recruit the first bounty player for team_1
-    $bounty_player_id = $bounties[$this->team_1->id][0];
-    $bounty_player = Player::find($bounty_player_id);
+    $bounties = $this->challenge->state()->fresh()->challenge_data['team_bounties'];
 
-    $bounty_player->joinTeam($this->team_1);
+    foreach ($bounties as $assigned_team_id => $bounty_player_ids) {
+        $team = Team::find($assigned_team_id);
 
-    // recruit a player who is not one of our team's bounty players
-    $non_bounty_player = Player::query()
-        ->whereNotIn('id', $bounties[$this->team_1->id])
-        ->where('team_id', '!=', $this->team_1->id)
-        ->first();
+        // recruit a bounty player assigned to the team
+        $bounty_player = Player::query()
+            ->whereNotIn('id', $this->challenge->state()->fresh()->challenge_data['swapper_ids'])
+            ->where('team_id', '!=', $assigned_team_id)
+            ->whereIn('id', $bounty_player_ids)
+            ->first();
 
-    $non_bounty_player->joinTeam($this->team_1);
+        $bounty_player->joinTeam($team);
+        expect($bounty_player->refresh()->team_id)->toBe($assigned_team_id);
 
-    // Team gets 15 points for recruiting their bounty
-    expect($this->team_1->fresh()->score)->toBe(15);
+        // assigned team gets 15 points for recruiting their bounty
+        expect($team->fresh()->score)->toBe(15);
+
+        // recruit a player not assigned to the team
+        $non_bounty_player = Player::query()
+            ->whereNotIn('id', $this->challenge->state()->fresh()->challenge_data['swapper_ids'])
+            ->where('team_id', '!=', $assigned_team_id)
+            ->whereNotIn('id', $bounty_player_ids)
+            ->first();
+
+        $non_bounty_player->joinTeam($team);
+        expect($non_bounty_player->refresh()->team_id)->toBe($assigned_team_id);
+
+        // assigned team does not get points for recruiting a non-bounty player
+        expect($team->fresh()->score)->toBe(15);
+    }
 });
 
-it('prevents players from switching teams multiple times', function () {
+it('players may only switch teams once during this challenge', function () {
     $player = $this->player_1;
 
     // First team switch should work
