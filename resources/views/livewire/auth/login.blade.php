@@ -50,7 +50,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
             $this->redirect(route('dashboard', absolute: false), navigate: true);
         } else {
             if (Session::has('url.intended') && str_contains(Session::get('url.intended'), '/games/')) {
-                dump(request()->query('game'));
                 Session::forget('url.intended');
                 $this->redirect(route('dashboard', absolute: false), navigate: true);
             } else {
