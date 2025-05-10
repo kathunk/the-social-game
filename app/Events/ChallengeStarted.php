@@ -27,14 +27,19 @@ class ChallengeStarted extends Event
         $state->current_challenge_id = $this->challenge_id;
     }
 
-    public function applyToChallenge(ChallengeState $state)
+    public function applyToChallenge(ChallengeState $challenge)
     {
-        $state->status = 'active';
+        $challenge->status = 'active';
+        $challenge->challenge_data = $challenge->handler()->dataArrayForState();
     }
 
-    public function handle()
+    public function handle(ChallengeState $state)
     {
         Game::find($this->game_id)->update(['current_challenge_id' => $this->challenge_id]);
-        Challenge::find($this->challenge_id)->update(['status' => 'active']);
+
+        Challenge::find($this->challenge_id)->update([
+            'status' => 'active',
+            'challenge_data' => $state->challenge_data,
+        ]);
     }
 }
