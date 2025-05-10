@@ -47,10 +47,13 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
 
     public function frontendComponent(Player $player): array
     {
-        $bounties = $this->challenge_state->challenge_data['team_bounties'][$player->team_id];
+        $bounties = $this->challenge->challenge_data['team_bounties'][$player->team_id];
 
         $description = strtr(self::DESCRIPTION, [
-            '{3 players}' => collect($bounties)->map(fn ($id) => Player::find($id)->name)->implode(', '),
+            '{3 players}' => collect($bounties)->map(function ($id) {
+                $player = Player::find($id);
+                return $player->name . ' (' . $player->team->name . ')';
+            })->implode(', '),
         ]);
 
         if ($this->playerCanSwapTeams(player: $player)) {

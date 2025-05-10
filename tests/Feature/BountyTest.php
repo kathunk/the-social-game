@@ -64,8 +64,6 @@ beforeEach(function () {
 });
 
 it('assigns bounties to teams on challenge start', function () {
-    $this->challenge = $this->game->fresh()->currentChallenge;
-
     $bounties = $this->challenge->state()->fresh()->challenge_data['team_bounties'];
 
     expect(count($bounties))->toBe(4);
@@ -84,8 +82,6 @@ it('assigns bounties to teams on challenge start', function () {
 });
 
 it('only awards points when a team recruits their bounty', function () {
-    $this->challenge = $this->game->fresh()->currentChallenge;
-
     $bounties = $this->challenge->state()->fresh()->challenge_data['team_bounties'];
 
     foreach ($bounties as $assigned_team_id => $bounty_player_ids) {
