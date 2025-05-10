@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Game;
 use App\Livewire\Home;
 use Livewire\Volt\Volt;
 use App\Livewire\TeamPage;
@@ -8,10 +9,12 @@ use App\Livewire\PlayerPage;
 use Illuminate\Http\Request;
 use App\Livewire\PreGameLobby;
 use App\Livewire\GameDashboard;
+use App\Http\MissingGameHandler;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\GameTemplatesListPage;
 use App\Livewire\ManageGameTemplatePage;
 use Illuminate\Support\Facades\Redirect;
+use App\Http\Middleware\HandleMissingGameRouteParameters;
 
 Route::get('/', function () {
     return view('welcome');
@@ -27,9 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', Home::class)->name('dashboard');
     Route::get('/create-game', CreateGame::class)->name('create-game');
 
-    Route::missing(function (Request $request) {
-        return Redirect::route('dashboard');
-    })->group(function () {
+    Route::missing(new MissingGameHandler)->group(function () {
         Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
         Route::get('/games/{game}/dashboard', GameDashboard::class)->name('game-dashboard');
         Route::get('/games/{game}/teams/{team}', TeamPage::class)->name('teams.show');
