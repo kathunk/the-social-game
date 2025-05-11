@@ -225,7 +225,7 @@ Color: #2e2e2e (a near-black charcoal) */
         --color-dark-magenta: #793862;
         --color-medium-magenta: #764261;
 
-        --color-periwinkle: #a1a2dc;
+        --color-periwinkle: #99c;
 
         --color-text-white: #ffffff;
 
@@ -328,8 +328,8 @@ Color: #2e2e2e (a near-black charcoal) */
         @apply lg:bg-inherit;
     }
 }
-
-.php {
+.php,
+.dark .php {
     [data-flux-sidebar] {
         --color-zinc-50: var(--color-medium-blue);
         --color-zinc-500: var(--color-light-blue);
@@ -379,8 +379,8 @@ Color: #2e2e2e (a near-black charcoal) */
 
 .dark .php {
     [data-flux-card] {
-        @apply bg-[var(--color-background)];
-        @apply border-[var(--color-dark-periwinkle)];
+        --color-white: var(--color-zinc-800);
+        @apply bg-[#F2F2F2] !border-[var(--color-periwinkle)] !text-zinc-800;
     }
 }
 

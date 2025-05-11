@@ -109,7 +109,7 @@
 
             <flux:spacer />
 
-            <div class="mt-1.5 mr-1.5">
+             <div class="lg:hidden block absolute top-3 right-24 mr-px z-50">
                 <x-dark-mode-toggle />
             </div>
 
