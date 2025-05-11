@@ -2,16 +2,15 @@
 
 namespace App\Events\Dev;
 
-use Thunk\Verbs\Event;
-use Thunk\Verbs\State;
+use App\Events\Traits\HasActiveGame;
+use App\Events\Traits\HasChallenge;
 use App\Models\Challenge;
 use App\States\ChallengeState;
-use App\Events\Traits\HasChallenge;
-use App\Events\Traits\HasActiveGame;
+use Thunk\Verbs\Event;
 
 class ChallengeForceEnded extends Event
 {
-    use HasChallenge, HasActiveGame;
+    use HasActiveGame, HasChallenge;
 
     public function validate()
     {

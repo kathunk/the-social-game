@@ -1,12 +1,11 @@
 <?php
 
-use App\Models\Team;
-use App\Models\Player;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Support\Facades\Date;
-use Illuminate\Queue\Middleware\Skip;
-use App\Challenges\Classes\TeamBounty;
 use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\Classes\TeamBounty;
+use App\Models\Player;
+use App\Models\Team;
+use Illuminate\Support\Facades\Date;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -67,11 +66,11 @@ it('assigns bounties to teams on challenge start', function () {
     $bounties = $this->challenge->fresh()->challenge_data['team_bounties'];
 
     expect(count($bounties))->toBe(4);
-    expect(collect($bounties)->every(fn($bounty) => count($bounty) === 3))->toBeTrue();
+    expect(collect($bounties)->every(fn ($bounty) => count($bounty) === 3))->toBeTrue();
 
     foreach ($bounties as $assigned_team_id => $bounty_player_ids) {
-        $bounty_players = collect($bounty_player_ids)->map(fn($id) => Player::find($id));
-        $bounty_players_team_ids = $bounty_players->map(fn($p) => $p->team_id);
+        $bounty_players = collect($bounty_player_ids)->map(fn ($id) => Player::find($id));
+        $bounty_players_team_ids = $bounty_players->map(fn ($p) => $p->team_id);
 
         // bounty players should not be from their assigned team
         expect($bounty_players_team_ids->doesntContain($assigned_team_id))->toBeTrue();
@@ -121,7 +120,7 @@ it('players may only switch teams once during this challenge', function () {
     // First team switch should work
     $player->fresh()->joinTeam($this->team_2);
 
-    expect(fn() => $player->fresh()->joinTeam($this->team_3))->toThrow(Exception::class);
+    expect(fn () => $player->fresh()->joinTeam($this->team_3))->toThrow(Exception::class);
 
     expect($this->challenge->fresh()->challenge_data['swapper_ids'])->toContain($player->id);
 

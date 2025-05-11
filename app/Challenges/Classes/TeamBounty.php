@@ -16,7 +16,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
 
     const NAME = 'Bounty';
 
-    const DESCRIPTION = "Your team has been assigned 3 players from other teams as bounties: {3 players}. For each bounty you can convince to defect and join you, your team gains 15 points. But be careful - other teams are trying to recruit your teammates too!";
+    const DESCRIPTION = 'Your team has been assigned 3 players from other teams as bounties: {3 players}. For each bounty you can convince to defect and join you, your team gains 15 points. But be careful - other teams are trying to recruit your teammates too!';
 
     const TYPE = 'team';
 
@@ -40,7 +40,8 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         $description = strtr(self::DESCRIPTION, [
             '{3 players}' => collect($bounties)->map(function ($id) {
                 $player = Player::find($id);
-                return $player->name . ' (' . $player->team->name . ')';
+
+                return $player->name.' ('.$player->team->name.')';
             })->implode(', '),
         ]);
 
@@ -94,9 +95,9 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         foreach ($teams as $team) {
             // Get 3 other random teams
             $other_team_ids = collect($marked_as_bounty)
-                ->reject(fn($bounties) => count($bounties) === 0)
+                ->reject(fn ($bounties) => count($bounties) === 0)
                 ->keys()
-                ->reject(fn($id) => $id === $team->id)
+                ->reject(fn ($id) => $id === $team->id)
                 ->shuffle()
                 ->take(3);
 
@@ -117,7 +118,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         GameState $game_state,
         ?TeamState $previous_team = null,
     ) {
-        if (!$previous_team) {
+        if (! $previous_team) {
             return;
         }
 

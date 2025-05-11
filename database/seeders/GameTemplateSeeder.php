@@ -5,7 +5,6 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\StayOnMessage;
 use App\Challenges\Classes\TeamBounty;
 use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\TeamResignation;

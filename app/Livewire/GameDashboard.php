@@ -4,10 +4,10 @@ namespace App\Livewire;
 
 use App\Models\Game;
 use App\Models\Team;
-use Livewire\Component;
-use Livewire\Attributes\On;
-use Thunk\Verbs\Facades\Verbs;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Component;
+use Thunk\Verbs\Facades\Verbs;
 
 #[On('challenge-complete')]
 class GameDashboard extends Component

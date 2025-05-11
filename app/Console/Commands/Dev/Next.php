@@ -5,9 +5,9 @@ namespace App\Console\Commands\Dev;
 use App\Events\Dev\ChallengeForceEnded;
 use App\Events\Dev\ChallengeForceStarted;
 use App\Models\Challenge;
-use Thunk\Verbs\Facades\Verbs;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Thunk\Verbs\Facades\Verbs;
 
 class Next extends Command
 {
@@ -35,6 +35,7 @@ class Next extends Command
 
         if ($active_challenges->isEmpty()) {
             $this->error('No active challenges found');
+
             return;
         }
 
@@ -44,6 +45,7 @@ class Next extends Command
 
         if ($next_challenges->isEmpty()) {
             $this->error('No next challenges found');
+
             return;
         }
 
