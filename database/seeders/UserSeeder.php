@@ -3,11 +3,10 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\User;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Database\Seeder;
 use App\Events\UserGainedMembership;
 use App\Events\UserPromotedToSuperAdmin;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {

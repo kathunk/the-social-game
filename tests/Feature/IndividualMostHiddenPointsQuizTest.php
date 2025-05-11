@@ -1,10 +1,9 @@
 <?php
 
+use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
+use App\Events\PlayerSubmittedQuizGuess;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
-use App\Events\PlayerSubmittedQuizGuess;
-use App\Events\PlayerSubmittedPeckingOrderBallot;
-use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

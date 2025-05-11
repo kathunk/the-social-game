@@ -19,6 +19,7 @@
         </flux:card>
     @endif
     @if ($this->challengeComponent)
+        <livewire:next-challenge-button />
         <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challengeComponent" />
     @endif
     <x-game-components.scoreboard :teams="$this->teams" :players="$this->players" :type="$this->template->type" />
