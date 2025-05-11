@@ -64,6 +64,7 @@ class PlayerJoinedTeam extends Event
             player_state: $this->state(PlayerState::class),
             team_state: $this->state(TeamState::class),
             game_state: $this->state(GameState::class),
+            modifier_state: $modifier,
             previous_team: $this->previous_team_id ? TeamState::load($this->previous_team_id) : null,
         ));
     }
@@ -104,5 +105,6 @@ class PlayerJoinedTeam extends Event
         $game->teams->each(fn ($t) => $t->update(['score' => $t->state()->score()]));
 
         $game->currentChallenge->updateModelWithStateData();
+        $game->modifiers->each(fn ($m) => $m->updateModelWithStateData());
     }
 }

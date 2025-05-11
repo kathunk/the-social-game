@@ -20,9 +20,6 @@ class TeamResignation extends BaseModifierClass
 
     public function frontendComponent(Player $player): array
     {
-        // @todo implement
-        $player_has_resigned = false;
-
         if (! $player->team) {
             return [];
         }
@@ -34,12 +31,11 @@ class TeamResignation extends BaseModifierClass
                 label: 'How many points should we give your team?',
                 placeholder: 'Select a number...',
                 options: [
-                    // @todo I'm still running into this issue where the first option in the select looks real but has no value
                     '3' => '+3',
                     '-3' => '-3',
                 ],
                 property_name: 'points',
-                validation_rules: 'required|string|in:' . "['-3', '3']",
+                validation_rules: 'required|string|in:'."['-3', '3']",
                 validation_messages: [
                     'points.required' => 'Please select a number.',
                     'points.string' => 'Please select a number.',
@@ -59,7 +55,7 @@ class TeamResignation extends BaseModifierClass
     public function resign(Player $player, array $params)
     {
         // @todo replace this when we finish validation logic for modifiers
-        if(
+        if (
             ! isset($params['points'])
             || (
                 $params['points'] === ''
