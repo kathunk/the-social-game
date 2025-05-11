@@ -54,11 +54,14 @@
     @apply !mb-0 !leading-tight;
 }
 
-input:focus[data-flux-control],
-textarea:focus[data-flux-control],
+:focus {
+    @apply rounded-md outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-white dark:ring-offset-zinc-900;
+}
 
-select:focus[data-flux-control] {
-    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
+/* Fix focus elements in flux tables with overflow-x-auto */
+div:has(> [data-flux-table]) {
+    padding: 4px;
+    margin: -4px;
 }
 
 /* Hide the label for team selection but keeps it for validation */
