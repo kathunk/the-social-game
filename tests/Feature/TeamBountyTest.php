@@ -64,7 +64,7 @@ beforeEach(function () {
 });
 
 it('assigns bounties to teams on challenge start', function () {
-    $bounties = $this->challenge->state()->fresh()->challenge_data['team_bounties'];
+    $bounties = $this->challenge->fresh()->challenge_data['team_bounties'];
 
     expect(count($bounties))->toBe(4);
     expect(collect($bounties)->every(fn($bounty) => count($bounty) === 3))->toBeTrue();

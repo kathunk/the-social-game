@@ -16,7 +16,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
 
     const NAME = 'Bounty';
 
-    const DESCRIPTION = "Your team has been assigned 3 players from 3 other teams as bounties: {3 players}. For each bounty you can convince to defect and join you, your team gains 15 points. But be careful - other teams are trying to recruit your teammates too!";
+    const DESCRIPTION = "Your team has been assigned 3 players from other teams as bounties: {3 players}. For each bounty you can convince to defect and join you, your team gains 15 points. But be careful - other teams are trying to recruit your teammates too!";
 
     const TYPE = 'team';
 
@@ -126,7 +126,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         $team_bounties = $this->challenge_state->challenge_data['team_bounties'][$team_state->id] ?? [];
 
         if (in_array($player_state->id, $team_bounties)) {
-            $team_state->addToScoreHistory(15, "Recruited bounty player {$player_state->name}");
+            $team_state->addToScoreHistory(15, "Recruited {$player_state->name} during the Bounty challenge");
         }
     }
 }
