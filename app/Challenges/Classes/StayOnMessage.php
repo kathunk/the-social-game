@@ -42,7 +42,7 @@ class StayOnMessage extends BaseChallengeClass
                 validation_messages: [
                     'required' => 'I assure you, 0 is less than 50',
                     'min' => "Don't be nervous. We need at least 50 characters from you.",
-                    'max' => "Slow down there John Updike, we don't need a novel",
+                    'max' => "Easy there John Updike, we don't need a novel",
                 ]
             )
             ->buttonGroup()

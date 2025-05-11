@@ -18,8 +18,6 @@ abstract class BaseModifierClass
 
     const TYPE = 'team'; // team or individual
 
-    const IS_SECRET = false;
-
     abstract public static function key(): string;
 
     public ?Player $player = null;

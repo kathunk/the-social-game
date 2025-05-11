@@ -26,12 +26,12 @@ class PlayerAssignedSecretAllyInTeamGame extends Event
             }, []);
 
         $this->assert(
-            !$paired_player_ids->contains($this->player_id),
+            !collect($paired_player_ids)->contains($this->player_id),
             'Player already has an ally'
         );
 
         $this->assert(
-            !$paired_player_ids->contains($this->ally_id),
+            !collect($paired_player_ids)->contains($this->ally_id),
             'Ally already has an ally'
         );
 

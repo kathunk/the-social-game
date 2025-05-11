@@ -24,6 +24,7 @@ beforeEach(function () {
     $this->team = Team::first();
 });
 
+// @todo whoops make this work again
 it('grants points when a player resigns', function () {
     $this->player->joinTeam($this->team);
     $this->player->fresh()->resign(3);
@@ -37,4 +38,4 @@ it('grants points when a player resigns', function () {
     expect($this->team->players->count())->toBe(0);
 
     // @todo test that all the state information is correct too
-})->skip('revisit once we refactor to game modifiers');
+});
