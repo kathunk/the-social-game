@@ -2,10 +2,9 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Artisan;
-use PhpParser\Node\Stmt\Return_;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class NextChallengeButton extends Component
 {

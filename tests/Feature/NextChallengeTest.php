@@ -1,13 +1,10 @@
 <?php
 
-use App\Models\Challenge;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Artisan;
+use App\Challenges\Classes\FlattenTheCurve;
 use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\StayOnMessage;
-use App\Challenges\Classes\FlattenTheCurve;
-use App\Challenges\Classes\BaseChallengeClass;
+use Illuminate\Support\Facades\Artisan;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

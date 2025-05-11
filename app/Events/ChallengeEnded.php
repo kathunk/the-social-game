@@ -16,7 +16,7 @@ class ChallengeEnded extends Event
 
     public function applyToGame(GameState $state)
     {
-        $state->currentChallenge()->handler()->onChallengeEnded($state);
+        $this->state(ChallengeState::class)->handler()->onChallengeEnded($state);
         $state->current_challenge_id = null;
     }
 
