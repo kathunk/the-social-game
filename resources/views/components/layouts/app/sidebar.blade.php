@@ -8,9 +8,11 @@
             $user = auth()->user();
         @endphp
 
-        <div class="absolute lg:top-2.5 top-3 lg:right-12 right-24 z-50">
-            <x-dark-mode-toggle />
-        </div>
+        @if(config('app.env') === 'local')
+            <div class="absolute lg:top-2.5 top-3 lg:right-12 right-24 z-50">
+                <x-dark-mode-toggle />
+            </div>
+        @endif
 
         @if ($user)
             <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
