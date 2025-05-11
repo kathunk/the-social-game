@@ -15,7 +15,9 @@
                     @endforeach
                 </flux:select>
             </span>
-            <flux:button wire:click="joinTeam" class="mt-4">Join</flux:button>
+            <div class="mt-4 flex justify-end">
+                <flux:button variant="primary" wire:click="joinTeam">Join</flux:button>
+            </div>
         </flux:card>
     @endif
     @if ($this->challengeComponent)
