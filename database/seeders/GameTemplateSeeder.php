@@ -31,7 +31,7 @@ class GameTemplateSeeder extends Seeder
                 'challenges' => [
                     [
                         'challenge_keys' => [PyramidScheme::key()],
-                        'duration' => 60,
+                        'duration' => 1,
                     ],
                     [
                         'challenge_keys' => [TeamBounty::key()],
