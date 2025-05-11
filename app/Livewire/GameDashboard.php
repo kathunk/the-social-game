@@ -147,7 +147,12 @@ class GameDashboard extends Component
 
     public function callChallengeAction(string $action, ?array $params = null)
     {
+        // If no params provided, use challenge_properties
         $params = $params ?? $this->challenge_properties;
+        
+        // Always wrap params in challenge_properties namespace
+        $params = ['challenge_properties' => $params];
+        
         $component = $this->challenge_handler->frontendComponent($this->player);
 
         $all_elements = collect($component['elements'])->flatMap(function ($el) {
@@ -185,7 +190,8 @@ class GameDashboard extends Component
             $this->validate($filtered_rules, $filtered_messages);
         }
 
-        $this->challenge->handler()->{$action}($this->player, $params);
+        // Extract the challenge_properties when passing to the handler
+        $this->challenge->handler()->{$action}($this->player, $params['challenge_properties']);
 
         redirect()->route('game-dashboard', ['game' => $this->game]);
     }
