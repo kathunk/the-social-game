@@ -1,7 +1,7 @@
 <flux:dropdown x-data x-cloak>
     <flux:button square size="sm" class="group !cursor-pointer !bg-accent" aria-label="Preferred color scheme">
-        <flux:icon.moon x-show="$flux.dark" variant="solid" class="size-8 text-accent-foreground" />
-        <flux:icon.sun x-show="! $flux.dark" variant="solid" class="size-10 text-accent-foreground" />
+        <flux:icon.moon x-show="$flux.dark" variant="solid" class="size-7 text-accent-foreground" />
+        <flux:icon.sun x-show="! $flux.dark" variant="solid" class="size-9 text-accent-foreground" />
 
     </flux:button>
 

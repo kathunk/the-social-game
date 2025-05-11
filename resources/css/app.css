@@ -59,8 +59,8 @@
      /* Default */
      .default {
         --color-accent: var(--color-blue-600);
-        --color-accent-content: #262626; /* zinc-800 */
-        --color-accent-foreground: var(--color-white);
+        --color-accent-content: var(--color-blue-500);
+        --color-accent-foreground: var(--color-blue-50);
 
         /* --color-background: #f1f5f9; */
 
@@ -79,11 +79,10 @@
 
     .dark .default {
         --color-accent: var(--color-blue-600);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-indigo-200);
+        --color-accent-content: var(--color-pink-600);
+        --color-accent-foreground: var(--color-blue-50);
 
-        /* --color-background: #1e293b;  */
-        /* slate-800 */
+        /* --color-background: #1e293b; */
     }
 
     /* Desert */
@@ -437,6 +436,7 @@ Color: #2e2e2e (a near-black charcoal) */
 
 input:focus[data-flux-control],
 textarea:focus[data-flux-control],
+
 select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }

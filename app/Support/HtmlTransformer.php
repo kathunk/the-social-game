@@ -25,7 +25,7 @@ class HtmlTransformer
             'ul' => fn ($node, $html) => "<ul class=\"list-disc pl-5 mb-4\">{$html}</ul>",
             'ol' => fn ($node, $html) => "<ol class=\"list-decimal pl-5 mb-4\">{$html}</ol>",
             'li' => fn ($node, $html) => "<li class=\"mb-2\">{$html}</li>",
-            'a' => fn ($node, $html) => "<a href=\"{$node->getAttribute('href')}\" class=\"dark:text-accent text-accent underline hover:text-accent\">{$html}</a>",
+            'a' => fn ($node, $html) => "<a href=\"{$node->getAttribute('href')}\" class=\"dark:text-accent text-accent underline dark:hover:text-accent-content hover:text-accent-content\">{$html}</a>",
             'blockquote' => fn ($node, $html) => "<blockquote class=\"border-l-4 pl-4 italic text-gray-600 mb-4\">{$html}</blockquote>",
         ];
 

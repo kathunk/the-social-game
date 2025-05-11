@@ -8,8 +8,8 @@
     @endphp
     <body
         @class([
-            'default' => !$user?->currentPlayer,
-            "{$user->currentPlayer->team->theme()}" => $user->currentPlayer,
+            'default' => $user,
+            {{-- "{$user->currentPlayer->team->theme()}" => $user?->currentPlayer?->team?->theme(), --}}
             'min-h-screen bg-[var(--color-background)]',
         ])
     >

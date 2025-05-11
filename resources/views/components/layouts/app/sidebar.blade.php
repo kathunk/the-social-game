@@ -7,7 +7,7 @@
         $user = auth()->user();
     @endphp
     <body @class([
-        'default' => !$user?->currentPlayer,
+        'default' => ! $user->currentPlayer->team,
         "{$user->currentPlayer?->team?->theme()}" => $user->currentPlayer?->team?->theme(),
         'min-h-screen bg-[var(--color-background)]',
     ])>
@@ -22,12 +22,12 @@
             ])>
 
             <div class="flex items-center">
-                <flux:brand href="{{ route('dashboard') }}" wire:navigate>
-                    <x-slot name="name">
+                <flux:brand name="The Social Game" href="{{ route('dashboard') }}" wire:navigate>
+                    {{-- <x-slot name="name">
                         <span class="font-bold text-accent-foreground">The Social Game™</span>
-                    </x-slot>
+                    </x-slot> --}}
                     <x-slot name="logo">
-                        <div class="rounded w-12 bg-accent text-accent-foreground">
+                        <div class="rounded w-12 bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
                             <x-app-logo />
                         </div>
                     </x-slot>
