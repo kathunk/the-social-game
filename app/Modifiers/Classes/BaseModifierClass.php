@@ -44,11 +44,6 @@ abstract class BaseModifierClass
         return new static;
     }
 
-    public function onRoundEnded()
-    {
-        // Optional override
-    }
-
     public function onPlayerJoinedTeam(
         PlayerState $player_state,
         TeamState $team_state,

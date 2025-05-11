@@ -27,18 +27,6 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
 
     public function dataArrayForState(): array
     {
-        if (
-            $this->challenge_state
-                ->game()
-                ->fresh()
-                ->teams()
-                ->map(fn ($t) => $t->players()->isNotEmpty())
-                ->filter()
-                ->isNotEmpty()
-        ) {
-            $team_bounties = $this->assignTeams($this->challenge_state->game()->fresh()->teams());
-        }
-
         return [
             'swapper_ids' => [],
             'team_bounties' => $team_bounties ?? [],
@@ -88,14 +76,16 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         return false;
     }
 
-    public function assignTeams(Collection $teams)
+    public function onChallengeStarted(GameState $game_state)
     {
         // team_id => [player_id, player_id, player_id]
         $marked_as_bounty = [];
 
+        $teams = $game_state->teams();
+
         // mark 3 random players from each team as bounties
         foreach ($teams as $team) {
-            $marked_as_bounty[$team->id] = $team->players()->shuffle()->take(3)->pluck('id')->all();
+            $marked_as_bounty[$team->id] = $team->player_ids->shuffle()->take(3)->all();
         }
 
         // assign 3 of those bounties to each team
@@ -104,6 +94,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         foreach ($teams as $team) {
             // Get 3 other random teams
             $other_team_ids = collect($marked_as_bounty)
+                ->reject(fn($bounties) => count($bounties) === 0)
                 ->keys()
                 ->reject(fn($id) => $id === $team->id)
                 ->shuffle()
@@ -117,9 +108,8 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
             $team_bounties[$team->id] = $bounties->values()->all();
         }
 
-        return $team_bounties;
+        $this->challenge_state->challenge_data['team_bounties'] = $team_bounties;
     }
-
 
     public function onPlayerJoinedTeam(
         PlayerState $player_state,

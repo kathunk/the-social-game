@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Classes\TeamBounty;
 use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\TeamResignation;
 use App\Modifiers\Classes\TeamSecretAlliance;
@@ -28,11 +30,11 @@ class GameTemplateSeeder extends Seeder
                 'team_names' => ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
                 'challenges' => [
                     [
-                        'challenge_keys' => [StayOnMessage::key()],
+                        'challenge_keys' => [PyramidScheme::key()],
                         'duration' => 60,
                     ],
                     [
-                        'challenge_keys' => [StayOnMessage::key()],
+                        'challenge_keys' => [TeamBounty::key()],
                         'duration' => 60,
                     ],
                 ],

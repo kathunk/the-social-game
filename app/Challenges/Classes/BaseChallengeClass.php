@@ -55,8 +55,15 @@ abstract class BaseChallengeClass
         return false;
     }
 
-    public function onRoundEnded()
-    {
+    public function onChallengeStarted(
+        GameState $game_state,
+    ) {
+        // Optional override
+    }
+
+    public function onChallengeEnded(
+        GameState $game_state,
+    ) {
         // Optional override
     }
 
@@ -65,12 +72,6 @@ abstract class BaseChallengeClass
         TeamState $team_state,
         GameState $game_state,
         ?TeamState $previous_team = null,
-    ) {
-        // Optional override
-    }
-
-    public function onChallengeEnded(
-        GameState $game_state,
     ) {
         // Optional override
     }
