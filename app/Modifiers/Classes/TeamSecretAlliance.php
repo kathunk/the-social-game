@@ -16,7 +16,7 @@ class TeamSecretAlliance extends BaseModifierClass
 {
     const NAME = 'Star crossed allies';
 
-    const DESCRIPTION = 'You have been randomly assigned a secret alliance with {player_name}. They are currently on {ally_team_name}. If at any point, you and {player_name} join a new team together, that team will receive +5 points.';
+    const DESCRIPTION = "You have been randomly assigned a secret alliance with {player_name}. They were on {ally_team_name} when you were assigned. If at any point, you and {player_name} join a new team together, that team will receive +5 points. Note that this will not take effect if either of you simply joins the other's current team. You must both join a new team together.";
 
     const TYPE = 'team';
 
@@ -39,7 +39,7 @@ class TeamSecretAlliance extends BaseModifierClass
         $player_is_on_dashboard = Route::currentRouteName() === 'game-dashboard';
         $player_is_lucky = rand(0, 100) > 0;
 
-        if ($player_is_active && $player_is_on_dashboard && ! $ally && $player_is_lucky) {
+        if ($player_is_active && $player_is_on_dashboard && ! $ally && $player_is_lucky && $player->team_id) {
             return $this->form()
                 ->title(static::NAME)
                 ->subtitle("You discovered a secret! A friend is waiting for you.")
@@ -47,6 +47,10 @@ class TeamSecretAlliance extends BaseModifierClass
                     ->button('Learn more', 'learnMore')
                 ->endGroup()
                 ->build();
+        }
+
+        if ($player_is_on_dashboard) {
+            return [];
         }
 
         if ($has_connected) {
@@ -61,7 +65,7 @@ class TeamSecretAlliance extends BaseModifierClass
             '{ally_team_name}' => $ally?->team->name,
         ]);
 
-        if ($player_is_active && ! $player_is_on_dashboard && $ally) {
+        if ($player_is_active && $ally) {
             return $this->form()
                 ->title(static::NAME)
                 ->subtitle($description)
@@ -74,6 +78,18 @@ class TeamSecretAlliance extends BaseModifierClass
             return $this->form()
                 ->title(static::NAME)
                 ->subtitle('Unfortunately there are no eligible partners for you right now. Try again later.')
+                ->build();
+        }
+
+        if (! $player->team_id) {
+            return $this->form()
+                ->subtitle('Join a team before you can discover your secret ally.')
+                ->build();
+        }
+
+        if (! $player_is_active) {
+            return $this->form()
+                ->subtitle('You are not currently active. Got nothing for you, head back to camp.')
                 ->build();
         }
 
@@ -98,11 +114,15 @@ class TeamSecretAlliance extends BaseModifierClass
         return $player->game->players->where('status', 'active')
             ->reject(fn($p) => collect($paired_player_ids)->contains($p->id))
             ->filter(fn($p) => $p->id !== $player->id)
-            ->filter(fn($p) => $p->team_id !== null && $p->team_id === $player->team_id);
+            ->filter(fn($p) => $p->team_id !== null && $p->team_id !== $player->team_id);
     }
 
     public function onSecretDiscovered(Player $player)
     {
+        if ($player->team_id === null) {
+            return;
+        }
+
         $paired_player_ids = collect($this->modifier->modifier_data['pairs'])
             ->reduce(function ($carry, $pair) {
                 $carry[] = $pair['player_1_id'];
@@ -153,19 +173,19 @@ class TeamSecretAlliance extends BaseModifierClass
             return;
         }
 
-        if ($pair_data['has_connected']) {
+        if ($pair_data->hasConnected()) {
             return;
         }
 
-        if ($pair_data['player_1_original_team_id'] === $team_state->id || $pair_data['player_2_original_team_id'] === $team_state->id) {
+        if (collect($pair_data->originalTeamIds())->contains($team_state->id)) {
             return;
         }
 
-        $team_state->addToScoreHistory(5, 'Secret alliance bonus');
+        $team_state->addToScoreHistory(5, $player_state->name . ' and ' . $ally->name . ' were secret allies');
 
         $modifier_state->modifier_data['pairs'] = collect($modifier_state->modifier_data['pairs'])
             ->map(function ($pair) use ($pair_data) {
-                if ($pair['player_1_id'] === $pair_data['player_1_id'] && $pair['player_2_id'] === $pair_data['player_2_id']) {
+                if ($pair['player_1_id'] === $pair_data->player_id && $pair['player_2_id'] === $pair_data->ally()->id) {
                     $pair['has_realized_reward'] = true;
                 }
 
