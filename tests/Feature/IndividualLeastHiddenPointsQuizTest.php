@@ -1,9 +1,9 @@
 <?php
 
+use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
+use App\Events\PlayerSubmittedQuizGuess;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
-use App\Events\PlayerSubmittedQuizGuess;
-use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

@@ -35,7 +35,7 @@ class TeamResignation extends BaseModifierClass
                     '-3' => '-3',
                 ],
                 property_name: 'points',
-                validation_rules: 'required|string|in:' . "['-3', '3']",
+                validation_rules: 'required|string|in:'."['-3', '3']",
                 validation_messages: [
                     'points.required' => 'Please select a number.',
                     'points.string' => 'Please select a number.',
@@ -55,7 +55,7 @@ class TeamResignation extends BaseModifierClass
     public function resign(Player $player, array $params)
     {
         // @todo replace this when we finish validation logic for modifiers
-        if(
+        if (
             ! isset($params['points'])
             || (
                 $params['points'] === ''

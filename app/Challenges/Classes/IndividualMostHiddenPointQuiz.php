@@ -87,8 +87,7 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
     ) {
         $this->applyVotesToScore($game_state);
 
-        $hidden_points = $game_state->players()->mapWithKeys(fn ($p) => 
-            [$p->id => $p->score(include_hidden: true) - $p->score()]
+        $hidden_points = $game_state->players()->mapWithKeys(fn ($p) => [$p->id => $p->score(include_hidden: true) - $p->score()]
         );
 
         $most_hidden_points = $hidden_points->max();

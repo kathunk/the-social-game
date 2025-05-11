@@ -2,16 +2,16 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\PlayerState;
-use App\States\ModifierState;
-use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasActiveGame;
 use App\Events\Traits\HasActivePlayer;
+use App\Events\Traits\HasModifier;
+use App\States\ModifierState;
+use App\States\PlayerState;
+use Thunk\Verbs\Event;
 
 class PlayerAssignedSecretAllyInTeamGame extends Event
 {
-    use HasActivePlayer, HasActiveGame, HasModifier;
+    use HasActiveGame, HasActivePlayer, HasModifier;
 
     public int $ally_id;
 
@@ -26,12 +26,12 @@ class PlayerAssignedSecretAllyInTeamGame extends Event
             }, []);
 
         $this->assert(
-            !collect($paired_player_ids)->contains($this->player_id),
+            ! collect($paired_player_ids)->contains($this->player_id),
             'Player already has an ally'
         );
 
         $this->assert(
-            !collect($paired_player_ids)->contains($this->ally_id),
+            ! collect($paired_player_ids)->contains($this->ally_id),
             'Ally already has an ally'
         );
 

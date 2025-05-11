@@ -2,15 +2,15 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Player;
-use App\Models\Modifier;
-use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
-use App\States\ModifierState;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Support\Facades\Route;
 use App\Events\PlayerAssignedSecretAllyInTeamGame;
+use App\Models\Modifier;
+use App\Models\Player;
+use App\States\GameState;
+use App\States\ModifierState;
+use App\States\PlayerState;
+use App\States\TeamState;
+use Illuminate\Support\Facades\Route;
+use Thunk\Verbs\Facades\Verbs;
 
 class TeamSecretAlliance extends BaseModifierClass
 {
@@ -42,9 +42,9 @@ class TeamSecretAlliance extends BaseModifierClass
         if ($player_is_active && $player_is_on_dashboard && ! $ally && $player_is_lucky && $player->team_id) {
             return $this->form()
                 ->title(static::NAME)
-                ->subtitle("You discovered a secret! A friend is waiting for you.")
+                ->subtitle('You discovered a secret! A friend is waiting for you.')
                 ->buttonGroup()
-                    ->button('Learn more', 'learnMore')
+                ->button('Learn more', 'learnMore')
                 ->endGroup()
                 ->build();
         }
@@ -72,18 +72,18 @@ class TeamSecretAlliance extends BaseModifierClass
                 ->build();
         }
 
+        if (! $player->team_id) {
+            return $this->form()
+                ->subtitle('Join a team before you can discover your secret ally.')
+                ->build();
+        }
+
         $elligible_partner_exists = $pair_data->ally() ? false : $this->elligiblePartners($player)->count() > 0;
 
         if (! $elligible_partner_exists) {
             return $this->form()
                 ->title(static::NAME)
                 ->subtitle('Unfortunately there are no eligible partners for you right now. Try again later.')
-                ->build();
-        }
-
-        if (! $player->team_id) {
-            return $this->form()
-                ->subtitle('Join a team before you can discover your secret ally.')
                 ->build();
         }
 
@@ -112,9 +112,9 @@ class TeamSecretAlliance extends BaseModifierClass
             }, []);
 
         return $player->game->players->where('status', 'active')
-            ->reject(fn($p) => collect($paired_player_ids)->contains($p->id))
-            ->filter(fn($p) => $p->id !== $player->id)
-            ->filter(fn($p) => $p->team_id !== null && $p->team_id !== $player->team_id);
+            ->reject(fn ($p) => collect($paired_player_ids)->contains($p->id))
+            ->filter(fn ($p) => $p->id !== $player->id)
+            ->filter(fn ($p) => $p->team_id !== null && $p->team_id !== $player->team_id);
     }
 
     public function onSecretDiscovered(Player $player)
@@ -148,7 +148,7 @@ class TeamSecretAlliance extends BaseModifierClass
             ally_id: $ally_id,
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
-        ); 
+        );
 
         Verbs::commit();
 
@@ -165,7 +165,7 @@ class TeamSecretAlliance extends BaseModifierClass
         $pair_data = new TeamSecretAlliancePairData(player_id: $player_state->id, modifier_state: $modifier_state);
         $ally = $pair_data->ally();
 
-        if ( ! $ally) {
+        if (! $ally) {
             return;
         }
 
@@ -181,12 +181,12 @@ class TeamSecretAlliance extends BaseModifierClass
             return;
         }
 
-        $team_state->addToScoreHistory(5, $player_state->name . ' and ' . $ally->name . ' were secret allies');
+        $team_state->addToScoreHistory(5, $player_state->name.' and '.$ally->name.' were secret allies');
 
         $modifier_state->modifier_data['pairs'] = collect($modifier_state->modifier_data['pairs'])
-            ->map(function ($pair) use ($pair_data) {
-                if ($pair['player_1_id'] === $pair_data->player_id && $pair['player_2_id'] === $pair_data->ally()->id) {
-                    $pair['has_realized_reward'] = true;
+            ->map(function ($pair) use ($player_state) {
+                if ($pair['player_1_id'] === $player_state->id || $pair['player_2_id'] === $player_state->id) {
+                    $pair['has_connected'] = true;
                 }
 
                 return $pair;
@@ -213,7 +213,7 @@ class TeamSecretAlliancePairData
             : ($this->modifier_state->modifier_data['pairs'] ?? []);
 
         return collect($pairs)
-            ->first(fn($pair) => in_array($this->player_id, [$pair['player_1_id'], $pair['player_2_id']]));
+            ->first(fn ($pair) => in_array($this->player_id, [$pair['player_1_id'], $pair['player_2_id']]));
     }
 
     public function exists(): bool
@@ -223,7 +223,7 @@ class TeamSecretAlliancePairData
 
     public function hasConnected(): bool
     {
-        return $this->pair['has_realized_reward'] ?? false;
+        return $this->pair['has_connected'] ?? false;
     }
 
     public function originalTeamIds(): array
@@ -236,7 +236,9 @@ class TeamSecretAlliancePairData
 
     public function ally(): ?Player
     {
-        if (! $this->pair) return null;
+        if (! $this->pair) {
+            return null;
+        }
 
         $other_id = $this->pair['player_1_id'] === $this->player_id
             ? $this->pair['player_2_id']
@@ -250,5 +252,3 @@ class TeamSecretAlliancePairData
         return $this->pair;
     }
 }
-
-

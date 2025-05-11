@@ -3,9 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\Game;
-use Livewire\Component;
 use App\Models\Modifier;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class SecretsPage extends Component
 {
@@ -38,8 +38,6 @@ class SecretsPage extends Component
         $params = $params ?? $this->modifier_properties;
 
         // @todo validate params
-
-        $this->modifier->handler()->{$action}($this->player, $params);
 
         $response = $this->modifier->handler()->{$action}($this->player, $params);
 

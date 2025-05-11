@@ -195,8 +195,6 @@ class GameDashboard extends Component
         // @todo validate params
 
         $modifier = $this->modifiers->firstWhere('class_key', $modifier_key);
-        $modifier->handler()->{$action}($this->player, $params);
-
         $response = $modifier->handler()->{$action}($this->player, $params);
 
         return $response instanceof \Illuminate\Http\RedirectResponse

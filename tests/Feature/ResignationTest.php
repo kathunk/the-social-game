@@ -1,41 +1,42 @@
 <?php
 
 use App\Challenges\Classes\PyramidScheme;
-use App\GameTemplates\TestTemplate;
-use App\Models\Team;
+use App\Livewire\GameDashboard;
+use App\Modifiers\Classes\TeamResignation;
+use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-beforeEach(function () {
+it('allows for resignations in team games', function () {
     Verbs::commitImmediately();
 
-    $challenges = collect([
+    $challenges = [
         [
-            'class' => PyramidScheme::class,
-            'starts_at' => now(),
-            'ends_at' => now()->addHours(1),
+            'challenge_keys' => [PyramidScheme::key()],
+            'duration' => 10,
         ],
-    ]);
+    ];
 
-    // $this->game = (new TestTemplate(now(), $challenges))->createGame()->start();
+    $modifiers = [TeamResignation::key()];
 
-    // $this->createPlayer();
-    $this->team = Team::first();
-});
+    $this->mockGameTemplate(challenges: $challenges, type: 'team', modifiers: $modifiers, team_names: ['team1', 'team2', 'team3', 'team4']);
 
-// @todo whoops make this work again
-it('grants points when a player resigns', function () {
-    $this->player->joinTeam($this->team);
-    $this->player->fresh()->resign(3);
-    $this->player->refresh();
-    $this->team->refresh();
+    $this->createGame()->start();
 
-    expect($this->player->status)->toBe('resigned');
-    expect($this->player->team_id)->toBeNull();
-    expect($this->team->score)->toBe(4);
+    $team = $this->game->teams->first();
 
-    expect($this->team->players->count())->toBe(0);
+    $player_1 = $this->createPlayer();
 
-    // @todo test that all the state information is correct too
+    $this->actingAs($player_1->user);
+
+    Livewire::test(GameDashboard::class, ['game' => $this->game])
+        ->assertDontSee('Had enough?');
+
+    $player_1->joinTeam($team);
+    $player_1->refresh();
+
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->assertSee('Had enough?')
+        ->call('callModifierAction', TeamResignation::key(), 'resign', ['points' => '-3']);
 });
