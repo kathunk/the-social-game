@@ -12,7 +12,7 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
 {
     use HasPeckingOrderBallots;
 
-    const NAME = "A broken clock that is never right";
+    const NAME = 'A broken clock that is never right';
 
     const DESCRIPTION = 'Guess which player had the fewest hidden points at the beginning of this challenge. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
 
@@ -87,8 +87,7 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
     ) {
         $this->applyVotesToScore($game_state);
 
-        $hidden_points = $game_state->players()->mapWithKeys(fn ($p) => 
-            [$p->id => $p->score(include_hidden: true) - $p->score()]
+        $hidden_points = $game_state->players()->mapWithKeys(fn ($p) => [$p->id => $p->score(include_hidden: true) - $p->score()]
         );
 
         $fewest_hidden_points = $hidden_points->min();
