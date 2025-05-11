@@ -1,19 +1,19 @@
 <?php
 
-use App\Challenges\Classes\IndividualHighScoreQuiz;
-use App\Events\PlayerSubmittedPeckingOrderBallot;
-use App\Events\PlayerSubmittedQuizGuess;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerSubmittedQuizGuess;
+use App\Events\PlayerSubmittedPeckingOrderBallot;
+use App\Challenges\Classes\IndividualLargestIncreaseQuiz;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-it('runs the individual high score quiz', function () {
+it('runs the individual largest increase quiz', function () {
     Verbs::commitImmediately();
 
     $challenges = [
         [
-            'challenge_keys' => [IndividualHighScoreQuiz::key()],
+            'challenge_keys' => [IndividualLargestIncreaseQuiz::key()],
             'duration' => 10,
         ],
     ];

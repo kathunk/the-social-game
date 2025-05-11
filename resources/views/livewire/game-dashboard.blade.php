@@ -7,13 +7,13 @@
         <flux:card>
             <flux:heading>Join a team</flux:heading>
             <flux:subheading>To start playing, join a team. At certain points in the game, you will be able to switch teams.</flux:subheading>
-            <flux:select wire:model="selected_team_id" class="my-4">
-                <flux:select.option value="">Select a team</flux:select.option>
+            <flux:select label="Select a team" class="[&_[data-flux-label]]:sr-only mt-4" wire:model="selected_team_id">
+                <flux:select.option value="" selected class="placeholder">Select a team</flux:select.option>
                 @foreach ($this->teams as $team)
                     <flux:select.option :value="(string) $team->id">{{ $team->name }}</flux:select.option>
                 @endforeach
             </flux:select>
-            <flux:button variant="primary" wire:click="joinTeam">Join</flux:button>
+            <flux:button variant="primary" wire:click="joinTeam" class="mt-4">Join</flux:button>
         </flux:card>
     @endif
     @if ($this->challengeComponent)

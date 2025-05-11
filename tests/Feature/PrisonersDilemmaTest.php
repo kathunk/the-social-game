@@ -43,11 +43,11 @@ beforeEach(function () {
     $this->player_7 = $this->createPlayer()->joinTeam($this->team_4);
     $this->player_8 = $this->createPlayer()->joinTeam($this->team_4);
 
-    incrementScore($this->team_1, 20);
-    incrementScore($this->team_2, 20);
+    incrementScore(team: $this->team_1, points: 20);
+    incrementScore(team: $this->team_2, points: 20);
 
-    incrementScore($this->team_3, 10);
-    incrementScore($this->team_4, 10);
+    incrementScore(team: $this->team_3, points: 10);
+    incrementScore(team: $this->team_4, points: 10);
 });
 
 function playDirty($player)

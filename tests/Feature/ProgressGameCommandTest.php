@@ -96,3 +96,13 @@ it('ends the game', function () {
 
     expect($this->game->fresh()->status)->toBe('ended');
 });
+
+it('updates the game start time if it was scheduled in the past', function () {
+    $this->createGame(starts_at: now()->subMinutes(10));
+    $this->artisan('app:progress-games');
+
+    $game = $this->game->fresh();
+
+    expect($game->starts_at->diffInSeconds(now()))->toBeLessThan(60);
+    expect($game->challenges->first()->starts_at->diffInSeconds(now()))->toBeLessThan(60);
+});

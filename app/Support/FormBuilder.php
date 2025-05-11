@@ -266,4 +266,25 @@ class FormBuilder
 
         return $this;
     }
+
+    public function merge(FormBuilder $other): static
+    {
+        $this->elements = array_merge($this->elements, $other->elements);
+
+        return $this;
+    }
+
+    public function when(bool $condition, callable $callback): static
+    {
+        if ($condition) {
+            $callback($this);
+        }
+
+        return $this;
+    }
+
+    public static function section(): static
+    {
+        return new static;
+    }
 }

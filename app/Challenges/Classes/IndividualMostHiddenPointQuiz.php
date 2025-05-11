@@ -8,19 +8,19 @@ use App\Events\PlayerSubmittedQuizGuess;
 use App\Models\Player;
 use App\States\GameState;
 
-class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeckingOrderBallots
+class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {
     use HasPeckingOrderBallots;
 
-    const NAME = 'Belle of the ball';
+    const NAME = "Teacher's pet";
 
-    const DESCRIPTION = 'Guess which player will be at the top of the scoreboard at the end of this round. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'Guess which player had the most hidden points at the beginning of this challenge. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
 
     const TYPE = 'individual';
 
     public static function key(): string
     {
-        return 'individual_high_score_quiz';
+        return 'individual_most_hidden_point_quiz';
     }
 
     public function dataArrayForState(): array
@@ -48,20 +48,16 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
             ->when(! $has_guessed, fn ($form) => $form->select(
                 property_name: 'guess_player_id',
                 options: $players->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
-                label: 'Guess which player will be at the top of the scoreboard',
+                label: 'Guess which player had the most hidden points at the beginning of this challenge',
                 placeholder: 'Select a player...',
-                validation_rules: 'required|string|in:'.implode(',', $players->pluck('id')->toArray()),
+                validation_rules: 'required|in:'.implode(',', $players->pluck('id')->toArray()),
                 validation_messages: [
                     'required' => 'Must select a player',
                     'in' => 'Must select a valid player',
                 ],
             )
                 ->buttonGroup()
-                ->button(
-                    label: 'Submit Guess',
-                    action: 'guess',
-                    properties_to_validate: ['guess_player_id'],
-                )
+                ->button('Submit Guess', 'guess')
                 ->endGroup()
             )
             ->when(! $has_guessed || ! $has_voted, fn ($form) => $form->divider()
@@ -91,15 +87,19 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
     ) {
         $this->applyVotesToScore($game_state);
 
-        $highest_score = $game_state->players()->max(fn ($p) => $p->score());
+        $hidden_points = $game_state->players()->mapWithKeys(fn ($p) => 
+            [$p->id => $p->score(include_hidden: true) - $p->score()]
+        );
 
-        $leader_ids = $game_state->players()->filter(fn ($p) => $p->score() === $highest_score)->pluck('id');
+        $most_hidden_points = $hidden_points->max();
 
-        $game_state->players()->each(function ($player) use ($leader_ids) {
+        $most_hidden_points_ids = $hidden_points->filter(fn ($hidden_points) => $hidden_points === $most_hidden_points)->keys();
+
+        $game_state->players()->each(function ($player) use ($most_hidden_points_ids) {
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
 
-            if ($leader_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, 'Correctly guessed the player in first place', true);
+            if ($most_hidden_points_ids->contains($guess_id)) {
+                $player->addToScoreHistory(1, 'Correctly guessed the player with the most hidden points', true);
             }
         });
     }
