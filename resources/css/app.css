@@ -89,28 +89,111 @@
 
     /* JavaScript */
     .javascript {
-        --color-zinc-50: #f8fafc; /* Slate-50 */
-        --color-zinc-100: #f1f5f9;
-        --color-zinc-200: #e2e8f0;
-        --color-zinc-300: #cbd5e1;
-        --color-zinc-400: #94a3b8;
-        --color-zinc-500: #64748b;
-        --color-zinc-600: #475569;
-        --color-zinc-700: #334155;
-        --color-zinc-800: #1e293b;
-        --color-zinc-900: #0f172a;
-        --color-zinc-950: #020617;
+        /* palette */
+        --font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-        --color-accent: #f7df1e;
-        --color-accent-content: #a29f00;
-        --color-accent-foreground: #000000;
+        /* --mdn-color-background-highlight: #f0e498; */
+        /* --mdn-color-dark-grey: #4e4e4e; */
+
+        /* second darkest bg */
+        --mdn-background-dark: #1B1B1B;
+
+        /* #131313; darkest background ^ darkens when sidebar is open */
+        --mdn-background-darkest: #131313;
+
+        /* --mdn-background-light: #fff; */
+        /* --mdn-background-light-grey: #e2e2e2; */
+        /* --color-announcement-banner-accent: #ff6d91; */
+
+        /* accent color, a lot like link */
+        --accent-color: #5e9eff;
+
+        --text-primary: #cdcdcd;
+        --text-link: #8cb4ff;
+
+        /* breadcrumb bg */
+        --color-background-secondary: #313131;
+        --color-background-tertiary: #858585;
+
+        --color-accent: var(--text-link);
+        --color-accent-content: var(--text-link);
+        --color-accent-foreground: var(--mdn-background-dark);
+
+        --color-background: var(--mdn-background-dark);
+
+        --color-blue-hover: #4C5E80;
+
+        --color-red-text: #FE6D91;
+        --color-red-hover: #472025;
+
+        [data-flux-sidebar] {
+            @apply !bg-[var(--mdn-background-dark)];
+
+            [data-show-stashed-sidebar] {
+                --color-background: var(--mdn-background-darkest) !important;
+            }
+
+            [data-flux-navlist-item] {
+                /* red */
+                @apply hover:!bg-[var(--color-red-hover)] hover:!text-[var(--color-red-text)] !rounded-sm;
+            }
+        }
+
+        [data-flux-card] {
+            @apply !bg-[var(--color-background-secondary)] !rounded-none !border-[var(--color-background-tertiary)] !text-[var(--text-primary)];
+        }
+
+        [data-flux-button] {
+            /* blue */
+            @apply !bg-inherit !shadow-none hover:!bg-[var(--color-blue-hover)] hover:!text-[var(--text-link)] !rounded-sm !text-[var(--text-primary)];
+        }
     }
 
-    .dark .javascript {
-        --color-accent: #f7df1e;
-        --color-accent-content: #f7df1e;
-        --color-accent-foreground: #000000;
-        --color-background: #121212;
+    .node {
+        /* open sans */
+        --font-family: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
+
+        --color-neutral-950: #0f0f0f;
+        --color-neutral-900: #1a1a1a;
+
+        --color-green-300: #99cc7d;
+
+        /* hover on link */
+        --color-green-400: #84ba64;
+
+        /* accent and link */
+        --color-green-600: #417e38;
+
+        --color-background: var(--color-neutral-950);
+
+        --color-accent: var(--color-green-600);
+        --color-accent-content: var(--color-green-400);
+        --color-accent-foreground: var(--color-white);
+
+        [data-flux-card] {
+            /* background-image: linear-gradient(180deg,
+ color-mix(in oklab, var(--color-neutral-900) 50%, transparent) 0,
+ color-mix(in oklab, var(--color-neutral-900) 0%, transparent) 48.32%); */
+
+            /* @apply !bg-gradient-to-b from-[#1a1a1a] to-[#090909] !border-0; */
+        }
+
+        [data-flux-link] {
+            @apply !no-underline hover:!text-[var(--color-green-300)];
+        }
+
+        [data-flux-sidebar] {
+            @apply !bg-[var(--color-background)];
+
+            [data-flux-navlist-item][data-current] {
+                @apply hover:!bg-[var(--color-green-600)];
+            }
+        }
+
+        /* Apply font to all elements */
+        * {
+            @apply !font-[var(--font-family)];
+        }
     }
 
 

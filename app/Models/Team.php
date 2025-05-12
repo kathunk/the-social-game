@@ -32,7 +32,7 @@ class Team extends Model
         return match($this->name) {
             'Elixir' => 'elixir',
             'Go' => 'go',
-            'Javascript' => 'javascript',
+            'JavaScript' => 'javascript',
             'Laravel' => 'laravel',
             'Node' => 'node',
             'PHP' => 'php',

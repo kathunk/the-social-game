@@ -7,7 +7,7 @@
         $user = auth()->user();
     @endphp
     <body @class([
-        'default bg-zinc-50 dark:bg-zinc-800' => ! $user?->currentPlayer?->team,
+        'bg-zinc-50 dark:bg-zinc-800' => ! $user?->currentPlayer?->team,
         "{$user->currentPlayer?->team?->theme()} bg-[var(--color-background)]" => $user->currentPlayer?->team?->theme(),
         'min-h-screen',
     ])>
