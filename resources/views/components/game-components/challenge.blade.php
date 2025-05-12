@@ -1,4 +1,4 @@
-<flux:card>
+<x-card>
     <div class="flex flex-col space-y-4">
         <div class="flex space-x-2 items-center">
             <flux:heading size="lg">Challenge</flux:heading>
@@ -57,4 +57,4 @@
             @endswitch
         @endforeach
     </div>
-</flux:card>
+</x-card>

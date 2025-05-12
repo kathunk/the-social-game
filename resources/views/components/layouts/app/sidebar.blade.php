@@ -11,10 +11,6 @@
         "{$user->currentPlayer?->team?->theme()} bg-[var(--color-background)]" => $user->currentPlayer?->team?->theme(),
         'min-h-screen',
     ])>
-        <div class="hidden lg:block fixed top-2.5 right-12 z-50">
-            <x-dark-mode-toggle />
-        </div>
-
         @if(config('app.env') === 'local')
             <div class="absolute lg:top-2.5 top-3 lg:right-12 right-24 z-50">
                 <x-dark-mode-toggle />
@@ -102,10 +98,6 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
-
-             <div class="lg:hidden block absolute top-3 right-24 mr-px z-50">
-                <x-dark-mode-toggle />
-            </div>
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

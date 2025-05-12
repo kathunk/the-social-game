@@ -1,5 +1,5 @@
 <div x-data="{ gameType: @entangle('gameType') }">
-    <flux:card>
+    <x-card>
         <div class="flex flex-col gap-6">
             <flux:input wire:model="name" label="Name" />
             <flux:textarea wire:model="description" label="Description" />
@@ -113,7 +113,7 @@
 
             <flux:button variant="primary" wire:click="saveTemplate">Save</flux:button>
         </div>
-    </flux:card>
+    </x-card>
 
     @if ($this->game_template !== null)
         <div class="mt-4 flex flex-row space-x-4 justify-end">

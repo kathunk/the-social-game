@@ -2,9 +2,9 @@
     @if ($this->is_game_admin)
         <flux:button icon="cog" :href="route('pre-game-lobby', $this->game)" variant="filled">Manage game</flux:button>
     @endif
-@dump($this->current_team)
+    @dump($this->current_team)
     @if (! $this->current_team && $this->template->type === 'team' && $this->player->status === 'active')
-        <flux:card>
+        <x-card>
             <flux:heading>Join a team</flux:heading>
             <flux:subheading>To start playing, join a team. At certain points in the game, you will be able to switch teams.</flux:subheading>
             <span class="join-team-select">
@@ -18,7 +18,7 @@
             <div class="mt-4 flex justify-end">
                 <flux:button variant="primary" wire:click="joinTeam">Join</flux:button>
             </div>
-        </flux:card>
+        </x-card>
     @endif
     @if ($this->challengeComponent)
         <livewire:next-challenge-button />
@@ -26,7 +26,7 @@
     @endif
     <x-game-components.scoreboard :teams="$this->teams" :players="$this->players" :type="$this->template->type" />
     @if ($this->template->players_can_join_late)
-        <flux:card>
+        <x-card>
             <flux:heading class="mb-2">Invite your friends</flux:heading>
             <div class="flex gap-2">
                 <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
@@ -34,7 +34,7 @@
                     <flux:button variant="filled">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
                 </flux:modal.trigger>
             </div>
-        </flux:card>
+        </x-card>
     @endif
 
     @foreach ($this->modifiers as $modifier)

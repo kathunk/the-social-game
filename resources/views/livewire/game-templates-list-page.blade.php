@@ -1,5 +1,5 @@
 <div>
-    <flux:card>
+    <x-card>
         <div class="flex flex-row justify-between items-center mb-4">
             <flux:heading size="lg" class="mb-4">Manage Game Templates</flux:heading>
             <flux:link :href="route('game-templates.create')">
@@ -31,5 +31,5 @@
                 @endforeach
             </flux:table.rows>
         </flux:table>
-    </flux:card>
+    </x-card>
 </div>

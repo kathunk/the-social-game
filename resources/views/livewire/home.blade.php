@@ -1,5 +1,5 @@
 <div>
-    <flux:card>
+    <x-card>
         @if ($this->games->isEmpty())
             <flux:text>No games found</flux:text>
         @else
@@ -46,5 +46,5 @@
                 </flux:table.rows>
             </flux:table>
         @endif
-    </flux:card>
+    </x-card>
 </div>

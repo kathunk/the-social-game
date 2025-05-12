@@ -191,59 +191,47 @@
         --color-background: #121212;
     }
 
-    /* PHP */
-/*
-1. "Documentation" section (image with Downloads & Documentation)
-Highlight background (Downloads): #4f5595
-
-Regular background (Documentation): #52598e
-
-Text color: #e7ebff (a very light bluish white)
-
-2. "Fibers" text
-Text color: #764261 (a deep mauve/purple)
-
-3. Light background
-Color: #f1f1f1 (a light gray)
-
-4. Dark background
-Color: #2e2e2e (a near-black charcoal) */
-
     .php {
+        /* palette */
         --color-dark-blue: #4a4e86;
         --color-medium-blue: #52598e;
         --color-light-blue: #e7ebff;
 
         --color-dark-magenta: #793862;
-        --color-medium-magenta: #764261;
+        --color-medium-magenta: #AE508D;
 
-        --color-periwinkle: #99c;
+        --color-link: #336699;
 
-        --color-text-white: #ffffff;
+        --color-light-background: #F2F2F2;
+        --color-dark-background: #2C2C2C;
 
-        --color-zinc-50:  #f9f9fa;
-        --color-zinc-100: #f2f2f4;
-        --color-zinc-200: #e6e7ea;
-        --color-zinc-300: #d5d6db;
-        --color-zinc-400: #babcc3;
-        --color-zinc-500: #9fa1aa;
-        --color-zinc-600: #7e8089;
-        --color-zinc-700: #5f616a;
-        --color-zinc-800: #47484f;
-        --color-zinc-900: #2f3035;
-        --color-zinc-950: #1f2023;
-
+        /* theme */
         --color-accent: var(--color-dark-blue);
-        --color-accent-content: var(--color-medium-magenta);
-        --color-accent-foreground: var(--color-light-blue);
+        --color-accent-content: var(--color-light-blue);
+        --color-accent-foreground: var(--color-white);
 
-        --color-background: #F2F2F2;
-    }
+        --color-background: var(--color-dark-background);
 
-    .dark .php {
-        --color-accent-content: var(--color-dark-magenta);
+        [data-flux-sidebar] {
+            @apply !bg-[var(--color-medium-blue)];
 
-        --color-background: #2C2C2C;
+            [data-flux-navlist-item]:hover {
+                @apply !bg-[var(--color-dark-blue)];
+            }
+        }
+
+        /* php flux cards use light mode | @see App/Models/Theme #forceLight */
+        [data-flux-card] {
+            @apply !bg-[var(--color-light-background)];
+        }
+
+        [data-flux-heading] {
+            @apply !text-[var(--color-dark-magenta)];
+        }
+
+        [data-flux-link] {
+            @apply !text-[var(--color-link)] hover:!text-[var(--color-medium-magenta)];
+        }
     }
 
     /* React */
@@ -299,14 +287,6 @@ Color: #2e2e2e (a near-black charcoal) */
     }
 }
 
-.dark .light {
-    color-scheme: light;
-}
-
-.light .dark {
-    color-scheme: dark;
-}
-
 /* Flux Component Overrides */
 
 /* Laravel */
@@ -318,61 +298,6 @@ Color: #2e2e2e (a near-black charcoal) */
     [data-flux-sidebar] {
         background-color: var(--color-background);
         @apply lg:bg-inherit;
-    }
-}
-.php,
-.dark .php {
-    [data-flux-sidebar] {
-        --color-zinc-50: var(--color-medium-blue);
-        --color-zinc-500: var(--color-light-blue);
-        --color-zinc-900: var(--color-medium-blue);
-
-        a:hover {
-            @apply bg-[var(--color-dark-blue)];
-            @apply text-[var(--color-white)];
-        }
-
-        /* user dropdown */
-        [data-flux-dropdown]:hover {
-            @apply bg-[var(--color-dark-blue)];
-            @apply text-[var(--color-white)];
-
-            [data-flux-avatar] {
-                @apply text-[var(--color-medium-magenta)];
-            }
-
-            span:not([data-flux-avatar] span, [data-flux-menu] span) {
-                @apply text-[var(--color-white)];
-            }
-
-            /* Only target icons that are direct children or within specific elements,
-               but NOT inside menus */
-            & > [data-flux-icon],
-            [data-flux-profile] [data-flux-icon] {
-                @apply text-[var(--color-white)];
-            }
-        }
-    }
-
-    /* Menu styles with higher specificity */
-    [data-flux-menu] {
-        @apply bg-[var(--color-light-blue)];
-        @apply text-[var(--color-medium-magenta)];
-
-        /* This ensures menu items are always magenta,
-           even when the dropdown is hovered */
-        [data-flux-menu-item],
-        [data-flux-icon],
-        span {
-            @apply text-[var(--color-medium-magenta)];
-        }
-    }
-}
-
-.dark .php {
-    [data-flux-card] {
-        --color-white: var(--color-zinc-800);
-        @apply bg-[#F2F2F2] !border-[var(--color-periwinkle)] !text-zinc-800;
     }
 }
 
@@ -406,6 +331,7 @@ Color: #2e2e2e (a near-black charcoal) */
         [data-flux-sidebar-toggle] {
             /* --color-zinc-400: var(--color-blue-600); */
         }
+    }
 }
 
 @layer base {

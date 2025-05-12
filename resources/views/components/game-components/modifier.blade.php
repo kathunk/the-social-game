@@ -1,5 +1,5 @@
 @if (isset($modifierComponent['elements']))
-<flux:card>
+<x-card>
     <div class="flex flex-col space-y-4">
         @foreach ($modifierComponent['elements'] as $element)
             @switch($element['type'])
@@ -54,5 +54,5 @@
             @endswitch
         @endforeach
     </div>
-</flux:card>
+</x-card>
 @endif

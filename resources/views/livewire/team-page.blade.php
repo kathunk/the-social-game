@@ -3,9 +3,9 @@
         Back to dashboard
     </flux:link>
 
-    <flux:card>
+    <x-card>
         <flux:heading size="lg">{{ $team->name }}</flux:heading>
-        
+
         @if ($this->players->count() > 0)
             <flux:table>
                 <flux:table.columns>
@@ -27,11 +27,11 @@
         @else
             <flux:subheading>No players yet</flux:subheading>
         @endif
-    </flux:card>
+    </x-card>
 
-    <flux:card>
+    <x-card>
         <flux:heading size="lg">Score: {{ $team->score }}</flux:heading>
-        
+
         @if (count($this->scoreHistoryEntries) > 0)
             <flux:table>
                 <flux:table.columns>
@@ -61,5 +61,5 @@
         @else
             <flux:subheading>No score history yet</flux:subheading>
         @endif
-    </flux:card>
+    </x-card>
 </div>

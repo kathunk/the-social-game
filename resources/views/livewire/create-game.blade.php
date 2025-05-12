@@ -1,5 +1,5 @@
 <div>
-    <flux:card>
+    <x-card>
         <div class="flex flex-col space-y-6">
             <flux:heading size="lg">Create Game</flux:heading>
             <flux:radio.group label="Select Game Variant" wire:model="game_template_id">
@@ -27,5 +27,5 @@
         <div class="flex justify-end">
             <flux:button variant="primary" wire:click="createGame" class="mt-4">Create Game</flux:button>
         </div>
-    </flux:card>
+    </x-card>
 </div>

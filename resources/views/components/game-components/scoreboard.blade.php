@@ -1,7 +1,7 @@
 @props(['teams', 'players', 'type'])
 
 <div>
-    <flux:card>
+    <x-card>
         <flux:heading size="lg">Scoreboard</flux:heading>
 
         <flux:table>
@@ -54,5 +54,5 @@
                 @endif
             </flux:table.rows>
         </flux:table>
-    </flux:card>
+    </x-card>
 </div>

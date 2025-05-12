@@ -43,8 +43,8 @@ class Team extends Model
         };
     }
 
-    public function forceDark(): bool
+    public function forceLight(): bool
     {
-        return in_array($this->theme(), ['PHP']);
+        return in_array($this->name, ['PHP']);
     }
 }
