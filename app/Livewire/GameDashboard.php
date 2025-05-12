@@ -5,9 +5,11 @@ namespace App\Livewire;
 use App\Models\Game;
 use App\Models\Team;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
 
+#[On('challenge-complete')]
 class GameDashboard extends Component
 {
     public Game $game;
@@ -194,11 +196,13 @@ class GameDashboard extends Component
 
         // @todo validate params
 
-        $modifier = $this->modifiers->firstWhere('key', $modifier_key);
+        $modifier = $this->modifiers->firstWhere('class_key', $modifier_key);
+        $response = $modifier->handler()->{$action}($this->player, $params);
 
-        $modifier->handler()->{$action}($this->player, $params);
-
-        redirect()->route('game-dashboard', ['game' => $this->game]);
+        return $response instanceof \Illuminate\Http\RedirectResponse
+            || $response instanceof \Livewire\Features\SupportRedirects\Redirector
+            ? $response
+            : redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
     public function render()

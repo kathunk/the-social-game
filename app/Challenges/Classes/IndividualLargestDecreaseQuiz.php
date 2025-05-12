@@ -89,8 +89,7 @@ class IndividualLargestDecreaseQuiz extends BaseChallengeClass implements Suppor
 
         $votes = collect($this->challenge_state->challenge_data['votes']);
 
-        $score_changes = $game_state->players()->mapWithKeys(fn ($p) => 
-            [$p->id => $votes->where('upvote_player_id', $p->id)->count() - $votes->where('downvote_player_id', $p->id)->count()]);
+        $score_changes = $game_state->players()->mapWithKeys(fn ($p) => [$p->id => $votes->where('upvote_player_id', $p->id)->count() - $votes->where('downvote_player_id', $p->id)->count()]);
 
         $largest_decrease = $score_changes->min();
 

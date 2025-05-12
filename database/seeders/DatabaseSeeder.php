@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             Laracon2025Seeder::class,
             PeckingOrderSeeder::class,
+            // Laracon2025TeamPlayerSeeder::class,
         ]);
     }
 }

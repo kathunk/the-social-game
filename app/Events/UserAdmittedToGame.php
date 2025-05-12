@@ -92,7 +92,7 @@ class UserAdmittedToGame extends Event
 
     public function handle()
     {
-        $player =Player::create([
+        $player = Player::create([
             'id' => $this->player_id,
             'user_id' => $this->user_id,
             'game_id' => $this->game_id,

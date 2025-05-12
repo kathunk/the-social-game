@@ -7,25 +7,25 @@
         $user = auth()->user();
     @endphp
     <body @class([
-        'default' => ! $user->currentPlayer->team,
-        "{$user->currentPlayer?->team?->theme()}" => $user->currentPlayer?->team?->theme(),
-        'min-h-screen bg-[var(--color-background)]',
+        'default bg-zinc-50 dark:bg-zinc-800' => ! $user->currentPlayer->team,
+        "{$user->currentPlayer?->team?->theme()} bg-[var(--color-background)]" => $user->currentPlayer?->team?->theme(),
+        'min-h-screen',
     ])>
         <div class="hidden lg:block fixed top-2.5 right-12 z-50">
             <x-dark-mode-toggle />
         </div>
 
+        @if(config('app.env') === 'local')
+            <div class="absolute lg:top-2.5 top-3 lg:right-12 right-24 z-50">
+                <x-dark-mode-toggle />
+            </div>
+        @endif
+
         @if ($user)
-            <flux:sidebar sticky stashable @class([
-                "border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900",
-                'dark' => $user->currentPlayer?->team?->forceDark(),
-            ])>
+            <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
 
             <div class="flex items-center">
                 <flux:brand name="The Social Game" href="{{ route('dashboard') }}" wire:navigate>
-                    {{-- <x-slot name="name">
-                        <span class="font-bold text-accent-foreground">The Social Game™</span>
-                    </x-slot> --}}
                     <x-slot name="logo">
                         <div class="rounded w-12 bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
                             <x-app-logo />
@@ -34,12 +34,6 @@
                 </flux:brand>
                 <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
             </div>
-
-                        {{-- <flux:brand href="#" name="Acme Inc." class="px-2">
-                            <x-slot name="logo">
-                                <div class="size-6 rounded shrink-0 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] flex items-center justify-center"><i class="font-serif font-bold">A</i></div>
-                            </x-slot>
-                        </flux:brand> --}}
 
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Games')" class="grid">
