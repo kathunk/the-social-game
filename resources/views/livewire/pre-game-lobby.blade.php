@@ -53,7 +53,7 @@
         </flux:button>
     @endif
 
-    <x-card class="!text-zinc-700">
+    <x-card>
         <div class="flex flex-col gap-2">
             {!! $this->description !!}
         </div>

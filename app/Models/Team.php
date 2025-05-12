@@ -40,6 +40,7 @@ class Team extends Model
             'React' => 'react',
             'Ruby' => 'ruby',
             'Vue' => 'vue',
+            default => false,
         };
     }
 

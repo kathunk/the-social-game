@@ -8,6 +8,49 @@
 
 @custom-variant dark (&:where(.dark, .dark *):not(:has(.light), .light *));
 
+:root {
+    /* colors */
+    --color-sand-50: #fefae6;
+    --color-sand-100: #fde6b0;
+    --color-sand-200: #fcd49e;
+    --color-sand-300: #f6bf84;
+    --color-sand-400: #ec9f66;
+    --color-sand-500: #de8a55;
+    --color-sand-600: #c7743d;
+    --color-sand-700: #a95d2b;
+    --color-sand-800: #844622;
+    --color-sand-900: #5b321b;
+    --color-sand-950: #321f12;
+
+    --color-blue-600: #2563eb;
+
+    /* --color-background: #ffffff; */
+
+    --color-black: #000000;
+    --color-white: #ffffff;
+    --color-neutral-800: #1e293b;
+
+    --color-sky-300: #7dd3fc;
+    --color-twilight: #180F30;
+
+    /* gradients */
+    --gradient-day: linear-gradient(to top, #0ea5e9 33%, #87ceeb 90%, #cceeff 100%);
+    --gradient-dusk: linear-gradient(to top, #4B0082 33%, #2F005F 90%, #191970 100%);
+    --gradient-night: linear-gradient(to top, #030375 33%, #2C003E 90%, #000000 100%);
+
+    --gradient-sand-50: linear-gradient(to right, #fefae6 0%, #fceec0 50%, #f8d98b 100%);
+    --gradient-sand-100: linear-gradient(to right, #fde6b0 0%, #fcd38e 50%, #f8b463 100%);
+    --gradient-sand-200: linear-gradient(to right, #fcd49e 0%, #f5b475 50%, #e78f50 100%);
+    --gradient-sand-300: linear-gradient(to right, #f6bf84 0%, #e8a261 50%, #cf7948 100%);
+    --gradient-sand-400: linear-gradient(to right, #ec9f66 0%, #c66c40 50%, #a94e2f 100%);
+    --gradient-sand-500: linear-gradient(to right, #de8a55 0%, #b85a35 50%, #933a20 100%);
+    --gradient-sand-600: linear-gradient(to right, #c7743d 0%, #a8512c 50%, #843619 100%);
+    --gradient-sand-700: linear-gradient(to right, #a95d2b 0%, #8a3c1b 50%, #62280f 100%);
+    --gradient-sand-800: linear-gradient(to right, #844622 0%, #5e2e15 50%, #3b1c0b 100%);
+    --gradient-sand-900: linear-gradient(to right, #5b321b 0%, #381e0e 50%, #1f0f06 100%);
+    --gradient-sand-950: linear-gradient(to right, #321f12 0%, #1c0e07 50%, #0c0502 100%);
+}
+
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
@@ -33,6 +76,41 @@
         --color-accent: var(--color-blue-600);
         --color-accent-content: var(--color-pink-500);
         --color-accent-foreground: var(--color-blue-50);
+    }
+
+    /* Desert */
+    .desert {
+        --color-accent: var(--color-sand-50); /* primary color */
+        --color-accent-content: var(--color-sand-700); /* secondary color */
+        --color-accent-foreground: var(--color-sand-700); /* text color */
+    }
+
+    .dark .desert {
+        --color-accent: var(--color-sand-600);
+        --color-accent-foreground: var(--color-sand-50);
+        /* text color */
+    }
+
+    .desert .fill-dunes-foreground { fill: var(--color-sand-50); }
+    .desert .fill-dunes-background { fill: var(--color-sand-200); }
+
+    .dark .desert .fill-dunes-foreground { fill: var(--color-sand-700); }
+    .dark .desert .fill-dunes-background { fill: var(--color-sand-900); }
+
+    .desert.bg-background { background-image: var(--gradient-day); }
+    .dark .desert.bg-background { background-image: var(--gradient-night);}
+
+    /* Laravel */
+    .laravel {
+        --color-accent: #e40014;
+        --color-accent-content: #f53003;
+        --color-accent-foreground: #fdfdfc;
+        --color-background: #fdfdfc;
+    }
+
+    .dark .laravel {
+        --color-accent-content: #f61500;
+        --color-background: #111110;
     }
 
     /* Elixir */
@@ -113,36 +191,6 @@
         --color-background: #121212;
     }
 
-
-    .laravel {
-        /* palette */
-        --color-laravel-red: #f61500;
-
-        --color-sand-dark-1: #111110;
-        --color-sand-light-3: #f1f0ef;
-
-        /* theme */
-        --color-accent: var(--color-laravel-red);
-        --color-accent-content: var(--color-red-500);
-        --color-accent-foreground: var(--color-white);
-
-        --color-background: var(--color-sand-dark-1);
-
-        --color-white: var(--color-sand-light-3);
-
-        [data-flux-card] {
-            @apply !bg-[var(--color-background)];
-        }
-
-        [data-flux-sidebar] {
-            @apply !bg-[var(--color-background)];
-        }
-
-        [data-flux-link] {
-            @apply !underline-offset-1 !decoration-current
-        }
-    }
-
     .php {
         /* palette */
         --color-dark-blue: #4a4e86;
@@ -186,42 +234,30 @@
         }
     }
 
+    /* React */
     .react {
-        /* palette */
-        --color-card-dark: rgb(52, 58, 70, 1);
-        --color-wash-dark: rgb(35, 39, 47, 1);
-        --color-brand-dark: rgb(88, 196, 220, 1);
-        --color-highlight-dark: rgba(88, 175, 223, .1);
+        --color-zinc-50: #f0f9ff; /* Sky-50 */
+        --color-zinc-100: #e0f2fe;
+        --color-zinc-200: #bae6fd;
+        --color-zinc-300: #7dd3fc;
+        --color-zinc-400: #38bdf8;
+        --color-zinc-500: #0ea5e9;
+        --color-zinc-600: #0284c7;
+        --color-zinc-700: #0369a1;
+        --color-zinc-800: #075985;
+        --color-zinc-900: #0c4a6e;
+        --color-zinc-950: #082f49;
 
-        --border-link: rgb(8, 126, 164, 1);
+        --color-accent: #61dafb;
+        --color-accent-content: #21a1c4;
+        --color-accent-foreground: #e0f9ff;
+    }
 
-        --text-primary-dark: rgb(246, 247, 249, 1);
-        --text-secondary: rgb(64, 71, 86, 1);
-
-        /* theme */
-        --color-accent: var(--color-brand-dark);
-        --color-accent-content: var(--color-brand-dark);
-        --color-accent-foreground: var(--text-secondary);
-
-        --color-background: var(--color-wash-dark);
-
-        --color-white: var(--text-primary-dark);
-
-        [data-flux-sidebar] {
-            @apply !bg-[var(--color-card-dark)];
-
-            [data-flux-navlist-item][data-current] {
-                @apply !text-[var(--color-brand-dark)] !bg-[var(--color-highlight-dark)];
-            }
-        }
-
-        [data-flux-card] {
-            @apply !bg-[var(--color-card-dark)];
-        }
-
-        [data-flux-link] {
-            @apply !text-[var(--color-brand-dark)] hover:!decoration-[var(--border-link)] !decoration-[color-mix(in_oklab,var(--color-accent-content),transparent_100%)] !underline-offset-4 !decoration-1;
-        }
+    .dark .react {
+        --color-accent: #61dafb;
+        --color-accent-content: #e0f9ff;
+        --color-accent-foreground: #082f49;
+        --color-background: #082f49;
     }
 
     /* Ruby */
@@ -248,6 +284,53 @@
         --color-accent-content: #fcd7d5;
         --color-accent-foreground: #450a0a;
         --color-background: #450a0a;
+    }
+}
+
+/* Flux Component Overrides */
+
+/* Laravel */
+.laravel {
+    [data-flux-card] {
+        @apply bg-inherit;
+    }
+
+    [data-flux-sidebar] {
+        background-color: var(--color-background);
+        @apply lg:bg-inherit;
+    }
+}
+
+/* Desert */
+.desert {
+    [data-flux-card] {
+        --color-white: rgba(255, 255, 255, 0.5);
+    }
+
+    [data-flux-sidebar] {
+        background: var(--color-sand-300);
+        --color-zinc-400: var(--color-zinc-700);
+    }
+
+    [data-flux-sidebar-toggle] {
+        --color-zinc-400: var(--color-zinc-700);
+    }
+
+    .dark & {
+        [data-flux-card] {
+            /* --color-white: rgba(255, 255, 255); */
+            background: rgba(255, 255, 255, .05);
+            --text-color-white: var(--color-sand-50);
+        }
+
+        [data-flux-sidebar] {
+            background: var(--color-sand-950);
+            --color-zinc-400: var(--color-zinc-500);
+        }
+
+        [data-flux-sidebar-toggle] {
+            /* --color-zinc-400: var(--color-blue-600); */
+        }
     }
 }
 

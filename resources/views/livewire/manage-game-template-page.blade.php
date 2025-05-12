@@ -3,7 +3,7 @@
         <div class="flex flex-col gap-6">
             <flux:input wire:model="name" label="Name" />
             <flux:textarea wire:model="description" label="Description" />
-            <flux:editor class="!text-zinc-800" wire:model="pre_game_lobby_message" label="Pre Game Lobby Message" description="This message will be sent to players when they join the game lobby." />
+            <flux:editor wire:model="pre_game_lobby_message" label="Pre Game Lobby Message" description="This message will be sent to players when they join the game lobby." />
             <div class="flex flex-row gap-4">
                 <flux:input wire:model="min_players" label="Minimum Players" placeholder="Can be left blank"/>
                 <flux:input wire:model="max_players" label="Maximum Players" placeholder="Can be left blank"/>

@@ -8,9 +8,9 @@
     @endphp
     <body
         @class([
-            'default' => $user,
-            {{-- "{$user->currentPlayer->team->theme()}" => $user?->currentPlayer?->team?->theme(), --}}
-            'min-h-screen bg-[var(--color-background)]',
+            'bg-zinc-50 dark:bg-zinc-800' => ! $user?->currentPlayer?->team,
+            "{$user->currentPlayer?->team?->theme()} bg-[var(--color-background)]" => $user->currentPlayer?->team?->theme(),
+            'min-h-screen',
         ])
     >
         <flux:main class="w-full max-w-screen">

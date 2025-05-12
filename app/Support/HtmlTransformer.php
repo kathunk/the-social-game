@@ -18,15 +18,15 @@ class HtmlTransformer
         $dom->loadHTML('<?xml encoding="utf-8" ?>'.$this->html);
 
         $tagReplacements = [
-            'h1' => fn ($node, $html) => "<h1 class=\"text-2xl font-bold mb-3\">{$html}</h1>",
-            'h2' => fn ($node, $html) => "<h2 class=\"text-xl font-semibold mb-3\">{$html}</h2>",
-            'h3' => fn ($node, $html) => "<h3 class=\"text-lg font-semibold mb-2\">{$html}</h3>",
-            'p' => fn ($node, $html) => "<p class=\"text-sm mb-4\">{$html}</p>",
-            'ul' => fn ($node, $html) => "<ul class=\"list-disc pl-5 mb-4\">{$html}</ul>",
-            'ol' => fn ($node, $html) => "<ol class=\"list-decimal pl-5 mb-4\">{$html}</ol>",
-            'li' => fn ($node, $html) => "<li class=\"mb-2\">{$html}</li>",
+            'h1' => fn ($node, $html) => "<h1 class=\"text-zinc-800 dark:text-white text-2xl font-bold mb-3\">{$html}</h1>",
+            'h2' => fn ($node, $html) => "<h2 class=\"text-zinc-800 dark:text-white text-xl font-semibold mb-3\">{$html}</h2>",
+            'h3' => fn ($node, $html) => "<h3 class=\"text-zinc-800 dark:text-white text-lg font-semibold mb-2\">{$html}</h3>",
+            'p' => fn ($node, $html) => "<p class=\"text-zinc-500 dark:text-white/70 text-sm mb-4\">{$html}</p>",
+            'ul' => fn ($node, $html) => "<ul class=\"text-zinc-800 dark:text-white list-disc pl-5 mb-4\">{$html}</ul>",
+            'ol' => fn ($node, $html) => "<ol class=\"text-zinc-800 dark:text-white list-decimal pl-5 mb-4\">{$html}</ol>",
+            'li' => fn ($node, $html) => "<li class=\"text-zinc-500 dark:text-white/70 mb-2\">{$html}</li>",
             'a' => fn ($node, $html) => "<a class=\"inline font-medium underline-offset-[6px] hover:decoration-current underline [[data-color]>&]:text-inherit [[data-color]>&]:decoration-current/20 dark:[[data-color]>&]:decoration-current/50 [[data-color]>&]:hover:decoration-current text-[var(--color-accent-content)] decoration-[color-mix(in_oklab,var(--color-accent-content),transparent_80%)]\" href=\"{$node->getAttribute('href')}\" data-flux-link=\"\">{$html}</a>",
-            'blockquote' => fn ($node, $html) => "<blockquote class=\"border-l-4 pl-4 italic text-gray-600 mb-4\">{$html}</blockquote>",
+            'blockquote' => fn ($node, $html) => "<blockquote class=\"border-l-4 pl-4 italic text-zinc-600 dark:text-zinc-50 mb-4\">{$html}</blockquote>",
         ];
 
         $body = $dom->getElementsByTagName('body')->item(0);
