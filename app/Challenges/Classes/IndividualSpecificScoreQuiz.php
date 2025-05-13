@@ -8,25 +8,25 @@ use App\Events\PlayerSubmittedQuizGuess;
 use App\Models\Player;
 use App\States\GameState;
 
-class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeckingOrderBallots
+class IndividualSpecificScoreQuiz extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {
     use HasPeckingOrderBallots;
 
-    const NAME = 'Belle of the ball';
+    const NAME = 'Guess your score';
 
-    const DESCRIPTION = 'Guess which player will be at the top of the scoreboard at the end of this round. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'Guess what your score will be on the scoreboard at the beginning of the next round. If you are within 1 point of the correct score, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
 
     const TYPE = 'individual';
 
     public static function key(): string
     {
-        return 'individual_high_score_quiz';
+        return 'individual_guess_specific_score_quiz';
     }
 
     public function dataArrayForState(): array
     {
         return [
-            'quiz_submissions' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => ['guess_player_id' => null]])->toArray(),
+            'quiz_submissions' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => ['guess_score' => null]])->toArray(),
             'votes' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => [
                 'downvote_player_id' => null,
                 'upvote_player_id' => null,
@@ -37,7 +37,7 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
+        $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_score'] !== null;
         $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
 
         return $this->form()
@@ -45,22 +45,21 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
             ->subtitle(self::DESCRIPTION)
             ->when($has_guessed, fn ($form) => $form->subtitle('You have already guessed.')
             )
-            ->when(! $has_guessed, fn ($form) => $form->select(
-                property_name: 'guess_player_id',
-                options: $players->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
-                label: 'Guess which player will be at the top of the scoreboard',
-                placeholder: 'Select a player...',
-                validation_rules: 'required|in:'.implode(',', $players->pluck('id')->toArray()),
+            ->when(! $has_guessed, fn ($form) => $form->input(
+                property_name: 'guess_score',
+                label: 'Guess your score',
+                placeholder: 'Enter your guess...',
+                validation_rules: 'required|integer',
                 validation_messages: [
-                    'required' => 'Must select a player',
-                    'in' => 'Must select a valid player',
+                    'required' => 'Pick a number, any number',
+                    'integer' => "What part of 'number' aren't we understanding?",
                 ],
             )
                 ->buttonGroup()
                 ->button(
                     label: 'Submit Guess',
                     action: 'guess',
-                    properties_to_validate: ['guess_player_id'],
+                    properties_to_validate: ['guess_score'],
                 )
                 ->endGroup()
             )
@@ -82,7 +81,7 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
             player_id: $player->id,
             challenge_id: $this->challenge->id,
             game_id: $this->challenge->game_id,
-            guess: ['guess_player_id' => $params['guess_player_id']],
+            guess: ['guess_score' => $params['guess_score']],
         );
     }
 
@@ -91,15 +90,13 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
     ) {
         $this->applyVotesToScore($game_state);
 
-        $highest_score = $game_state->players()->max(fn ($p) => $p->score());
+        $player_scores = $game_state->players()->mapWithKeys(fn ($p) => [$p->id => $p->score(include_hidden: false)]);
 
-        $leader_ids = $game_state->players()->filter(fn ($p) => $p->score() === $highest_score)->pluck('id');
+        $game_state->players()->each(function ($player) use ($player_scores) {
+            $guess_score = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_score'];
 
-        $game_state->players()->each(function ($player) use ($leader_ids) {
-            $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
-
-            if ($leader_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, 'Correctly guessed the player in first place', true);
+            if ($guess_score >= $player_scores[$player->id] - 1 && $guess_score <= $player_scores[$player->id] + 1) {
+                $player->addToScoreHistory(1, 'Correctly guessed their own score', true);
             }
         });
     }
