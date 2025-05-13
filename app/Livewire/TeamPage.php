@@ -2,13 +2,15 @@
 
 namespace App\Livewire;
 
+use App\Models\Game;
 use App\Models\Team;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\Attributes\Computed;
 
 class TeamPage extends Component
 {
     public Team $team;
+    public Game $game;
 
     #[Computed]
     public function players()
