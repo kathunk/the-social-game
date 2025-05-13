@@ -1,9 +1,11 @@
 <?php
 
-use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
-use App\Events\PlayerSubmittedQuizGuess;
+use Livewire\Livewire;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
+use App\Livewire\GameDashboard;
+use App\Events\PlayerSubmittedQuizGuess;
+use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -41,31 +43,23 @@ it('runs the individual most hidden points quiz', function () {
     incrementScore(player: $player_3, points: 9, is_hidden: true);
     incrementScore(player: $player_4, points: 40);
 
-    // player 3 and player 1 are tied at 1 point
+    $this->actingAs($player_1->user);
 
-    // player 1 is correct
-    PlayerSubmittedQuizGuess::fire(
-        player_id: $player_1->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_1->id],
-    );
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.guess_player_id', $player_1->id)
+        ->call('callChallengeAction', 'guess');
 
-    // player 2 is correct
-    PlayerSubmittedQuizGuess::fire(
-        player_id: $player_2->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_2->id],
-    );
+    $this->actingAs($player_2->user);
 
-    // player 3 is incorrect
-    PlayerSubmittedQuizGuess::fire(
-        player_id: $player_3->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_3->id],
-    );
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.guess_player_id', $player_2->id)
+        ->call('callChallengeAction', 'guess');
+
+    $this->actingAs($player_3->user);
+
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.guess_player_id', $player_3->id)
+        ->call('callChallengeAction', 'guess');
 
     $challenge->refresh();
     $challenge->end();

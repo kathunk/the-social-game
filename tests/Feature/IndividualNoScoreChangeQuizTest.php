@@ -1,10 +1,12 @@
 <?php
 
-use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
-use App\Events\PlayerSubmittedPeckingOrderBallot;
-use App\Events\PlayerSubmittedQuizGuess;
+use Livewire\Livewire;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
+use App\Livewire\GameDashboard;
+use App\Events\PlayerSubmittedQuizGuess;
+use App\Events\PlayerSubmittedPeckingOrderBallot;
+use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -34,60 +36,43 @@ it('runs the individual no score change quiz', function () {
 
     $challenge = Challenge::first();
 
-    PlayerSubmittedPeckingOrderBallot::fire(
-        player_id: $player_1->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        downvote_player_id: $player_2->id,
-        upvote_player_id: $player_3->id,
-    );
+    $this->actingAs($player_1->user);
 
-    PlayerSubmittedPeckingOrderBallot::fire(
-        player_id: $player_2->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        downvote_player_id: $player_4->id,
-        upvote_player_id: $player_2->id,
-    );
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.upvote_player_id', $player_3->id)
+        ->set('challenge_properties.downvote_player_id', $player_2->id)
+        ->call('callChallengeAction', 'vote')
+        ->set('challenge_properties.guess_player_id', $player_3->id)
+        ->call('callChallengeAction', 'guess');
 
-    // player 3 and player 1 are tied at 1 point
+    $this->actingAs($player_2->user);
 
-    // player 1 is correct
-    PlayerSubmittedQuizGuess::fire(
-        player_id: $player_1->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_1->id],
-    );
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.upvote_player_id', $player_1->id)
+        ->set('challenge_properties.downvote_player_id', $player_3->id)
+        ->call('callChallengeAction', 'vote')
+        ->set('challenge_properties.guess_player_id', $player_4->id)
+        ->call('callChallengeAction', 'guess');
 
-    // player 2 is correct
-    PlayerSubmittedQuizGuess::fire(
-        player_id: $player_2->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_2->id],
-    );
+    $this->actingAs($player_3->user);
 
-    // player 3 is incorrect
-    PlayerSubmittedQuizGuess::fire(
-        player_id: $player_3->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        guess: ['guess_player_id' => $player_3->id],
-    );
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.guess_player_id', $player_1->id)
+        ->call('callChallengeAction', 'guess');
+
 
     $challenge->refresh();
     $challenge->end();
 
     // visible scores show this
-    expect($player_1->fresh()->score)->toBe(0);
-    expect($player_2->fresh()->score)->toBe(0);
-    expect($player_3->fresh()->score)->toBe(1);
-    expect($player_4->fresh()->score)->toBe(-1);
+    expect($player_1->fresh()->score)->toBe(1);
+    expect($player_2->fresh()->score)->toBe(-1);
+    expect($player_3->fresh()->score)->toBe(0);
+    expect($player_4->fresh()->score)->toBe(0);
 
     // but with hidden scores included, we see this
-    expect($player_1->fresh()->state()->score(include_hidden: true))->toBe(1);
-    expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(1);
-    expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(1);
-    expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(-1);
+    expect($player_1->fresh()->state()->score(include_hidden: true))->toBe(2);
+    expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(0);
+    expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(0);
+    expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(0);
 });

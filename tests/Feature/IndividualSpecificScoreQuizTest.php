@@ -1,9 +1,11 @@
 <?php
 
-use App\Challenges\Classes\IndividualSpecificScoreQuiz;
-use App\Events\PlayerSubmittedQuizGuess;
+use Livewire\Livewire;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
+use App\Livewire\GameDashboard;
+use App\Events\PlayerSubmittedQuizGuess;
+use App\Challenges\Classes\IndividualSpecificScoreQuiz;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -33,37 +35,29 @@ it('runs the individual guess specific score quiz', function () {
 
     $challenge = Challenge::first();
 
-    // player 1 is correct
-    PlayerSubmittedQuizGuess::fire(
-        player_id: $player_1->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        guess: ['guess_score' => 1],
-    );
+    $this->actingAs($player_1->user);
 
-    // player 2 is correct
-    PlayerSubmittedQuizGuess::fire(
-        player_id: $player_2->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        guess: ['guess_score' => -1],
-    );
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.guess_score', 1)
+        ->call('callChallengeAction', 'guess');
 
-    // player 3 is incorrect
-    PlayerSubmittedQuizGuess::fire(
-        player_id: $player_3->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        guess: ['guess_score' => 2],
-    );
+    $this->actingAs($player_2->user);
 
-    // player 4 is incorrect
-    PlayerSubmittedQuizGuess::fire(
-        player_id: $player_4->id,
-        challenge_id: $challenge->id,
-        game_id: $this->game->id,
-        guess: ['guess_score' => -2],
-    );
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.guess_score', -1)
+        ->call('callChallengeAction', 'guess');
+
+    $this->actingAs($player_3->user);
+
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.guess_score', 0)
+        ->call('callChallengeAction', 'guess');
+
+    $this->actingAs($player_4->user);
+
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.guess_score', -2)
+        ->call('callChallengeAction', 'guess');
 
     $challenge->refresh();
     $challenge->end();
@@ -77,6 +71,6 @@ it('runs the individual guess specific score quiz', function () {
     // but with hidden scores included, we see this
     expect($player_1->fresh()->state()->score(include_hidden: true))->toBe(1);
     expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(1);
-    expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(0);
+    expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(1);
     expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(0);
 });
