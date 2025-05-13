@@ -1,11 +1,10 @@
 <?php
 
-use Livewire\Livewire;
-use App\Models\Challenge;
-use Thunk\Verbs\Facades\Verbs;
-use App\Livewire\GameDashboard;
-use App\Events\PlayerSubmittedQuizGuess;
 use App\Challenges\Classes\IndividualSpecificScoreQuiz;
+use App\Livewire\GameDashboard;
+use App\Models\Challenge;
+use Livewire\Livewire;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

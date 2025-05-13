@@ -1,12 +1,10 @@
 <?php
 
-use Livewire\Livewire;
-use App\Models\Challenge;
-use Thunk\Verbs\Facades\Verbs;
-use App\Livewire\GameDashboard;
-use App\Events\PlayerSubmittedQuizGuess;
-use App\Events\PlayerSubmittedPeckingOrderBallot;
 use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
+use App\Livewire\GameDashboard;
+use App\Models\Challenge;
+use Livewire\Livewire;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -59,7 +57,6 @@ it('runs the individual no score change quiz', function () {
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('challenge_properties.guess_player_id', $player_1->id)
         ->call('callChallengeAction', 'guess');
-
 
     $challenge->refresh();
     $challenge->end();
