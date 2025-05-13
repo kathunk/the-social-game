@@ -78,7 +78,7 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
             player_id: $player->id,
             challenge_id: $this->challenge->id,
             game_id: $this->challenge->game_id,
-            guess: ['guess_player_id' => $params['challenge_properties']['guess_player_id']],
+            guess: ['guess_player_id' => $params['guess_player_id']],
         );
     }
 
@@ -98,7 +98,7 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
 
         $max_votes = $vote_counts->max();
 
-        $players_with_most_votes = $vote_counts->filter(fn($count) => $count === $max_votes)->keys()->toArray();
+        $players_with_most_votes = $vote_counts->filter(fn ($count) => $count === $max_votes)->keys()->toArray();
 
         $game_state->players()->each(function ($player) use ($players_with_most_votes) {
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];

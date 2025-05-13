@@ -145,14 +145,35 @@ class GameDashboard extends Component
         redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
+    public function rules()
+    {
+        // Get the base rules for challenge_properties
+        $rules = [
+            'challenge_properties' => 'array',
+            'challenge_properties.*' => 'nullable',
+        ];
+
+        // If we have validation rules from the challenge handler, merge them
+        if (! empty($this->challenge_validation_rules['rules'])) {
+            // Transform the rules to be under challenge_properties namespace
+            $transformed_rules = [];
+            foreach ($this->challenge_validation_rules['rules'] as $key => $rule) {
+                $transformed_rules["challenge_properties.$key"] = $rule;
+            }
+            $rules = array_merge($rules, $transformed_rules);
+        }
+
+        return $rules;
+    }
+
     public function callChallengeAction(string $action, ?array $params = null)
     {
         // If no params provided, use challenge_properties
         $params = $params ?? $this->challenge_properties;
-        
+
         // Always wrap params in challenge_properties namespace
         $params = ['challenge_properties' => $params];
-        
+
         $component = $this->challenge_handler->frontendComponent($this->player);
 
         $all_elements = collect($component['elements'])->flatMap(function ($el) {
@@ -174,14 +195,14 @@ class GameDashboard extends Component
             $filtered_rules = [];
             $filtered_messages = [];
             foreach ($fields as $field) {
-                $key = "challenge_properties.$field";
-                if (isset($validation['rules'][$key])) {
-                    $filtered_rules[$key] = $validation['rules'][$key];
+                // No need to prefix with challenge_properties here since rules() handles it
+                if (isset($validation['rules'][$field])) {
+                    $filtered_rules["challenge_properties.$field"] = $validation['rules'][$field];
                 }
                 if (isset($validation['messages'])) {
                     foreach ($validation['messages'] as $msg_key => $msg_val) {
-                        if (str_starts_with($msg_key, "$key.")) {
-                            $filtered_messages[$msg_key] = $msg_val;
+                        if (str_starts_with($msg_key, "$field.")) {
+                            $filtered_messages["challenge_properties.$msg_key"] = $msg_val;
                         }
                     }
                 }

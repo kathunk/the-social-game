@@ -1,9 +1,9 @@
 <?php
 
+use App\Challenges\Classes\IndividualSpecificScoreQuiz;
+use App\Events\PlayerSubmittedQuizGuess;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
-use App\Events\PlayerSubmittedQuizGuess;
-use App\Challenges\Classes\IndividualSpecificScoreQuiz;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
