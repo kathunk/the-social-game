@@ -1,9 +1,8 @@
 <?php
 
-use App\Models\Team;
-use Thunk\Verbs\Facades\Verbs;
-use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\IndividualLowScoreQuiz;
+use App\Challenges\Classes\PyramidScheme;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

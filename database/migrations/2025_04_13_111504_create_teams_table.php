@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('game_id')->constrained('games');
             $table->string('name');
             $table->integer('score')->default(0);
+            $table->integer('hidden_score')->default(0);
             $table->timestamps();
         });
     }

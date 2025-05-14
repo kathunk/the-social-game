@@ -28,7 +28,27 @@
                                     @endif
                                 </flux:button>
                             </flux:table.cell>
-                            <flux:table.cell>{{ $team->score }}</flux:table.cell>
+                            <flux:table.cell>
+                                @if ($this->game->status === 'ended')
+                                    <div class="flex items-center gap-2">
+                                        {{ $team->hidden_score }} 
+                                        @if ($team->hidden_score !== $team->score)    
+                                            <flux:text class="text-purple-500 dark:text-purple-300">
+                                                ({{ $team->hidden_score - $team->score }} bonus)
+                                            </flux:text>
+                                        @endif
+                                    </div>
+                                @else
+                                    <div class="flex items-center gap-2">
+                                        {{ $team->score }}
+                                        @if ($team->id === $this->player->team_id && $team->hidden_score > $team->score)
+                                            <flux:text class="text-purple-500 dark:text-purple-300">
+                                                +{{ $team->hidden_score - $team->score }}
+                                            </flux:text>
+                                        @endif
+                                    </div>
+                                @endif
+                            </flux:table.cell>
                         </flux:table.row>
                     @endforeach
                 @else
@@ -40,14 +60,25 @@
                                 </flux:button>
                             </flux:table.cell>
                             <flux:table.cell>
-                                <div class="flex items-center gap-2">
-                                    {{ $player->score }}
-                                    @if ($player->id === $this->player->id && $player->hidden_score > $player->score)
-                                        <flux:text class="text-purple-500 dark:text-purple-300">
-                                            +{{ $player->hidden_score - $player->score }}
-                                        </flux:text>
-                                    @endif
-                                </div>
+                                @if ($this->game->status === 'ended')
+                                    <div class="flex items-center gap-2">
+                                        {{ $player->hidden_score }} 
+                                        @if ($player->hidden_score > $player->score)
+                                            <flux:text class="text-purple-500 dark:text-purple-300">
+                                                ({{ $player->hidden_score - $player->score }} bonus)
+                                            </flux:text>
+                                        @endif
+                                    </div>
+                                @else
+                                    <div class="flex items-center gap-2">
+                                        {{ $player->score }}
+                                        @if ($player->id === $this->player->id && $player->hidden_score > $player->score)
+                                            <flux:text class="text-purple-500 dark:text-purple-300">
+                                                +{{ $player->hidden_score - $player->score }}
+                                            </flux:text>
+                                        @endif
+                                    </div>
+                                @endif
                             </flux:table.cell>
                         </flux:table.row>
                     @endforeach

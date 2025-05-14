@@ -95,6 +95,10 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
         $game_state->players()->each(function ($player) use ($player_scores) {
             $guess_score = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_score'];
 
+            if ($guess_score === null) {
+                return;
+            }
+
             if ($guess_score >= $player_scores[$player->id] - 1 && $guess_score <= $player_scores[$player->id] + 1) {
                 $player->addToScoreHistory(1, 'Correctly guessed their own score', true);
             }

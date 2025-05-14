@@ -189,7 +189,7 @@ class Game extends Model
 
     public function getIsJoinableAttribute(): bool
     {
-        if ($this->status === 'complete') {
+        if ($this->status === 'ended') {
             return false;
         }
 

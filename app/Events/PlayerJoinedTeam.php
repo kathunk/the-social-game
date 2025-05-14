@@ -102,7 +102,10 @@ class PlayerJoinedTeam extends Event
 
         $game = Game::find($this->game_id);
 
-        $game->teams->each(fn ($t) => $t->update(['score' => $t->state()->score()]));
+        $game->teams->each(fn ($t) => $t->update([
+            'score' => $t->state()->score(),
+            'hidden_score' => $t->state()->score(include_hidden: true),
+        ]));
 
         $game->currentChallenge->updateModelWithStateData();
         $game->modifiers->each(fn ($m) => $m->updateModelWithStateData());

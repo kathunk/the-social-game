@@ -16,7 +16,7 @@ class TeamSecretAlliance extends BaseModifierClass
 {
     const NAME = 'Star crossed allies';
 
-    const DESCRIPTION = "You have been randomly assigned a secret alliance with {player_name}. They were on {ally_team_name} when you were assigned. If at any point, you and {player_name} join a new team together, that team will receive +5 points. Note that this will not take effect if either of you simply joins the other's current team. You must both join a new team together.";
+    const DESCRIPTION = "You have been randomly assigned a secret alliance with {player_name}. They were on {ally_team_name} when you were assigned. If at any point, you and {player_name} join a new team together, that team will receive 5 bonus points that will not be revealed until the end of the game. Note that this will not take effect if either of you simply joins the other's current team. You must both join a new team together.";
 
     const TYPE = 'team';
 
@@ -37,7 +37,7 @@ class TeamSecretAlliance extends BaseModifierClass
         $has_connected = $pair_data->hasConnected();
         $player_is_active = $player->status === 'active';
         $player_is_on_dashboard = Route::currentRouteName() === 'game-dashboard';
-        $player_is_lucky = rand(0, 100) > 98;
+        $player_is_lucky = rand(0, 100) > 0;
 
         if ($player_is_active && $player_is_on_dashboard && ! $ally && $player_is_lucky && $player->team_id) {
             return $this->form()
@@ -181,7 +181,7 @@ class TeamSecretAlliance extends BaseModifierClass
             return;
         }
 
-        $team_state->addToScoreHistory(5, $player_state->name.' and '.$ally->name.' were secret allies');
+        $team_state->addToScoreHistory(5, $player_state->name.' and '.$ally->name.' were secret allies', true);
 
         $modifier_state->modifier_data['pairs'] = collect($modifier_state->modifier_data['pairs'])
             ->map(function ($pair) use ($player_state) {

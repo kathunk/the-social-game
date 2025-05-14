@@ -76,7 +76,8 @@ it('assigns secret allies in team games', function () {
     $player_1->fresh()->joinTeam($team_3);
     $player_2->fresh()->joinTeam($team_3);
 
-    expect($team_3->fresh()->score)->toBe(5);
+    expect($team_3->fresh()->score)->toBe(0);
+    expect($team_3->fresh()->hidden_score)->toBe(5);
 
     $pair_data = $this->game->modifiers->first()->fresh()->modifier_data['pairs'];
 
@@ -111,4 +112,5 @@ it('assigns secret allies in team games', function () {
 
     // since they have already realized this reward, it does not give them an additional reward
     expect($team_4->fresh()->score)->toBe(0);
+    expect($team_4->fresh()->hidden_score)->toBe(0);
 });
