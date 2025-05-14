@@ -62,10 +62,10 @@ class GameTemplateSeeder extends Seeder
                 'challenges' => [
                     [
                         'challenge_keys' => [
-                            // IndividualHighScoreQuiz::key(),
-                            // IndividualLowScoreQuiz::key(),
+                            IndividualHighScoreQuiz::key(),
+                            IndividualLowScoreQuiz::key(),
                             IndividualSpecificScoreQuiz::key(),
-                            // IndividualNoScoreChangeQuiz::key(),
+                            IndividualNoScoreChangeQuiz::key(),
                         ],
                         'duration' => 5,
                     ],
