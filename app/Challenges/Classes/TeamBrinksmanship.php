@@ -45,63 +45,48 @@ class TeamBrinksmanship extends BaseChallengeClass
 
     public function frontendComponent(Player $player): array
     {
-        $team_id = $player->team_id;
+        $team_data = $this->challenge->challenge_data[$player->team_id];
 
-        if (! isset($this->challenge->challenge_data[$team_id])) {
-            return $this->form()
-                ->title(self::NAME)
-                ->subtitle('Challenge data is being prepared...')
-                ->build();
-        }
-
-        $team_data = $this->challenge->challenge_data[$team_id];
-        $ally_team_id = $team_data['ally_team_id'];
-        $ally_team = $player->game->teams->firstWhere('id', $ally_team_id);
+        $ally_team = $player->game->teams->firstWhere('id', $team_data['ally_team_id']);
 
         $description = strtr(self::DESCRIPTION, [
             '{ally_team}' => $ally_team->name,
         ]);
 
-        // @todo use the when() function for the following:
-
-        $form = $this->form()
+        return $this->form()
             ->title(self::NAME)
-            ->subtitle($description);
+            ->subtitle($description)
+            ->message('Your nuclear code: '.$team_data['code'])
+            ->when($team_data['has_launched'], function ($form) use ($team_data, $ally_team) {
+                $strike_message = $team_data['strike_type'] === 'carpet_bomb'
+                    ? 'You carpet bombed all other teams!'
+                    : "You launched a nuclear strike against {$ally_team->name}!";
 
-        $form->message('Your nuclear code: '.$team_data['code']);
-
-        if ($team_data['has_launched']) {
-            $strike_message = $team_data['strike_type'] === 'carpet_bomb'
-                ? 'You carpet bombed all other teams!'
-                : "You launched a nuclear strike against {$ally_team->name}!";
-
-            $form->message($strike_message);
-        } else {
-            $form->input(
-                property_name: 'target_code',
-                label: 'Enter your ally\'s nuclear code',
-                validation_rules: 'required|nuclear_code',
-                validation_messages: [
-                    'required' => 'You must enter a nuclear code',
-                    'match_ally_code' => 'The nuclear code is incorrect. Please verify the code with your ally team.',
-                ]
-            );
-
-            $form->buttonGroup()
-                ->button(
-                    label: 'Carpet Bomb (-10 to all other teams)',
-                    action: 'carpetBomb',
-                    properties_to_validate: ['target_code'],
+                return $form->message($strike_message);
+            })
+            ->when(! $team_data['has_launched'], fn ($form) => $form->input(
+                    property_name: 'target_code',
+                    label: 'Enter your ally\'s nuclear code',
+                    validation_rules: 'required|nuclear_code',
+                    validation_messages: [
+                        'required' => 'You must enter a nuclear code',
+                        'match_ally_code' => 'The nuclear code is incorrect. Please verify the code with your ally team.',
+                    ]
                 )
-                ->button(
-                    label: 'Nuke Ally (-40 to ally)',
-                    action: 'nukeAlly',
-                    properties_to_validate: ['target_code'],
-                )
-                ->endGroup();
-        }
-
-        return $form->build();
+                ->buttonGroup()
+                    ->button(
+                        label: 'Carpet Bomb (-10 to all other teams)',
+                        action: 'carpetBomb',
+                        properties_to_validate: ['target_code'],
+                    )
+                    ->button(
+                        label: 'Nuke Ally (-40 to ally)',
+                        action: 'nukeAlly',
+                        properties_to_validate: ['target_code'],
+                    )
+                    ->endGroup()
+            )
+            ->build();
     }
 
     public function carpetBomb(Player $player, array $params)

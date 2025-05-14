@@ -175,7 +175,14 @@ it('prevents a team from launching multiple strikes', function () {
 });
 
 describe('validate nuclear code', function () {
-    it('throws an error if the code is invalid', function () {
+    it('is required', function () {
+        launchNuclearStrike($this->player_1, 'carpet_bomb', '')
+            ->assertHasErrors([
+                'challenge_properties.target_code' => 'required',
+            ]);
+    });
+
+    it('must be valid', function () {
         launchNuclearStrike($this->player_1, 'carpet_bomb', 'INVALID')
             ->assertHasErrors([
                 'challenge_properties.target_code' => 'nuclear_code',
