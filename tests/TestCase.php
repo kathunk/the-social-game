@@ -2,13 +2,13 @@
 
 namespace Tests;
 
-use App\Models\Game;
-use App\Models\User;
-use App\Models\Player;
-use App\Models\GameTemplate;
-use Illuminate\Support\Carbon;
 use App\Events\GameTemplateAdded;
+use App\Models\Game;
+use App\Models\GameTemplate;
+use App\Models\Player;
+use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Carbon;
 
 abstract class TestCase extends BaseTestCase
 {

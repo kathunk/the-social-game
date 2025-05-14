@@ -1,8 +1,8 @@
 <?php
 
-use Livewire\Livewire;
 use App\Livewire\GameDashboard;
 use Livewire\Features\SupportTesting\Testable as LivewireTest;
+use Livewire\Livewire;
 
 /*
     This is for Livewire Test Components used in *multiple* challenges
