@@ -222,8 +222,11 @@ class FormBuilder
             placeholder: 'Select a team...',
             options: $teams->mapWithKeys(fn ($team) => [$team->id => $team->name])->toArray(),
             property_name: 'team_id',
-            validation_rules: 'required',
-            validation_messages: ['required' => 'Team is required'],
+            validation_rules: 'required|exists:teams,id',
+            validation_messages: [
+                'required' => 'Team is required',
+                'exists' => 'Team is invalid',
+            ],
         );
 
         $this->buttonGroup();
