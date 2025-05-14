@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
     <head>
         @include('partials.head')
     </head>
@@ -7,12 +7,6 @@
         @php
             $user = auth()->user();
         @endphp
-
-        @if(config('app.env') === 'local')
-            <div class="absolute lg:top-2.5 top-3 lg:right-12 right-24 z-50">
-                <x-dark-mode-toggle />
-            </div>
-        @endif
 
         @if ($user)
             <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
@@ -56,15 +50,15 @@
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
                                 <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
                                     <span
-                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
+                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-600 dark:text-white"
                                     >
                                         {{ $user?->initials() }}
                                     </span>
                                 </span>
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{ $user?->name }}</span>
-                                    <span class="truncate text-xs">{{ $user?->email }}</span>
+                                    <span class="truncate font-semibold dark:text-zinc-100">{{ $user?->name }}</span>
+                                    <span class="truncate text-xs dark:text-zinc-200">{{ $user?->email }}</span>
                                 </div>
                             </div>
                         </div>
@@ -106,17 +100,17 @@
                     <flux:menu.radio.group>
                         <div class="p-0 text-sm font-normal">
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                                <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
+                                <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg shadow-md">
                                     <span
-                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
+                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-600 dark:text-white shadow-md"
                                     >
                                         {{ $user?->initials() }}
                                     </span>
                                 </span>
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <span class="truncate font-semibold">{{ $user?->name }}</span>
-                                    <span class="truncate text-xs">{{ $user?->email }}</span>
+                                    <span class="truncate font-semibold dark:text-zinc-100">{{ $user?->name }}</span>
+                                    <span class="truncate text-xs dark:text-zinc-200">{{ $user?->email }}</span>
                                 </div>
                             </div>
                         </div>
