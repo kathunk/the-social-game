@@ -15,6 +15,7 @@ class PlayerSubmittedNuclearStrike extends Event
     use HasActiveGame, HasChallenge, HasPlayerOnTeam;
 
     public string $strike_type;
+
     public string $target_code;
 
     public function validate(PlayerState $player, ChallengeState $challenge)

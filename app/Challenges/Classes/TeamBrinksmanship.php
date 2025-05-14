@@ -6,7 +6,6 @@ use App\Events\PlayerSubmittedNuclearStrike;
 use App\Models\Player;
 use App\States\GameState;
 use App\States\TeamState;
-use App\Rules\MatchesAllyCode;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -14,7 +13,10 @@ class TeamBrinksmanship extends BaseChallengeClass
 {
     const NAME = 'Brinksmanship';
 
-    const DESCRIPTION = "Your team has nuclear codes, and you've been assigned an ally team: {ally_team}. You also have a field to input your ally's code. When you put in your ally's code, you'll have the option to either: Carpet Bomb (-10 points to all other teams), or Nuke Ally (-40 points to your ally).";
+    const DESCRIPTION = "Your team has nuclear codes, and you've been assigned an ally team: {ally_team}.
+        You also have a field to input your ally's code.
+        When you put in your ally's code, you'll have the option to either:
+        Carpet Bomb (-10 points to all other teams), or Nuke Ally (-40 points to your ally).";
 
     const TYPE = 'team';
 
@@ -25,31 +27,13 @@ class TeamBrinksmanship extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        if (!$this->challenge_state) {
-            return ['teams' => []];
-        }
-
-        $teams = $this->challenge_state->game()->teams()->sortByDesc('score');
-        $paired_teams = $this->pairTeams($teams);
-
-        $teams_data = [];
-
-        foreach ($paired_teams as $team_id => $ally_team_id) {
-            $teams_data[$team_id] = [
-                'code' => $this->generateNuclearCode(),
-                'ally_team_id' => $ally_team_id,
-                'has_launched' => false,
-                'strike_type' => null,
-            ];
-        }
-
-        return ['teams' => $teams_data];
+        return ['teams' => $this->challenge_state->game()->teams()->mapWithKeys(fn ($t) => [$t->id => []])->toArray()];
     }
 
     private function generateNuclearCode(): string
     {
         // @todo decide what we want the nuclear code to be
-        // see custom validation macro @nuclear_code in AppServiceProvider
+        // see app/Rules/NuclearCode.php
         return strtoupper(Str::random(6));
     }
 
@@ -79,7 +63,7 @@ class TeamBrinksmanship extends BaseChallengeClass
     {
         $team_id = $player->team_id;
 
-        if (!isset($this->challenge->challenge_data['teams'][$team_id])) {
+        if (! isset($this->challenge->challenge_data['teams'][$team_id])) {
             return $this->form()
                 ->title(self::NAME)
                 ->subtitle('Challenge data is being prepared...')
@@ -98,7 +82,7 @@ class TeamBrinksmanship extends BaseChallengeClass
             ->title(self::NAME)
             ->subtitle($description);
 
-        $form->message('Your nuclear code: ' . $team_data['code']);
+        $form->message('Your nuclear code: '.$team_data['code']);
 
         if ($team_data['has_launched']) {
             $strike_message = $team_data['strike_type'] === 'carpet_bomb'
@@ -113,7 +97,7 @@ class TeamBrinksmanship extends BaseChallengeClass
                 validation_rules: 'required|nuclear_code',
                 validation_messages: [
                     'required' => 'You must enter a nuclear code',
-                    'match_ally_code' => 'The nuclear code is incorrect. Please verify the code with your ally team.'
+                    'match_ally_code' => 'The nuclear code is incorrect. Please verify the code with your ally team.',
                 ]
             );
 
@@ -158,13 +142,32 @@ class TeamBrinksmanship extends BaseChallengeClass
         );
     }
 
+    public function onChallengeStarted(GameState $game_state)
+    {
+        $teams = $this->challenge_state->game()->teams()->sortByDesc('score');
+        $paired_teams = $this->pairTeams($teams);
+
+        $teams_data = [];
+
+        foreach ($paired_teams as $team_id => $ally_team_id) {
+            $teams_data[$team_id] = [
+                'code' => $this->generateNuclearCode(),
+                'ally_team_id' => $ally_team_id,
+                'has_launched' => false,
+                'strike_type' => null,
+            ];
+        }
+
+        return $this->challenge_state->challenge_data['teams'] = $teams_data;
+    }
+
     public function onChallengeEnded(GameState $game_state)
     {
         $teams = $game_state->teams();
         $teams_data = $this->challenge_state->challenge_data['teams'];
 
         foreach ($teams_data as $team_id => $team_data) {
-            if (!$team_data['has_launched']) {
+            if (! $team_data['has_launched']) {
                 continue;
             }
 
@@ -177,18 +180,18 @@ class TeamBrinksmanship extends BaseChallengeClass
                     if ($other_team->id !== $team_id) {
                         $other_team->addToScoreHistory(
                             -10,
-                            "Carpet bombed by " . TeamState::load($team_id)->name
+                            'Carpet bombed by '.TeamState::load($team_id)->name
                         );
                     }
                 }
-            // Apply -40 points to ally team
-            } else if ($strike_type === 'nuke_ally') {
+                // Apply -40 points to ally team
+            } elseif ($strike_type === 'nuke_ally') {
                 $ally_team = TeamState::load($ally_team_id);
                 $team = TeamState::load($team_id);
 
                 $ally_team->addToScoreHistory(
                     -40,
-                    "Nuked by ally team " . $team->name
+                    'Nuked by ally team '.$team->name
                 );
             }
         }
