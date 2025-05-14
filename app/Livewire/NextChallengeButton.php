@@ -13,8 +13,6 @@ class NextChallengeButton extends Component
     {
         $game = auth()?->user()?->currentGame;
 
-        // dd($game);
-
         if (! $game || $game->status === 'ended') {
             return false;
         }
