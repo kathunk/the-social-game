@@ -21,9 +21,9 @@ class PlayerSubmittedNuclearStrike extends Event
     public function validate(PlayerState $player, ChallengeState $challenge)
     {
         $team_id = $player->team_id;
-        $team_data = $challenge->challenge_data['teams'][$team_id];
+        $team_data = $challenge->challenge_data[$team_id];
         $ally_team_id = $team_data['ally_team_id'];
-        $ally_team_code = $challenge->challenge_data['teams'][$ally_team_id]['code'];
+        $ally_team_code = $challenge->challenge_data[$ally_team_id]['code'];
 
         $this->assert(
             $player->team_id === $this->team_id,
@@ -49,8 +49,8 @@ class PlayerSubmittedNuclearStrike extends Event
     public function applyToChallenge(ChallengeState $challenge)
     {
         $team_id = $this->team_id;
-        $challenge->challenge_data['teams'][$team_id]['has_launched'] = true;
-        $challenge->challenge_data['teams'][$team_id]['strike_type'] = $this->strike_type;
+        $challenge->challenge_data[$team_id]['has_launched'] = true;
+        $challenge->challenge_data[$team_id]['strike_type'] = $this->strike_type;
     }
 
     public function handle()

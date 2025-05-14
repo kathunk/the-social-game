@@ -27,7 +27,11 @@ class TeamBrinksmanship extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        return ['teams' => $this->challenge_state->game()->teams()->mapWithKeys(fn ($t) => [$t->id => []])->toArray()];
+        return $this->challenge_state->game()
+            ->teams()
+            ->sortByDesc(fn ($team) => $team->score)
+            ->mapWithKeys(fn ($t) => [$t->id => []])
+            ->toArray();
     }
 
     private function generateNuclearCode(): string
@@ -37,46 +41,45 @@ class TeamBrinksmanship extends BaseChallengeClass
         return strtoupper(Str::random(6));
     }
 
-    private function pairTeams(Collection $teams): array
+    private function pair(Collection $teams): Collection
     {
+        // @todo in the future: account for scenarios where there is an odd number of teams
+
         $paired_teams = collect();
-        $team_ids = $teams->pluck('id');
 
-        // Handle odd number of teams by making the last team pair with the first team
-        if ($team_ids->count() % 2 !== 0) {
-            $paired_teams->put($team_ids->last(), $team_ids->first());
+        $teams = $teams->keys();
+
+        while ($teams->count() >= 2) {
+            [$team1, $team2] = $teams->splice(0, 2);
+
+            $paired_teams
+                ->put($team1, $team2)
+                ->put($team2, $team1);
         }
 
-        // Pair teams sequentially (1-2, 3-4, etc.)
-        for ($i = 0; $i < $team_ids->count() - ($team_ids->count() % 2); $i += 2) {
-            $team1 = $team_ids[$i];
-            $team2 = $team_ids[$i + 1];
-
-            $paired_teams->put($team1, $team2);
-            $paired_teams->put($team2, $team1);
-        }
-
-        return $paired_teams->toArray();
+        return $paired_teams;
     }
 
     public function frontendComponent(Player $player): array
     {
         $team_id = $player->team_id;
 
-        if (! isset($this->challenge->challenge_data['teams'][$team_id])) {
+        if (! isset($this->challenge->challenge_data[$team_id])) {
             return $this->form()
                 ->title(self::NAME)
                 ->subtitle('Challenge data is being prepared...')
                 ->build();
         }
 
-        $team_data = $this->challenge->challenge_data['teams'][$team_id];
+        $team_data = $this->challenge->challenge_data[$team_id];
         $ally_team_id = $team_data['ally_team_id'];
         $ally_team = $player->game->teams->firstWhere('id', $ally_team_id);
 
         $description = strtr(self::DESCRIPTION, [
             '{ally_team}' => $ally_team->name,
         ]);
+
+        // @todo use the when() function for the following:
 
         $form = $this->form()
             ->title(self::NAME)
@@ -144,27 +147,28 @@ class TeamBrinksmanship extends BaseChallengeClass
 
     public function onChallengeStarted(GameState $game_state)
     {
-        $teams = $this->challenge_state->game()->teams()->sortByDesc('score');
-        $paired_teams = $this->pairTeams($teams);
+        $teams = collect($this->challenge_state->challenge_data);
 
-        $teams_data = [];
+        $paired_teams = $this->pair($teams);
 
-        foreach ($paired_teams as $team_id => $ally_team_id) {
-            $teams_data[$team_id] = [
-                'code' => $this->generateNuclearCode(),
-                'ally_team_id' => $ally_team_id,
-                'has_launched' => false,
-                'strike_type' => null,
+        $paired_teams = $paired_teams->mapWithKeys(function ($team_id, $ally_team_id) {
+            return [
+                $team_id => [
+                    'code' => $this->generateNuclearCode(),
+                    'ally_team_id' => $ally_team_id,
+                    'has_launched' => false,
+                    'strike_type' => null,
+                ],
             ];
-        }
+        })->toArray();
 
-        return $this->challenge_state->challenge_data['teams'] = $teams_data;
+        return $this->challenge_state->challenge_data = $paired_teams;
     }
 
     public function onChallengeEnded(GameState $game_state)
     {
         $teams = $game_state->teams();
-        $teams_data = $this->challenge_state->challenge_data['teams'];
+        $teams_data = $this->challenge_state->challenge_data;
 
         foreach ($teams_data as $team_id => $team_data) {
             if (! $team_data['has_launched']) {

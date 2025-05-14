@@ -50,7 +50,7 @@ beforeEach(function () {
     $this->challenge = $this->game->fresh()->currentChallenge;
     $this->challenge_data = $this->challenge->challenge_data;
 
-    $this->data = fn($team) => $this->challenge_data['teams'][$team->id];
+    $this->data = fn($team) => $this->challenge_data[$team->id];
     $this->code = fn($team) => ($this->data)($team)['code'];
     $this->ally_team = fn($team) => $this->game->teams->firstWhere('id', ($this->data)($team)['ally_team_id']);
 

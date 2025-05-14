@@ -28,17 +28,17 @@ class NuclearCode extends StringableRule
 
         $team_id = $player->team_id;
 
-        if (! isset($challenge->challenge_data['teams'][$team_id])) {
+        if (! isset($challenge->challenge_data[$team_id])) {
             return false;
         }
 
-        $ally_team_id = $challenge->challenge_data['teams'][$team_id]['ally_team_id'];
+        $ally_team_id = $challenge->challenge_data[$team_id]['ally_team_id'];
 
-        if (! isset($challenge->challenge_data['teams'][$ally_team_id])) {
+        if (! isset($challenge->challenge_data[$ally_team_id])) {
             return false;
         }
 
-        $ally_code = $challenge->challenge_data['teams'][$ally_team_id]['code'];
+        $ally_code = $challenge->challenge_data[$ally_team_id]['code'];
 
         return $value === $ally_code;
     }
