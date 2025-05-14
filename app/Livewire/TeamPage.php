@@ -13,6 +13,12 @@ class TeamPage extends Component
     public Game $game;
 
     #[Computed]
+    public function user()
+    {
+        return auth()->user();
+    }
+
+    #[Computed]
     public function players()
     {
         return $this->team->players;
@@ -25,9 +31,21 @@ class TeamPage extends Component
     }
 
     #[Computed]
-    public function scoreHistoryEntries(): array
+    public function scoreHistoryEntries()
     {
-        return array_reverse($this->team->state()->score_history);
+        return collect($this->team->state()->score_history)
+            ->filter(fn ($entry) => $this->showHiddenPoints || ! $entry['is_hidden'])
+            ->values()
+            ->reverse();
+    }
+
+    #[Computed]
+    public function showHiddenPoints()
+    {
+        $player_is_on_team = $this->players->pluck('user_id')->contains($this->user->id);
+        $game_is_over = $this->game->status === 'ended';
+
+        return $player_is_on_team || $game_is_over;
     }
 
     public function mount(Team $team)

@@ -80,7 +80,7 @@ class GameDashboard extends Component
     #[Computed]
     public function challengeHandler()
     {
-        return $this->challenge->handler();
+        return $this->challenge?->handler();
     }
 
     #[Computed]
@@ -123,9 +123,9 @@ class GameDashboard extends Component
             return;
         }
 
-        $this->challenge_component = $this->challenge_handler->frontendComponent($this->player);
-        $this->challenge_properties = $this->challenge_handler->propertiesForLivewire($this->player);
-        $this->challenge_validation_rules = $this->challenge_handler->validationRulesForLivewire($this->player);
+        $this->challenge_component = $this->challenge_handler?->frontendComponent($this->player) ?? [];
+        $this->challenge_properties = $this->challenge_handler?->propertiesForLivewire($this->player) ?? [];
+        $this->challenge_validation_rules = $this->challenge_handler?->validationRulesForLivewire($this->player) ?? [];
     }
 
     public function joinTeam()

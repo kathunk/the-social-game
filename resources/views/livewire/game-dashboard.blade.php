@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-4">
-    @if ($this->is_game_admin)
+    @if ($this->is_game_admin && $this->game->status !== 'ended')
         <flux:button icon="cog" :href="route('pre-game-lobby', $this->game)" variant="filled">Manage game</flux:button>
     @endif
 
@@ -20,26 +20,30 @@
             </div>
         </flux:card>
     @endif
-    @if ($this->challengeComponent)
+    @if ($this->game->status !== 'ended')
         <livewire:next-challenge-button />
+    @endif
+    @if ($this->challengeComponent)
         <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challengeComponent" />
     @endif
     <x-game-components.scoreboard :teams="$this->teams" :players="$this->players" :type="$this->template->type" />
-    @if ($this->template->players_can_join_late)
-        <flux:card>
-            <flux:heading class="mb-2">Invite your friends</flux:heading>
-            <div class="flex gap-2">
-                <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
-                <flux:modal.trigger name="qr-code">
-                    <flux:button variant="filled">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
-                </flux:modal.trigger>
-            </div>
-        </flux:card>
-    @endif
+    @if ($this->game->status === 'active')
+        @if ($this->template->players_can_join_late)
+            <flux:card>
+                <flux:heading class="mb-2">Invite your friends</flux:heading>
+                <div class="flex gap-2">
+                    <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
+                    <flux:modal.trigger name="qr-code">
+                        <flux:button variant="filled">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
+                    </flux:modal.trigger>
+                </div>
+            </flux:card>
+        @endif
 
-    @foreach ($this->modifiers as $modifier)
-        <x-game-components.modifier :modifier="$modifier" :modifierComponent="$modifier->handler()->frontendComponent($this->player)" />
-    @endforeach
+        @foreach ($this->modifiers as $modifier)
+            <x-game-components.modifier :modifier="$modifier" :modifierComponent="$modifier->handler()->frontendComponent($this->player)" />
+        @endforeach
+    @endif
 
     <flux:modal name="qr-code">
         <div class="flex justify-center p-6">

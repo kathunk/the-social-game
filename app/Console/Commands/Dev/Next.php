@@ -2,12 +2,14 @@
 
 namespace App\Console\Commands\Dev;
 
-use App\Events\Dev\ChallengeForceEnded;
-use App\Events\Dev\ChallengeForceStarted;
+use App\Models\Game;
+use App\Events\GameEnded;
 use App\Models\Challenge;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Thunk\Verbs\Facades\Verbs;
+use Illuminate\Console\Command;
+use App\Events\Dev\ChallengeForceEnded;
+use Illuminate\Support\Facades\Artisan;
+use App\Events\Dev\ChallengeForceStarted;
 
 class Next extends Command
 {
@@ -33,21 +35,9 @@ class Next extends Command
             })
             ->get();
 
-        if ($active_challenges->isEmpty()) {
-            $this->error('No active challenges found');
-
-            return;
-        }
-
         $next_challenges = Challenge::where('status', 'upcoming')
             ->whereIn('starts_at', $active_challenges->pluck('ends_at'))
             ->get();
-
-        if ($next_challenges->isEmpty()) {
-            $this->error('No next challenges found');
-
-            return;
-        }
 
         $active_challenges
             ->each(function (Challenge $challenge) {
@@ -64,6 +54,16 @@ class Next extends Command
                     game_id: $challenge->game_id,
                 );
             });
+
+        $games_to_end = Game::all()
+            ->filter(function (Game $game) {
+                return $game->status === 'active' 
+                && $game->challenges->where('status', 'active')->isEmpty();
+            });
+
+        foreach ($games_to_end as $game) {
+            GameEnded::fire(game_id: $game->id);
+        }
 
         Artisan::call('app:progress-games');
     }

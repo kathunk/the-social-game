@@ -53,7 +53,7 @@ class UserSeeder extends Seeder
             ['Gandalf', 'gandalf@thunk.dev'],
             ['Hermione Granger', 'hermione@thunk.dev'],
             ['Black Widow', 'blackwidow@thunk.dev'],
-            ['Doctor Strange', 'strange@thunk.dev'],
+            ['Doctor Strange', 'doctor@thunk.dev'],
             ['Princess Leia', 'leia@thunk.dev'],
             ['Thor Odinson', 'thor@thunk.dev'],
             ['Darth Vader', 'darth@thunk.dev'],

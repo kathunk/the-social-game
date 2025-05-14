@@ -13,12 +13,13 @@ class NextChallengeButton extends Component
     {
         $game = auth()?->user()?->currentGame;
 
-        if (! $game) {
+        // dd($game);
+
+        if (! $game || $game->status === 'ended') {
             return false;
         }
 
-        return ($game->challenges->last()->id !== $game->currentChallenge->id)
-                && config('app.env') === 'local';
+        return config('app.env') === 'local';
     }
 
     public function nextChallenge()

@@ -21,18 +21,25 @@ class TeamState extends State
         $this->player_ids = collect();
     }
 
-    public function addToScoreHistory(int $points, string $description)
+    public function addToScoreHistory(int $points, string $description, bool $is_hidden = false)
     {
         $this->score_history[] = [
             'description' => $description,
             'timestamp' => now(),
             'points' => $points,
+            'is_hidden' => $is_hidden,
         ];
     }
 
-    public function score(): int
+    public function score(bool $include_hidden = false): int
     {
-        return array_sum(array_column($this->score_history, 'points'));
+        if ($include_hidden) {
+            return collect($this->score_history)->sum('points');
+        }
+
+        return collect($this->score_history)
+            ->filter(fn ($item) => ! $item['is_hidden'])
+            ->sum('points');
     }
 
     public function game()

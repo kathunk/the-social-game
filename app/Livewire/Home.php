@@ -19,7 +19,7 @@ class Home extends Component
         $statusOrder = [
             'active' => 1,
             'upcoming' => 2,
-            'completed' => 3,
+            'ended' => 3,
             'canceled' => 4,
         ];
 
@@ -27,7 +27,7 @@ class Home extends Component
             ->orderByRaw("CASE 
                 WHEN games.status = 'active' THEN 1
                 WHEN games.status = 'upcoming' THEN 2
-                WHEN games.status = 'completed' THEN 3
+                WHEN games.status = 'ended' THEN 3
                 WHEN games.status = 'canceled' THEN 4
                 ELSE 5
             END")
