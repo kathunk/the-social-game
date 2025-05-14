@@ -70,7 +70,7 @@ class TeamBrinksmanship extends BaseChallengeClass
                     validation_rules: 'required|nuclear_code',
                     validation_messages: [
                         'required' => 'You must enter a nuclear code',
-                        'match_ally_code' => 'The nuclear code is incorrect. Please verify the code with your ally team.',
+                        'nuclear_code' => 'The nuclear code is incorrect. Please verify the code with your ally team.',
                     ]
                 )
                 ->buttonGroup()
