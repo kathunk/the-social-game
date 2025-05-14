@@ -33,6 +33,7 @@ class ChallengeEnded extends Event
 
         $game->teams->each(function ($team) {
             $team->score = $team->state()->score();
+            $team->hidden_score = $team->state()->score(include_hidden: true);
             $team->save();
         });
 

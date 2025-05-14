@@ -30,7 +30,7 @@
                         @foreach ($element['buttons'] as $btn)
                             <flux:button
                                 variant="primary"
-                                wire:click="callModifierAction('{{ $modifier->key }}', '{{ $btn['action'] }}')"
+                                wire:click="callModifierAction('{{ $modifier->class_key }}', '{{ $btn['action'] }}')"
                             >
                                 {{ $btn['label'] }}
                             </flux:button>
