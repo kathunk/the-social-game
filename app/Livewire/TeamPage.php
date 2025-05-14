@@ -4,12 +4,13 @@ namespace App\Livewire;
 
 use App\Models\Game;
 use App\Models\Team;
-use Livewire\Component;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class TeamPage extends Component
 {
     public Team $team;
+
     public Game $game;
 
     #[Computed]

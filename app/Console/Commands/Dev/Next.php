@@ -2,14 +2,14 @@
 
 namespace App\Console\Commands\Dev;
 
-use App\Models\Game;
+use App\Events\Dev\ChallengeForceEnded;
+use App\Events\Dev\ChallengeForceStarted;
 use App\Events\GameEnded;
 use App\Models\Challenge;
-use Thunk\Verbs\Facades\Verbs;
+use App\Models\Game;
 use Illuminate\Console\Command;
-use App\Events\Dev\ChallengeForceEnded;
 use Illuminate\Support\Facades\Artisan;
-use App\Events\Dev\ChallengeForceStarted;
+use Thunk\Verbs\Facades\Verbs;
 
 class Next extends Command
 {
@@ -57,7 +57,7 @@ class Next extends Command
 
         $games_to_end = Game::all()
             ->filter(function (Game $game) {
-                return $game->status === 'active' 
+                return $game->status === 'active'
                 && $game->challenges->where('status', 'active')->isEmpty();
             });
 

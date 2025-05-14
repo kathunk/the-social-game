@@ -30,10 +30,14 @@
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if ($this->game->status === 'ended')
-                                    {{ $team->hidden_score }} 
-                                    <flux:text class="text-purple-500 dark:text-purple-300">
-                                        ({{ $team->score - $team->hidden_score }} hidden points)
-                                    </flux:text>
+                                    <div class="flex items-center gap-2">
+                                        {{ $team->hidden_score }} 
+                                        @if ($team->hidden_score !== $team->score)    
+                                            <flux:text class="text-purple-500 dark:text-purple-300">
+                                                ({{ $team->hidden_score - $team->score }} bonus)
+                                            </flux:text>
+                                        @endif
+                                    </div>
                                 @else
                                     <div class="flex items-center gap-2">
                                         {{ $team->score }}
@@ -61,7 +65,7 @@
                                         {{ $player->hidden_score }} 
                                         @if ($player->hidden_score > $player->score)
                                             <flux:text class="text-purple-500 dark:text-purple-300">
-                                            ({{ $player->hidden_score - $player->score }} bonus)
+                                                ({{ $player->hidden_score - $player->score }} bonus)
                                             </flux:text>
                                         @endif
                                     </div>

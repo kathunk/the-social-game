@@ -2,9 +2,9 @@
 
 namespace App\Http;
 
+use App\Models\Game;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use App\Models\Game;
 
 class MissingGameHandler
 {
