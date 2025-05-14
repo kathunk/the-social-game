@@ -1,13 +1,15 @@
 <?php
 
-use App\Models\Challenge;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Support\Facades\Date;
-use App\Events\PlayerSubmittedNuclearStrike;
 use App\Challenges\Classes\TeamBrinksmanship;
 use App\Challenges\Classes\TeamPrisonersDilemma;
+use App\Livewire\GameDashboard;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Date;
+use Livewire\Features\SupportTesting\Testable as LivewireTest;
+use Livewire\Livewire;
+use Thunk\Verbs\Facades\Verbs;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Verbs::fake();
@@ -50,9 +52,9 @@ beforeEach(function () {
     $this->challenge = $this->game->fresh()->currentChallenge;
     $this->challenge_data = $this->challenge->challenge_data;
 
-    $this->data = fn($team) => $this->challenge_data[$team->id];
-    $this->code = fn($team) => ($this->data)($team)['code'];
-    $this->ally_team = fn($team) => $this->game->teams->firstWhere('id', ($this->data)($team)['ally_team_id']);
+    $this->data = fn ($team) => $this->challenge_data[$team->id];
+    $this->code = fn ($team) => ($this->data)($team)['code'];
+    $this->ally_team = fn ($team) => $this->game->teams->firstWhere('id', ($this->data)($team)['ally_team_id']);
 
     expect($this->team_1->fresh()->score)->toBe(20);
     expect($this->team_2->fresh()->score)->toBe(20);
@@ -60,16 +62,17 @@ beforeEach(function () {
     expect($this->team_4->fresh()->score)->toBe(20);
 });
 
-function launchNuclearStrike($player, $strike_type, $target_code)
+function launchNuclearStrike($player, $strike_type, $code): LivewireTest
 {
-    PlayerSubmittedNuclearStrike::fire(
-        player_id: $player->id,
-        game_id: $player->game_id,
-        challenge_id: $player->game->currentChallenge->id,
-        team_id: $player->team_id,
-        strike_type: $strike_type,
-        target_code: $target_code,
-    );
+    $strike_type = match ($strike_type) {
+        'carpet_bomb' => 'carpetBomb',
+        'nuke_ally' => 'nukeAlly',
+    };
+
+    return Livewire::actingAs($player->user)
+        ->test(GameDashboard::class, ['game' => $player->game->fresh()])
+        ->set('challenge_properties.target_code', $code)
+        ->call('callChallengeAction', $strike_type);
 }
 
 it('creates unique codes for each team and assigns ally pairs', function () {
@@ -92,16 +95,11 @@ it('creates unique codes for each team and assigns ally pairs', function () {
     }
 
     // All codes should be unique
-    $codes = collect($this->game->teams->map(fn($t) => ($this->code)($t)));
+    $codes = collect($this->game->teams->map(fn ($t) => ($this->code)($t)));
     expect($codes->unique()->count())->toBe($codes->count());
 });
 
 it('requires valid ally code to launch nuclear strikes', function () {
-    // This should fail validation with an invalid code
-    expect(function () {
-        launchNuclearStrike($this->player_1, 'carpet_bomb', 'INVALID');
-    })->toThrow(\Exception::class);
-
     // Test valid launches for all teams
     foreach ($this->game->teams as $team) {
         $player = $team->players->first();
@@ -174,4 +172,13 @@ it('prevents a team from launching multiple strikes', function () {
             launchNuclearStrike($player, 'nuke_ally', $ally_code);
         })->toThrow(\Exception::class);
     }
+});
+
+describe('validate nuclear code', function () {
+    it('throws an error if the code is invalid', function () {
+        launchNuclearStrike($this->player_1, 'carpet_bomb', 'INVALID')
+            ->assertHasErrors([
+                'challenge_properties.target_code' => 'nuclear_code',
+            ]);
+    });
 });

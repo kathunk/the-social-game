@@ -2,15 +2,17 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Support\Traits\HasTeamPairs;
 use App\Events\PlayerSubmittedNuclearStrike;
 use App\Models\Player;
 use App\States\GameState;
 use App\States\TeamState;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class TeamBrinksmanship extends BaseChallengeClass
 {
+    use HasTeamPairs;
+
     const NAME = 'Brinksmanship';
 
     const DESCRIPTION = "Your team has nuclear codes, and you've been assigned an ally team: {ally_team}.
@@ -29,7 +31,7 @@ class TeamBrinksmanship extends BaseChallengeClass
     {
         return $this->challenge_state->game()
             ->teams()
-            ->sortByDesc(fn ($team) => $team->score)
+            ->sortByDesc(fn ($team) => $team->score())
             ->mapWithKeys(fn ($t) => [$t->id => []])
             ->toArray();
     }
@@ -39,25 +41,6 @@ class TeamBrinksmanship extends BaseChallengeClass
         // @todo decide what we want the nuclear code to be
         // see app/Rules/NuclearCode.php
         return strtoupper(Str::random(6));
-    }
-
-    private function pair(Collection $teams): Collection
-    {
-        // @todo in the future: account for scenarios where there is an odd number of teams
-
-        $paired_teams = collect();
-
-        $teams = $teams->keys();
-
-        while ($teams->count() >= 2) {
-            [$team1, $team2] = $teams->splice(0, 2);
-
-            $paired_teams
-                ->put($team1, $team2)
-                ->put($team2, $team1);
-        }
-
-        return $paired_teams;
     }
 
     public function frontendComponent(Player $player): array
