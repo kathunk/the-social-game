@@ -6,6 +6,8 @@ use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
+// @todo update this test to use Livewire
+
 it('runs the Pyramid Scheme challenge', function () {
     Verbs::commitImmediately();
 
@@ -39,10 +41,6 @@ it('runs the Pyramid Scheme challenge', function () {
     expect($team->fresh()->score)->toBe(1);
     expect($team_2->fresh()->score)->toBe(2);
     expect($team_3->fresh()->score)->toBe(0);
-
-    // @todo need generalized logic for this
-    // player is no longer allowed to change team
-    // expect($player_1->fresh()->joinTeam($team_2))->toThrow(Exception::class);
 
     // challenge ends and the first place team loses all its points
     $end = $this->game->fresh()->currentChallenge->ends_at;

@@ -47,7 +47,7 @@
         </flux:card>
     @endif
 
-    @if ($this->application?->status === 'accepted' && $this->game->status === 'active')
+    @if ($this->application?->status === 'accepted' && $this->game->status !== 'upcoming')
         <flux:button variant="primary" href="{{ route('game-dashboard', ['game' => $this->game]) }}">
             Go to game
         </flux:button>
@@ -59,15 +59,17 @@
         </div>
     </flux:card>
 
-    <flux:card>
-        <flux:heading class="mb-2">Invite your friends</flux:heading>
-        <div class="flex gap-2">
-            <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
-            <flux:modal.trigger name="qr-code">
-                <flux:button variant="filled">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
-            </flux:modal.trigger>
-        </div>
-    </flux:card>
+    @if ($this->game->status !== 'ended')
+        <flux:card>
+            <flux:heading class="mb-2">Invite your friends</flux:heading>
+            <div class="flex gap-2">
+                <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
+                <flux:modal.trigger name="qr-code">
+                    <flux:button variant="filled">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
+                </flux:modal.trigger>
+            </div>
+        </flux:card>
+    @endif
 
     @if ($this->hasTooManyPlayers)
         <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameTemplate->name }} only allows {{ $this->game->gameTemplate->max_players }} players. Remove some players, or change the game template." />
@@ -125,7 +127,7 @@
         </flux:card>
     @endif
 
-    @if ($this->is_game_admin && $this->game->requires_admin_approval_to_join)
+    @if ($this->is_game_admin && $this->game->requires_admin_approval_to_join && $this->game->status !== 'ended')
         <flux:card>
             <flux:heading class="mb-4">Pending Players</flux:heading>
 
@@ -174,6 +176,7 @@
                                         ! $this->admins->pluck('id')->contains($player->user_id)
                                         || $this->creator->id === $this->user->id
                                     )
+                                    && $this->game->status === 'active'
                                 )
                                     <div class="flex gap-1" x-data="{showConfirmation: false}">
                                         <div x-show="showConfirmation">
@@ -201,7 +204,8 @@
                                 @if (
                                     $this->user?->id === $this->creator->id &&
                                     ! $this->admins->pluck('id')->contains($player->user_id) &&
-                                    $this->user?->id !== $player->user_id
+                                    $this->user?->id !== $player->user_id &&
+                                    $this->game->status !== 'ended'
                                 )
                                     <div class="flex gap-1">
                                         <flux:button variant="subtle" size="sm" wire:click="promoteToAdmin('{{ $player->id }}')">
@@ -216,7 +220,8 @@
                                 @if (
                                     $this->user?->id === $this->creator->id &&
                                     $this->admins->pluck('id')->contains($player->user_id) &&
-                                    $this->user?->id !== $player->user_id
+                                    $this->user?->id !== $player->user_id &&
+                                    $this->game->status !== 'ended'
                                 )
                                     <div class="flex gap-1">
                                         <flux:button variant="subtle" size="sm" wire:click="demoteFromAdmin('{{ $player->id }}')">

@@ -29,7 +29,7 @@ class PlayerPage extends Component
     public function showHiddenPoints()
     {
         $player_is_player = $this->user()->id === $this->player->user_id;
-        $game_is_over = $this->game->status === 'completed';
+        $game_is_over = $this->game->status === 'ended';
 
         return $player_is_player || $game_is_over;
     }
@@ -39,7 +39,8 @@ class PlayerPage extends Component
     {
         return collect($this->playerState->score_history)
             ->filter(fn ($entry) => $this->showHiddenPoints || ! $entry['is_hidden'])
-            ->values();
+            ->values()
+            ->reverse();
     }
 
     public function mount(Game $game, Player $player)

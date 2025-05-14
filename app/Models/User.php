@@ -162,6 +162,7 @@ class User extends Authenticatable
 
         if ($game->requires_admin_approval_to_join) {
             Verbs::commit();
+
             return $this->fresh();
         }
 

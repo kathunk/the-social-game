@@ -84,6 +84,11 @@ class PyramidScheme extends BaseChallengeClass implements SupportsTeamSwaps
     ) {
         $first_place_team = $game_state->teams()->sortByDesc(fn ($t) => $t->score())->first();
 
-        $first_place_team->addToScoreHistory(-$first_place_team->score(), 'Collapsed under the weight of its own success');
+        // if multiple teams are tied for first place, set each of their scores to 0
+        $first_place_teams = $game_state->teams()->filter(fn ($t) => $t->score() === $first_place_team->score());
+
+        foreach ($first_place_teams as $team) {
+            $team->addToScoreHistory(-$team->score(), 'Collapsed under the weight of its own success');
+        }
     }
 }

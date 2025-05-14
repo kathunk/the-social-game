@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\Team;
 use App\Models\Player;
-use Thunk\Verbs\Event;
-use App\States\TeamState;
+use App\Models\Team;
 use App\States\PlayerState;
+use App\States\TeamState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 function incrementScore(int $points, ?Team $team = null, ?Player $player = null, ?bool $is_hidden = false)
 {

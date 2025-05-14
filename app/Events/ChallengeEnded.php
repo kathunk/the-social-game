@@ -16,7 +16,7 @@ class ChallengeEnded extends Event
 
     public function applyToGame(GameState $state)
     {
-        $state->currentChallenge()->handler()->onChallengeEnded($state);
+        $this->state(ChallengeState::class)->handler()->onChallengeEnded($state);
         $state->current_challenge_id = null;
     }
 
@@ -33,6 +33,7 @@ class ChallengeEnded extends Event
 
         $game->teams->each(function ($team) {
             $team->score = $team->state()->score();
+            $team->hidden_score = $team->state()->score(include_hidden: true);
             $team->save();
         });
 

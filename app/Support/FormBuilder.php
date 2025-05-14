@@ -219,6 +219,7 @@ class FormBuilder
 
         $this->select(
             label: $label,
+            placeholder: 'Select a team...',
             options: $teams->mapWithKeys(fn ($team) => [$team->id => $team->name])->toArray(),
             property_name: 'team_id',
             validation_rules: 'required',

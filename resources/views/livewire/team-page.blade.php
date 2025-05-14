@@ -30,7 +30,23 @@
     </flux:card>
 
     <flux:card>
-        <flux:heading size="lg">Score: {{ $team->score }}</flux:heading>
+        <flux:heading size="lg">
+            @if ($this->game->status === 'ended')
+                <div class="flex items-center gap-2">
+                    Score: {{ $this->team->hidden_score }}
+                    @if ($this->team->hidden_score > $this->team->score)
+                        <flux:text size="lg" class="text-purple-500 dark:text-purple-300">({{ $this->team->hidden_score - $this->team->score }} bonus)</flux:text>
+                    @endif
+                </div>
+            @else
+                <div class="flex items-center gap-2">
+                    Score: {{ $this->team->score }}
+                    @if ($this->showHiddenPoints && $this->team->hidden_score !== $this->team->score)
+                        <flux:text size="lg" class="text-purple-500 dark:text-purple-300">+{{ $this->team->hidden_score - $this->team->score }}</flux:text>
+                    @endif
+                </div>
+            @endif
+        </flux:heading>
         
         @if (count($this->scoreHistoryEntries) > 0)
             <flux:table>
@@ -48,7 +64,9 @@
                                 </div>
                             </flux:table.cell>
                             <flux:table.cell>
-                                @if ($entry['points'] > -1)
+                                @if ($entry['is_hidden'])
+                                    <flux:heading size="sm" class="text-purple-500 dark:text-purple-300">+{{ $entry['points'] }}</flux:heading>
+                                @elseif ($entry['points'] > -1)
                                     <flux:heading size="sm" class="text-green-500">+{{ $entry['points'] }}</flux:heading>
                                 @else
                                     <flux:heading size="sm" class="text-red-500">{{ $entry['points'] }}</flux:heading>

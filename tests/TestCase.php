@@ -72,6 +72,7 @@ abstract class TestCase extends BaseTestCase
     public function mockGameTemplate(
         array $challenges,
         string $type,
+        ?array $modifiers = null,
         ?string $description = null,
         ?string $pre_game_lobby_message = null,
         ?bool $players_can_join_late = null,
@@ -96,6 +97,7 @@ abstract class TestCase extends BaseTestCase
             is_public: $is_public ?? true,
             team_names: $team_names ?? [],
             challenges: $challenges,
+            modifiers: $modifiers ?? [],
         )->game_template_id;
 
         $this->game_template = GameTemplate::find($id);

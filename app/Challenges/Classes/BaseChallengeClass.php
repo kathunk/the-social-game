@@ -55,8 +55,15 @@ abstract class BaseChallengeClass
         return false;
     }
 
-    public function onRoundEnded()
-    {
+    public function onChallengeStarted(
+        GameState $game_state,
+    ) {
+        // Optional override
+    }
+
+    public function onChallengeEnded(
+        GameState $game_state,
+    ) {
         // Optional override
     }
 
@@ -65,12 +72,6 @@ abstract class BaseChallengeClass
         TeamState $team_state,
         GameState $game_state,
         ?TeamState $previous_team = null,
-    ) {
-        // Optional override
-    }
-
-    public function onChallengeEnded(
-        GameState $game_state,
     ) {
         // Optional override
     }
@@ -108,7 +109,8 @@ abstract class BaseChallengeClass
         return collect($this->frontendComponent($player)['elements'])
             ->filter(fn ($element) => isset($element['property_name'], $element['validation_rules']))
             ->reduce(function ($carry, $element) {
-                $property = "challenge_properties.{$element['property_name']}";
+                // Remove the challenge_properties namespace from the property name
+                $property = $element['property_name'];
 
                 $carry['rules'][$property] = $element['validation_rules'];
 

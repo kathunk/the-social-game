@@ -89,8 +89,7 @@ class IndividualNoScoreChangeQuiz extends BaseChallengeClass implements Supports
 
         $votes = collect($this->challenge_state->challenge_data['votes']);
 
-        $score_changes = $game_state->players()->mapWithKeys(fn ($p) => 
-            [$p->id => $votes->where('upvote_player_id', $p->id)->count() - $votes->where('downvote_player_id', $p->id)->count()]);
+        $score_changes = $game_state->players()->mapWithKeys(fn ($p) => [$p->id => $votes->where('upvote_player_id', $p->id)->count() - $votes->where('downvote_player_id', $p->id)->count()]);
 
         $steady_ids = $score_changes->filter(fn ($score_change) => $score_change === 0)->keys();
 

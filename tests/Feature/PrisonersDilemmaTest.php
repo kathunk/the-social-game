@@ -7,6 +7,8 @@ use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
+// @todo update this test to use Livewire
+
 beforeEach(function () {
     Verbs::fake();
     Verbs::commitImmediately();

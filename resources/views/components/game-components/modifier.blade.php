@@ -29,8 +29,8 @@
                     <div class="flex space-x-2 mt-4 justify-end">
                         @foreach ($element['buttons'] as $btn)
                             <flux:button
-                                wire:click="callModifierAction('{{ $modifier->key }}', '{{ $btn['action'] }}')"
-                                class="px-4 py-2 bg-blue-600 text-white rounded"
+                                variant="primary"
+                                wire:click="callModifierAction('{{ $modifier->class_key }}', '{{ $btn['action'] }}')"
                             >
                                 {{ $btn['label'] }}
                             </flux:button>

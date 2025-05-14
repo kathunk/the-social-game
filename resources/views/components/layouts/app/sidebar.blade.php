@@ -1,23 +1,35 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
+    <body class="min-h-screen bg-zinc-50 dark:bg-zinc-800">
         @php
             $user = auth()->user();
         @endphp
 
+        @if(config('app.env') === 'local')
+            <div class="absolute lg:top-2.5 top-3 lg:right-12 right-24 z-50">
+                <x-dark-mode-toggle />
+            </div>
+        @endif
+
         @if ($user)
             <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-                <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
-                <x-app-logo />
-            </a>
+            <div class="flex items-center">
+                <flux:brand name="The Social Game" href="{{ route('dashboard') }}" wire:navigate>
+                    <x-slot name="logo">
+                        <div class="rounded w-12 bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
+                            <x-app-logo />
+                        </div>
+                    </x-slot>
+                </flux:brand>
+                <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
+            </div>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
+                <flux:navlist.group :heading="__('Games')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Home') }}</flux:navlist.item>
                     @if ($user?->is_member)
                         <flux:navlist.item icon="plus" :href="route('create-game')" :current="request()->routeIs('create-game')" wire:navigate>{{ __('Create Game') }}</flux:navlist.item>

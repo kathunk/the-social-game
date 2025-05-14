@@ -44,6 +44,16 @@ abstract class BaseModifierClass
         return new static;
     }
 
+    public function dataArrayForState(): array
+    {
+        return [];
+    }
+
+    public function onSecretDiscovered(Player $player)
+    {
+        // Optional override
+    }
+
     public function onRoundEnded()
     {
         // Optional override
@@ -53,6 +63,7 @@ abstract class BaseModifierClass
         PlayerState $player_state,
         TeamState $team_state,
         GameState $game_state,
+        ModifierState $modifier_state,
         ?TeamState $previous_team = null,
     ) {
         // Optional override
@@ -94,11 +105,6 @@ abstract class BaseModifierClass
         }
 
         return $properties;
-    }
-
-    public function dataArrayForState(): array
-    {
-        return [];
     }
 
     public function validationRulesForLivewire(Player $player): array

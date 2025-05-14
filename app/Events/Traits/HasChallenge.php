@@ -2,6 +2,7 @@
 
 namespace App\Events\Traits;
 
+use App\Models\Challenge;
 use App\States\ChallengeState;
 use App\States\GameState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
@@ -17,5 +18,10 @@ trait HasChallenge
             $this->state(GameState::class)->challenge_ids->contains($this->challenge_id),
             'Challenge is not in game'
         );
+    }
+
+    public function challenge()
+    {
+        return Challenge::find($this->challenge_id);
     }
 }
