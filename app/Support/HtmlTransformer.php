@@ -9,6 +9,7 @@ class HtmlTransformer
     ) {
         //
     }
+
     // @todo @themes
     public function formatted(): string
     {

@@ -29,7 +29,7 @@ class Team extends Model
 
     public function theme(): string
     {
-        return match($this->name) {
+        return match ($this->name) {
             'Elixir' => 'elixir',
             'Go' => 'go',
             'JavaScript' => 'javascript',

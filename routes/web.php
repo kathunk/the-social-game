@@ -5,14 +5,14 @@ use App\Livewire\CreateGame;
 use App\Livewire\GameDashboard;
 use App\Livewire\GameTemplatesListPage;
 use App\Livewire\Home;
-use App\Livewire\Theme;
 use App\Livewire\ManageGameTemplatePage;
 use App\Livewire\PlayerPage;
 use App\Livewire\PreGameLobby;
 use App\Livewire\SecretsPage;
 use App\Livewire\TeamPage;
-use Livewire\Volt\Volt;
+use App\Livewire\Theme;
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 if (app()->environment('local')) {
     Route::get('/theme', Theme::class)->name('theme');

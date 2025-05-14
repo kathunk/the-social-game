@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 class Theme extends Component
 {
