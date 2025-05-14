@@ -164,18 +164,14 @@
         /* accent and link */
         --color-green-600: #417e38;
 
-        --color-background: var(--color-neutral-950);
+        --color-background: rgb(13, 18, 28);
 
         --color-accent: var(--color-green-600);
         --color-accent-content: var(--color-green-400);
         --color-accent-foreground: var(--color-white);
 
         [data-flux-card] {
-            /* background-image: linear-gradient(180deg,
- color-mix(in oklab, var(--color-neutral-900) 50%, transparent) 0,
- color-mix(in oklab, var(--color-neutral-900) 0%, transparent) 48.32%); */
-
-            /* @apply !bg-gradient-to-b from-[#1a1a1a] to-[#090909] !border-0; */
+            @apply !rounded-none !bg-transparent dark:!bg-[linear-gradient(180deg,_color-mix(in_oklab,var(--color-neutral-900)_50%,_transparent)_0%,_color-mix(in_oklab,var(--color-neutral-900)_0%,_transparent)_48.32%)]
         }
 
         [data-flux-link] {

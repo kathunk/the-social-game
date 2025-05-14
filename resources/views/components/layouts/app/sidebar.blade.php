@@ -9,7 +9,7 @@
     @endphp
 
     <body @class([
-        'bg-zinc-50 dark:bg-zinc-800' => ! $user?->currentPlayer?->team,
+        'dark:bg-linear-to-b dark:from-neutral-950 dark:to-neutral-900' => ! $user?->currentPlayer?->team,
         "{$user->currentPlayer?->team?->theme()} bg-[var(--color-background)]" => $user->currentPlayer?->team?->theme(),
         'min-h-screen',
     ])>
