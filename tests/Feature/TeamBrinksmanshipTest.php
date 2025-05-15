@@ -48,19 +48,25 @@ beforeEach(function () {
     Date::setTestNow($end->addSeconds(1));
     $this->artisan('app:progress-games');
 
-    // Get challenge data to identify ally teams
     $this->challenge = $this->game->fresh()->currentChallenge;
-    $this->challenge_data = $this->challenge->challenge_data;
-
-    $this->data = fn ($team) => $this->challenge_data[$team->id];
-    $this->code = fn ($team) => ($this->data)($team)['code'];
-    $this->ally_team = fn ($team) => $this->game->teams->firstWhere('id', ($this->data)($team)['ally_team_id']);
 
     expect($this->team_1->fresh()->score)->toBe(20);
     expect($this->team_2->fresh()->score)->toBe(20);
     expect($this->team_3->fresh()->score)->toBe(20);
     expect($this->team_4->fresh()->score)->toBe(20);
 });
+
+function data($team) {
+    return $team->game->fresh()->currentChallenge->challenge_data[$team->id];
+}
+
+function code($team) {
+    return data($team)['code'];
+}
+
+function ally_team($team) {
+    return $team->game->teams->firstWhere('id', data($team)['ally_team_id']);
+}
 
 function launchNuclearStrike($player, $strike_type, $code): LivewireTest
 {
@@ -76,12 +82,11 @@ function launchNuclearStrike($player, $strike_type, $code): LivewireTest
 }
 
 it('creates unique codes for each team and assigns ally pairs', function () {
-    // Check all teams have a code and ally
     foreach ($this->game->teams as $team) {
-        $ally_team = ($this->ally_team)($team);
+        $ally_team = ally_team($team);
 
-        $team_data = ($this->data)($team);
-        $ally_data = ($this->data)($ally_team);
+        $team_data = data($team);
+        $ally_data = data($ally_team);
 
         expect($team_data)->toHaveKey('code');
         expect($team_data)->toHaveKey('ally_team_id');
@@ -95,24 +100,19 @@ it('creates unique codes for each team and assigns ally pairs', function () {
     }
 
     // All codes should be unique
-    $codes = collect($this->game->teams->map(fn ($t) => ($this->code)($t)));
+    $codes = collect($this->game->teams->map(fn ($t) => code($t)));
     expect($codes->unique()->count())->toBe($codes->count());
 });
 
 it('requires valid ally code to launch nuclear strikes', function () {
-    // Test valid launches for all teams
     foreach ($this->game->teams as $team) {
         $player = $team->players->first();
-        $ally_team = ($this->ally_team)($team);
-        $ally_code = ($this->code)($ally_team);
+        $ally_team = ally_team($team);
+        $ally_code = code($ally_team);
 
         launchNuclearStrike($player, 'carpet_bomb', $ally_code);
 
-        // Refresh challenge data
-        $this->challenge = $this->game->fresh()->currentChallenge;
-        $this->challenge_data = $this->challenge->challenge_data;
-
-        $team_data = ($this->data)($team);
+        $team_data = data($team);
 
         expect($team_data['has_launched'])->toBeTrue();
         expect($team_data['strike_type'])->toBe('carpet_bomb');
@@ -122,10 +122,9 @@ it('requires valid ally code to launch nuclear strikes', function () {
 it('gives -10 points to all other teams when a team launches a carpet bomb', function () {
     foreach ($this->game->teams as $team) {
         $player = $team->players->first();
-        $ally_team = ($this->ally_team)($team);
-        $ally_code = ($this->code)($ally_team);
+        $ally_team = ally_team($team);
+        $ally_code = code($ally_team);
 
-        // Launch carpet bomb
         launchNuclearStrike($player, 'carpet_bomb', $ally_code);
     }
 
@@ -141,10 +140,9 @@ it('gives -10 points to all other teams when a team launches a carpet bomb', fun
 it('gives -40 points to ally team when a team launches a nuke ally strike', function () {
     foreach ($this->game->teams as $team) {
         $player = $team->players->first();
-        $ally_team = ($this->ally_team)($team);
-        $ally_code = ($this->code)($ally_team);
+        $ally_team = ally_team($team);
+        $ally_code = code($ally_team);
 
-        // Teams nuke one another
         launchNuclearStrike($player, 'nuke_ally', $ally_code);
     }
 
@@ -152,7 +150,6 @@ it('gives -40 points to ally team when a team launches a nuke ally strike', func
 
     // all teams ally strike, so it's -40 points for each team
     foreach ($this->game->teams as $team) {
-        // Both teams should lose 40 points
         expect($team->fresh()->score)->toBe(-20);
         expect($ally_team->fresh()->score)->toBe(-20);
     }
@@ -161,8 +158,8 @@ it('gives -40 points to ally team when a team launches a nuke ally strike', func
 it('prevents a team from launching multiple strikes', function () {
     foreach ($this->game->teams as $team) {
         $player = $team->players->first();
-        $ally_team = ($this->ally_team)($team);
-        $ally_code = ($this->code)($ally_team);
+        $ally_team = ally_team($team);
+        $ally_code = code($ally_team);
 
         // First strike should succeed
         launchNuclearStrike($player, 'carpet_bomb', $ally_code);
