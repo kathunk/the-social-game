@@ -4,21 +4,25 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
-use App\Challenges\Classes\IndividualHighScoreQuiz;
-use App\Challenges\Classes\IndividualLargestDecreaseQuiz;
-use App\Challenges\Classes\IndividualLargestIncreaseQuiz;
-use App\Challenges\Classes\IndividualLowScoreQuiz;
-use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
-use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
-use App\Challenges\Classes\IndividualSpecificScoreQuiz;
-use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\FlattenTheCurve;
+use Thunk\Verbs\Facades\Verbs;
+use Illuminate\Database\Seeder;
 use App\Events\GameTemplateAdded;
+use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\Classes\StayOnMessage;
 use App\Modifiers\Classes\TeamResignation;
 use App\Modifiers\Classes\TeamSecretAlliance;
-use Illuminate\Database\Seeder;
-use Thunk\Verbs\Facades\Verbs;
+use App\Challenges\Classes\TeamPrisonersDilemma;
+use App\Challenges\Classes\IndividualLowScoreQuiz;
+use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
+use App\Challenges\Classes\IndividualSpecificScoreQuiz;
+use App\Challenges\Classes\IndividualLargestDecreaseQuiz;
+use App\Challenges\Classes\IndividualLargestIncreaseQuiz;
+use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
+use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
+use App\Challenges\Classes\TeamBrinksmanship;
 
 class GameTemplateSeeder extends Seeder
 {
@@ -38,11 +42,34 @@ class GameTemplateSeeder extends Seeder
                 'challenges' => [
                     [
                         'challenge_keys' => [PyramidScheme::key()],
-                        'duration' => 1,
+                        'duration' => 420,
+                    ],
+                    [
+                        'challenge_keys' => [StayOnMessage::key()],
+                        'duration' => 60,
+                    ],
+                    [
+                        'challenge_keys' => [TeamPrisonersDilemma::key()],
+                        'duration' => 180,
                     ],
                     [
                         'challenge_keys' => [TeamBounty::key()],
-                        'duration' => 60,
+                        'duration' => 540,
+                    ],
+                    [
+                        'challenge_keys' => [PyramidScheme::key()],
+                        'duration' => 720,
+                    ],
+
+                    // @todo add hot potato
+
+                    [
+                        'challenge_keys' => [TeamBrinksmanship::key()],
+                        'duration' => 120,
+                    ],
+                    [
+                        'challenge_keys' => [FlattenTheCurve::key()],
+                        'duration' => 120,
                     ],
                 ],
                 'modifiers' => [
