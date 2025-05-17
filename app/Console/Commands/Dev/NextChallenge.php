@@ -11,7 +11,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Thunk\Verbs\Facades\Verbs;
 
-class Next extends Command
+class NextChallenge extends Command
 {
     protected $signature = 'dev:next';
 
