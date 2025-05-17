@@ -65,26 +65,26 @@ class TeamBrinksmanship extends BaseChallengeClass
                 return $form->subtitle($strike_message);
             })
             ->when(! $team_data['has_launched'], fn ($form) => $form->input(
-                    property_name: 'target_code',
-                    label: 'Enter your ally\'s nuclear code',
-                    validation_rules: 'required|nuclear_code',
-                    validation_messages: [
-                        'required' => 'You must enter a nuclear code',
-                        'nuclear_code' => 'The nuclear code is incorrect. Please verify the code with your ally team.',
-                    ]
-                )
+                property_name: 'target_code',
+                label: 'Enter your ally\'s nuclear code',
+                validation_rules: 'required|nuclear_code',
+                validation_messages: [
+                    'required' => 'You must enter a nuclear code',
+                    'nuclear_code' => 'The nuclear code is incorrect. Please verify the code with your ally team.',
+                ]
+            )
                 ->buttonGroup()
-                    ->button(
-                        label: 'Carpet Bomb (-10 to all other teams)',
-                        action: 'carpetBomb',
-                        properties_to_validate: ['target_code'],
-                    )
-                    ->button(
-                        label: 'Nuke Ally (-40 to ally)',
-                        action: 'nukeAlly',
-                        properties_to_validate: ['target_code'],
-                    )
-                    ->endGroup()
+                ->button(
+                    label: 'Carpet Bomb (-10 to all other teams)',
+                    action: 'carpetBomb',
+                    properties_to_validate: ['target_code'],
+                )
+                ->button(
+                    label: 'Nuke Ally (-40 to ally)',
+                    action: 'nukeAlly',
+                    properties_to_validate: ['target_code'],
+                )
+                ->endGroup()
             )
             ->build();
     }

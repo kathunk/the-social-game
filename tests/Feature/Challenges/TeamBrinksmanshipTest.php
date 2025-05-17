@@ -56,15 +56,18 @@ beforeEach(function () {
     expect($this->team_4->fresh()->score)->toBe(20);
 });
 
-function data($team) {
+function data($team)
+{
     return $team->game->fresh()->currentChallenge->challenge_data[$team->id];
 }
 
-function code($team) {
+function code($team)
+{
     return data($team)['code'];
 }
 
-function ally_team($team) {
+function ally_team($team)
+{
     return $team->game->teams->firstWhere('id', data($team)['ally_team_id']);
 }
 
