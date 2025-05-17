@@ -157,16 +157,6 @@ class FormBuilder
         return $this;
     }
 
-    public function message(string $text): static
-    {
-        $this->elements[] = [
-            'type' => 'message',
-            'text' => $text,
-        ];
-
-        return $this;
-    }
-
     public function table(array $rows): static
     {
         $this->elements[] = [
