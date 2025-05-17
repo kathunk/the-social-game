@@ -52,7 +52,7 @@ beforeEach(function () {
     incrementScore(team: $this->team_4, points: 10);
 });
 
-function playDirty($player): LivewireTest
+function playDirtyLW($player): LivewireTest
 {
     return Livewire::actingAs($player->user)
         ->test(GameDashboard::class, ['game' => $player->game->fresh()])
@@ -60,8 +60,8 @@ function playDirty($player): LivewireTest
 }
 
 it('if both teams play dirty they will each get -20 points', function () {
-    playDirty($this->player_1);
-    playDirty($this->player_3);
+    playDirtyLW($this->player_1);
+    playDirtyLW($this->player_3);
 
     Challenge::latest()->first()->end();
 
@@ -70,7 +70,7 @@ it('if both teams play dirty they will each get -20 points', function () {
 });
 
 it('if your team play dirty and your paired_team does not you will get 50 points', function () {
-    playDirty($this->player_1);
+    playDirtyLW($this->player_1);
 
     Challenge::latest()->first()->end();
 
