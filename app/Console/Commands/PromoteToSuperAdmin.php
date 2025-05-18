@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Models\User;
-use Illuminate\Console\Command;
 use App\Events\UserGainedMembership;
 use App\Events\UserPromotedToSuperAdmin;
+use App\Models\User;
+use Illuminate\Console\Command;
 
 class PromoteToSuperAdmin extends Command
 {
@@ -30,11 +30,12 @@ class PromoteToSuperAdmin extends Command
     {
         $user = User::where('email', $this->argument('email'))->first();
 
-        if (!$user) {
+        if (! $user) {
             $this->error('User not found');
+
             return;
         }
-        
+
         UserGainedMembership::fire(user_id: $user->id);
 
         UserPromotedToSuperAdmin::fire(user_id: $user->id);
