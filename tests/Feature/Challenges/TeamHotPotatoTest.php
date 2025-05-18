@@ -50,6 +50,11 @@ beforeEach(function () {
     $this->player_7 = $this->createPlayer()->joinTeam($this->team_2);
     $this->player_8 = $this->createPlayer()->joinTeam($this->team_2);
 
+    $this->player_9 = $this->createPlayer()->joinTeam($this->team_3);
+    $this->player_10 = $this->createPlayer()->joinTeam($this->team_3);
+    $this->player_11 = $this->createPlayer()->joinTeam($this->team_3);
+    $this->player_12 = $this->createPlayer()->joinTeam($this->team_3);
+
     $end = $this->game->fresh()->currentChallenge->ends_at;
     Date::setTestNow($end->addSeconds(1));
     $this->artisan('app:progress-games');
@@ -70,7 +75,6 @@ it('sets the expected challenge data', function () {
     $remaining_player_ids = $team_1_data['remaining_player_ids'];
     $all_holder_ids = $team_1_data['all_holder_ids'];
 
-
     expect(count($remaining_player_ids))->toBe(3);
     expect($remaining_player_ids)->not->toContain($holder_id);
 
@@ -85,7 +89,7 @@ it('passes the potato to the intended recipient', function () {
     $remaining_player_ids = $team_1_data['remaining_player_ids'];
 
     $holder = Player::find($holder_id);
-    $valid_recipient = Player::find($remaining_player_ids[0]);
+    $valid_recipient = Player::find(collect($remaining_player_ids)->random());
 
     passPotato($holder, $valid_recipient);
 
@@ -96,4 +100,79 @@ it('passes the potato to the intended recipient', function () {
     expect($team_1_data['remaining_player_ids'])->not->toContain($valid_recipient->id);
     expect($team_1_data['all_holder_ids'])->toContain($valid_recipient->id);
     expect(count($team_1_data['all_holder_ids']))->toBe(2);
+});
+
+it('does not penalize teams with zero players', function () {
+    $new_player = $this->createPlayer()->joinTeam($this->team_4);
+
+    Livewire::actingAs($new_player->user)
+        ->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->assertSee('Challenge forfeited. No players were on the team when the challenge started.');
+
+    $end = $this->game->fresh()->currentChallenge->ends_at;
+    Date::setTestNow($end->addSeconds(1));
+    $this->artisan('app:progress-games');
+
+    expect($this->team_4->fresh()->score)->toBe(0);
+});
+
+it('ends the challenge when the potato is passed to a repeat player', function () {
+    $team_1_data = $this->game->fresh()->currentChallenge->challenge_data[$this->team_1->id];
+    $holder_id = $team_1_data['potato_holder_id'];
+    $remaining_player_ids = $team_1_data['remaining_player_ids'];
+    $holder = Player::find($holder_id);
+    $valid_recipient = Player::find(collect($remaining_player_ids)->random());
+    
+    passPotato($holder, $valid_recipient);
+
+    passPotato($valid_recipient, $holder);
+
+    $team_status = $this->game->fresh()->currentChallenge->challenge_data[$this->team_1->id]['status'];
+
+    expect($team_status)->toBe('failed');
+    expect($this->team_1->fresh()->score)->toBe(-50);
+
+    Livewire::actingAs($this->player_1->user)
+        ->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->assertSee('Sorry folks, try again next time.');
+});
+
+it('gives expected scores', function () {
+    $team_2_data = $this->game->fresh()->currentChallenge->challenge_data[$this->team_2->id];
+    $holder_id = $team_2_data['potato_holder_id'];
+    $remaining_player_ids = $team_2_data['remaining_player_ids'];
+    $holder = Player::find($holder_id);
+    $valid_recipient = Player::find(collect($remaining_player_ids)->random());
+    
+    passPotato($holder, $valid_recipient);
+
+    foreach (range(1, 3) as $i) {
+        $team_3_data = $this->game->fresh()->currentChallenge->challenge_data[$this->team_3->id];
+        $holder_id = $team_3_data['potato_holder_id'];
+        $remaining_player_ids = $team_3_data['remaining_player_ids'];
+        $holder = Player::find($holder_id);
+        $valid_recipient = Player::find(collect($remaining_player_ids)->random());
+        passPotato($holder, $valid_recipient);
+    }
+
+    $fresh_team_3_data = $this->game->fresh()->currentChallenge->challenge_data[$this->team_3->id];
+    expect($fresh_team_3_data['status'])->toBe('succeeded');
+    expect($fresh_team_3_data['potato_holder_id'])->toBeNull();
+
+    Livewire::actingAs($this->player_10->user)
+        ->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->assertSee('You did it!');
+
+    $end = $this->game->fresh()->currentChallenge->ends_at;
+    Date::setTestNow($end->addSeconds(1));
+    $this->artisan('app:progress-games');
+
+    // team 1 does nothing, resulting in -25 points
+    expect($this->team_1->fresh()->score)->toBe(-25);
+
+    // team 2 does 1 pass, resulting in 0 points
+    expect($this->team_2->fresh()->score)->toBe(0);
+
+    // team 3 does all 3 passes, resulting in 50 points
+    expect($this->team_3->fresh()->score)->toBe(50);
 });

@@ -20,18 +20,20 @@ class PlayerPassedPotato extends Event
     {
         $team_data = $challenge->challenge_data[$this->team_id];
 
-        $challenge->challenge_data[$this->team_id]['all_holder_ids'][] = $this->recipient_id;
-
-        if (collect($team_data['all_holder_ids'])->filter(fn ($id) => $id === $this->recipient_id)->count() === 2) {
+        if (collect($team_data['all_holder_ids'])->contains($this->recipient_id)) {
             $challenge->challenge_data[$this->team_id]['status'] = 'failed';
             $challenge->challenge_data[$this->team_id]['potato_holder_id'] = null;
             return;
         }
 
-        $challenge->challenge_data[$this->team_id]['remaining_player_ids'] = 
-            collect($team_data['remaining_player_ids'])->filter(fn ($id) => $id !== $this->recipient_id)->toArray();
+        $challenge->challenge_data[$this->team_id]['all_holder_ids'][] = $this->recipient_id;
 
-        if (empty($team_data['remaining_player_ids'])) {
+        $challenge->challenge_data[$this->team_id]['remaining_player_ids'] = 
+            collect($team_data['remaining_player_ids'])
+                ->filter(fn ($id) => $id !== $this->recipient_id)
+                ->toArray();
+
+        if (collect($challenge->challenge_data[$this->team_id]['remaining_player_ids'])->count() === 0) {
             $challenge->challenge_data[$this->team_id]['status'] = 'succeeded';
             $challenge->challenge_data[$this->team_id]['potato_holder_id'] = null;
             return;
@@ -49,11 +51,7 @@ class PlayerPassedPotato extends Event
         }
 
         if ($team_data['status'] === 'failed') {
-            $double_holder_id = collect($team_data['all_holder_ids'])
-                ->filter(fn ($id) => array_count_values($team_data['all_holder_ids'])[$id] === 2)
-                ->first();
-
-            $player = PlayerState::load($double_holder_id);
+            $player = PlayerState::load($this->recipient_id);
 
             $team->addToScoreHistory(-50, "Failed the hot potato challenge. $player->name held the potato twice.");
         }

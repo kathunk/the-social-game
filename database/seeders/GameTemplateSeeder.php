@@ -38,11 +38,11 @@ class GameTemplateSeeder extends Seeder
                 'team_names' => ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
                 'challenges' => [
                     [
-                        'challenge_keys' => [TeamHotPotato::key()],
+                        'challenge_keys' => [PyramidScheme::key()],
                         'duration' => 10000,
                     ],
                     [
-                        'challenge_keys' => [TeamBounty::key()],
+                        'challenge_keys' => [TeamHotPotato::key()],
                         'duration' => 60,
                     ],
                 ],

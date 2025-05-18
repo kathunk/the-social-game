@@ -48,10 +48,10 @@ class TeamHotPotato extends BaseChallengeClass
         $form
             ->when($has_potato, fn ($form) => $form->select(
                 property_name: 'recipient_player_id',
-                options: $player->team->players->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
+                options: $player->team->players->reject(fn ($p) => $p->id === $player->id)->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
                 label: 'Pass the potato to...',
                 placeholder: 'Select a player...',
-                validation_rules: 'required|in:'.implode(',', $player->team->players->pluck('id')->toArray()),
+                validation_rules: 'required|in:'.implode(',', $player->team->players->reject(fn ($p) => $p->id === $player->id)->pluck('id')->toArray()),
                 validation_messages: [
                     'required' => 'Must select a player',
                     'in' => 'Must select a valid player',
@@ -94,7 +94,7 @@ class TeamHotPotato extends BaseChallengeClass
     {
         PlayerPassedPotato::fire(
             player_id: $player->id,
-            recipient_id: $params['recipient_player_id'],
+            recipient_id: (int) $params['recipient_player_id'],
             game_id: $player->game_id,
             challenge_id: $this->challenge->id,
             team_id: $player->team_id,
@@ -104,17 +104,17 @@ class TeamHotPotato extends BaseChallengeClass
     public function onChallengeEnded(GameState $game_state)
     {
         $teams_to_resolve = $game_state->teams()
-            ->filter(fn ($team) => $this->challenge->challenge_data[$team->id]['status'] === 'active');
+            ->filter(fn ($team) => $this->challenge_state->challenge_data[$team->id]['status'] === 'active');
 
         $teams_to_resolve->each(function ($team) {
-            $team_data = $this->challenge->challenge_data[$team->id];
+            $team_data = $this->challenge_state->challenge_data[$team->id];
 
             $held = count($team_data['all_holder_ids']);
             $total = $team->player_ids->count();
             $percentage = $held / $total;
-            $points = (int) ($percentage - 0.5) * 100;
+            $points = ($percentage - 0.5) * 100;
 
-            $team->addToScoreHistory($points, "Completed the Hot Potato Challenge. $held of $total players held the potato.");
+            $team->addToScoreHistory(round($points), "Completed the Hot Potato Challenge. $held of $total players held the potato.");
         });
     }
 }
