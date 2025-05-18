@@ -13,7 +13,7 @@ use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
 use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
 use App\Challenges\Classes\IndividualSpecificScoreQuiz;
 use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\TeamHotPotato;
 use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\TeamResignation;
 use App\Modifiers\Classes\TeamSecretAlliance;
@@ -38,10 +38,10 @@ class GameTemplateSeeder extends Seeder
                 'challenges' => [
                     [
                         'challenge_keys' => [PyramidScheme::key()],
-                        'duration' => 1,
+                        'duration' => 10000,
                     ],
                     [
-                        'challenge_keys' => [TeamBounty::key()],
+                        'challenge_keys' => [TeamHotPotato::key()],
                         'duration' => 60,
                     ],
                 ],

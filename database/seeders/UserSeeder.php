@@ -61,7 +61,7 @@ class UserSeeder extends Seeder
             ['Yoda', 'yoda@thunk.dev'],
             ['Jyn Erso', 'jyn@thunk.dev'],
             ['Rey', 'rey@thunk.dev'],
-            ['Chewbacca', 'chewie@thunk.dev'],
+            ['Chewbacca', 'Chewbacca@thunk.dev'],
             ['Obi-Wan Kenobi', 'obi@thunk.dev'],
             ['Anakin Skywalker', 'anakin@thunk.dev'],
             ['Padme Amidala', 'padme@thunk.dev'],
