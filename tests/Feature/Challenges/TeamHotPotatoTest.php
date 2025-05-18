@@ -1,14 +1,13 @@
 <?php
 
-use App\Models\Player;
-use Livewire\Livewire;
-use App\Models\Challenge;
-use Thunk\Verbs\Facades\Verbs;
-use App\Livewire\GameDashboard;
-use Illuminate\Support\Facades\Date;
 use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\TeamHotPotato;
+use App\Livewire\GameDashboard;
+use App\Models\Player;
+use Illuminate\Support\Facades\Date;
 use Livewire\Features\SupportTesting\Testable as LivewireTest;
+use Livewire\Livewire;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -122,7 +121,7 @@ it('ends the challenge when the potato is passed to a repeat player', function (
     $remaining_player_ids = $team_1_data['remaining_player_ids'];
     $holder = Player::find($holder_id);
     $valid_recipient = Player::find(collect($remaining_player_ids)->random());
-    
+
     passPotato($holder, $valid_recipient);
 
     passPotato($valid_recipient, $holder);
@@ -143,7 +142,7 @@ it('gives expected scores', function () {
     $remaining_player_ids = $team_2_data['remaining_player_ids'];
     $holder = Player::find($holder_id);
     $valid_recipient = Player::find(collect($remaining_player_ids)->random());
-    
+
     passPotato($holder, $valid_recipient);
 
     foreach (range(1, 3) as $i) {

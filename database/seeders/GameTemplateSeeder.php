@@ -13,7 +13,6 @@ use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
 use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
 use App\Challenges\Classes\IndividualSpecificScoreQuiz;
 use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\TeamBounty;
 use App\Challenges\Classes\TeamHotPotato;
 use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\TeamResignation;

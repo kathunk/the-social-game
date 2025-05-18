@@ -2,17 +2,17 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\TeamState;
-use App\States\PlayerState;
-use App\Events\Traits\HasGame;
-use App\States\ChallengeState;
 use App\Events\Traits\HasChallenge;
+use App\Events\Traits\HasGame;
 use App\Events\Traits\HasPlayerOnTeam;
+use App\States\ChallengeState;
+use App\States\PlayerState;
+use App\States\TeamState;
+use Thunk\Verbs\Event;
 
 class PlayerPassedPotato extends Event
 {
-    use HasPlayerOnTeam, HasGame, HasChallenge;
+    use HasChallenge, HasGame, HasPlayerOnTeam;
 
     public int $recipient_id;
 
@@ -23,12 +23,13 @@ class PlayerPassedPotato extends Event
         if (collect($team_data['all_holder_ids'])->contains($this->recipient_id)) {
             $challenge->challenge_data[$this->team_id]['status'] = 'failed';
             $challenge->challenge_data[$this->team_id]['potato_holder_id'] = null;
+
             return;
         }
 
         $challenge->challenge_data[$this->team_id]['all_holder_ids'][] = $this->recipient_id;
 
-        $challenge->challenge_data[$this->team_id]['remaining_player_ids'] = 
+        $challenge->challenge_data[$this->team_id]['remaining_player_ids'] =
             collect($team_data['remaining_player_ids'])
                 ->filter(fn ($id) => $id !== $this->recipient_id)
                 ->toArray();
@@ -36,6 +37,7 @@ class PlayerPassedPotato extends Event
         if (collect($challenge->challenge_data[$this->team_id]['remaining_player_ids'])->count() === 0) {
             $challenge->challenge_data[$this->team_id]['status'] = 'succeeded';
             $challenge->challenge_data[$this->team_id]['potato_holder_id'] = null;
+
             return;
         }
 
@@ -47,7 +49,7 @@ class PlayerPassedPotato extends Event
         $team_data = $this->state(ChallengeState::class)->challenge_data[$team->id];
 
         if ($team_data['status'] === 'succeeded') {
-            $team->addToScoreHistory(50, "Completed the hot potato challenge.");
+            $team->addToScoreHistory(50, 'Completed the hot potato challenge.');
         }
 
         if ($team_data['status'] === 'failed') {

@@ -2,13 +2,13 @@
 
 namespace App\Challenges\Classes;
 
+use App\Events\PlayerPassedPotato;
 use App\Models\Player;
 use App\States\GameState;
-use App\Events\PlayerPassedPotato;
 
 class TeamHotPotato extends BaseChallengeClass
 {
-    const NAME = "Hot Potato";
+    const NAME = 'Hot Potato';
 
     const DESCRIPTION = 'One player on your team has the hot potato, and can pass it to any teammate. 
         Your team will receive (% of teammates who held the potato - 50%) * 100 points.
@@ -57,10 +57,10 @@ class TeamHotPotato extends BaseChallengeClass
                     'in' => 'Must select a valid player',
                 ],
             )
-            ->buttonGroup()
-            ->button('Pass the potato', 'passThePotato')
-            ->endGroup()
-        );
+                ->buttonGroup()
+                ->button('Pass the potato', 'passThePotato')
+                ->endGroup()
+            );
 
         $form->when($challenge_failed, fn ($form) => $form->subtitle('Sorry folks, try again next time.'));
 
@@ -78,6 +78,7 @@ class TeamHotPotato extends BaseChallengeClass
         $game_state->teams()->each(function ($team) use ($challenge_state) {
             if ($team->player_ids->count() === 0) {
                 $challenge_state->challenge_data[$team->id]['status'] = 'forfeited';
+
                 return;
             }
 
