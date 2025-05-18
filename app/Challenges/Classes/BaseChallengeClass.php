@@ -19,6 +19,8 @@ abstract class BaseChallengeClass
 
     const TYPE = 'team'; // team or individual
 
+    const HIDE_SCOREBOARD = false;
+
     abstract public static function key(): string;
 
     public ?Player $player = null;

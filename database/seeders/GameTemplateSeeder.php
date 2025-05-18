@@ -12,8 +12,8 @@ use App\Challenges\Classes\IndividualLowScoreQuiz;
 use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
 use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
 use App\Challenges\Classes\IndividualSpecificScoreQuiz;
-use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\TeamHotPotato;
+use App\Challenges\Classes\TheGreatRealignment;
 use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\TeamResignation;
 use App\Modifiers\Classes\TeamSecretAlliance;
@@ -37,7 +37,7 @@ class GameTemplateSeeder extends Seeder
                 'team_names' => ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
                 'challenges' => [
                     [
-                        'challenge_keys' => [PyramidScheme::key()],
+                        'challenge_keys' => [TheGreatRealignment::key()],
                         'duration' => 10000,
                     ],
                     [

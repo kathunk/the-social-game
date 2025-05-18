@@ -26,7 +26,9 @@
     @if ($this->challengeComponent)
         <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challengeComponent" />
     @endif
-    <x-game-components.scoreboard :teams="$this->teams" :players="$this->players" :type="$this->template->type" />
+    @if ($this->showScoreboard)
+        <x-game-components.scoreboard :teams="$this->teams" :players="$this->players" :type="$this->template->type" />
+    @endif
     @if ($this->game->status === 'active')
         @if ($this->template->players_can_join_late)
             <flux:card>
