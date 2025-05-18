@@ -14,6 +14,7 @@ use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
 use App\Challenges\Classes\IndividualSpecificScoreQuiz;
 use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\TeamHotPotato;
 use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\TeamResignation;
 use App\Modifiers\Classes\TeamSecretAlliance;
@@ -37,8 +38,8 @@ class GameTemplateSeeder extends Seeder
                 'team_names' => ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
                 'challenges' => [
                     [
-                        'challenge_keys' => [PyramidScheme::key()],
-                        'duration' => 1,
+                        'challenge_keys' => [TeamHotPotato::key()],
+                        'duration' => 10000,
                     ],
                     [
                         'challenge_keys' => [TeamBounty::key()],
