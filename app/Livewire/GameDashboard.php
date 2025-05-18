@@ -109,6 +109,12 @@ class GameDashboard extends Component
         return $this->game->modifiers;
     }
 
+    #[Computed]
+    public function showScoreboard()
+    {
+        return ! $this->challenge_handler::HIDE_SCOREBOARD;
+    }
+
     public function mount(Game $game)
     {
         $this->game = $game;
