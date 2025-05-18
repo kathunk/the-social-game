@@ -1,14 +1,23 @@
 <?php
 
 use App\Challenges\Classes\StayOnMessage;
-use App\Events\PlayerSubmittedStayOnMessage;
+use App\Livewire\GameDashboard;
+use Livewire\Features\SupportTesting\Testable as LivewireTest;
+use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-// @todo update this test to use Livewire
+function stayOnMessage($player, $message): LivewireTest
+{
+    return Livewire::actingAs($player->user)
+        ->test(GameDashboard::class, ['game' => $player->game->fresh()])
+        ->set('challenge_properties.string_input', $message)
+        ->call('callChallengeAction', 'submitString');
+}
 
-it('runs the Stay on Message challenge', function () {
+beforeEach(function () {
+    Verbs::fake();
     Verbs::commitImmediately();
 
     $challenges = [
@@ -18,9 +27,16 @@ it('runs the Stay on Message challenge', function () {
         ],
     ];
 
-    $this->mockGameTemplate(challenges: $challenges, type: 'team');
-    $this->createGame()->start();
+    $this->mockGameTemplate(
+        challenges: $challenges,
+        type: 'team',
+        team_names: ['Team 1', 'Team 2', 'Team 3', 'Team 4'],
+    );
 
+    $this->createGame()->start();
+});
+
+it('runs the Stay on Message challenge', function () {
     $challenge = $this->game->challenges->first();
     $team_1 = $this->game->teams->first();
     $team_2 = $this->game->teams->skip(1)->first();
@@ -33,13 +49,7 @@ it('runs the Stay on Message challenge', function () {
     $player_6 = $this->createPlayer($team_2)->joinTeam($team_2);
     $player_7 = $this->createPlayer($team_2)->joinTeam($team_2);
 
-    PlayerSubmittedStayOnMessage::fire(
-        player_id: $player_1->id,
-        game_id: $this->game->id,
-        team_id: $player_1->fresh()->team_id,
-        challenge_id: $challenge->id,
-        message: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    );
+    stayOnMessage($player_1, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
 
     expect($challenge->state()->challenge_data[$player_1->team_id][$player_1->id])
         ->toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
@@ -47,37 +57,10 @@ it('runs the Stay on Message challenge', function () {
     expect($challenge->fresh()->challenge_data[$player_1->team_id][$player_1->id])
         ->toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
 
-    PlayerSubmittedStayOnMessage::fire(
-        player_id: $player_2->id,
-        game_id: $this->game->id,
-        team_id: $player_2->fresh()->team_id,
-        challenge_id: $challenge->id,
-        message: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    );
-
-    PlayerSubmittedStayOnMessage::fire(
-        player_id: $player_3->id,
-        game_id: $this->game->id,
-        team_id: $player_3->fresh()->team_id,
-        challenge_id: $challenge->id,
-        message: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-    );
-
-    PlayerSubmittedStayOnMessage::fire(
-        player_id: $player_4->id,
-        game_id: $this->game->id,
-        team_id: $player_4->fresh()->team_id,
-        challenge_id: $challenge->id,
-        message: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-    );
-
-    PlayerSubmittedStayOnMessage::fire(
-        player_id: $player_5->id,
-        game_id: $this->game->id,
-        team_id: $player_5->fresh()->team_id,
-        challenge_id: $challenge->id,
-        message: 'cccccccccccccccccccccccccccccccccccccccccccccccccc',
-    );
+    stayOnMessage($player_2, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    stayOnMessage($player_3, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+    stayOnMessage($player_4, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+    stayOnMessage($player_5, 'cccccccccccccccccccccccccccccccccccccccccccccccccc');
 
     $challenge->fresh()->end();
 
@@ -89,4 +72,25 @@ it('runs the Stay on Message challenge', function () {
 
     // team 3 had 0/0 and gets 0 points
     expect($team_3->fresh()->score)->toBe(0);
+});
+
+describe('validate stayOnMessage', function () {
+    beforeEach(function () {
+        $this->player = $this->createPlayer()->joinTeam($this->game->teams->first());
+    });
+
+    it('is required', function () {
+        stayOnMessage($this->player, '')
+            ->assertHasErrors(['challenge_properties.string_input' => 'required']);
+    });
+
+    it('must be 50 min', function () {
+        stayOnMessage($this->player, 'a')
+            ->assertHasErrors(['challenge_properties.string_input' => 'min']);
+    });
+
+    it('must be 50 max', function () {
+        stayOnMessage($this->player, str_repeat('a', 51))
+            ->assertHasErrors(['challenge_properties.string_input' => 'max']);
+    });
 });
