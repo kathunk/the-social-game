@@ -13,8 +13,6 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        Verbs::commitImmediately();
-
         $super_admins = [
             ['John Rudolph Drexler', 'john@thunk.dev'],
             ['Jacob Davis', 'jacob@thunk.dev'],

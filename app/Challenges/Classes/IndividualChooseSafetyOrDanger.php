@@ -107,7 +107,7 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
             }
 
             if ($choices[$player->id] === 'danger' && $downvotes_received > 0) {
-                $player->addToScoreHistory($downvotes_received * 2, 'Received downvotes after choosing danger');
+                $player->addToScoreHistory(-$downvotes_received * 2, 'Received downvotes after choosing danger');
             }
 
             if ($choices[$player->id] === 'danger') {
