@@ -1,10 +1,8 @@
 <?php
 
 use App\Challenges\Classes\TeamBrinksmanship;
-use App\Challenges\Classes\TeamPrisonersDilemma;
 use App\Livewire\GameDashboard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Date;
 use Livewire\Features\SupportTesting\Testable as LivewireTest;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
@@ -16,10 +14,6 @@ beforeEach(function () {
     Verbs::commitImmediately();
 
     $challenges = [
-        [
-            'challenge_keys' => [TeamPrisonersDilemma::key()],
-            'duration' => 10,
-        ],
         [
             'challenge_keys' => [TeamBrinksmanship::key()],
             'duration' => 10,
@@ -44,16 +38,7 @@ beforeEach(function () {
     $this->player_3 = $this->createPlayer()->joinTeam($this->team_3);
     $this->player_4 = $this->createPlayer()->joinTeam($this->team_4);
 
-    $end = $this->game->fresh()->currentChallenge->ends_at;
-    Date::setTestNow($end->addSeconds(1));
-    $this->artisan('app:progress-games');
-
     $this->challenge = $this->game->fresh()->currentChallenge;
-
-    expect($this->team_1->fresh()->score)->toBe(20);
-    expect($this->team_2->fresh()->score)->toBe(20);
-    expect($this->team_3->fresh()->score)->toBe(20);
-    expect($this->team_4->fresh()->score)->toBe(20);
 });
 
 function data($team)
@@ -122,7 +107,7 @@ it('requires valid ally code to launch nuclear strikes', function () {
     }
 });
 
-it('gives -10 points to all other teams when a team launches a carpet bomb', function () {
+it('gives -5 points to all other teams when a team launches a carpet bomb', function () {
     foreach ($this->game->teams as $team) {
         $player = $team->players->first();
         $ally_team = ally_team($team);
@@ -153,8 +138,8 @@ it('gives -40 points to ally team when a team launches a nuke ally strike', func
 
     // all teams ally strike, so it's -40 points for each team
     foreach ($this->game->teams as $team) {
-        expect($team->fresh()->score)->toBe(-20);
-        expect($ally_team->fresh()->score)->toBe(-20);
+        expect($team->fresh()->score)->toBe(-40);
+        expect($ally_team->fresh()->score)->toBe(-40);
     }
 });
 

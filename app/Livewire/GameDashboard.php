@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Events\UserSwitchedCurrentGame;
 use App\Models\Game;
 use App\Models\Team;
 use Livewire\Attributes\Computed;
@@ -127,6 +128,16 @@ class GameDashboard extends Component
 
         if ($player_needs_to_join_team) {
             return;
+        }
+
+        if ($this->user->current_game_id !== $this->game->id) {
+            UserSwitchedCurrentGame::fire(
+                user_id: $this->user->id,
+                player_id: $this->player->id,
+                game_id: $this->game->id,
+            );
+
+            Verbs::commit();
         }
 
         $this->initializeChallenge();

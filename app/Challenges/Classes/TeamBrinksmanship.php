@@ -7,7 +7,6 @@ use App\Events\PlayerSubmittedNuclearStrike;
 use App\Models\Player;
 use App\States\GameState;
 use App\States\TeamState;
-use Illuminate\Support\Str;
 
 class TeamBrinksmanship extends BaseChallengeClass
 {
@@ -18,7 +17,7 @@ class TeamBrinksmanship extends BaseChallengeClass
     const DESCRIPTION = "Your team has nuclear codes, and you've been assigned an ally team: {ally_team}.
         You also have a field to input your ally's code.
         When you put in your ally's code, you'll have the option to either:
-        Carpet Bomb (-10 points to all other teams), or Nuke Ally (-40 points to your ally).";
+        Carpet Bomb (-5 points to all teams other than you and your ally), or Nuke Ally (-40 points to your ally).";
 
     const TYPE = 'team';
 
@@ -38,9 +37,7 @@ class TeamBrinksmanship extends BaseChallengeClass
 
     private function generateNuclearCode(): string
     {
-        // @todo decide what we want the nuclear code to be
-        // see app/Rules/NuclearCode.php
-        return strtoupper(Str::random(6));
+        return random_int(100000, 999999);
     }
 
     public function frontendComponent(Player $player): array
@@ -149,9 +146,9 @@ class TeamBrinksmanship extends BaseChallengeClass
             // Apply -10 points to all other teams
             if ($strike_type === 'carpet_bomb') {
                 foreach ($teams as $other_team) {
-                    if ($other_team->id !== $team_id) {
+                    if ($other_team->id !== $team_id && $other_team->id !== $ally_team_id) {
                         $other_team->addToScoreHistory(
-                            -10,
+                            -5,
                             'Carpet bombed by '.TeamState::load($team_id)->name
                         );
                     }
