@@ -13,7 +13,7 @@
                 <div class="flex items-center gap-2">
                     Score: {{ $this->player->hidden_score }}
                     @if ($this->player->hidden_score > $this->player->score)
-                        <flux:text size="lg" class="text-purple-500 dark:text-purple-300">({{ $this->player->hidden_score - $this->player->score }} bonus)</flux:text>
+                        <flux:text size="lg" class="text-purple-500 dark:text-purple-300">({{ $this->player->hidden_score - $this->player->score }} hidden)</flux:text>
                     @endif
                 </div>
             @else
