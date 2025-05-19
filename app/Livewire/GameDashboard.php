@@ -129,9 +129,20 @@ class GameDashboard extends Component
             return;
         }
 
+        $this->initializeChallenge();
+    }
+
+    protected function initializeChallenge()
+    {
         $this->challenge_component = $this->challenge_handler?->frontendComponent($this->player) ?? [];
         $this->challenge_properties = $this->challenge_handler?->propertiesForLivewire($this->player) ?? [];
         $this->challenge_validation_rules = $this->challenge_handler?->validationRulesForLivewire($this->player) ?? [];
+    }
+
+    #[On('challenge-complete')]
+    public function refreshChallenge()
+    {
+        $this->initializeChallenge();
     }
 
     public function joinTeam()
