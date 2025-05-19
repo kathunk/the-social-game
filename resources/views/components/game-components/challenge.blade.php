@@ -19,6 +19,9 @@
                 @case('image')
                     <img src="{{ $element['url'] }}" alt="{{ $element['alt'] }}" class="w-full h-auto rounded-lg my-4" />
                     @break
+                @case('message')
+                    <flux:text class="mt-1">{{ $element['text'] }}</flux:text>
+                    @break
                 @case('divider')
                     <flux:separator class="my-4" />
                     @break

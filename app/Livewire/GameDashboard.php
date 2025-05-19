@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Events\UserSwitchedCurrentGame;
 use App\Models\Game;
 use App\Models\Team;
 use Livewire\Attributes\Computed;
@@ -129,9 +130,30 @@ class GameDashboard extends Component
             return;
         }
 
+        if ($this->user->current_game_id !== $this->game->id) {
+            UserSwitchedCurrentGame::fire(
+                user_id: $this->user->id,
+                player_id: $this->player->id,
+                game_id: $this->game->id,
+            );
+
+            Verbs::commit();
+        }
+
+        $this->initializeChallenge();
+    }
+
+    protected function initializeChallenge()
+    {
         $this->challenge_component = $this->challenge_handler?->frontendComponent($this->player) ?? [];
         $this->challenge_properties = $this->challenge_handler?->propertiesForLivewire($this->player) ?? [];
         $this->challenge_validation_rules = $this->challenge_handler?->validationRulesForLivewire($this->player) ?? [];
+    }
+
+    #[On('challenge-complete')]
+    public function refreshChallenge()
+    {
+        $this->initializeChallenge();
     }
 
     public function joinTeam()
