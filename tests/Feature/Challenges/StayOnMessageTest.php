@@ -1,7 +1,8 @@
 <?php
 
 use App\Challenges\Classes\StayOnMessage;
-use App\Events\PlayerSubmittedStayOnMessage;
+use App\Livewire\GameDashboard;
+use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
@@ -33,13 +34,10 @@ it('runs the Stay on Message challenge', function () {
     $player_6 = $this->createPlayer($team_2)->joinTeam($team_2);
     $player_7 = $this->createPlayer($team_2)->joinTeam($team_2);
 
-    PlayerSubmittedStayOnMessage::fire(
-        player_id: $player_1->id,
-        game_id: $this->game->id,
-        team_id: $player_1->fresh()->team_id,
-        challenge_id: $challenge->id,
-        message: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    );
+    Livewire::actingAs($player_1->user)
+        ->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.string_input', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        ->call('callChallengeAction', 'submitString');
 
     expect($challenge->state()->challenge_data[$player_1->team_id][$player_1->id])
         ->toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
@@ -47,37 +45,25 @@ it('runs the Stay on Message challenge', function () {
     expect($challenge->fresh()->challenge_data[$player_1->team_id][$player_1->id])
         ->toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
 
-    PlayerSubmittedStayOnMessage::fire(
-        player_id: $player_2->id,
-        game_id: $this->game->id,
-        team_id: $player_2->fresh()->team_id,
-        challenge_id: $challenge->id,
-        message: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    );
+    Livewire::actingAs($player_2->user)
+        ->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.string_input', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        ->call('callChallengeAction', 'submitString');
 
-    PlayerSubmittedStayOnMessage::fire(
-        player_id: $player_3->id,
-        game_id: $this->game->id,
-        team_id: $player_3->fresh()->team_id,
-        challenge_id: $challenge->id,
-        message: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-    );
+    Livewire::actingAs($player_3->user)
+        ->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.string_input', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+        ->call('callChallengeAction', 'submitString');
 
-    PlayerSubmittedStayOnMessage::fire(
-        player_id: $player_4->id,
-        game_id: $this->game->id,
-        team_id: $player_4->fresh()->team_id,
-        challenge_id: $challenge->id,
-        message: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-    );
+    Livewire::actingAs($player_4->user)
+        ->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.string_input', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+        ->call('callChallengeAction', 'submitString');
 
-    PlayerSubmittedStayOnMessage::fire(
-        player_id: $player_5->id,
-        game_id: $this->game->id,
-        team_id: $player_5->fresh()->team_id,
-        challenge_id: $challenge->id,
-        message: 'cccccccccccccccccccccccccccccccccccccccccccccccccc',
-    );
+    Livewire::actingAs($player_5->user)
+        ->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.string_input', 'cccccccccccccccccccccccccccccccccccccccccccccccccc')
+        ->call('callChallengeAction', 'submitString');
 
     $challenge->fresh()->end();
 
