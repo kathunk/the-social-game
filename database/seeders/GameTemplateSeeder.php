@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Challenges\Classes\FlattenTheCurve;
 use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualLargestDecreaseQuiz;
@@ -13,11 +12,8 @@ use App\Challenges\Classes\IndividualLowScoreQuiz;
 use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
 use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
 use App\Challenges\Classes\IndividualSpecificScoreQuiz;
-use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\StayOnMessage;
-use App\Challenges\Classes\TeamBounty;
-use App\Challenges\Classes\TeamBrinksmanship;
-use App\Challenges\Classes\TeamPrisonersDilemma;
+use App\Challenges\Classes\TeamHotPotato;
+use App\Challenges\Classes\TheGreatRealignment;
 use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\TeamResignation;
 use App\Modifiers\Classes\TeamSecretAlliance;
@@ -41,35 +37,12 @@ class GameTemplateSeeder extends Seeder
                 'team_names' => ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
                 'challenges' => [
                     [
-                        'challenge_keys' => [PyramidScheme::key()],
-                        'duration' => 420,
+                        'challenge_keys' => [TheGreatRealignment::key()],
+                        'duration' => 10000,
                     ],
                     [
-                        'challenge_keys' => [StayOnMessage::key()],
+                        'challenge_keys' => [TeamHotPotato::key()],
                         'duration' => 60,
-                    ],
-                    [
-                        'challenge_keys' => [TeamPrisonersDilemma::key()],
-                        'duration' => 180,
-                    ],
-                    [
-                        'challenge_keys' => [TeamBounty::key()],
-                        'duration' => 540,
-                    ],
-                    [
-                        'challenge_keys' => [PyramidScheme::key()],
-                        'duration' => 720,
-                    ],
-
-                    // @todo add hot potato
-
-                    [
-                        'challenge_keys' => [TeamBrinksmanship::key()],
-                        'duration' => 120,
-                    ],
-                    [
-                        'challenge_keys' => [FlattenTheCurve::key()],
-                        'duration' => 120,
                     ],
                 ],
                 'modifiers' => [

@@ -16,7 +16,6 @@ return new class extends Migration
             $table->integer('hidden_score')->default(0);
             $table->string('name');
             $table->string('status');
-            $table->foreignId('team_id')->nullable()->constrained('teams');
             $table->timestamp('last_switched_team_at')->nullable();
             $table->timestamps();
         });

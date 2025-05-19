@@ -2,7 +2,11 @@
     <div class="flex flex-col space-y-4">
         <div class="flex space-x-2 items-center">
             <flux:heading size="lg">Challenge</flux:heading>
-            <flux:text variant="subtle">ends {{ $this->challenge->ends_at->diffForHumans() }}</flux:text>
+            @if ($this->challenge->ends_at->isFuture())
+                <flux:text variant="subtle">ends {{ $this->challenge->ends_at->diffForHumans() }}</flux:text>
+            @else
+                <flux:text variant="subtle">ending...</flux:text>
+            @endif
         </div>
         @foreach ($challengeComponent['elements'] as $element)
             @switch($element['type'])
