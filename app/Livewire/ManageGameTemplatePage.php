@@ -42,14 +42,16 @@ class ManageGameTemplatePage extends Component
     public function allChallenges()
     {
         return collect(ChallengeRegistry::getAll())
-            ->filter(fn ($c) => $c::TYPE === $this->gameType);
+            ->filter(fn ($c) => $c::TYPE === $this->gameType)
+            ->sortBy(fn ($c) => $c::NAME);
     }
 
     #[Computed]
     public function allModifiers()
     {
         return collect(ModifierRegistry::getAll())
-            ->filter(fn ($m) => $m::TYPE === $this->gameType);
+            ->filter(fn ($m) => $m::TYPE === $this->gameType)
+            ->sortBy(fn ($m) => $m::NAME);
     }
 
     public function mount($game_template = null)
