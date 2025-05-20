@@ -39,21 +39,21 @@ it('runs individual buddy system', function () {
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('challenge_properties.upvote_player_id', $player_2->id)
         ->set('challenge_properties.downvote_player_id', $player_3->id)
-        ->call('callChallengeAction', 'vote');
+        ->call('callChallengeAction', 'vote')->assertHasNoErrors();
 
     $this->actingAs($player_2->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('challenge_properties.upvote_player_id', $player_1->id)
         ->set('challenge_properties.downvote_player_id', $player_4->id)
-        ->call('callChallengeAction', 'vote');
+        ->call('callChallengeAction', 'vote')->assertHasNoErrors();
 
     $this->actingAs($player_3->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('challenge_properties.upvote_player_id', $player_4->id)
         ->set('challenge_properties.downvote_player_id', $player_1->id)
-        ->call('callChallengeAction', 'vote');
+        ->call('callChallengeAction', 'vote')->assertHasNoErrors();
 
     $challenge->refresh();
     $challenge->end();
