@@ -2,11 +2,11 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
+use App\Events\Traits\HasActivePlayer;
+use App\Events\Traits\HasChallenge;
 use App\Events\Traits\HasGame;
 use App\States\ChallengeState;
-use App\Events\Traits\HasChallenge;
-use App\Events\Traits\HasActivePlayer;
+use Thunk\Verbs\Event;
 
 class PlayerChoseSafetyOrDanger extends Event
 {

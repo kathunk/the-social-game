@@ -20,7 +20,13 @@
                 <div class="flex items-center gap-2">
                     Score: {{ $this->player->score }}
                     @if ($this->showHiddenPoints && $this->player->hidden_score !== $this->player->score)
-                        <flux:text size="lg" class="text-purple-500 dark:text-purple-300">+{{ $this->player->hidden_score - $this->player->score }}</flux:text>
+                        <flux:text size="lg" class="text-purple-500 dark:text-purple-300">
+                            @if ($this->player->hidden_score > $this->player->score)
+                                +{{ $this->player->hidden_score - $this->player->score }}
+                            @else
+                                -{{ $this->player->hidden_score - $this->player->score }}
+                            @endif
+                        </flux:text>
                     @endif
                 </div>
             @endif

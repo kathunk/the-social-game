@@ -90,7 +90,7 @@ abstract class TestCase extends BaseTestCase
             name: $name ?? 'template',
             description: $description ?? 'description',
             pre_game_lobby_message: $pre_game_lobby_message ?? 'pre_game_lobby_message',
-            players_can_join_late: $players_can_join_late ?? false,
+            players_can_join_late: $players_can_join_late ?? true,
             type: $type,
             min_players: $min_players ?? null,
             max_players: $max_players ?? null,

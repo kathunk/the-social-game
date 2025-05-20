@@ -7,7 +7,6 @@ use App\Events\UserGainedMembership;
 use App\Events\UserPromotedToSuperAdmin;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Thunk\Verbs\Facades\Verbs;
 
 class UserSeeder extends Seeder
 {

@@ -2,12 +2,11 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Traits\HasPeckingOrderBallots;
+use App\Events\PlayerChoseSafetyOrDanger;
 use App\Models\Player;
 use App\States\GameState;
-use App\Events\PlayerSubmittedQuizGuess;
-use App\Events\PlayerChoseSafetyOrDanger;
-use App\Challenges\Support\Traits\HasPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {
@@ -83,7 +82,7 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
             choice: 'danger',
         );
     }
-    
+
     public function onChallengeEnded(
         GameState $game_state,
     ) {

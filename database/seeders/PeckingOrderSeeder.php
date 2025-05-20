@@ -7,8 +7,6 @@ use App\Models\Game;
 use App\Models\GameTemplate;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Thunk\Verbs\Facades\Verbs;
 
 class PeckingOrderSeeder extends Seeder
