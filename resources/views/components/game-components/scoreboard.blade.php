@@ -34,7 +34,7 @@
                                         {{ $team->hidden_score }} 
                                         @if ($team->hidden_score !== $team->score)    
                                             <flux:text class="text-purple-500 dark:text-purple-300">
-                                                ({{ $team->hidden_score - $team->score }} bonus)
+                                                ({{ $team->hidden_score - $team->score }} hidden)
                                             </flux:text>
                                         @endif
                                     </div>
@@ -65,7 +65,7 @@
                                         {{ $player->hidden_score }} 
                                         @if ($player->hidden_score > $player->score)
                                             <flux:text class="text-purple-500 dark:text-purple-300">
-                                                ({{ $player->hidden_score - $player->score }} bonus)
+                                                ({{ $player->hidden_score - $player->score }} hidden)
                                             </flux:text>
                                         @endif
                                     </div>

@@ -21,19 +21,31 @@ class UserRequestedToJoinGame extends Event
 
     public function validate()
     {
+        $game = $this->state(GameState::class);
+
         $this->assert(
-            ! $this->state(GameState::class)->user_ids->contains($this->user_id),
+            ! $game->user_ids->contains($this->user_id),
             'User is already a player of this game',
         );
 
         $this->assert(
-            ! $this->state(GameState::class)->rejected_user_ids->contains($this->user_id),
+            ! $game->rejected_user_ids->contains($this->user_id),
             'User is already rejected from this game',
         );
 
         $this->assert(
-            ! $this->state(GameState::class)->unaccepted_user_ids->contains($this->user_id),
+            ! $game->unaccepted_user_ids->contains($this->user_id),
             'User already applied to this game',
+        );
+
+        $this->assert(
+            $game->status === 'upcoming' || $game->players_can_join_late,
+            'Game has already started',
+        );
+
+        $this->assert(
+            $game->template()->max_players === null || $game->player_ids->count() < $game->template()->max_players,
+            'Game is full',
         );
     }
 

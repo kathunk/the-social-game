@@ -7,42 +7,34 @@ use App\Models\Game;
 use App\Models\GameTemplate;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Thunk\Verbs\Facades\Verbs;
 
 class PeckingOrderSeeder extends Seeder
 {
     public function run(): void
     {
-        try {
-            DB::transaction(function () {
-                Verbs::commitImmediately();
+        Verbs::commitImmediately();
 
-                $template = GameTemplate::firstWhere('name', 'Pecking Order');
+        $template = GameTemplate::firstWhere('name', 'Pecking Order');
 
-                $john = User::firstWhere('email', 'john@thunk.dev');
+        $john = User::firstWhere('email', 'john@thunk.dev');
 
-                $game = Game::fromTemplate(
-                    template: $template,
-                    starts_at: now(),
-                    user: $john,
-                    is_public: false,
-                    requires_admin_approval_to_join: false,
-                );
+        $game = Game::fromTemplate(
+            template: $template,
+            starts_at: now(),
+            user: $john,
+            is_public: false,
+            requires_admin_approval_to_join: false,
+        );
 
-                $game->refresh();
+        $game->refresh();
 
-                $users = User::all()->slice(12);
+        $users = User::where('email', '!=', 'john@thunk.dev')->take(11)->get();
 
-                foreach ($users as $user) {
-                    $user->requestToJoinGame($game);
-                }
-
-                $game->start();
-            });
-        } catch (\Exception $e) {
-            Log::error($e);
+        foreach ($users as $user) {
+            $user->requestToJoinGame($game);
         }
+
+        $game->start();
     }
 }

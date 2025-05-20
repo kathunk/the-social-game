@@ -29,6 +29,7 @@ class GameStarted extends Event
     public function applyToGame(GameState $state)
     {
         $state->status = 'active';
+        $state->players_can_join_late = $state->template()->players_can_join_late;
     }
 
     public function handle()

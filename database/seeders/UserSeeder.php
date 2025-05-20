@@ -7,14 +7,11 @@ use App\Events\UserGainedMembership;
 use App\Events\UserPromotedToSuperAdmin;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Thunk\Verbs\Facades\Verbs;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        Verbs::commitImmediately();
-
         $super_admins = [
             ['John Rudolph Drexler', 'john@thunk.dev'],
             ['Jacob Davis', 'jacob@thunk.dev'],

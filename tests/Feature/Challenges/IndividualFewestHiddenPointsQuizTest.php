@@ -44,12 +44,18 @@ it('runs the individual fewest hidden points quiz', function () {
     $this->actingAs($player_1->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.upvote_player_id', $player_2->id)
+        ->set('challenge_properties.downvote_player_id', $player_3->id)
+        ->call('callChallengeAction', 'vote')
         ->set('challenge_properties.guess_player_id', $player_3->id)
         ->call('callChallengeAction', 'guess');
 
     $this->actingAs($player_2->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('challenge_properties.upvote_player_id', $player_1->id)
+        ->set('challenge_properties.downvote_player_id', $player_4->id)
+        ->call('callChallengeAction', 'vote')
         ->set('challenge_properties.guess_player_id', $player_4->id)
         ->call('callChallengeAction', 'guess');
 
@@ -69,8 +75,12 @@ it('runs the individual fewest hidden points quiz', function () {
     expect($player_4->fresh()->score)->toBe(40);
 
     // but with hidden scores included, we see this
-    expect($player_1->fresh()->state()->score(include_hidden: true))->toBe(21);
-    expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(31);
-    expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(30);
-    expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(40);
+    expect($player_1->fresh()->state()->score(include_hidden: true))->toBe(22);
+    expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(32);
+
+    // upvote counted as hidden points
+    expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(29);
+
+    // downvote counted as hidden points
+    expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(39);
 });

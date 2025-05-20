@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
 use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualLargestDecreaseQuiz;
@@ -60,6 +61,12 @@ class GameTemplateSeeder extends Seeder
                 'is_public' => false,
                 'team_names' => [],
                 'challenges' => [
+                    [
+                        'challenge_keys' => [
+                            IndividualChooseSafetyOrDanger::key(),
+                        ],
+                        'duration' => 5,
+                    ],
                     [
                         'challenge_keys' => [
                             IndividualHighScoreQuiz::key(),
