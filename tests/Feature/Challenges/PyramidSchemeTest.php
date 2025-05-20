@@ -56,7 +56,8 @@ it('runs the Pyramid Scheme challenge', function () {
     expect($team_3->fresh()->score)->toBe(0);
 
     // player changes team, but score is not affected
-    swapTeam($player_1->fresh(), $team_3->id);
+    swapTeam($player_1->fresh(), $team_3->id)
+        ->assertHasNoErrors();
 
     expect($team->fresh()->score)->toBe(1);
     expect($team_2->fresh()->score)->toBe(2);

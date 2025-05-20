@@ -64,7 +64,7 @@ function passPotato($player, $recipient): LivewireTest
     return Livewire::actingAs($player->user)
         ->test(GameDashboard::class, ['game' => $player->game->fresh()])
         ->set('challenge_properties.recipient_player_id', $recipient->id)
-        ->call('callChallengeAction', 'passThePotato');
+        ->call('callChallengeAction', 'passThePotato')->assertHasNoErrors();
 }
 
 it('sets the expected challenge data', function () {

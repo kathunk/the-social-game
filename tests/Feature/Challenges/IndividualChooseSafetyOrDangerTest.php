@@ -39,16 +39,16 @@ it('runs individual choose safety or danger', function () {
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('challenge_properties.upvote_player_id', $player_3->id)
         ->set('challenge_properties.downvote_player_id', $player_2->id)
-        ->call('callChallengeAction', 'vote')
-        ->call('callChallengeAction', 'choose_safety');
+        ->call('callChallengeAction', 'vote')->assertHasNoErrors()
+        ->call('callChallengeAction', 'choose_safety')->assertHasNoErrors();
 
     $this->actingAs($player_2->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('challenge_properties.upvote_player_id', $player_4->id)
         ->set('challenge_properties.downvote_player_id', $player_1->id)
-        ->call('callChallengeAction', 'vote')
-        ->call('callChallengeAction', 'choose_danger');
+        ->call('callChallengeAction', 'vote')->assertHasNoErrors()
+        ->call('callChallengeAction', 'choose_danger')->assertHasNoErrors();
 
     $challenge->refresh();
     $challenge->end();

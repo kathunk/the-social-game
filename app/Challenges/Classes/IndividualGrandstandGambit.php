@@ -2,12 +2,11 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Traits\HasPeckingOrderBallots;
+use App\Events\PlayerPlayedGrandstandGambit;
 use App\Models\Player;
 use App\States\GameState;
-use App\Events\PlayerChoseHopeOrFear;
-use App\Events\PlayerPlayedGrandstandGambit;
-use App\Challenges\Support\Traits\HasPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {
@@ -82,13 +81,23 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
 
         $players = $game_state->players();
 
+        $players->each(function ($player) use ($choices) {
+            if ($choices[$player->id] === null) {
+                $player->addToScoreHistory(1, 'Did not take Grandstand Gambit', true);
+
+                return;
+            }
+
+            $player->addToScoreHistory(5, 'Grandstand Gambit');
+        });
+
         $highest_score = $players->max(fn ($p) => $p->score());
 
         $leader_ids = $players->filter(fn ($p) => $p->score() === $highest_score)->pluck('id');
 
         $players->each(function ($player) use ($choices, $leader_ids) {
             if ($choices[$player->id] !== null && $leader_ids->contains($player->id)) {
-                $player->addToScoreHistory(-$player->score(), 'Grandstand Gambit too close to the sun', true);
+                $player->addToScoreHistory(-$player->score(), 'Grandstand Gambit too close to the sun');
             }
         });
     }

@@ -41,22 +41,22 @@ it('runs individual steal the bacon', function () {
     $this->actingAs($player_1->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->call('callChallengeAction', 'steal_the_bacon');
+        ->call('callChallengeAction', 'steal_the_bacon')->assertHasNoErrors();
 
     $this->actingAs($player_2->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->call('callChallengeAction', 'steal_the_bacon');
+        ->call('callChallengeAction', 'steal_the_bacon')->assertHasNoErrors();
 
     $this->actingAs($player_3->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->call('callChallengeAction', 'steal_the_bacon');
+        ->call('callChallengeAction', 'steal_the_bacon')->assertHasNoErrors();
 
     $this->actingAs($player_4->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->call('callChallengeAction', 'steal_the_bacon');
+        ->call('callChallengeAction', 'steal_the_bacon')->assertHasNoErrors();
 
     $challenge->refresh();
     $challenge->end();
@@ -71,7 +71,7 @@ it('runs individual steal the bacon', function () {
     $this->actingAs($player_1->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->call('callChallengeAction', 'steal_the_bacon');
+        ->call('callChallengeAction', 'steal_the_bacon')->assertHasNoErrors();
 
     $challenge->refresh();
     $challenge->end();

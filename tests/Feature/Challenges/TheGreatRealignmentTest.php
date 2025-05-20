@@ -42,7 +42,7 @@ it('runs the Flatten the Curve challenge', function () {
         ->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->assertSee('Currently you carry 50 points')
         ->set('challenge_properties.team_id', $team_2->id)
-        ->call('callChallengeAction', 'swapTeams');
+        ->call('callChallengeAction', 'swapTeams')->assertHasNoErrors();
 
     expect($team->fresh()->score)->toBe(50);
     expect($team_2->fresh()->score)->toBe(-50);
@@ -51,7 +51,7 @@ it('runs the Flatten the Curve challenge', function () {
         ->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->assertSee('Currently you carry -25 points')
         ->set('challenge_properties.team_id', $team_3->id)
-        ->call('callChallengeAction', 'swapTeams');
+        ->call('callChallengeAction', 'swapTeams')->assertHasNoErrors();
 
     expect($team_2->fresh()->score)->toBe(-25);
     expect($team_3->fresh()->score)->toBe(-25);
