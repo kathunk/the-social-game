@@ -49,7 +49,8 @@ it('runs the Stay on Message challenge', function () {
     $player_6 = $this->createPlayer($team_2)->joinTeam($team_2);
     $player_7 = $this->createPlayer($team_2)->joinTeam($team_2);
 
-    stayOnMessage($player_1, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    stayOnMessage($player_1, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        ->assertHasNoErrors();
 
     expect($challenge->state()->challenge_data[$player_1->team_id][$player_1->id])
         ->toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
@@ -57,10 +58,17 @@ it('runs the Stay on Message challenge', function () {
     expect($challenge->fresh()->challenge_data[$player_1->team_id][$player_1->id])
         ->toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
 
-    stayOnMessage($player_2, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
-    stayOnMessage($player_3, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
-    stayOnMessage($player_4, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
-    stayOnMessage($player_5, 'cccccccccccccccccccccccccccccccccccccccccccccccccc');
+    stayOnMessage($player_2, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        ->assertHasNoErrors();
+
+    stayOnMessage($player_3, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+        ->assertHasNoErrors();
+
+    stayOnMessage($player_4, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+        ->assertHasNoErrors();
+
+    stayOnMessage($player_5, 'cccccccccccccccccccccccccccccccccccccccccccccccccc')
+        ->assertHasNoErrors();
 
     $challenge->fresh()->end();
 

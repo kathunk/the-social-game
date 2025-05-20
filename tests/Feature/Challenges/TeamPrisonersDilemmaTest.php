@@ -57,7 +57,7 @@ function playDirtyLW($player): LivewireTest
 {
     return Livewire::actingAs($player->user)
         ->test(GameDashboard::class, ['game' => $player->game->fresh()])
-        ->call('callChallengeAction', 'playDirty');
+        ->call('callChallengeAction', 'playDirty')->assertHasNoErrors();
 }
 
 it('if both teams play dirty they will each get -20 points', function () {

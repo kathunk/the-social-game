@@ -98,7 +98,8 @@ it('requires valid ally code to launch nuclear strikes', function () {
         $ally_team = ally_team($team);
         $ally_code = code($ally_team);
 
-        launchNuclearStrike($player, 'carpet_bomb', $ally_code);
+        launchNuclearStrike($player, 'carpet_bomb', $ally_code)
+            ->assertHasNoErrors();
 
         $team_data = data($team);
 
@@ -113,7 +114,8 @@ it('gives -5 points to all other teams when a team launches a carpet bomb', func
         $ally_team = ally_team($team);
         $ally_code = code($ally_team);
 
-        launchNuclearStrike($player, 'carpet_bomb', $ally_code);
+        launchNuclearStrike($player, 'carpet_bomb', $ally_code)
+            ->assertHasNoErrors();
     }
 
     $this->challenge->end();
@@ -131,7 +133,8 @@ it('gives -40 points to ally team when a team launches a nuke ally strike', func
         $ally_team = ally_team($team);
         $ally_code = code($ally_team);
 
-        launchNuclearStrike($player, 'nuke_ally', $ally_code);
+        launchNuclearStrike($player, 'nuke_ally', $ally_code)
+            ->assertHasNoErrors();
     }
 
     $this->challenge->end();
