@@ -4,23 +4,23 @@ namespace App\Challenges\Classes;
 
 use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 use App\Challenges\Support\Traits\HasPeckingOrderBallots;
-use App\Events\PlayerStoleTheBacon;
+use App\Events\PlayerChoseHopeOrFear;
 use App\Models\Player;
 use App\States\GameState;
 
-class IndividualStealTheBacon extends BaseChallengeClass implements SupportsPeckingOrderBallots
+class IndividualChooseHopeOrFear extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {
     use HasPeckingOrderBallots;
 
-    const NAME = 'Steal the Bacon';
+    const NAME = 'Choose Hope or Fear';
 
-    const DESCRIPTION = 'If you steal the bacon, you will receive -(total number of bacon stealers - {half_player_count}) hidden points. Choose wisely.';
+    const DESCRIPTION = 'Choose hope or fear. If you choose hope, and your score increases, you will gain a hidden point. If you choose fear, and your score decreases, you will lose a hidden point.';
 
     const TYPE = 'individual';
 
     public static function key(): string
     {
-        return 'individual_steal_the_bacon';
+        return 'individual_choose_hope_or_fear';
     }
 
     public function dataArrayForState(): array
@@ -40,20 +40,15 @@ class IndividualStealTheBacon extends BaseChallengeClass implements SupportsPeck
         $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
         $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
 
-        $player_count = $players->count();
-
-        $description = strtr(self::DESCRIPTION, [
-            '{half_player_count}' => ceil($player_count / 2),
-        ]);
-
         return $this->form()
             ->title(self::NAME)
-            ->subtitle($description)
+            ->subtitle(self::DESCRIPTION)
             ->when($has_chosen, fn ($form) => $form->subtitle('You have made your choice.')
             )
             ->when(! $has_chosen, fn ($form) => $form
                 ->buttonGroup()
-                ->button('Steal the Bacon', 'steal_the_bacon')
+                ->button('Hope', 'choose_hope')
+                ->button('Fear', 'choose_fear')
                 ->endGroup()
             )
             ->when(! $has_chosen || ! $has_voted, fn ($form) => $form->divider()
@@ -68,12 +63,23 @@ class IndividualStealTheBacon extends BaseChallengeClass implements SupportsPeck
             ->build();
     }
 
-    public function steal_the_bacon(Player $player, array $params)
+    public function choose_hope(Player $player, array $params)
     {
-        PlayerStoleTheBacon::fire(
+        PlayerChoseHopeOrFear::fire(
             player_id: $player->id,
             challenge_id: $this->challenge->id,
             game_id: $this->challenge->game_id,
+            choice: 'hope',
+        );
+    }
+
+    public function choose_fear(Player $player, array $params)
+    {
+        PlayerChoseHopeOrFear::fire(
+            player_id: $player->id,
+            challenge_id: $this->challenge->id,
+            game_id: $this->challenge->game_id,
+            choice: 'fear',
         );
     }
 
@@ -83,12 +89,28 @@ class IndividualStealTheBacon extends BaseChallengeClass implements SupportsPeck
         $this->applyVotesToScore($game_state);
 
         $choices = $this->challenge_state->challenge_data['choices'];
-        $player_count = $game_state->player_ids->count();
-        $number_of_stealers = collect($this->challenge_state->challenge_data['choices'])->filter(fn ($choice) => $choice === 'steal')->count();
 
-        $game_state->players()->each(function ($player) use ($choices, $number_of_stealers, $player_count) {
-            if ($choices[$player->id] === 'steal') {
-                $player->addToScoreHistory(-($number_of_stealers - ceil($player_count / 2)), 'Stole the Bacon');
+        $votes = $this->challenge_state->challenge_data['votes'];
+
+        $players = $game_state->players();
+
+        $players->each(function ($player) use ($votes, $choices) {
+            $upvotes_received = collect($votes)
+                ->filter(fn ($v) => $v['upvote_player_id'] === $player->id)
+                ->count();
+
+            $downvotes_received = collect($votes)
+                ->filter(fn ($v) => $v['downvote_player_id'] === $player->id)
+                ->count();
+
+            $score_change = $upvotes_received - $downvotes_received;
+
+            if ($choices[$player->id] === 'hope' && $score_change > 0) {
+                $player->addToScoreHistory(1, 'Chose hope', true);
+            }
+
+            if ($choices[$player->id] === 'fear' && $score_change < 0) {
+                $player->addToScoreHistory(1, 'Chose fear', true);
             }
         });
     }

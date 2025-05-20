@@ -2,12 +2,11 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Traits\HasPeckingOrderBallots;
+use App\Events\PlayerChosePointsOrHiddenPoints;
 use App\Models\Player;
 use App\States\GameState;
-use App\Events\PlayerChoseSafetyOrDanger;
-use App\Events\PlayerChosePointsOrHiddenPoints;
-use App\Challenges\Support\Traits\HasPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 class IndividualChoosePointsOrHidden extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {

@@ -1,7 +1,7 @@
 <?php
 
-use Thunk\Verbs\Facades\Verbs;
 use App\Challenges\Classes\IndividualFirstShallBeLast;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

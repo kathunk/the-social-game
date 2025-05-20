@@ -2,10 +2,10 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Traits\HasPeckingOrderBallots;
 use App\Models\Player;
 use App\States\GameState;
-use App\Challenges\Support\Traits\HasPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {
