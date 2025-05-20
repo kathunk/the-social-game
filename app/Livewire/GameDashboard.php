@@ -113,6 +113,10 @@ class GameDashboard extends Component
     #[Computed]
     public function showScoreboard()
     {
+        if (! $this->challenge_handler) {
+            return true;
+        }
+
         return ! $this->challenge_handler::HIDE_SCOREBOARD;
     }
 
