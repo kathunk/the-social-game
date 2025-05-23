@@ -1,9 +1,12 @@
 <flux:card>
     <div class="flex flex-col space-y-4">
-        <div class="flex space-x-2 items-center">
+        <div class="flex space-x-2 items-baseline">
             <flux:heading size="lg">Challenge</flux:heading>
             @if ($this->challenge->ends_at->isFuture())
-                <flux:text variant="subtle">ends {{ $this->challenge->ends_at->diffForHumans() }}</flux:text>
+                <flux:text variant="subtle" class="flex items-baseline gap-1">
+                    ends in
+                    <x-game-components.countdown-timer :ends_at="$this->challenge->ends_at->toIsoString()" />
+                </flux:text>
             @else
                 <flux:text variant="subtle">ending...</flux:text>
             @endif

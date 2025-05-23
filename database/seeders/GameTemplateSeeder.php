@@ -65,7 +65,7 @@ class GameTemplateSeeder extends Seeder
                         'challenge_keys' => [
                             IndividualChooseSafetyOrDanger::key(),
                         ],
-                        'duration' => 1,
+                        'duration' => 10,
                     ],
                     [
                         'challenge_keys' => [
@@ -74,15 +74,15 @@ class GameTemplateSeeder extends Seeder
                             IndividualSpecificScoreQuiz::key(),
                             IndividualNoScoreChangeQuiz::key(),
                         ],
-                        'duration' => 1,
+                        'duration' => 10,
                     ],
                     [
                         'challenge_keys' => [IndividualHighScoreQuiz::key(), IndividualLargestDecreaseQuiz::key(), IndividualLargestIncreaseQuiz::key()],
-                        'duration' => 1,
+                        'duration' => 10,
                     ],
                     [
                         'challenge_keys' => [IndividualMostHiddenPointQuiz::key(), IndividualFewestHiddenPointQuiz::key()],
-                        'duration' => 1,
+                        'duration' => 10,
                     ],
                 ],
                 'modifiers' => [],

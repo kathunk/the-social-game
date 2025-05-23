@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
-use App\Models\Game;
-use Thunk\Verbs\Facades\Verbs;
 use App\Events\GameUpdatedForReverb;
-use Illuminate\Foundation\Queue\Queueable;
+use App\Models\Game;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+use Thunk\Verbs\Facades\Verbs;
 
 class StartGameIfReady implements ShouldQueue
 {
@@ -15,9 +15,7 @@ class StartGameIfReady implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Game $game)
-    {
-    }
+    public function __construct(public Game $game) {}
 
     /**
      * Execute the job.
