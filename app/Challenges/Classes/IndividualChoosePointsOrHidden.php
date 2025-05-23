@@ -101,8 +101,14 @@ class IndividualChoosePointsOrHidden extends BaseChallengeClass implements Suppo
         $choices = $this->challenge_state->challenge_data['choices'];
         $number_of_players_who_chose_points = collect($choices)->filter(fn ($choice) => $choice === 'points')->count();
         $number_of_players_who_chose_hidden = collect($choices)->filter(fn ($choice) => $choice === 'hidden')->count();
-        $points_per_player = floor($points / $number_of_players_who_chose_points);
-        $hidden_points_per_player = floor($hidden_points / $number_of_players_who_chose_hidden);
+        
+        // Handle cases where no players chose either option
+        $points_per_player = $number_of_players_who_chose_points > 0 
+            ? floor($points / $number_of_players_who_chose_points)
+            : 0;
+        $hidden_points_per_player = $number_of_players_who_chose_hidden > 0
+            ? floor($hidden_points / $number_of_players_who_chose_hidden)
+            : 0;
 
         $game_state->players()->each(function ($player) use ($choices, $points_per_player, $hidden_points_per_player) {
             if ($choices[$player->id] === 'points') {
