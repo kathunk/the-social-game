@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Events\GameUpdated;
+use App\Events\GameUpdatedForReverb;
 use App\Models\Challenge;
 use App\Models\Game;
 use Illuminate\Console\Command;
@@ -71,24 +72,33 @@ class ProgressGames extends Command
                 }
 
                 $game->fresh()->start();
+
+                Verbs::commit();
+                event(new GameUpdatedForReverb($game->fresh()));
             });
 
         Challenge::where('status', 'active')
             ->where('ends_at', '<=', now())
             ->each(function (Challenge $challenge) {
                 $challenge->end();
+                Verbs::commit();
+                event(new GameUpdatedForReverb($challenge->game->fresh()));
             });
 
         Challenge::where('status', 'upcoming')
             ->where('starts_at', '<=', now())
             ->each(function (Challenge $challenge) {
                 $challenge->start();
+                Verbs::commit();
+                event(new GameUpdatedForReverb($challenge->game->fresh()));
             });
 
         Game::where('status', 'active')
             ->where('ends_at', '<=', now())
             ->each(function (Game $game) {
                 $game->end();
+                Verbs::commit();
+                event(new GameUpdatedForReverb($game->fresh()));
             });
     }
 }
