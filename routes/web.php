@@ -17,6 +17,10 @@ Route::get('/', function () {
     return view('welcome');
 })->name('dashboard');
 
+Route::missing(new MissingGameHandler)->group(function () {
+    Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
+});
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -28,7 +32,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/create-game', CreateGame::class)->name('create-game');
 
     Route::missing(new MissingGameHandler)->group(function () {
-        Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
         Route::get('/games/{game}/dashboard', GameDashboard::class)->name('game-dashboard');
         Route::get('/games/{game}/teams/{team}', TeamPage::class)->name('teams.show');
         Route::get('/games/{game}/players/{player}', PlayerPage::class)->name('players.show');
