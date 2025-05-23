@@ -16,6 +16,7 @@ use App\Support\HtmlTransformer;
 use Flux\Flux;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -340,6 +341,12 @@ class PreGameLobby extends Component
         Verbs::commit();
 
         return redirect()->route('dashboard');
+    }
+
+    #[On('echo-private:games.{game.id},GameUpdatedForReverb')]
+    public function refreshGame()
+    {
+        return redirect()->route('pre-game-lobby', ['game' => $this->game]);
     }
 
     public function render()

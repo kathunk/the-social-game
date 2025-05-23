@@ -264,6 +264,12 @@ class GameDashboard extends Component
             : redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
+    #[On('echo-private:games.{game.id},GameUpdatedForReverb')]
+    public function refreshGame()
+    {
+        return redirect()->route('game-dashboard', ['game' => $this->game]);
+    }
+
     public function render()
     {
         return view('livewire.game-dashboard');
