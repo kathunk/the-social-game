@@ -2,14 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Game;
-use App\Models\Challenge;
 use App\Events\GameUpdated;
-use App\Jobs\StartGameIfReady;
-use Thunk\Verbs\Facades\Verbs;
 use App\Jobs\ProgressChallenge;
+use App\Jobs\StartGameIfReady;
+use App\Models\Challenge;
+use App\Models\Game;
 use Illuminate\Console\Command;
-use App\Events\GameUpdatedForReverb;
+use Thunk\Verbs\Facades\Verbs;
 
 class ProgressGames extends Command
 {

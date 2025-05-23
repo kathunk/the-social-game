@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
-use App\Models\Challenge;
-use Thunk\Verbs\Facades\Verbs;
 use App\Events\GameUpdatedForReverb;
-use Illuminate\Foundation\Queue\Queueable;
+use App\Models\Challenge;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+use Thunk\Verbs\Facades\Verbs;
 
 class ProgressChallenge implements ShouldQueue
 {
@@ -15,9 +15,7 @@ class ProgressChallenge implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Challenge $challenge)
-    {
-    }
+    public function __construct(public Challenge $challenge) {}
 
     /**
      * Execute the job.
@@ -34,7 +32,7 @@ class ProgressChallenge implements ShouldQueue
             Verbs::commit();
         }
 
-        if (!$next_challenge) {
+        if (! $next_challenge) {
             $this->challenge->game->end();
             Verbs::commit();
         }
