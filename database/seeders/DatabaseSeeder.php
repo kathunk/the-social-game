@@ -12,9 +12,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             GameTemplateSeeder::class,
             UserSeeder::class,
-            Laracon2025Seeder::class,
+            // Laracon2025Seeder::class,
             PeckingOrderSeeder::class,
-            // Laracon2025TeamPlayerSeeder::class,
         ]);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Events\GameUpdated;
+use App\Jobs\ProgressChallenge;
+use App\Jobs\StartGameIfReady;
 use App\Models\Challenge;
 use App\Models\Game;
 use Illuminate\Console\Command;
@@ -66,29 +68,17 @@ class ProgressGames extends Command
                         is_public: $game->is_public,
                         requires_admin_approval_to_join: $game->requires_admin_approval_to_join,
                     );
-
-                    Verbs::commit();
                 }
 
-                $game->fresh()->start();
+                Verbs::commit();
+
+                StartGameIfReady::dispatch($game->fresh());
             });
 
         Challenge::where('status', 'active')
             ->where('ends_at', '<=', now())
             ->each(function (Challenge $challenge) {
-                $challenge->end();
-            });
-
-        Challenge::where('status', 'upcoming')
-            ->where('starts_at', '<=', now())
-            ->each(function (Challenge $challenge) {
-                $challenge->start();
-            });
-
-        Game::where('status', 'active')
-            ->where('ends_at', '<=', now())
-            ->each(function (Game $game) {
-                $game->end();
+                ProgressChallenge::dispatch($challenge);
             });
     }
 }

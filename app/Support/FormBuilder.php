@@ -157,16 +157,6 @@ class FormBuilder
         return $this;
     }
 
-    public function message(string $text): static
-    {
-        $this->elements[] = [
-            'type' => 'message',
-            'text' => $text,
-        ];
-
-        return $this;
-    }
-
     public function table(array $rows): static
     {
         $this->elements[] = [
@@ -222,8 +212,11 @@ class FormBuilder
             placeholder: 'Select a team...',
             options: $teams->mapWithKeys(fn ($team) => [$team->id => $team->name])->toArray(),
             property_name: 'team_id',
-            validation_rules: 'required',
-            validation_messages: ['required' => 'Team is required'],
+            validation_rules: 'required|exists:teams,id',
+            validation_messages: [
+                'required' => 'Team is required',
+                'exists' => 'Team is invalid',
+            ],
         );
 
         $this->buttonGroup();

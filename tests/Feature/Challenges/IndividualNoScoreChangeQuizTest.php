@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;
@@ -8,12 +8,12 @@ use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-it('runs the individual high score quiz', function () {
+it('runs the individual no score change quiz', function () {
     Verbs::commitImmediately();
 
     $challenges = [
         [
-            'challenge_keys' => [IndividualHighScoreQuiz::key()],
+            'challenge_keys' => [IndividualNoScoreChangeQuiz::key()],
             'duration' => 10,
         ],
     ];
@@ -39,24 +39,24 @@ it('runs the individual high score quiz', function () {
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('challenge_properties.upvote_player_id', $player_3->id)
         ->set('challenge_properties.downvote_player_id', $player_2->id)
-        ->call('callChallengeAction', 'vote')
-        ->set('challenge_properties.guess_player_id', $player_1->id)
-        ->call('callChallengeAction', 'guess');
+        ->call('callChallengeAction', 'vote')->assertHasNoErrors()
+        ->set('challenge_properties.guess_player_id', $player_3->id)
+        ->call('callChallengeAction', 'guess')->assertHasNoErrors();
 
     $this->actingAs($player_2->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('challenge_properties.upvote_player_id', $player_1->id)
-        ->set('challenge_properties.downvote_player_id', $player_4->id)
-        ->call('callChallengeAction', 'vote')
-        ->set('challenge_properties.guess_player_id', $player_3->id)
-        ->call('callChallengeAction', 'guess');
+        ->set('challenge_properties.downvote_player_id', $player_3->id)
+        ->call('callChallengeAction', 'vote')->assertHasNoErrors()
+        ->set('challenge_properties.guess_player_id', $player_4->id)
+        ->call('callChallengeAction', 'guess')->assertHasNoErrors();
 
     $this->actingAs($player_3->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('challenge_properties.guess_player_id', $player_4->id)
-        ->call('callChallengeAction', 'guess');
+        ->set('challenge_properties.guess_player_id', $player_1->id)
+        ->call('callChallengeAction', 'guess')->assertHasNoErrors();
 
     $challenge->refresh();
     $challenge->end();
@@ -64,12 +64,12 @@ it('runs the individual high score quiz', function () {
     // visible scores show this
     expect($player_1->fresh()->score)->toBe(1);
     expect($player_2->fresh()->score)->toBe(-1);
-    expect($player_3->fresh()->score)->toBe(1);
-    expect($player_4->fresh()->score)->toBe(-1);
+    expect($player_3->fresh()->score)->toBe(0);
+    expect($player_4->fresh()->score)->toBe(0);
 
     // but with hidden scores included, we see this
     expect($player_1->fresh()->state()->score(include_hidden: true))->toBe(2);
     expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(0);
-    expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(1);
-    expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(-1);
+    expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(0);
+    expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(0);
 });

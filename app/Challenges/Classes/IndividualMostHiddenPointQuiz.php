@@ -14,7 +14,7 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
 
     const NAME = "Teacher's pet";
 
-    const DESCRIPTION = 'Guess which player had the most hidden points at the beginning of this challenge. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'All votes from this challenge will count toward hidden points. Guess which player will have the most hidden points at the end of the challenge. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
 
     const TYPE = 'individual';
 
@@ -85,7 +85,27 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
     public function onChallengeEnded(
         GameState $game_state,
     ) {
-        $this->applyVotesToScore($game_state);
+        $votes = $this->challenge_state->challenge_data['votes'];
+
+        $players = $game_state->players();
+
+        $players->each(function ($player) use ($votes) {
+            $upvotes_received = collect($votes)
+                ->filter(fn ($v) => $v['upvote_player_id'] === $player->id)
+                ->count();
+
+            $downvotes_received = collect($votes)
+                ->filter(fn ($v) => $v['downvote_player_id'] === $player->id)
+                ->count();
+
+            if ($upvotes_received > 0) {
+                $player->addToScoreHistory($upvotes_received, 'received hidden upvotes', true);
+            }
+
+            if ($downvotes_received > 0) {
+                $player->addToScoreHistory(-$downvotes_received, 'received hidden downvotes', true);
+            }
+        });
 
         $hidden_points = $game_state->players()->mapWithKeys(fn ($p) => [$p->id => $p->score(include_hidden: true) - $p->score()]
         );

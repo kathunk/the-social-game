@@ -135,9 +135,31 @@ class Game extends Model
 
         $challenges = $this->gameTemplate->challenges;
 
+        $used_challenge_keys = [];
+        $mapped_challenges = [];
+
+        foreach ($challenges as $challenge) {
+            $available = array_values(array_diff($challenge['challenge_keys'], $used_challenge_keys));
+
+            // If there's at least one key that hasn't been used, pick one at random
+            if (! empty($available)) {
+                $chosen_key = $available[array_rand($available)];
+            } else {
+                // Fall back to a random key from the original list
+                $chosen_key = $challenge['challenge_keys'][array_rand($challenge['challenge_keys'])];
+            }
+
+            $used_challenge_keys[] = $chosen_key;
+
+            $mapped_challenges[] = [
+                'challenge_keys' => [$chosen_key],
+                'duration' => $challenge['duration'],
+            ];
+        }
+
         $next_challenge_starts_at = $this->starts_at->copy();
 
-        $challenges_with_times = collect($challenges)->reduce(function ($carry, $challenge) use ($next_challenge_starts_at) {
+        $challenges_with_times = collect($mapped_challenges)->reduce(function ($carry, $challenge) use ($next_challenge_starts_at) {
             if (empty($carry)) {
                 $starts_at = $next_challenge_starts_at;
             } else {

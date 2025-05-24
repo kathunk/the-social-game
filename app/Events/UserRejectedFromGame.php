@@ -59,5 +59,10 @@ class UserRejectedFromGame extends Event
             'decided_by_id' => $this->admin_id,
             'decided_at' => now(),
         ]);
+
+        $this->user()->update([
+            'current_game_id' => null,
+            'current_player_id' => null,
+        ]);
     }
 }

@@ -9,8 +9,6 @@ use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-// @todo update this test to use Livewire
-
 beforeEach(function () {
     Verbs::fake();
     Verbs::commitImmediately();
@@ -95,7 +93,7 @@ it('only awards points when a team recruits their bounty', function () {
             ->whereIn('id', $bounty_player_ids)
             ->first();
 
-        $bounty_player->joinTeam($team);
+        swapTeam($bounty_player, $team->id);
         expect($bounty_player->refresh()->team_id)->toBe($assigned_team_id);
 
         // assigned team gets 15 points for recruiting their bounty
@@ -108,7 +106,7 @@ it('only awards points when a team recruits their bounty', function () {
             ->whereNotIn('id', $bounty_player_ids)
             ->first();
 
-        $non_bounty_player->joinTeam($team);
+        swapTeam($non_bounty_player, $team->id);
         expect($non_bounty_player->refresh()->team_id)->toBe($assigned_team_id);
 
         // assigned team does not get points for recruiting a non-bounty player
@@ -120,11 +118,27 @@ it('players may only switch teams once during this challenge', function () {
     $player = $this->player_1;
 
     // First team switch should work
-    $player->fresh()->joinTeam($this->team_2);
+    swapTeam($player->fresh(), $this->team_2->id);
 
-    expect(fn () => $player->fresh()->joinTeam($this->team_3))->toThrow(Exception::class);
+    expect(fn () => swapTeam($player->fresh(), $this->team_3->id))->toThrow(Exception::class);
 
     expect($this->challenge->fresh()->challenge_data['swapper_ids'])->toContain($player->id);
 
     expect($this->challenge->handler()->playerCanSwapTeams($player->fresh()))->toBeFalse();
+});
+
+describe('validate swapTeam', function () {
+    it('team_id is required', function () {
+        $player = $this->player_1;
+
+        swapTeam($player->fresh(), '')
+            ->assertHasErrors(['challenge_properties.team_id' => 'required']);
+    });
+
+    it('team_id must be a valid team', function () {
+        $player = $this->player_1;
+
+        swapTeam($player->fresh(), 999)
+            ->assertHasErrors(['challenge_properties.team_id' => 'exists']);
+    });
 });

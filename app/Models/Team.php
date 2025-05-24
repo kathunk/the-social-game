@@ -48,4 +48,12 @@ class Team extends Model
     {
         return in_array($this->name, ['PHP']);
     }
+
+    public function updateModelWithStateData()
+    {
+        $this->update([
+            'score' => $this->state()->score(),
+            'hidden_score' => $this->state()->score(include_hidden: true),
+        ]);
+    }
 }

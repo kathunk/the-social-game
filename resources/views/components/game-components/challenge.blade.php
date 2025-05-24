@@ -1,8 +1,15 @@
 <x-card>
     <div class="flex flex-col space-y-4">
-        <div class="flex space-x-2 items-center">
+        <div class="flex space-x-2 items-baseline">
             <flux:heading size="lg">Challenge</flux:heading>
-            <flux:text variant="subtle">ends {{ $this->challenge->ends_at->diffForHumans() }}</flux:text>
+            @if ($this->challenge->ends_at->isFuture())
+                <flux:text variant="subtle" class="flex items-baseline gap-1">
+                    ends in
+                    <x-game-components.countdown-timer :ends_at="$this->challenge->ends_at->toIsoString()" />
+                </flux:text>
+            @else
+                <flux:text variant="subtle">ending...</flux:text>
+            @endif
         </div>
         @foreach ($challengeComponent['elements'] as $element)
             @switch($element['type'])
@@ -14,6 +21,9 @@
                     @break
                 @case('image')
                     <img src="{{ $element['url'] }}" alt="{{ $element['alt'] }}" class="w-full h-auto rounded-lg my-4" />
+                    @break
+                @case('message')
+                    <flux:text class="mt-1">{{ $element['text'] }}</flux:text>
                     @break
                 @case('divider')
                     <flux:separator class="my-4" />

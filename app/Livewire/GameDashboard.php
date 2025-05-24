@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Events\UserSwitchedCurrentGame;
 use App\Models\Game;
 use App\Models\Team;
 use Livewire\Attributes\Computed;
@@ -41,7 +42,9 @@ class GameDashboard extends Component
     #[Computed]
     public function players()
     {
-        return $this->game->players->sortByDesc('score');
+        return $this->game->status === 'ended'
+            ? $this->game->players->sortByDesc('score')
+            : $this->game->players->sortByDesc('hidden_score');
     }
 
     #[Computed]
@@ -109,6 +112,16 @@ class GameDashboard extends Component
         return $this->game->modifiers;
     }
 
+    #[Computed]
+    public function showScoreboard()
+    {
+        if (! $this->challenge_handler) {
+            return true;
+        }
+
+        return ! $this->challenge_handler::HIDE_SCOREBOARD;
+    }
+
     public function mount(Game $game)
     {
         $this->game = $game;
@@ -123,9 +136,30 @@ class GameDashboard extends Component
             return;
         }
 
+        if ($this->user->current_game_id !== $this->game->id) {
+            UserSwitchedCurrentGame::fire(
+                user_id: $this->user->id,
+                player_id: $this->player->id,
+                game_id: $this->game->id,
+            );
+
+            Verbs::commit();
+        }
+
+        $this->initializeChallenge();
+    }
+
+    protected function initializeChallenge()
+    {
         $this->challenge_component = $this->challenge_handler?->frontendComponent($this->player) ?? [];
         $this->challenge_properties = $this->challenge_handler?->propertiesForLivewire($this->player) ?? [];
         $this->challenge_validation_rules = $this->challenge_handler?->validationRulesForLivewire($this->player) ?? [];
+    }
+
+    #[On('challenge-complete')]
+    public function refreshChallenge()
+    {
+        $this->initializeChallenge();
     }
 
     public function joinTeam()
@@ -230,6 +264,12 @@ class GameDashboard extends Component
             || $response instanceof \Livewire\Features\SupportRedirects\Redirector
             ? $response
             : redirect()->route('game-dashboard', ['game' => $this->game]);
+    }
+
+    #[On('echo-private:games.{game.id},GameUpdatedForReverb')]
+    public function refreshGame()
+    {
+        return redirect()->route('game-dashboard', ['game' => $this->game]);
     }
 
     public function render()

@@ -83,14 +83,16 @@
         <x-card x-data="{editGameSettings: false}">
             <flux:heading class="mb-4">Game Settings</flux:heading>
             <div x-show="!editGameSettings" class="flex gap-2">
-                <flux:button
-                    variant="primary"
-                    wire:click="startGame"
-                    icon="rocket-launch"
-                    :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers"
-                >
-                    Start Game Now
-                </flux:button>
+                @unless ($this->hasTooManyPlayers || $this->hasTooFewPlayers)
+                    <flux:button
+                        variant="primary"
+                        wire:click="startGame"
+                        icon="rocket-launch"
+                        :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers"
+                    >
+                        Start Game Now
+                    </flux:button>
+                @endunless
                 <flux:button @click="editGameSettings = true" icon="pencil">Edit</flux:button>
             </div>
             <div x-show="editGameSettings">

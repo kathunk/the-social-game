@@ -2,15 +2,17 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Support\Traits\HasTeamPairs;
 use App\Events\PlayerSubmittedPlayDirty;
 use App\Models\Player;
 use App\Models\Team;
 use App\States\GameState;
 use App\States\TeamState;
-use Illuminate\Support\Collection;
 
 class TeamPrisonersDilemma extends BaseChallengeClass
 {
+    use HasTeamPairs;
+
     const NAME = "Prisoner's Dilemma";
 
     const DESCRIPTION = '{player_team} (your team) is in a showdown with {paired_team}.
@@ -28,30 +30,16 @@ class TeamPrisonersDilemma extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        $teams = $this->challenge_state->game()->teams()->sortByDesc('score')->pluck('id');
-
-        $paired_teams = $this->pair($teams);
+        $teams = $this->challenge_state->game()
+            ->teams()
+            ->sortByDesc(fn ($team) => $team?->score())
+            ->mapWithKeys(fn ($t) => [$t->id => []])
+            ->toArray();
 
         return [
-            'team_voters' => $this->challenge_state->game()->teams()->mapWithKeys(fn ($t) => [$t->id => []])->toArray(),
-            'team_pairs' => $paired_teams,
+            'team_voters' => $teams,
+            'team_pairs' => $teams,
         ];
-    }
-
-    public function pair(Collection $teams): array
-    {
-        // @todo in the future: account for scenarios where there is an odd number of teams
-        $paired_teams = collect();
-
-        while ($teams->count() >= 2) {
-            [$team1, $team2] = $teams->splice(0, 2);
-
-            $paired_teams
-                ->put($team1, $team2)
-                ->put($team2, $team1);
-        }
-
-        return $paired_teams->toArray();
     }
 
     public function frontendComponent(Player $player): array
@@ -87,6 +75,15 @@ class TeamPrisonersDilemma extends BaseChallengeClass
             challenge_id: $this->challenge->id,
             team_id: $player->team_id,
         );
+    }
+
+    public function onChallengeStarted(GameState $game_state)
+    {
+        $teams = collect($this->challenge_state->challenge_data['team_pairs']);
+
+        $paired_teams = $this->pair($teams)->toArray();
+
+        return $this->challenge_state->challenge_data['team_pairs'] = $paired_teams;
     }
 
     public function onChallengeEnded(GameState $game_state)

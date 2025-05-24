@@ -160,9 +160,9 @@ class User extends Authenticatable
             game_id: $game->id,
         );
 
-        if ($game->requires_admin_approval_to_join) {
-            Verbs::commit();
+        Verbs::commit();
 
+        if ($game->requires_admin_approval_to_join) {
             return $this->fresh();
         }
 

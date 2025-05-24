@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
 use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualLargestDecreaseQuiz;
@@ -12,8 +13,8 @@ use App\Challenges\Classes\IndividualLowScoreQuiz;
 use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
 use App\Challenges\Classes\IndividualNoScoreChangeQuiz;
 use App\Challenges\Classes\IndividualSpecificScoreQuiz;
-use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\TeamBrinksmanship;
+use App\Challenges\Classes\TeamHotPotato;
 use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\TeamResignation;
 use App\Modifiers\Classes\TeamSecretAlliance;
@@ -37,11 +38,11 @@ class GameTemplateSeeder extends Seeder
                 'team_names' => ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
                 'challenges' => [
                     [
-                        'challenge_keys' => [PyramidScheme::key()],
-                        'duration' => 1,
+                        'challenge_keys' => [TeamBrinksmanship::key()],
+                        'duration' => 10000,
                     ],
                     [
-                        'challenge_keys' => [TeamBounty::key()],
+                        'challenge_keys' => [TeamHotPotato::key()],
                         'duration' => 60,
                     ],
                 ],
@@ -62,20 +63,26 @@ class GameTemplateSeeder extends Seeder
                 'challenges' => [
                     [
                         'challenge_keys' => [
+                            IndividualChooseSafetyOrDanger::key(),
+                        ],
+                        'duration' => 10,
+                    ],
+                    [
+                        'challenge_keys' => [
                             IndividualHighScoreQuiz::key(),
                             IndividualLowScoreQuiz::key(),
                             IndividualSpecificScoreQuiz::key(),
                             IndividualNoScoreChangeQuiz::key(),
                         ],
-                        'duration' => 5,
+                        'duration' => 10,
                     ],
                     [
                         'challenge_keys' => [IndividualHighScoreQuiz::key(), IndividualLargestDecreaseQuiz::key(), IndividualLargestIncreaseQuiz::key()],
-                        'duration' => 5,
+                        'duration' => 10,
                     ],
                     [
                         'challenge_keys' => [IndividualMostHiddenPointQuiz::key(), IndividualFewestHiddenPointQuiz::key()],
-                        'duration' => 5,
+                        'duration' => 10,
                     ],
                 ],
                 'modifiers' => [],

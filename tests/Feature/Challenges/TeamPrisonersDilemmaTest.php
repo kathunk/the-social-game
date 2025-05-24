@@ -1,13 +1,13 @@
 <?php
 
 use App\Challenges\Classes\TeamPrisonersDilemma;
-use App\Events\PlayerSubmittedPlayDirty;
-use Illuminate\Support\Facades\Date;
+use App\Livewire\GameDashboard;
+use App\Models\Challenge;
+use Livewire\Features\SupportTesting\Testable as LivewireTest;
+use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
-
-// @todo update this test to use Livewire
 
 beforeEach(function () {
     Verbs::fake();
@@ -52,46 +52,35 @@ beforeEach(function () {
     incrementScore(team: $this->team_4, points: 10);
 });
 
-function playDirty($player)
+/* cannot redeclare "playDirty" method, so appending LW */
+function playDirtyLW($player): LivewireTest
 {
-    PlayerSubmittedPlayDirty::fire(
-        player_id: $player->id,
-        game_id: $player->game_id,
-        challenge_id: $player->game->fresh()->currentChallenge->id,
-        team_id: $player->team_id,
-    );
+    return Livewire::actingAs($player->user)
+        ->test(GameDashboard::class, ['game' => $player->game->fresh()])
+        ->call('callChallengeAction', 'playDirty')->assertHasNoErrors();
 }
 
 it('if both teams play dirty they will each get -20 points', function () {
-    playDirty($this->player_1);
-    playDirty($this->player_3);
+    playDirtyLW($this->player_1);
+    playDirtyLW($this->player_3);
 
-    // end challenge
-    $end = $this->game->fresh()->currentChallenge->ends_at;
-    Date::setTestNow($end->addSeconds(1));
-    $this->artisan('app:progress-games');
+    Challenge::latest()->first()->end();
 
     expect($this->team_1->score)->toBe(0);
     expect($this->team_2->score)->toBe(0);
 });
 
 it('if your team play dirty and your paired_team does not you will get 50 points', function () {
-    playDirty($this->player_1);
+    playDirtyLW($this->player_1);
 
-    // end challenge
-    $end = $this->game->fresh()->currentChallenge->ends_at;
-    Date::setTestNow($end->addSeconds(1));
-    $this->artisan('app:progress-games');
+    Challenge::latest()->first()->end();
 
     expect($this->team_1->fresh()->score)->toBe(70);
     expect($this->team_2->fresh()->score)->toBe(20);
 });
 
 it('if neither team plays dirty they will each get 20 points', function () {
-    // end challenge
-    $end = $this->game->fresh()->currentChallenge->ends_at;
-    Date::setTestNow($end->addSeconds(1));
-    $this->artisan('app:progress-games');
+    Challenge::latest()->first()->end();
 
     expect($this->team_1->fresh()->score)->toBe(40);
     expect($this->team_2->fresh()->score)->toBe(40);
