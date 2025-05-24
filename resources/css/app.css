@@ -37,54 +37,98 @@
 
     /* Elixir */
     .elixir {
-        --color-zinc-50: #f8fafc;   /* Slate-50 */
-        --color-zinc-100: #f1f5f9;
-        --color-zinc-200: #e2e8f0;
-        --color-zinc-300: #cbd5e1;
-        --color-zinc-400: #94a3b8;
-        --color-zinc-500: #64748b;
-        --color-zinc-600: #475569;
-        --color-zinc-700: #334155;
-        --color-zinc-800: #1e293b;
-        --color-zinc-900: #0f172a;
-        --color-zinc-950: #020617;
+        /* palette */
+        --color-text: #24292E;
+        --color-background: #030812;
+        --color-link: #B1A5EE;
 
-        --color-accent: #4B275F;
-        --color-accent-content: #6E4C7D;
-        --color-accent-foreground: #D8B4E2;
+        --color-code-block: #132134;
+        --color-sidebar: #0E192A;
+        --color-header: #304254;
+
+        --color-border: #304254;
+
+        --color-danger: #FF5385;
+
+        /* theme */
+        --color-accent: var(--color-background);
+        --color-accent-content: var(--color-header);
+        --color-accent-foreground: var(--color-link);
+
+        [data-flux-card] {
+            @apply !bg-[var(--color-code-block)] !rounded-sm !border-[var(--color-border)] !text-[var(--color-text)];
+        }
+
+        [data-flux-link] {
+            @apply !text-[var(--color-link)] !no-underline;
+        }
+
+        /* Button Primary */
+        [data-flux-button].bg-\[var\(--color-accent\)\] {
+            @apply dark:!border-2 !rounded-sm !shadow-none !border-[var(--color-border)] hover:!border-[var(--color-link)];
+        }
+
+        /* Button Danger */
+        [data-flux-button].bg-red-500 {
+            @apply !bg-inherit !text-[var(--color-danger)] dark:!border-2 !rounded-sm !shadow-none !border-[var(--color-border)];
+        }
+
+        /* Button Filled */
+        [data-flux-button].bg-zinc-800\/5 {
+            @apply !text-[var(--color-link)];
+        }
+
+        [data-flux-sidebar] {
+            @apply !bg-[var(--color-sidebar)] !border-none;
+
+            [data-flux-navlist-item] {
+                @apply !bg-inherit hover:!font-normal;
+            }
+
+            [data-flux-navlist-item]:hover [data-flux-icon] {
+               @apply text-[var(--color-link)];
+            }
+
+            [data-flux-navlist-item][data-current] {
+                @apply !text-[var(--color-link)];
+            }
+        }
     }
 
-    .dark .elixir {
-        --color-accent: #6E4C7D;
-        --color-accent-content: #D8B4E2;
-        --color-accent-foreground: #1A0B24;
-        --color-background: #1A0B24;
-    }
-
-    /* Go */
     .go {
-        --color-zinc-50: #f9fafb;   /* Neutral-50 */
-        --color-zinc-100: #f3f4f6;
-        --color-zinc-200: #e5e7eb;
-        --color-zinc-300: #d1d5db;
-        --color-zinc-400: #9ca3af;
-        --color-zinc-500: #6b7280;
-        --color-zinc-600: #4b5563;
-        --color-zinc-700: #374151;
-        --color-zinc-800: #1f2937;
-        --color-zinc-900: #111827;
-        --color-zinc-950: #030712;
+        /* palette */
+        --color-background: #202224;
+        --color-faded-background: #161718;
+        --color-border: #6D7072;
+        --color-link: #50B7E0;
+        --color-header: #007D9C;
+        --color-text: #f0f1f2;
+        --color-sidebar: #202224;
 
-        --color-accent: #00ADD8;
-        --color-accent-content: #007D9C;
-        --color-accent-foreground: #B3E5FC;
-    }
+        /* theme */
+        --color-accent: var(--color-header);
+        --color-accent-content: var(--color-header);
+        --color-accent-foreground: var(--color-text);
 
-    .dark .go {
-        --color-accent: #00ADD8;
-        --color-accent-content: #B3E5FC;
-        --color-accent-foreground: #082f49;
-        --color-background: #082f49;
+        [data-flux-card] {
+            @apply !bg-inherit !font-normal !rounded-sm !border-[var(--color-border)] !text-[var(--color-text)];
+        }
+
+        [data-flux-link] {
+            @apply !text-[var(--color-link)] !underline-offset-2;
+        }
+
+        [data-flux-sidebar] {
+            @apply !bg-[var(--color-sidebar)] !border-[var(--color-border)];
+
+            [data-show-stashed-sidebar] {
+                @apply !bg-[var(--color-faded-background)];
+            }
+
+            [data-flux-navlist-item] {
+                @apply !text-[var(--color-link)] hover:!bg-inherit hover:!underline;
+            }
+        }
     }
 
     /* JavaScript */
@@ -218,7 +262,7 @@
         }
 
         [data-flux-link] {
-            @apply !underline-offset-1 !decoration-current
+            @apply !underline-offset-1 !decoration-current;
         }
     }
 
