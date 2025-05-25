@@ -213,7 +213,12 @@
         --color-accent-foreground: var(--color-white);
 
         [data-flux-card] {
-            @apply !rounded-none !bg-transparent dark:!bg-[linear-gradient(180deg,_color-mix(in_oklab,var(--color-neutral-900)_50%,_transparent)_0%,_color-mix(in_oklab,var(--color-neutral-900)_0%,_transparent)_48.32%)]
+            @apply !rounded-none !bg-transparent;
+             background-image: linear-gradient(
+                180deg,
+                color-mix(in oklab, var(--color-neutral-800) 50%, transparent) 0%,
+                color-mix(in oklab, var(--color-neutral-800) 0%, transparent) 48.32%
+            )!important;
         }
 
         [data-flux-link] {
@@ -224,7 +229,7 @@
             @apply !bg-[var(--color-background)];
 
             [data-flux-navlist-item][data-current] {
-                @apply hover:!bg-[var(--color-green-600)];
+                @apply !bg-[var(--color-green-600)];
             }
         }
 
