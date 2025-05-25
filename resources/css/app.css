@@ -431,20 +431,23 @@
 
         /* Button Danger */
         [data-flux-button].bg-red-500 {
-            @apply !bg-inherit !text-[var(--color-ruby)];
+            @apply !bg-inherit !text-[var(--color-ruby)] !shadow-none;
         }
 
-        /* todo the manage game button */
+        /* Button Filled */
+        [data-flux-button].bg-zinc-800\/5 {
+            @apply !text-[var(--color-ruby)] !bg-[var(--color-card)] hover:!bg-zinc-800/10;
+        }
 
         [data-flux-sidebar] {
             @apply !bg-[var(--color-nav)] !border-[var(--color-border)];
 
             [data-flux-navlist-item] {
-                @apply !bg-inherit hover:!font-normal;
+                @apply !bg-inherit !text-zinc-200 !font-normal;
             }
 
             [data-flux-navlist-item][data-current] {
-                @apply !font-bold *:!font-bold;
+                @apply !font-extrabold !text-white;
             }
         }
 
@@ -460,7 +463,7 @@
     ::before,
     ::backdrop,
     ::file-selector-button {
-        @apply border-gray-200 border-current;
+        @apply border-gray-200;
     }
 }
 
@@ -478,8 +481,7 @@
 
 /* Fix focus elements in flux tables with overflow-x-auto */
 div:has(> [data-flux-table]) {
-    padding: 4px;
-    margin: -4px;
+    @apply !p-1 !-m-1;
 }
 
 /* Hide the label for team selection but keeps it for validation */
