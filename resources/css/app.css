@@ -455,6 +455,70 @@
             @apply !text-[var(--color-ruby)];
         }
     }
+
+    .vue {
+        /* palette */
+        --color-background: #1A1A1A;
+        --color-text: #DEDEDE;
+
+        --color-code: #242424;
+        --color-card: #242424;
+
+        /* --color-nav: #585450; */
+        --color-border: #363636;
+
+        --color-vue: #42B883;
+        --color-link: #42B883;
+
+        --color-vue-vibrant: #43D392;
+
+        --color-button-text: #213547;
+
+        --color-danger: #FB3AA2;
+
+        --color-secondary: #75C05E;
+        --color-secondary-hover: #C4D141;
+
+        /* theme */
+        --color-accent: var(--color-vue);
+        --color-accent-content: var(--color-vue);
+        --color-accent-foreground: var(--color-button-text);
+
+        /* Button Primary */
+        [data-flux-button].bg-\[var\(--color-accent\)\] {
+            @apply hover:!bg-[var(--color-vue-vibrant)];
+        }
+
+        /* Button Danger */
+        [data-flux-button].bg-red-500 {
+            @apply !bg-inherit !text-[var(--color-danger)] !shadow-none;
+        }
+
+        /* Button Filled */
+        [data-flux-button].bg-zinc-800\/5 {
+            @apply !text-[var(--color-vue)];
+        }
+
+        [data-flux-card] {
+            @apply !bg-[var(--color-card)] !rounded-sm !text-[var(--color-text)] !border-transparent;
+        }
+
+        [data-flux-link] {
+            @apply !no-underline !text-[var(--color-link)] hover:!text-[var(--color-vue-vibrant)];
+        }
+
+        [data-flux-sidebar] {
+            @apply !bg-[var(--color-background)] !border-[var(--color-border)];
+
+            [data-flux-navlist-item] {
+                @apply !bg-inherit !text-zinc-400 hover:!text-zinc-200;
+            }
+
+            [data-flux-navlist-item][data-current] {
+                @apply !text-[var(--color-vue)];
+            }
+        }
+    }
 }
 
 @layer base {

@@ -8,7 +8,7 @@ use Livewire\Attributes\Computed;
 
 class Theme extends Component
 {
-    public string $theme = 'laravel';
+    public string $theme = 'default';
 
     #[Computed]
     public function themes()
@@ -24,6 +24,7 @@ class Theme extends Component
             'react',
             'ruby',
             'vue',
+            'default',
         ];
     }
 
@@ -33,6 +34,13 @@ class Theme extends Component
         return in_array($this->theme, ['php', 'ruby'])
             ? 'light'
             : '';
+    }
+
+    public function mount()
+    {
+        if (! app()->environment('local')) {
+            abort(404);
+        }
     }
 
     #[Layout('layouts.theme')]
