@@ -35,7 +35,6 @@
         --color-accent-foreground: var(--color-blue-50);
     }
 
-    /* Elixir */
     .elixir {
         /* palette */
         --color-text: #24292E;
@@ -131,7 +130,6 @@
         }
     }
 
-    /* JavaScript */
     .javascript {
         /* palette */
         --font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -309,6 +307,64 @@
         }
     }
 
+    .python {
+        /* palette */
+        --color-code-block: #303335;
+        --color-background: #222222;
+        --color-text: #CFD0D0;
+        --color-sidebar: #333333;
+        --color-card: #1C3B56;
+        --color-border: #303335;
+
+        --color-link-hover: #0090C0;
+
+        --color-danger: #FF4689;
+
+        --color-blue: #2B5B84;
+        --color-yellow: #FFD343;
+        --color-yellow-button-text: #1A1A1A;
+
+        /* theme */
+        --color-accent: var(--color-blue);
+        --color-accent-content: var(--color-blue);
+        --color-accent-foreground: var(--color-yellow);
+
+        [data-flux-card] {
+            @apply !bg-[var(--color-card)] !rounded-sm !text-[var(--color-text)];
+        }
+
+        [data-flux-link] {
+            @apply !text-[var(--color-yellow)] !underline hover:!text-white hover:!decoration-[var(--color-yellow)];
+        }
+
+        /* Button Primary */
+        [data-flux-button].bg-\[var\(--color-accent\)\] {
+            @apply !bg-[var(--color-yellow)] !text-[var(--color-yellow-button-text)];
+        }
+
+        /* Button Danger */
+        [data-flux-button].bg-red-500 {
+            @apply !bg-inherit !text-[var(--color-danger)];
+        }
+
+        /* Button Filled */
+        [data-flux-button].bg-zinc-800\/5 {
+            @apply !text-[var(--color-yellow)];
+        }
+
+        [data-flux-sidebar] {
+            @apply !bg-[var(--color-sidebar)] !border-[var(--color-border)];
+
+            [data-flux-navlist-item] {
+                @apply !bg-inherit hover:!font-normal hover:!text-[var(--color-link-hover)];
+            }
+
+            [data-flux-navlist-item][data-current] {
+                @apply !font-bold;
+            }
+        }
+    }
+
     .react {
         /* palette */
         --color-card-dark: rgb(52, 58, 70, 1);
@@ -347,30 +403,54 @@
         }
     }
 
-    /* Ruby */
     .ruby {
-        --color-zinc-50: #fef2f2; /* Rose-50 */
-        --color-zinc-100: #fee2e2;
-        --color-zinc-200: #fecaca;
-        --color-zinc-300: #fca5a5;
-        --color-zinc-400: #f87171;
-        --color-zinc-500: #ef4444;
-        --color-zinc-600: #dc2626;
-        --color-zinc-700: #b91c1c;
-        --color-zinc-800: #991b1b;
-        --color-zinc-900: #7f1d1d;
-        --color-zinc-950: #450a0a;
+        /* palette */
+        --color-background: #FFFFFF;
+        --color-card: #F6F6F3;
+        --color-text: #505050;
 
-        --color-accent: #cc342d;
-        --color-accent-content: #a72b26;
-        --color-accent-foreground: #fcd7d5;
-    }
+        --color-link: #42405f;
 
-    .dark .ruby {
-        --color-accent: #cc342d;
-        --color-accent-content: #fcd7d5;
-        --color-accent-foreground: #450a0a;
-        --color-background: #450a0a;
+        --color-nav: #585450;
+        --color-border: #E0E0E0;
+
+        --color-ruby: #CC342D;
+
+        /* theme */
+        --color-accent: var(--color-ruby);
+        --color-accent-content: var(--color-ruby);
+        --color-accent-foreground: var(--color-white);
+
+        [data-flux-card] {
+            @apply !bg-[var(--color-card)] !rounded-sm !text-[var(--color-text)] !shadow-[0_0_3px_rgba(0,0,0,0.4)];
+        }
+
+        [data-flux-link] {
+            @apply !underline !text-[var(--color-link)] !decoration-[var(--color-link)] hover:!text-[var(--color-ruby)] hover:!decoration-[var(--color-ruby)] !underline-offset-2;
+        }
+
+        /* Button Danger */
+        [data-flux-button].bg-red-500 {
+            @apply !bg-inherit !text-[var(--color-ruby)];
+        }
+
+        /* todo the manage game button */
+
+        [data-flux-sidebar] {
+            @apply !bg-[var(--color-nav)] !border-[var(--color-border)];
+
+            [data-flux-navlist-item] {
+                @apply !bg-inherit hover:!font-normal;
+            }
+
+            [data-flux-navlist-item][data-current] {
+                @apply !font-bold *:!font-bold;
+            }
+        }
+
+        [data-flux-heading] {
+            @apply !text-[var(--color-ruby)];
+        }
     }
 }
 

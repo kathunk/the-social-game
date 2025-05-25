@@ -46,7 +46,7 @@ class Team extends Model
 
     public function forceLight(): bool
     {
-        return in_array($this->name, ['PHP']);
+        return in_array($this->name, ['PHP', 'Ruby']);
     }
 
     public function updateModelWithStateData()
