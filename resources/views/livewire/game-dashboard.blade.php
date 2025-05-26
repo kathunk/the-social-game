@@ -2,7 +2,6 @@
     @if ($this->is_game_admin && $this->game->status !== 'ended')
         <flux:button icon="cog" :href="route('pre-game-lobby', $this->game)" variant="filled">Manage game</flux:button>
     @endif
-    @dump($this->current_team)
     @if (! $this->current_team && $this->template->type === 'team' && $this->player->status === 'active')
         <x-card>
             <flux:heading>Join a team</flux:heading>
