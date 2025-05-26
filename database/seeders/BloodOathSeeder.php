@@ -6,14 +6,14 @@ namespace Database\Seeders;
 
 use App\Challenges\Classes\IndividualDoubleTrouble;
 use App\Challenges\Classes\IndividualGrandstandGambit;
-use App\Models\Game;
-use App\Models\User;
-use App\Models\GameTemplate;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Database\Seeder;
-use App\Events\GameTemplateAdded;
-use App\Modifiers\Classes\BloodOaths;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Events\GameTemplateAdded;
+use App\Models\Game;
+use App\Models\GameTemplate;
+use App\Models\User;
+use App\Modifiers\Classes\BloodOaths;
+use Illuminate\Database\Seeder;
+use Thunk\Verbs\Facades\Verbs;
 
 class BloodOathSeeder extends Seeder
 {
@@ -24,7 +24,7 @@ class BloodOathSeeder extends Seeder
         $template_id = GameTemplateAdded::fire(
             name: 'Pecking Order: Blood Oaths',
             description: 'Play the game with a secret alliance, or as a lone wolf.',
-            pre_game_lobby_message:  "<h1>A popularity contest for horrible people</h1><h3>Climb to the top of the ranks.</h3><p>Every round, you will upvote and downvote your opponents. But you will also take quizzes about how you expect the votes to turn out. When you are right, you'll accumulate secret points that are revealed at the end of the game. Outsmart your opponents to be at the top of the Pecking Order!</p>",
+            pre_game_lobby_message: "<h1>A popularity contest for horrible people</h1><h3>Climb to the top of the ranks.</h3><p>Every round, you will upvote and downvote your opponents. But you will also take quizzes about how you expect the votes to turn out. When you are right, you'll accumulate secret points that are revealed at the end of the game. Outsmart your opponents to be at the top of the Pecking Order!</p>",
             type: 'individual',
             min_players: 6,
             max_players: 12,

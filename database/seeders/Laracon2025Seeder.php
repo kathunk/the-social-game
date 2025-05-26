@@ -3,16 +3,16 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\Game;
-use App\Models\User;
-use App\Models\GameTemplate;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Database\Seeder;
-use App\Events\GameTemplateAdded;
-use App\Challenges\Classes\TeamHotPotato;
-use App\Modifiers\Classes\TeamResignation;
 use App\Challenges\Classes\TeamBrinksmanship;
+use App\Challenges\Classes\TeamHotPotato;
+use App\Events\GameTemplateAdded;
+use App\Models\Game;
+use App\Models\GameTemplate;
+use App\Models\User;
+use App\Modifiers\Classes\TeamResignation;
 use App\Modifiers\Classes\TeamSecretAlliance;
+use Illuminate\Database\Seeder;
+use Thunk\Verbs\Facades\Verbs;
 
 class Laracon2025Seeder extends Seeder
 {
@@ -23,8 +23,8 @@ class Laracon2025Seeder extends Seeder
         $template_id = GameTemplateAdded::fire(
             name: 'Laracon 2025',
             description: 'A team game for the Laravel Conference 2025.',
-            pre_game_lobby_message:  "<h1>Welcome to the Laracon 2025 Pyramid Scheme</h1><h2>Brought to you by <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://thunk.dev\">Thunk</a></h2><h3>Find the man with the bag of cash. He will let you into the game.</h3><p>The pyramid scheme will take place for the duration of the conference. At 5pm at the end of the conference, the team at the top of the leader board will split $1,500. There will be twists and turns along the way. To keep up with the latest, follow <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://twitter.com/johnrudolphdrex\">John's Twitter</a>.</p><h3><strong>You're using your real name, right?</strong></h3><p>To join the game, your name must match your Laracon badge.</p>",
-            type: 'individual',
+            pre_game_lobby_message: "<h1>Welcome to the Laracon 2025 Pyramid Scheme</h1><h2>Brought to you by <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://thunk.dev\">Thunk</a></h2><h3>Find the man with the bag of cash. He will let you into the game.</h3><p>The pyramid scheme will take place for the duration of the conference. At 5pm at the end of the conference, the team at the top of the leader board will split $1,500. There will be twists and turns along the way. To keep up with the latest, follow <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://twitter.com/johnrudolphdrex\">John's Twitter</a>.</p><h3><strong>You're using your real name, right?</strong></h3><p>To join the game, your name must match your Laracon badge.</p>",
+            type: 'team',
             min_players: 0,
             max_players: null,
             is_public: false,
@@ -40,7 +40,7 @@ class Laracon2025Seeder extends Seeder
                 ],
             ],
             modifiers: [TeamResignation::key(), TeamSecretAlliance::key()],
-            players_can_join_late: false,
+            players_can_join_late: true,
             scoreboard_type: 'blood_oath',
         )->game_template_id;
 

@@ -2,12 +2,12 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\PlayerState;
-use App\States\ModifierState;
+use App\Events\Traits\HasActivePlayer;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
-use App\Events\Traits\HasActivePlayer;
+use App\States\ModifierState;
+use App\States\PlayerState;
+use Thunk\Verbs\Event;
 
 class PlayerMadeOathOfSolitude extends Event
 {
