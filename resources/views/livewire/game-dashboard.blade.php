@@ -24,11 +24,11 @@
         <livewire:next-challenge-button />
     @endif
     @if ($this->challengeComponent)
-        <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challengeComponent" />
+        <x-game-components.form :form="$this->challengeComponent" type="challenge" class_key="{{ $this->challenge->class_key }}" />
     @endif
     @if ($this->game->status === 'active')
         @foreach ($this->modifiers as $modifier)
-            <x-game-components.modifier :modifier="$modifier" :modifierComponent="$modifier->handler()->frontendComponent($this->player)" />
+            <x-game-components.form :form="$modifier->handler()->frontendComponent($this->player)" type="modifier" class_key="{{ $modifier->class_key }}" />
         @endforeach
     @endif
     @if ($this->showScoreboard)

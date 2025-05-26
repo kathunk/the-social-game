@@ -1,17 +1,23 @@
+@props(['form', 'type', 'class_key'])
+
 <flux:card>
     <div class="flex flex-col space-y-4">
         <div class="flex space-x-2 items-baseline">
-            <flux:heading size="lg">Challenge</flux:heading>
-            @if ($this->challenge->ends_at->isFuture())
-                <flux:text variant="subtle" class="flex items-baseline gap-1">
-                    ends in
-                    <x-game-components.countdown-timer :ends_at="$this->challenge->ends_at->toIsoString()" />
-                </flux:text>
-            @else
-                <flux:text variant="subtle">ending...</flux:text>
+            <flux:heading size="lg">
+                {{ $type === 'challenge' ? 'Challenge' : 'Modifier' }}
+            </flux:heading>
+            @if ($type === 'challenge')
+                @if ($this->challenge->ends_at->isFuture())
+                    <flux:text variant="subtle" class="flex items-baseline gap-1">
+                        ends in
+                        <x-game-components.countdown-timer :ends_at="$this->challenge->ends_at->toIsoString()" />
+                    </flux:text>
+                @else
+                    <flux:text variant="subtle">ending...</flux:text>
+                @endif
             @endif
         </div>
-        @foreach ($challengeComponent['elements'] as $element)
+        @foreach ($form['elements'] as $element)
             @switch($element['type'])
                 @case('title')
                     <flux:heading>{{ $element['text'] }}</flux:heading>
@@ -35,7 +41,7 @@
                     <flux:input
                         label="{{ $element['label']}}"
                         placeholder="{{$element['placeholder']}}"
-                        wire:model="round_properties.{{ $this->challenge->class_key }}.{{ $element['property_name']}}"
+                        wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
                     />
                     @break
                 @case('button_group')
@@ -43,7 +49,7 @@
                         @foreach ($element['buttons'] as $btn)
                             <flux:button
                                 variant="primary"
-                                wire:click="callClassAction('{{ $btn['action'] }}', 'challenge', '{{ $this->challenge->class_key }}')"
+                                wire:click="callClassAction('{{ $btn['action'] }}', $type, '{{ $class_key }}')"
                             >
                                 {{ $btn['label'] }}
                             </flux:button>
@@ -53,7 +59,7 @@
                 @case('select')
                     <flux:select
                         label="{{ $element['label'] }}"
-                        wire:model="round_properties.{{ $this->challenge->class_key }}.{{ $element['property_name']}}"
+                        wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
                     >
                     @isset($element['placeholder'])
                         <flux:select.option value="" selected class="placeholder">{{ $element['placeholder'] }}</flux:select.option>
