@@ -41,8 +41,8 @@ it('runs the Flatten the Curve challenge', function () {
     Livewire::actingAs($player_1->user)
         ->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->assertSee('Currently you carry 50 points')
-        ->set('challenge_properties.team_id', $team_2->id)
-        ->call('callChallengeAction', 'swapTeams')->assertHasNoErrors();
+        ->set('round_properties.'.TheGreatRealignment::key().'.team_id', $team_2->id)
+        ->call('callClassAction', 'swapTeams', 'challenge', TheGreatRealignment::key())->assertHasNoErrors();
 
     expect($team->fresh()->score)->toBe(50);
     expect($team_2->fresh()->score)->toBe(-50);
@@ -50,8 +50,8 @@ it('runs the Flatten the Curve challenge', function () {
     Livewire::actingAs($player_3->user)
         ->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->assertSee('Currently you carry -25 points')
-        ->set('challenge_properties.team_id', $team_3->id)
-        ->call('callChallengeAction', 'swapTeams')->assertHasNoErrors();
+        ->set('round_properties.'.TheGreatRealignment::key().'.team_id', $team_3->id)
+        ->call('callClassAction', 'swapTeams', 'challenge', TheGreatRealignment::key())->assertHasNoErrors();
 
     expect($team_2->fresh()->score)->toBe(-25);
     expect($team_3->fresh()->score)->toBe(-25);

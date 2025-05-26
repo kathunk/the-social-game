@@ -112,7 +112,7 @@ abstract class BaseModifierClass
         return collect($this->frontendComponent($player)['elements'])
             ->filter(fn ($element) => isset($element['property_name'], $element['validation_rules']))
             ->reduce(function ($carry, $element) {
-                $property = "challenge_properties.{$element['property_name']}";
+                $property = "{$element['property_name']}";
 
                 $carry['rules'][$property] = $element['validation_rules'];
 

@@ -26,6 +26,11 @@
     @if ($this->challengeComponent)
         <x-game-components.challenge :challenge="$this->challenge" :challenge-component="$this->challengeComponent" />
     @endif
+    @if ($this->game->status === 'active')
+        @foreach ($this->modifiers as $modifier)
+            <x-game-components.modifier :modifier="$modifier" :modifierComponent="$modifier->handler()->frontendComponent($this->player)" />
+        @endforeach
+    @endif
     @if ($this->showScoreboard)
         <x-game-components.scoreboard :teams="$this->teams" :players="$this->players" :type="$this->template->type" />
     @endif
@@ -41,10 +46,6 @@
                 </div>
             </flux:card>
         @endif
-
-        @foreach ($this->modifiers as $modifier)
-            <x-game-components.modifier :modifier="$modifier" :modifierComponent="$modifier->handler()->frontendComponent($this->player)" />
-        @endforeach
     @endif
 
     <flux:modal name="qr-code">

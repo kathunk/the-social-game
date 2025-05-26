@@ -1,3 +1,5 @@
+{{-- @todo unify this with challenge.blade.php --}}
+
 @if (isset($modifierComponent['elements']))
 <flux:card>
     <div class="flex flex-col space-y-4">
@@ -22,7 +24,7 @@
                     <flux:input
                         label="{{ $element['label']}}"
                         placeholder="{{$element['placeholder']}}"
-                        wire:model="modifier_properties.{{ $element['property_name']}}"
+                        wire:model="round_properties.{{ $element['property_name']}}"
                     />
                     @break
                 @case('button_group')
@@ -30,7 +32,7 @@
                         @foreach ($element['buttons'] as $btn)
                             <flux:button
                                 variant="primary"
-                                wire:click="callModifierAction('{{ $modifier->class_key }}', '{{ $btn['action'] }}')"
+                                wire:click="callClassAction('{{ $btn['action'] }}', 'modifier', '{{ $modifier->class_key }}')"
                             >
                                 {{ $btn['label'] }}
                             </flux:button>
@@ -38,10 +40,9 @@
                     </div>
                     @break
                 @case('select')
-                    {{-- @todo same issue here where first option in list is not placeholder, and is not real --}}
                     <flux:select
                         label="{{ $element['label'] }}"
-                        wire:model="modifier_properties.{{ $element['property_name']}}"
+                        wire:model="round_properties.{{ $modifier->class_key }}.{{ $element['property_name']}}"
                     >
                     @isset($element['placeholder'])
                         <flux:select.option value="" selected class="placeholder">{{ $element['placeholder'] }}</flux:select.option>

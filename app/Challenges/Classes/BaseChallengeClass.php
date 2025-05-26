@@ -111,7 +111,7 @@ abstract class BaseChallengeClass
         return collect($this->frontendComponent($player)['elements'])
             ->filter(fn ($element) => isset($element['property_name'], $element['validation_rules']))
             ->reduce(function ($carry, $element) {
-                // Remove the challenge_properties namespace from the property name
+                // Remove the round_properties namespace from the property name
                 $property = $element['property_name'];
 
                 $carry['rules'][$property] = $element['validation_rules'];

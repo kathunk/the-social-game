@@ -9,10 +9,10 @@ use Livewire\Livewire;
     because we cannot use the same function name across multiple files
 */
 
-function swapTeam($player, $team_id): LivewireTest
+function swapTeam($player, $team_id, $challenge_key): LivewireTest
 {
     return Livewire::actingAs($player->user)
         ->test(GameDashboard::class, ['game' => $player->game->fresh()])
-        ->set('challenge_properties.team_id', $team_id)
-        ->call('callChallengeAction', 'swapTeams');
+        ->set('round_properties.'.$challenge_key.'.team_id', $team_id)
+        ->call('callClassAction', 'swapTeams', 'challenge', $challenge_key);
 }

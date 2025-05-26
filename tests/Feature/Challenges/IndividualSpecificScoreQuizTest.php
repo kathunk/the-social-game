@@ -37,26 +37,26 @@ it('runs the individual guess specific score quiz', function () {
     $this->actingAs($player_1->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('challenge_properties.guess_score', 1)
-        ->call('callChallengeAction', 'guess')->assertHasNoErrors();
+        ->set('round_properties.'.$challenge->class_key.'.guess_score', 1)
+        ->call('callClassAction', 'guess', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     $this->actingAs($player_2->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('challenge_properties.guess_score', -1)
-        ->call('callChallengeAction', 'guess')->assertHasNoErrors();
+        ->set('round_properties.'.$challenge->class_key.'.guess_score', -1)
+        ->call('callClassAction', 'guess', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     $this->actingAs($player_3->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('challenge_properties.guess_score', 0)
-        ->call('callChallengeAction', 'guess')->assertHasNoErrors();
+        ->set('round_properties.'.$challenge->class_key.'.guess_score', 0)
+        ->call('callClassAction', 'guess', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     $this->actingAs($player_4->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('challenge_properties.guess_score', -2)
-        ->call('callChallengeAction', 'guess')->assertHasNoErrors();
+        ->set('round_properties.'.$challenge->class_key.'.guess_score', -2)
+        ->call('callClassAction', 'guess', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     $challenge->refresh();
     $challenge->end();

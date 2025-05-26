@@ -14,8 +14,6 @@ class CreateGame extends Component
 
     public int $game_template_id;
 
-    public bool $is_public = false;
-
     public bool $requires_admin_approval_to_join = false;
 
     #[Computed]
@@ -51,7 +49,6 @@ class CreateGame extends Component
             template: GameTemplate::find($this->game_template_id),
             starts_at: $this->game_start_timecode->setSeconds(0),
             user: $this->user,
-            is_public: $this->is_public,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
         );
 
