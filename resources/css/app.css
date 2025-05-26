@@ -162,6 +162,10 @@
             }
         }
 
+        [data-flux-link] {
+            @apply !underline hover:!no-underline !decoration-[var(--text-link)] !underline-offset-1;
+        }
+
         [data-flux-card] {
             @apply !bg-[var(--color-background-secondary)] !rounded-none !border-[var(--color-background-tertiary)] !text-[var(--text-primary)];
         }
@@ -347,6 +351,9 @@
         --color-card-dark: rgb(52, 58, 70, 1);
         --color-highlight-dark: rgba(88, 175, 223, .1);
         --color-wash-dark: rgb(35, 39, 47, 1);
+
+        --text-primary-dark: rgb(246, 247, 249, 1);
+        --text-secondary: rgb(64, 71, 86, 1);
 
         --border-link: rgb(8, 126, 164, 1);
 

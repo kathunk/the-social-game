@@ -14,6 +14,7 @@ class Theme extends Component
     public function themes()
     {
         return [
+            'default',
             'elixir',
             'go',
             'javascript',
@@ -24,7 +25,6 @@ class Theme extends Component
             'react',
             'ruby',
             'vue',
-            'default',
         ];
     }
 
