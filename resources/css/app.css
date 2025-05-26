@@ -37,17 +37,14 @@
 
     .elixir {
         /* palette */
-        --color-text: #24292E;
         --color-background: #030812;
-        --color-link: #B1A5EE;
-
-        --color-code-block: #132134;
-        --color-sidebar: #0E192A;
-        --color-header: #304254;
-
         --color-border: #304254;
-
+        --color-code: #132134;
         --color-danger: #FF5385;
+        --color-header: #304254;
+        --color-link: #B1A5EE;
+        --color-sidebar: #0E192A;
+        --color-text: #24292E;
 
         /* theme */
         --color-accent: var(--color-background);
@@ -55,7 +52,7 @@
         --color-accent-foreground: var(--color-link);
 
         [data-flux-card] {
-            @apply !bg-[var(--color-code-block)] !rounded-sm !border-[var(--color-border)] !text-[var(--color-text)];
+            @apply !bg-[var(--color-code)] !rounded-sm !border-[var(--color-border)] !text-[var(--color-text)];
         }
 
         [data-flux-link] {
@@ -96,13 +93,14 @@
 
     .go {
         /* palette */
+        --color-border: #6D7072;
+        --color-header: #007D9C;
+        --color-link: #50B7E0;
+        --color-sidebar: #202224;
+        --color-text: #f0f1f2;
+
         --color-background: #202224;
         --color-faded-background: #161718;
-        --color-border: #6D7072;
-        --color-link: #50B7E0;
-        --color-header: #007D9C;
-        --color-text: #f0f1f2;
-        --color-sidebar: #202224;
 
         /* theme */
         --color-accent: var(--color-header);
@@ -132,41 +130,24 @@
 
     .javascript {
         /* palette */
-        --font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-
-        /* --mdn-color-background-highlight: #f0e498; */
-        /* --mdn-color-dark-grey: #4e4e4e; */
-
-        /* second darkest bg */
-        --mdn-background-dark: #1B1B1B;
-
-        /* #131313; darkest background ^ darkens when sidebar is open */
-        --mdn-background-darkest: #131313;
-
-        /* --mdn-background-light: #fff; */
-        /* --mdn-background-light-grey: #e2e2e2; */
-        /* --color-announcement-banner-accent: #ff6d91; */
-
-        /* accent color, a lot like link */
-        --accent-color: #5e9eff;
-
         --text-primary: #cdcdcd;
         --text-link: #8cb4ff;
 
-        /* breadcrumb bg */
         --color-background-secondary: #313131;
         --color-background-tertiary: #858585;
+        --mdn-background-dark: #1B1B1B;
+        --mdn-background-darkest: #131313;
 
+        --color-blue-hover: #4C5E80;
+        --color-red-text: #FE6D91;
+        --color-red-hover: #472025;
+
+        /* theme */
         --color-accent: var(--text-link);
         --color-accent-content: var(--text-link);
         --color-accent-foreground: var(--mdn-background-dark);
 
         --color-background: var(--mdn-background-dark);
-
-        --color-blue-hover: #4C5E80;
-
-        --color-red-text: #FE6D91;
-        --color-red-hover: #472025;
 
         [data-flux-sidebar] {
             @apply !bg-[var(--mdn-background-dark)];
@@ -192,22 +173,16 @@
     }
 
     .node {
-        /* open sans */
-        --font-family: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
-
-        --color-neutral-950: #0f0f0f;
+        /* palette */
         --color-neutral-900: #1a1a1a;
 
         --color-green-300: #99cc7d;
-
-        /* hover on link */
         --color-green-400: #84ba64;
-
-        /* accent and link */
         --color-green-600: #417e38;
 
         --color-background: rgb(13, 18, 28);
 
+        /* theme */
         --color-accent: var(--color-green-600);
         --color-accent-content: var(--color-green-400);
         --color-accent-foreground: var(--color-white);
@@ -227,18 +202,17 @@
 
         [data-flux-sidebar] {
             @apply !bg-[var(--color-background)];
+            background-image: linear-gradient(
+                180deg,
+                color-mix(in oklab, var(--color-neutral-800) 50%, transparent) 0%,
+                color-mix(in oklab, var(--color-neutral-800) 0%, transparent) 48.32%
+            )!important;
 
             [data-flux-navlist-item][data-current] {
                 @apply !bg-[var(--color-green-600)];
             }
         }
-
-        /* Apply font to all elements */
-        * {
-            @apply !font-[var(--font-family)];
-        }
     }
-
 
     .laravel {
         /* palette */
@@ -271,17 +245,17 @@
 
     .php {
         /* palette */
+        --color-link: #336699;
+
+        --color-light-background: #F2F2F2;
+        --color-dark-background: #2C2C2C;
+
         --color-dark-blue: #4a4e86;
         --color-medium-blue: #52598e;
         --color-light-blue: #e7ebff;
 
         --color-dark-magenta: #793862;
         --color-medium-magenta: #AE508D;
-
-        --color-link: #336699;
-
-        --color-light-background: #F2F2F2;
-        --color-dark-background: #2C2C2C;
 
         /* theme */
         --color-accent: var(--color-dark-blue);
@@ -314,16 +288,13 @@
 
     .python {
         /* palette */
-        --color-code-block: #303335;
         --color-background: #222222;
-        --color-text: #CFD0D0;
-        --color-sidebar: #333333;
-        --color-card: #1C3B56;
         --color-border: #303335;
-
-        --color-link-hover: #0090C0;
-
+        --color-card: #1C3B56;
         --color-danger: #FF4689;
+        --color-link-hover: #0090C0;
+        --color-sidebar: #333333;
+        --color-text: #CFD0D0;
 
         --color-blue: #2B5B84;
         --color-yellow: #FFD343;
@@ -372,15 +343,12 @@
 
     .react {
         /* palette */
-        --color-card-dark: rgb(52, 58, 70, 1);
-        --color-wash-dark: rgb(35, 39, 47, 1);
         --color-brand-dark: rgb(88, 196, 220, 1);
+        --color-card-dark: rgb(52, 58, 70, 1);
         --color-highlight-dark: rgba(88, 175, 223, .1);
+        --color-wash-dark: rgb(35, 39, 47, 1);
 
         --border-link: rgb(8, 126, 164, 1);
-
-        --text-primary-dark: rgb(246, 247, 249, 1);
-        --text-secondary: rgb(64, 71, 86, 1);
 
         /* theme */
         --color-accent: var(--color-brand-dark);
@@ -411,15 +379,12 @@
     .ruby {
         /* palette */
         --color-background: #FFFFFF;
-        --color-card: #F6F6F3;
-        --color-text: #505050;
-
-        --color-link: #42405f;
-
-        --color-nav: #585450;
         --color-border: #E0E0E0;
-
+        --color-card: #F6F6F3;
+        --color-link: #42405f;
+        --color-nav: #585450;
         --color-ruby: #CC342D;
+        --color-text: #505050;
 
         /* theme */
         --color-accent: var(--color-ruby);
@@ -464,25 +429,14 @@
     .vue {
         /* palette */
         --color-background: #1A1A1A;
+        --color-border: #363636;
+        --color-button-text: #213547;
+        --color-card: #242424;
+        --color-danger: #FB3AA2;
         --color-text: #DEDEDE;
 
-        --color-code: #242424;
-        --color-card: #242424;
-
-        /* --color-nav: #585450; */
-        --color-border: #363636;
-
         --color-vue: #42B883;
-        --color-link: #42B883;
-
         --color-vue-vibrant: #43D392;
-
-        --color-button-text: #213547;
-
-        --color-danger: #FB3AA2;
-
-        --color-secondary: #75C05E;
-        --color-secondary-hover: #C4D141;
 
         /* theme */
         --color-accent: var(--color-vue);
@@ -509,7 +463,7 @@
         }
 
         [data-flux-link] {
-            @apply !no-underline !text-[var(--color-link)] hover:!text-[var(--color-vue-vibrant)];
+            @apply !no-underline !text-[var(--color-vue)] hover:!text-[var(--color-vue-vibrant)];
         }
 
         [data-flux-sidebar] {
