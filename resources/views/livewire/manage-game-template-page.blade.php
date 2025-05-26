@@ -1,4 +1,4 @@
-<div x-data="{ gameType: @entangle('gameType') }">
+<div x-data="{ game_type: @entangle('game_type') }">
     <flux:card>
         <div class="flex flex-col gap-6">
             <flux:input wire:model="name" label="Name" />
@@ -20,9 +20,14 @@
                 <flux:label>Players can join late</flux:label>
                 <flux:error name="players_can_join_late" />
             </flux:field>
-            <flux:radio.group wire:model="gameType" label="Victory Condition">
+            <flux:radio.group wire:model="game_type" label="Victory Condition">
                 <flux:radio value="individual" label="Individual" checked />
                 <flux:radio value="team" label="Team" />
+            </flux:radio.group>
+            <flux:radio.group wire:model="scoreboard_type" label="Scoreboard Type">
+                <flux:radio value="individual" label="Individual" checked />
+                <flux:radio value="team" label="Team" />
+                <flux:radio value="blood_oath" label="Blood Oath" />
             </flux:radio.group>
 
             <div class="flex flex-row gap-2 items-center">
@@ -139,7 +144,7 @@
 
                 <flux:table.rows>
                     @foreach ($this->allChallenges as $challenge)
-                        <template x-if="gameType === '{{ $challenge::TYPE }}'">
+                        <template x-if="game_type === '{{ $challenge::TYPE }}'">
                             <flux:table.row>
                                 <flux:table.cell>{{ $challenge::NAME }}</flux:table.cell>
                                 <flux:table.cell class="whitespace-normal break-words">{{ $challenge::DESCRIPTION }}</flux:table.cell>
@@ -166,7 +171,7 @@
 
                 <flux:table.rows>
                     @foreach ($this->allModifiers as $modifier)
-                        <template x-if="gameType === '{{ $modifier::TYPE }}'">
+                        <template x-if="game_type === '{{ $modifier::TYPE }}'">
                             <flux:table.row>
                                 <flux:table.cell>{{ $modifier::NAME }}</flux:table.cell>
                                 <flux:table.cell class="whitespace-normal break-words">{{ $modifier::DESCRIPTION }}</flux:table.cell>

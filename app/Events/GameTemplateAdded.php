@@ -36,6 +36,8 @@ class GameTemplateAdded extends Event
 
     public bool $players_can_join_late;
 
+    public ?string $scoreboard_type = 'individual';
+
     public function validate()
     {
         $this->assert(
@@ -72,6 +74,11 @@ class GameTemplateAdded extends Event
                 'Challenge duration must be greater than 0.'
             );
         });
+
+        $this->assert(
+            in_array($this->scoreboard_type, ['individual', 'team', 'blood_oath']),
+            'Scoreboard type must be either individual, team, or blood_oath.'
+        );
     }
 
     public function applyToGame(GameTemplateState $game_template)
@@ -87,6 +94,7 @@ class GameTemplateAdded extends Event
         $game_template->description = $this->description;
         $game_template->pre_game_lobby_message = $this->pre_game_lobby_message;
         $game_template->players_can_join_late = $this->players_can_join_late;
+        $game_template->scoreboard_type = $this->scoreboard_type;
     }
 
     public function handle()
@@ -106,6 +114,7 @@ class GameTemplateAdded extends Event
                 'description' => $this->description,
                 'pre_game_lobby_message' => $this->pre_game_lobby_message,
                 'players_can_join_late' => $this->players_can_join_late,
+                'scoreboard_type' => $this->scoreboard_type,
             ]);
 
             return;
@@ -124,6 +133,7 @@ class GameTemplateAdded extends Event
             'description' => $this->description,
             'pre_game_lobby_message' => $this->pre_game_lobby_message,
             'players_can_join_late' => $this->players_can_join_late,
+            'scoreboard_type' => $this->scoreboard_type,
         ]);
     }
 }

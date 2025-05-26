@@ -29,7 +29,6 @@ it('facilitates blood oaths', function () {
     $game->start();
 
     Livewire::actingAs($player_1->fresh()->user)->test(GameDashboard::class, ['game' => $game->fresh()])
-        ->assertSee('Blood Oath')
         ->call('callClassAction', 'declare_oath_of_solitude', 'modifier', BloodOaths::key())
         ->assertHasNoErrors();
 

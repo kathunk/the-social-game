@@ -13,7 +13,7 @@ use App\Events\GameTemplateAdded;
 use App\Modifiers\Classes\BloodOaths;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 
-class PeckingOrderSeeder extends Seeder
+class BloodOathSeeder extends Seeder
 {
     public function run(): void
     {

@@ -3,10 +3,9 @@
 <flux:card>
     <div class="flex flex-col space-y-4">
         <div class="flex space-x-2 items-baseline">
-            <flux:heading size="lg">
-                {{ $type === 'challenge' ? 'Challenge' : 'Modifier' }}
-            </flux:heading>
             @if ($type === 'challenge')
+                <flux:heading size="lg">Challenge</flux:heading>
+            
                 @if ($this->challenge->ends_at->isFuture())
                     <flux:text variant="subtle" class="flex items-baseline gap-1">
                         ends in

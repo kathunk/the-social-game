@@ -38,6 +38,8 @@ class ManageGameTemplatePage extends Component
 
     public array $modifiers;
 
+    public string $scoreboard_type;
+
     #[Computed]
     public function allChallenges()
     {
@@ -70,6 +72,7 @@ class ManageGameTemplatePage extends Component
             $this->modifiers = $game_template->modifiers ?? [];
             $this->players_can_join_late = $game_template->players_can_join_late ?? false;
             $this->gameType = $game_template->type ?? 'individual';
+            $this->scoreboard_type = $game_template->scoreboard_type ?? 'individual';
         } else {
             $this->name = '';
             $this->description = '';
@@ -82,6 +85,7 @@ class ManageGameTemplatePage extends Component
             $this->modifiers = [];
             $this->players_can_join_late = false;
             $this->gameType = 'individual';
+            $this->scoreboard_type = 'individual';
         }
     }
 
@@ -111,6 +115,7 @@ class ManageGameTemplatePage extends Component
         'challenges.*.duration' => 'required|integer|min:1',
         'players_can_join_late' => 'boolean',
         'gameType' => 'required|string|in:individual,team',
+        'scoreboard_type' => 'required|string|in:individual,team,blood_oath',
     ];
 
     public function saveTemplate()
@@ -144,6 +149,7 @@ class ManageGameTemplatePage extends Component
             challenges: $challenges,
             modifiers: $this->modifiers,
             players_can_join_late: $this->players_can_join_late,
+            scoreboard_type: $this->scoreboard_type,
         );
 
         Verbs::commit();
@@ -165,6 +171,7 @@ class ManageGameTemplatePage extends Component
             challenges: $this->game_template->challenges,
             modifiers: $this->game_template->modifiers,
             players_can_join_late: $this->game_template->players_can_join_late,
+            scoreboard_type: $this->scoreboard_type,
         )->game_template_id;
 
         Verbs::commit();

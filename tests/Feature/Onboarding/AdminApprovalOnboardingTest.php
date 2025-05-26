@@ -12,7 +12,6 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 beforeEach(function () {
     Verbs::commitImmediately();
     $this->seed(UserSeeder::class);
-    $this->seed(GameTemplateSeeder::class);
     $this->seed(Laracon2025Seeder::class);
     $this->game = Game::first();
     $this->admin = $this->game->admins->first();
