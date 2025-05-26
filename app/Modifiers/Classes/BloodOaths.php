@@ -103,7 +103,7 @@ class BloodOaths extends BaseModifierClass
             player_id: $player->id,
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
-            oath_offer_id: $params['oath_offer_id'],
+            oath_offer_id: (int) $params['oath_offer_id'],
         );
     }
 

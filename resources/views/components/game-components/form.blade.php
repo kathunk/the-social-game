@@ -2,8 +2,8 @@
 
 <flux:card>
     <div class="flex flex-col space-y-4">
-        <div class="flex space-x-2 items-baseline">
-            @if ($type === 'challenge')
+        @if ($type === 'challenge')
+            <div class="flex space-x-2 items-baseline">
                 <flux:heading size="lg">Challenge</flux:heading>
             
                 @if ($this->challenge->ends_at->isFuture())
@@ -14,8 +14,8 @@
                 @else
                     <flux:text variant="subtle">ending...</flux:text>
                 @endif
-            @endif
-        </div>
+            </div>
+        @endif
         @foreach ($form['elements'] as $element)
             @switch($element['type'])
                 @case('title')
@@ -48,7 +48,7 @@
                         @foreach ($element['buttons'] as $btn)
                             <flux:button
                                 variant="primary"
-                                wire:click="callClassAction('{{ $btn['action'] }}', $type, '{{ $class_key }}')"
+                                wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}')"
                             >
                                 {{ $btn['label'] }}
                             </flux:button>

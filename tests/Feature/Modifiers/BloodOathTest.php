@@ -72,4 +72,7 @@ it('facilitates blood oaths', function () {
     Livewire::actingAs($player_3->fresh()->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->assertSee('You are in a blood oath with '.$player_2->name)
         ->assertDontSee('If you offer an oath');
+
+    expect(1)->toBe(0);
+    //@todo test scores!
 });
