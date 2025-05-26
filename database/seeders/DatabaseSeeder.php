@@ -10,10 +10,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            GameTemplateSeeder::class,
             UserSeeder::class,
             // Laracon2025Seeder::class,
-            PeckingOrderSeeder::class,
+            // PeckingOrderSeeder::class,
+            BloodOathSeeder::class,
         ]);
     }
 }

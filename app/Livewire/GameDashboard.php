@@ -31,7 +31,7 @@ class GameDashboard extends Component
     public function players()
     {
         return $this->game->status === 'ended'
-            ? $this->game->players->sortByDesc('score')
+            ? $this->game->players->sortBy('name')->sortByDesc('score')
             : $this->game->players->sortByDesc('hidden_score');
     }
 
@@ -139,8 +139,10 @@ class GameDashboard extends Component
 
     protected function initializeProperties()
     {
-        $this->round_properties[$this->challenge->class_key] = $this->challenge_handler?->propertiesForLivewire($this->player) ?? [];
-        $this->validation_rules[$this->challenge->class_key] = $this->challenge_handler?->validationRulesForLivewire($this->player) ?? [];
+        if ($this->challenge) {
+            $this->round_properties[$this->challenge->class_key] = $this->challenge_handler?->propertiesForLivewire($this->player) ?? [];
+            $this->validation_rules[$this->challenge->class_key] = $this->challenge_handler?->validationRulesForLivewire($this->player) ?? [];
+        }
 
         foreach ($this->modifiers as $modifier) {
             $this->round_properties[$modifier->class_key] = $modifier->handler()?->propertiesForLivewire($this->player) ?? [];

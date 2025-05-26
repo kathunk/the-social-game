@@ -56,11 +56,9 @@ class BloodOaths extends BaseModifierClass
         $players = $players->reject(fn ($p) => $p->id === $offer_id);
 
         return $this->form()
-            ->title(static::NAME)
-            ->subtitle(static::DESCRIPTION)
-            ->divider()
-            ->subtitle('If you offer an oath to a player while they are offering you one, you will enter an unbreakable alliance.
-                Your scores will be combined at the end of the game, and you will win or lose as a pair.')
+            ->title('Offer a blood oath')
+            ->subtitle('If you offer an oath to a partner who offers you one,
+                your scores will be combined at the end of the game, and you will win or lose as a pair.')
             ->when($offer !== null, function ($form) use ($offer) {
                 return $form->subtitle('Your current offer: '.$offer->name.' (you may change this at any time)');
             })
@@ -86,6 +84,7 @@ class BloodOaths extends BaseModifierClass
             )
             ->endGroup()
             ->divider()
+            ->title('Or: Declare an oath of solitude')
             ->subtitle('Declaring an oath of solitude means you cannot be in an alliance with anyone else.
                 For your bravery, you will gain 3 hidden points.')
             ->buttonGroup()
@@ -104,7 +103,7 @@ class BloodOaths extends BaseModifierClass
             player_id: $player->id,
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
-            oath_offer_id: $params['oath_offer_id'],
+            oath_offer_id: (int) $params['oath_offer_id'],
         );
     }
 

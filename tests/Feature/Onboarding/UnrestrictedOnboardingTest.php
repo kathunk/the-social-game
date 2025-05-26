@@ -3,7 +3,7 @@
 use App\Models\Game;
 use App\Models\GameTemplate;
 use App\Models\User;
-use Database\Seeders\GameTemplateSeeder;
+use Database\Seeders\Laracon2025Seeder;
 use Database\Seeders\UserSeeder;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -12,7 +12,7 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 beforeEach(function () {
     Verbs::commitImmediately();
     $this->seed(UserSeeder::class);
-    $this->seed(GameTemplateSeeder::class);
+    $this->seed(Laracon2025Seeder::class);
     $this->admin = User::first();
 });
 

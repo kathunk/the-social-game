@@ -10,7 +10,7 @@
                     @if ($type === 'team')
                         Team
                     @else
-                        Player
+                        Players
                     @endif
                 </flux:table.column>
                 <flux:table.column>Score</flux:table.column>
@@ -51,7 +51,9 @@
                             </flux:table.cell>
                         </flux:table.row>
                     @endforeach
-                @else
+                @endif
+
+                @if ($type === 'individual' || ($type === 'blood_oath' && $this->game->status === 'active'))
                     @foreach ($players as $player)
                         <flux:table.row>
                             <flux:table.cell>
@@ -79,6 +81,72 @@
                                         @endif
                                     </div>
                                 @endif
+                            </flux:table.cell>
+                        </flux:table.row>
+                    @endforeach
+                @endif
+
+                @if ($type === 'blood_oath' && $this->game->status === 'ended')
+                    @php
+                        $modifier_data = $this->game->modifiers()->where('class_key', App\Modifiers\Classes\BloodOaths::key())->first()->modifier_data;
+                        $pair_ids = collect($modifier_data['pairs']);
+                        $loan_wolves = $players->reject(fn($player) => $pair_ids->has($player->id));
+
+                        $rows = $loan_wolves->map(fn($player) => [
+                            'players' => [$player],
+                            'final_score' => $player->score,
+                            'hidden_points' => $player->hidden_score,
+                        ]);
+
+                        $pair_ids->each(function($key, $pair) use ($rows, $players) {
+                            $player_1 = $players->firstWhere('id', $pair);
+                            $player_2 = $players->firstWhere('id', $key);
+
+                            $pair_accounted_for = $rows->filter(fn($row) => 
+                                $row['players'][0]->id === $player_1->id || $row['players'][0]->id === $player_2->id 
+                            )->count() > 0;
+
+                            if ($pair_accounted_for) {
+                                return;
+                            }
+
+                            $final_score = $player_1->hidden_score + $player_2->hidden_score;
+                            $hidden_points = $final_score - $player_1->score - $player_2->score;
+
+                            $rows->push([
+                                'players' => [$player_1, $player_2],
+                                'final_score' => $final_score,
+                                'hidden_points' => $hidden_points,
+                            ]);
+                        });
+
+                        $rows = $rows->sortByDesc('final_score');
+                    @endphp
+
+                    @foreach ($rows as $row)
+                        <flux:table.row>
+                            <flux:table.cell>
+                                <div class="flex items-center gap-2">
+                                    <flux:link :href="route('players.show', [$this->game->id, $row['players'][0]->id])">
+                                        {{ $row['players'][0]->name }}
+                                    </flux:link>
+                                    @if (collect($row['players'])->count() > 1)
+                                        &
+                                        <flux:link :href="route('players.show', [$this->game->id, $row['players'][1]->id])">
+                                            {{ $row['players'][1]->name }}
+                                        </flux:link>
+                                    @endif
+                                </div>
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                <div class="flex items-center gap-2">
+                                    {{ $row['final_score'] }} 
+                                    @if ($row['hidden_points'] > 0)
+                                        <flux:text class="text-purple-500 dark:text-purple-300">
+                                            ({{ $row['hidden_points'] }} hidden)
+                                        </flux:text>
+                                    @endif
+                                </div>
                             </flux:table.cell>
                         </flux:table.row>
                     @endforeach

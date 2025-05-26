@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\IndividualDoubleTrouble;
+use App\Challenges\Classes\IndividualGrandstandGambit;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
@@ -13,7 +15,7 @@ use App\Modifiers\Classes\BloodOaths;
 use Illuminate\Database\Seeder;
 use Thunk\Verbs\Facades\Verbs;
 
-class PeckingOrderSeeder extends Seeder
+class BloodOathSeeder extends Seeder
 {
     public function run(): void
     {
@@ -31,7 +33,19 @@ class PeckingOrderSeeder extends Seeder
             challenges: [
                 [
                     'challenge_keys' => [
+                        IndividualGrandstandGambit::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
                         IndividualHighScoreQuiz::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualDoubleTrouble::key(),
                     ],
                     'duration' => 10,
                 ],
