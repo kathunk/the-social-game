@@ -25,7 +25,7 @@ class PlayerOfferedBloodOath extends Event
         );
 
         $this->assert(
-            $data['pairs'][$this->player()->id] === null,
+            ! array_key_exists($this->player()->id, $data['pairs']),
             'You are already in an alliance',
         );
 
@@ -39,7 +39,10 @@ class PlayerOfferedBloodOath extends Event
     {
         $modifier->modifier_data['offers'][$this->player()->id] = $this->oath_offer_id;
 
-        if ($modifier->modifier_data['offers'][$this->oath_offer_id] === $this->player_id) {
+        if (
+            array_key_exists($this->oath_offer_id, $modifier->modifier_data['offers'])
+            && $modifier->modifier_data['offers'][$this->oath_offer_id] === $this->player_id
+        ) {
             $modifier->modifier_data['pairs'][$this->player_id] = $this->oath_offer_id;
             $modifier->modifier_data['pairs'][$this->oath_offer_id] = $this->player_id;
 

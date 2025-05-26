@@ -30,7 +30,7 @@ it('facilitates blood oaths', function () {
 
     Livewire::actingAs($player_1->fresh()->user)->test(GameDashboard::class, ['game' => $game->fresh()])
         ->assertSee('Blood Oath')
-        ->call('callModifierAction', BloodOaths::key(), 'declare_oath_of_solitude')
+        ->call('callClassAction', 'declare_oath_of_solitude', 'modifier', BloodOaths::key())
         ->assertHasNoErrors();
 
     $modifier = $this->game->modifiers->first();
@@ -41,22 +41,22 @@ it('facilitates blood oaths', function () {
         ->assertDontSee('If you offer an oath to a player');
 
     Livewire::actingAs($player_2->fresh()->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('modifier_properties.oath_offer_id', $player_3->id)
-        ->call('callModifierAction', BloodOaths::key(), 'offer_blood_oath')
+        ->set('round_properties.'.BloodOaths::key().'.oath_offer_id', $player_3->id)
+        ->call('callClassAction', 'offer_blood_oath', 'modifier', BloodOaths::key())
         ->assertHasNoErrors();
 
     $modifier->refresh();
     expect($modifier->modifier_data['offers'][$player_2->id])->toBe($player_3->id);
     expect(collect($modifier->modifier_data['pairs'])->count())->toBe(0);
 
-    Livewire::actingAs($player_2->user)->test(GameDashboard::class, ['game' => $this->game])
-        ->assertSee('Current offer: '.$player_3->name)
+    Livewire::actingAs($player_2->fresh()->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->assertSee('Your current offer: '.$player_3->name)
         ->assertDontSee('Players currently offering you an oath');
 
-    Livewire::actingAs($player_3->user)->test(GameDashboard::class, ['game' => $this->game])
+    Livewire::actingAs($player_3->fresh()->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->assertSee('Players currently offering you an oath: '.$player_2->name)
-        ->set('modifier_properties.oath_offer_id', $player_2->id)
-        ->call('callModifierAction', BloodOaths::key(), 'offer_blood_oath')
+        ->set('round_properties.'.BloodOaths::key().'.oath_offer_id', $player_2->id)
+        ->call('callClassAction', 'offer_blood_oath', 'modifier', BloodOaths::key())
         ->assertHasNoErrors();
 
     $modifier->refresh();
@@ -66,11 +66,11 @@ it('facilitates blood oaths', function () {
     expect($modifier->modifier_data['offers'][$player_2->id])->toBe(null);
     expect($modifier->modifier_data['offers'][$player_3->id])->toBe(null);
 
-    Livewire::actingAs($player_2->user)->test(GameDashboard::class, ['game' => $this->game])
+    Livewire::actingAs($player_2->fresh()->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->assertSee('You are in a blood oath with '.$player_3->name)
-        ->assertDontSee('Select a player');
+        ->assertDontSee('If you offer an oath');
 
-    Livewire::actingAs($player_3->user)->test(GameDashboard::class, ['game' => $this->game])
+    Livewire::actingAs($player_3->fresh()->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->assertSee('You are in a blood oath with '.$player_2->name)
-        ->assertDontSee('Select a player');
+        ->assertDontSee('If you offer an oath');
 });
