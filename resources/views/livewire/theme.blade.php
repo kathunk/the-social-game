@@ -12,27 +12,27 @@
             @endforeach
         </flux:select>
 
-        <div id="palette" class="flex p-4 border border-dotted text-zinc-500 border-black dark:border-white justify-around grow h-full w-full gap-x-4">
+        <div id="palette" class="flex p-4 border border-dotted text-zinc-500 border-black dark:border-zinc-200 justify-around grow h-full w-full gap-x-4">
             <div class="flex flex-col sm:flex-row justify-between sm:justify-normal gap-2 sm:gap-4 items-center w-1/4">
                 background
-                <div class="p-4 bg-[var(--color-background)] border border-dotted border-black dark:border-white">
+                <div class="p-4 bg-[var(--color-background)] border border-dotted border-black dark:border-zinc-200">
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row justify-between sm:justify-normal sm:gap-4 items-center w-1/4">
                 accent
-                <div class="p-4 bg-[var(--color-accent)] border border-dotted border-black dark:border-white">
+                <div class="p-4 bg-[var(--color-accent)] border border-dotted border-black dark:border-zinc-200">
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row justify-between sm:justify-normal sm:gap-4 items-center w-1/4">
                 <span class="hidden sm:block">accent-content</span>
                 <span class="block sm:hidden">content</span>
-                <div class="p-4 bg-[var(--color-accent-content)] border border-dotted border-black dark:border-white">
+                <div class="p-4 bg-[var(--color-accent-content)] border border-dotted border-black dark:border-zinc-200">
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row justify-between sm:justify-normal sm:gap-4 items-center w-1/4">
                 <span class="hidden sm:block">accent-foreground</span>
                 <span class="block sm:hidden">foreground</span>
-                <div class="p-4 bg-[var(--color-accent-foreground)] border border-dotted border-black dark:border-white">
+                <div class="p-4 bg-[var(--color-accent-foreground)] border border-dotted border-black dark:border-zinc-200">
                 </div>
             </div>
         </div>
