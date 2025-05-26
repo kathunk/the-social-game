@@ -17,7 +17,7 @@
             <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
 
             <div class="flex items-center">
-                <flux:brand name="The Social Game" href="{{ route('dashboard') }}" wire:navigate>
+                <flux:brand name="The Social Game™" href="{{ route('dashboard') }}" wire:navigate>
                     <x-slot name="logo">
                         <div class="rounded w-12 bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
                             <x-app-logo />

@@ -7,7 +7,7 @@
         <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
             <div class="flex w-full max-w-sm flex-col gap-2">
                 <div class="flex items-center justify-center">
-                    <flux:brand name="The Social Game" href="{{ route('dashboard') }}" wire:navigate>
+                    <flux:brand name="The Social Game™" href="{{ route('dashboard') }}" wire:navigate>
                         <x-slot name="logo">
                             <div class="rounded w-12 bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
                                 <x-app-logo />
