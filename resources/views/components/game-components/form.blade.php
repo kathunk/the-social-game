@@ -1,7 +1,23 @@
-@if (isset($modifierComponent['elements']))
+@props(['form', 'type', 'class_key'])
+
 <x-card>
     <div class="flex flex-col space-y-4">
-        @foreach ($modifierComponent['elements'] as $element)
+        <div class="flex space-x-2 items-baseline">
+            <flux:heading size="lg">
+                {{ $type === 'challenge' ? 'Challenge' : 'Modifier' }}
+            </flux:heading>
+            @if ($type === 'challenge')
+                @if ($this->challenge->ends_at->isFuture())
+                    <flux:text variant="subtle" class="flex items-baseline gap-1">
+                        ends in
+                        <x-game-components.countdown-timer :ends_at="$this->challenge->ends_at->toIsoString()" />
+                    </flux:text>
+                @else
+                    <flux:text variant="subtle">ending...</flux:text>
+                @endif
+            @endif
+        </div>
+        @foreach ($form['elements'] as $element)
             @switch($element['type'])
                 @case('title')
                     <flux:heading>{{ $element['text'] }}</flux:heading>
@@ -11,6 +27,9 @@
                     @break
                 @case('image')
                     <img src="{{ $element['url'] }}" alt="{{ $element['alt'] }}" class="w-full h-auto rounded-lg my-4" />
+                    @break
+                @case('message')
+                    <flux:text class="mt-1">{{ $element['text'] }}</flux:text>
                     @break
                 @case('divider')
                     <flux:separator class="my-4" />
@@ -22,7 +41,7 @@
                     <flux:input
                         label="{{ $element['label']}}"
                         placeholder="{{$element['placeholder']}}"
-                        wire:model="modifier_properties.{{ $element['property_name']}}"
+                        wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
                     />
                     @break
                 @case('button_group')
@@ -30,7 +49,7 @@
                         @foreach ($element['buttons'] as $btn)
                             <flux:button
                                 variant="primary"
-                                wire:click="callModifierAction('{{ $modifier->class_key }}', '{{ $btn['action'] }}')"
+                                wire:click="callClassAction('{{ $btn['action'] }}', $type, '{{ $class_key }}')"
                             >
                                 {{ $btn['label'] }}
                             </flux:button>
@@ -38,10 +57,9 @@
                     </div>
                     @break
                 @case('select')
-                    {{-- @todo same issue here where first option in list is not placeholder, and is not real --}}
                     <flux:select
                         label="{{ $element['label'] }}"
-                        wire:model="modifier_properties.{{ $element['property_name']}}"
+                        wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
                     >
                     @isset($element['placeholder'])
                         <flux:select.option value="" selected class="placeholder">{{ $element['placeholder'] }}</flux:select.option>
@@ -55,4 +73,3 @@
         @endforeach
     </div>
 </x-card>
-@endif

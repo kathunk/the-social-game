@@ -34,7 +34,7 @@ function joinTeam($player, $team_id): LivewireTest
     return Livewire::actingAs($player->user)
         ->test(GameDashboard::class, ['game' => $player->game->fresh()])
         ->set('selected_team_id', $team_id)
-        ->call('joinTeam');
+        ->call('joinTeam', 'challenge', PyramidScheme::key());
 }
 
 it('runs the Pyramid Scheme challenge', function () {
@@ -56,7 +56,7 @@ it('runs the Pyramid Scheme challenge', function () {
     expect($team_3->fresh()->score)->toBe(0);
 
     // player changes team, but score is not affected
-    swapTeam($player_1->fresh(), $team_3->id)
+    swapTeam($player_1->fresh(), $team_3->id, PyramidScheme::key())
         ->assertHasNoErrors();
 
     expect($team->fresh()->score)->toBe(1);
@@ -77,8 +77,8 @@ describe('validate swapTeam', function () {
 
         joinTeam($player->fresh(), $this->game->teams->first()->id);
 
-        swapTeam($player->fresh(), '')
-            ->assertHasErrors(['challenge_properties.team_id' => 'required']);
+        swapTeam($player->fresh(), '', PyramidScheme::key())
+            ->assertHasErrors(['round_properties.'.PyramidScheme::key().'.team_id' => 'required']);
     });
 
     it('team_id must be a valid team', function () {
@@ -86,8 +86,8 @@ describe('validate swapTeam', function () {
 
         joinTeam($player->fresh(), $this->game->teams->first()->id);
 
-        swapTeam($player->fresh(), 999)
-            ->assertHasErrors(['challenge_properties.team_id' => 'exists']);
+        swapTeam($player->fresh(), 999, PyramidScheme::key())
+            ->assertHasErrors(['round_properties.'.PyramidScheme::key().'.team_id' => 'exists']);
     });
 });
 
@@ -95,14 +95,14 @@ describe('validate joinTeam', function () {
     it('team_id is required', function () {
         $player = $this->createPlayer();
 
-        joinTeam($player->fresh(), '')
+        joinTeam($player->fresh(), '', PyramidScheme::key())
             ->assertHasErrors(['selected_team_id' => 'required']);
     });
 
     it('team_id must be a valid team', function () {
         $player = $this->createPlayer();
 
-        joinTeam($player->fresh(), 999)
+        joinTeam($player->fresh(), 999, PyramidScheme::key())
             ->assertHasErrors(['selected_team_id' => 'exists']);
     });
 });

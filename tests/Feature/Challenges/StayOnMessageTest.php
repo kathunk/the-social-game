@@ -12,8 +12,8 @@ function stayOnMessage($player, $message): LivewireTest
 {
     return Livewire::actingAs($player->user)
         ->test(GameDashboard::class, ['game' => $player->game->fresh()])
-        ->set('challenge_properties.string_input', $message)
-        ->call('callChallengeAction', 'submitString');
+        ->set('round_properties.'.StayOnMessage::key().'.string_input', $message)
+        ->call('callClassAction', 'submitString', 'challenge', StayOnMessage::key());
 }
 
 beforeEach(function () {
@@ -89,16 +89,16 @@ describe('validate stayOnMessage', function () {
 
     it('is required', function () {
         stayOnMessage($this->player, '')
-            ->assertHasErrors(['challenge_properties.string_input' => 'required']);
+            ->assertHasErrors(['round_properties.'.StayOnMessage::key().'.string_input' => 'required']);
     });
 
     it('must be 50 min', function () {
         stayOnMessage($this->player, 'a')
-            ->assertHasErrors(['challenge_properties.string_input' => 'min']);
+            ->assertHasErrors(['round_properties.'.StayOnMessage::key().'.string_input' => 'min']);
     });
 
     it('must be 50 max', function () {
         stayOnMessage($this->player, str_repeat('a', 51))
-            ->assertHasErrors(['challenge_properties.string_input' => 'max']);
+            ->assertHasErrors(['round_properties.'.StayOnMessage::key().'.string_input' => 'max']);
     });
 });

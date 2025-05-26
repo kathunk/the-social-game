@@ -93,7 +93,7 @@ it('only awards points when a team recruits their bounty', function () {
             ->whereIn('id', $bounty_player_ids)
             ->first();
 
-        swapTeam($bounty_player, $team->id);
+        swapTeam($bounty_player, $team->id, TeamBounty::key());
         expect($bounty_player->refresh()->team_id)->toBe($assigned_team_id);
 
         // assigned team gets 15 points for recruiting their bounty
@@ -106,7 +106,7 @@ it('only awards points when a team recruits their bounty', function () {
             ->whereNotIn('id', $bounty_player_ids)
             ->first();
 
-        swapTeam($non_bounty_player, $team->id);
+        swapTeam($non_bounty_player, $team->id, TeamBounty::key());
         expect($non_bounty_player->refresh()->team_id)->toBe($assigned_team_id);
 
         // assigned team does not get points for recruiting a non-bounty player
@@ -118,9 +118,9 @@ it('players may only switch teams once during this challenge', function () {
     $player = $this->player_1;
 
     // First team switch should work
-    swapTeam($player->fresh(), $this->team_2->id);
+    swapTeam($player->fresh(), $this->team_2->id, TeamBounty::key());
 
-    expect(fn () => swapTeam($player->fresh(), $this->team_3->id))->toThrow(Exception::class);
+    expect(fn () => swapTeam($player->fresh(), $this->team_3->id, TeamBounty::key()))->toThrow(Exception::class);
 
     expect($this->challenge->fresh()->challenge_data['swapper_ids'])->toContain($player->id);
 
@@ -131,14 +131,14 @@ describe('validate swapTeam', function () {
     it('team_id is required', function () {
         $player = $this->player_1;
 
-        swapTeam($player->fresh(), '')
-            ->assertHasErrors(['challenge_properties.team_id' => 'required']);
+        swapTeam($player->fresh(), '', TeamBounty::key())
+            ->assertHasErrors(['round_properties.'.TeamBounty::key().'.team_id' => 'required']);
     });
 
     it('team_id must be a valid team', function () {
         $player = $this->player_1;
 
-        swapTeam($player->fresh(), 999)
-            ->assertHasErrors(['challenge_properties.team_id' => 'exists']);
+        swapTeam($player->fresh(), 999, TeamBounty::key())
+            ->assertHasErrors(['round_properties.'.TeamBounty::key().'.team_id' => 'exists']);
     });
 });

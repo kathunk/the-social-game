@@ -11,7 +11,7 @@ class TeamResignation extends BaseModifierClass
 
     const DESCRIPTION = 'Players can resign at any time. When they do, they may give their team +3 or -3 points.';
 
-    const TYPE = 'team'; // team or individual
+    const TYPE = 'team';
 
     public static function key(): string
     {
@@ -35,10 +35,10 @@ class TeamResignation extends BaseModifierClass
                     '-3' => '-3',
                 ],
                 property_name: 'points',
-                validation_rules: 'required|string|in:'."['-3', '3']",
+                validation_rules: 'required|string|in:3,-3',
                 validation_messages: [
-                    'points.required' => 'Please select a number.',
-                    'points.string' => 'Please select a number.',
+                    'required' => 'Please select a number.',
+                    'string' => 'Please select a number.',
                     'in' => 'Please select between -3 and 3.',
                 ],
             )
@@ -54,19 +54,6 @@ class TeamResignation extends BaseModifierClass
 
     public function resign(Player $player, array $params)
     {
-        // @todo replace this when we finish validation logic for modifiers
-        if (
-            ! isset($params['points'])
-            || (
-                $params['points'] === ''
-            )
-        ) {
-            return back()->withErrors([
-                // this will not show up in the UI because we are not validating yet
-                'points' => 'Points are required.',
-            ]);
-        }
-
         PlayerResignedInTeamGame::fire(
             player_id: $player->id,
             points: (int) $params['points'],

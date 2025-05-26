@@ -65,8 +65,8 @@ function launchNuclearStrike($player, $strike_type, $code): LivewireTest
 
     return Livewire::actingAs($player->user)
         ->test(GameDashboard::class, ['game' => $player->game->fresh()])
-        ->set('challenge_properties.target_code', $code)
-        ->call('callChallengeAction', $strike_type);
+        ->set('round_properties.'.TeamBrinksmanship::key().'.target_code', $code)
+        ->call('callClassAction', $strike_type, 'challenge', TeamBrinksmanship::key());
 }
 
 it('creates unique codes for each team and assigns ally pairs', function () {
@@ -166,14 +166,14 @@ describe('validate nuclear code', function () {
     it('is required', function () {
         launchNuclearStrike($this->player_1, 'carpet_bomb', '')
             ->assertHasErrors([
-                'challenge_properties.target_code' => 'required',
+                'round_properties.'.TeamBrinksmanship::key().'.target_code' => 'required',
             ]);
     });
 
     it('must be valid', function () {
         launchNuclearStrike($this->player_1, 'carpet_bomb', 'INVALID')
             ->assertHasErrors([
-                'challenge_properties.target_code' => 'nuclear_code',
+                'round_properties.'.TeamBrinksmanship::key().'.target_code' => 'nuclear_code',
             ]);
     });
 });

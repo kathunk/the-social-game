@@ -78,8 +78,8 @@ class Game extends Model
         GameTemplate $template,
         Carbon $starts_at,
         User $user,
-        bool $is_public,
         bool $requires_admin_approval_to_join,
+        ?bool $is_public = false,
         ?array $challenges = null,
     ): self {
         $game_id = GameCreated::fire(
