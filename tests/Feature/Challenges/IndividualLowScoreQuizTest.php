@@ -37,26 +37,26 @@ it('runs the individual low score quiz', function () {
     $this->actingAs($player_1->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('challenge_properties.upvote_player_id', $player_3->id)
-        ->set('challenge_properties.downvote_player_id', $player_2->id)
-        ->call('callChallengeAction', 'vote')->assertHasNoErrors()
-        ->set('challenge_properties.guess_player_id', $player_2->id)
-        ->call('callChallengeAction', 'guess')->assertHasNoErrors();
+        ->set('round_properties.'.$challenge->class_key.'.upvote_player_id', $player_3->id)
+        ->set('round_properties.'.$challenge->class_key.'.downvote_player_id', $player_2->id)
+        ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)->assertHasNoErrors()
+        ->set('round_properties.'.$challenge->class_key.'.guess_player_id', $player_2->id)
+        ->call('callClassAction', 'guess', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     $this->actingAs($player_2->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('challenge_properties.upvote_player_id', $player_1->id)
-        ->set('challenge_properties.downvote_player_id', $player_4->id)
-        ->call('callChallengeAction', 'vote')->assertHasNoErrors()
-        ->set('challenge_properties.guess_player_id', $player_4->id)
-        ->call('callChallengeAction', 'guess')->assertHasNoErrors();
+        ->set('round_properties.'.$challenge->class_key.'.upvote_player_id', $player_1->id)
+        ->set('round_properties.'.$challenge->class_key.'.downvote_player_id', $player_4->id)
+        ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)->assertHasNoErrors()
+        ->set('round_properties.'.$challenge->class_key.'.guess_player_id', $player_4->id)
+        ->call('callClassAction', 'guess', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     $this->actingAs($player_3->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('challenge_properties.guess_player_id', $player_1->id)
-        ->call('callChallengeAction', 'guess')->assertHasNoErrors();
+        ->set('round_properties.'.$challenge->class_key.'.guess_player_id', $player_1->id)
+        ->call('callClassAction', 'guess', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     $challenge->refresh();
     $challenge->end();

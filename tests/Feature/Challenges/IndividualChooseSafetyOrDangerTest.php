@@ -37,18 +37,18 @@ it('runs individual choose safety or danger', function () {
     $this->actingAs($player_1->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('challenge_properties.upvote_player_id', $player_3->id)
-        ->set('challenge_properties.downvote_player_id', $player_2->id)
-        ->call('callChallengeAction', 'vote')->assertHasNoErrors()
-        ->call('callChallengeAction', 'choose_safety')->assertHasNoErrors();
+        ->set('round_properties.'.$challenge->class_key.'.upvote_player_id', $player_3->id)
+        ->set('round_properties.'.$challenge->class_key.'.downvote_player_id', $player_2->id)
+        ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)->assertHasNoErrors()
+        ->call('callClassAction', 'choose_safety', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     $this->actingAs($player_2->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('challenge_properties.upvote_player_id', $player_4->id)
-        ->set('challenge_properties.downvote_player_id', $player_1->id)
-        ->call('callChallengeAction', 'vote')->assertHasNoErrors()
-        ->call('callChallengeAction', 'choose_danger')->assertHasNoErrors();
+        ->set('round_properties.'.$challenge->class_key.'.upvote_player_id', $player_4->id)
+        ->set('round_properties.'.$challenge->class_key.'.downvote_player_id', $player_1->id)
+        ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)->assertHasNoErrors()
+        ->call('callClassAction', 'choose_danger', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     $challenge->refresh();
     $challenge->end();

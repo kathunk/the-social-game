@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\Classes\StayOnMessage;
 use App\Livewire\GameDashboard;
 use App\Modifiers\Classes\TeamResignation;
 use Livewire\Livewire;
@@ -13,7 +13,7 @@ it('allows for resignations in team games', function () {
 
     $challenges = [
         [
-            'challenge_keys' => [PyramidScheme::key()],
+            'challenge_keys' => [StayOnMessage::key()],
             'duration' => 10,
         ],
     ];
@@ -38,5 +38,9 @@ it('allows for resignations in team games', function () {
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->assertSee('Had enough?')
-        ->call('callModifierAction', TeamResignation::key(), 'resign', ['points' => '-3']);
+        ->set('round_properties.'.TeamResignation::key().'.points', '-3')
+        ->call('callClassAction', 'resign', 'modifier', TeamResignation::key())
+        ->assertHasNoErrors();
+
+    expect($team->fresh()->score)->toBe(-3);
 });

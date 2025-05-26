@@ -24,7 +24,7 @@ class GameCreated extends Event
 
     public Carbon $ends_at;
 
-    public bool $is_public;
+    public ?bool $is_public = false;
 
     public bool $requires_admin_approval_to_join;
 

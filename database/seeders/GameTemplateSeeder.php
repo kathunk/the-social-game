@@ -88,6 +88,35 @@ class GameTemplateSeeder extends Seeder
                 'modifiers' => [],
                 'players_can_join_late' => false,
             ],
+            'Pecking Order: Blood Oaths' => [
+                'description' => 'Win the game with a secret alliance, or as a lone wolf.',
+                'pre_game_lobby_message' => "<h1>A popularity contest for horrible people</h1><h3>Climb to the top of the ranks.</h3><p>Every round, you will upvote and downvote your opponents. But you will also take quizzes about how you expect the votes to turn out. When you are right, you'll accumulate secret points that are revealed at the end of the game. Outsmart your opponents to be at the top of the Pecking Order!</p>",
+                'type' => 'individual',
+                'min_players' => 6,
+                'max_players' => 12,
+                'is_public' => false,
+                'team_names' => [],
+                'challenges' => [
+                    [
+                        'challenge_keys' => [IndividualHighScoreQuiz::key()],
+                        'duration' => 10,
+                    ],
+                    [
+                        'challenge_keys' => [IndividualNoScoreChangeQuiz::key()],
+                        'duration' => 10,
+                    ],
+                    [
+                        'challenge_keys' => [IndividualHighScoreQuiz::key(), IndividualLargestDecreaseQuiz::key(), IndividualLargestIncreaseQuiz::key()],
+                        'duration' => 10,
+                    ],
+                    [
+                        'challenge_keys' => [IndividualMostHiddenPointQuiz::key(), IndividualFewestHiddenPointQuiz::key()],
+                        'duration' => 10,
+                    ],
+                ],
+                'modifiers' => [],
+                'players_can_join_late' => false,
+            ],
         ];
 
         foreach ($templates as $name => $template) {

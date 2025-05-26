@@ -17,21 +17,9 @@ class GameDashboard extends Component
 
     public string $selected_team_id;
 
-    public int $quit_points;
+    public array $round_properties = [];
 
-    public array $challenge_component = [];
-
-    public array $modifier_component = [];
-
-    public array $challenge_properties = [];
-
-    public array $modifier_properties = [];
-
-    public array $challenge_validation_rules = [];
-
-    public array $modifier_validation_rules = [];
-
-    public array $modifier_validation_messages = [];
+    public array $validation_rules = [];
 
     #[Computed]
     public function user()
@@ -146,20 +134,24 @@ class GameDashboard extends Component
             Verbs::commit();
         }
 
-        $this->initializeChallenge();
+        $this->initializeProperties();
     }
 
-    protected function initializeChallenge()
+    protected function initializeProperties()
     {
-        $this->challenge_component = $this->challenge_handler?->frontendComponent($this->player) ?? [];
-        $this->challenge_properties = $this->challenge_handler?->propertiesForLivewire($this->player) ?? [];
-        $this->challenge_validation_rules = $this->challenge_handler?->validationRulesForLivewire($this->player) ?? [];
+        $this->round_properties[$this->challenge->class_key] = $this->challenge_handler?->propertiesForLivewire($this->player) ?? [];
+        $this->validation_rules[$this->challenge->class_key] = $this->challenge_handler?->validationRulesForLivewire($this->player) ?? [];
+
+        foreach ($this->modifiers as $modifier) {
+            $this->round_properties[$modifier->class_key] = $modifier->handler()?->propertiesForLivewire($this->player) ?? [];
+            $this->validation_rules[$modifier->class_key] = $modifier->handler()?->validationRulesForLivewire($this->player) ?? [];
+        }
     }
 
     #[On('challenge-complete')]
     public function refreshChallenge()
     {
-        $this->initializeChallenge();
+        $this->initializeProperties();
     }
 
     public function joinTeam()
@@ -167,8 +159,6 @@ class GameDashboard extends Component
         $this->validate([
             'selected_team_id' => 'required|exists:teams,id',
         ]);
-
-        // @todo freaky ass bug where joinTeam fails when you choose the first team in the select
 
         $team = Team::find($this->selected_team_id);
         $this->player->joinTeam($team);
@@ -181,34 +171,39 @@ class GameDashboard extends Component
 
     public function rules()
     {
-        // Get the base rules for challenge_properties
         $rules = [
-            'challenge_properties' => 'array',
-            'challenge_properties.*' => 'nullable',
+            'round_properties' => 'array',
+            'round_properties.*' => 'nullable',
         ];
 
-        // If we have validation rules from the challenge handler, merge them
-        if (! empty($this->challenge_validation_rules['rules'])) {
-            // Transform the rules to be under challenge_properties namespace
-            $transformed_rules = [];
-            foreach ($this->challenge_validation_rules['rules'] as $key => $rule) {
-                $transformed_rules["challenge_properties.$key"] = $rule;
+        foreach ($this->validation_rules as $class_key => $validation) {
+            if (! empty($validation['rules'])) {
+                $transformed_rules = [];
+                foreach ($validation['rules'] as $key => $rule) {
+                    $transformed_rules["round_properties.$class_key.$key"] = $rule;
+                }
+                $rules = array_merge($rules, $transformed_rules);
             }
-            $rules = array_merge($rules, $transformed_rules);
+        }
+
+        if (isset($this->filtered_rules)) {
+            $rules = array_merge($rules, $this->filtered_rules);
         }
 
         return $rules;
     }
 
-    public function callChallengeAction(string $action, ?array $params = null)
+    public function callClassAction(string $action, string $type, string $class_key)
     {
-        // If no params provided, use challenge_properties
-        $params = $params ?? $this->challenge_properties;
+        $params = $this->round_properties[$class_key];
+        $params = ['round_properties' => $params];
 
-        // Always wrap params in challenge_properties namespace
-        $params = ['challenge_properties' => $params];
+        $handler = match ($type) {
+            'challenge' => $this->challenge_handler,
+            'modifier' => $this->modifiers->firstWhere('class_key', $class_key)->handler(),
+        };
 
-        $component = $this->challenge_handler->frontendComponent($this->player);
+        $component = $handler->frontendComponent($this->player);
 
         $all_elements = collect($component['elements'])->flatMap(function ($el) {
             return [
@@ -224,19 +219,18 @@ class GameDashboard extends Component
         $fields = $button['properties_to_validate'] ?? [];
 
         if (! empty($fields)) {
-            $validation = $this->challenge_validation_rules;
+            $validation = $this->validation_rules[$class_key] ?? [];
 
             $filtered_rules = [];
             $filtered_messages = [];
             foreach ($fields as $field) {
-                // No need to prefix with challenge_properties here since rules() handles it
                 if (isset($validation['rules'][$field])) {
-                    $filtered_rules["challenge_properties.$field"] = $validation['rules'][$field];
+                    $filtered_rules["round_properties.$class_key.$field"] = $validation['rules'][$field];
                 }
                 if (isset($validation['messages'])) {
                     foreach ($validation['messages'] as $msg_key => $msg_val) {
                         if (str_starts_with($msg_key, "$field.")) {
-                            $filtered_messages["challenge_properties.$msg_key"] = $msg_val;
+                            $filtered_messages["round_properties.$class_key.$msg_key"] = $msg_val;
                         }
                     }
                 }
@@ -245,20 +239,7 @@ class GameDashboard extends Component
             $this->validate($filtered_rules, $filtered_messages);
         }
 
-        // Extract the challenge_properties when passing to the handler
-        $this->challenge->handler()->{$action}($this->player, $params['challenge_properties']);
-
-        redirect()->route('game-dashboard', ['game' => $this->game]);
-    }
-
-    public function callModifierAction(string $modifier_key, string $action, ?array $params = null)
-    {
-        $params = $params ?? $this->modifier_properties;
-
-        // @todo validate params
-
-        $modifier = $this->modifiers->firstWhere('class_key', $modifier_key);
-        $response = $modifier->handler()->{$action}($this->player, $params);
+        $response = $handler->{$action}($this->player, $params['round_properties']);
 
         return $response instanceof \Illuminate\Http\RedirectResponse
             || $response instanceof \Livewire\Features\SupportRedirects\Redirector
