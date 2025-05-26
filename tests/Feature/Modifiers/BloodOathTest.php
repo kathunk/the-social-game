@@ -39,6 +39,8 @@ it('facilitates blood oaths', function () {
         ->assertSee('You have made an oath of solitude')
         ->assertDontSee('If you offer an oath to a player');
 
+    expect($player_1->fresh()->hidden_score)->toBe(3);
+
     Livewire::actingAs($player_2->fresh()->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('round_properties.'.BloodOaths::key().'.oath_offer_id', $player_3->id)
         ->call('callClassAction', 'offer_blood_oath', 'modifier', BloodOaths::key())
@@ -72,7 +74,4 @@ it('facilitates blood oaths', function () {
     Livewire::actingAs($player_3->fresh()->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->assertSee('You are in a blood oath with '.$player_2->name)
         ->assertDontSee('If you offer an oath');
-
-    expect(1)->toBe(0);
-    //@todo test scores!
 });

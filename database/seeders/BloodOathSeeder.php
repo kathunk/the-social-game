@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\IndividualDoubleTrouble;
+use App\Challenges\Classes\IndividualGrandstandGambit;
 use App\Models\Game;
 use App\Models\User;
 use App\Models\GameTemplate;
@@ -31,7 +33,19 @@ class BloodOathSeeder extends Seeder
             challenges: [
                 [
                     'challenge_keys' => [
+                        IndividualGrandstandGambit::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
                         IndividualHighScoreQuiz::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualDoubleTrouble::key(),
                     ],
                     'duration' => 10,
                 ],

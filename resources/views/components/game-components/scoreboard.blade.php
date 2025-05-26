@@ -88,23 +88,22 @@
 
                 @if ($type === 'blood_oath' && $this->game->status === 'ended')
                     @php
-                        $modifier_data = $this->game->modifiers()->where('class_key', BloodOaths::key())->first()->modifier_data;
+                        $modifier_data = $this->game->modifiers()->where('class_key', App\Modifiers\Classes\BloodOaths::key())->first()->modifier_data;
                         $pair_ids = collect($modifier_data['pairs']);
-                        $loan_wolves = $players->reject(fn($player) => array_key_exists($player->id, $pair_ids));
+                        $loan_wolves = $players->reject(fn($player) => $pair_ids->has($player->id));
 
                         $rows = $loan_wolves->map(fn($player) => [
-                            'ids' => [$player->id],
-                            'names' => [$player->name],
+                            'players' => [$player],
                             'final_score' => $player->score,
                             'hidden_points' => $player->hidden_score,
                         ]);
 
-                        $pair_ids->each(function($key, $pair) use ($rows) {
+                        $pair_ids->each(function($key, $pair) use ($rows, $players) {
                             $player_1 = $players->firstWhere('id', $pair);
                             $player_2 = $players->firstWhere('id', $key);
 
                             $pair_accounted_for = $rows->filter(fn($row) => 
-                                $row['ids'][0] === $player_1->id || $row['ids'][0] === $player_2->id 
+                                $row['players'][0]->id === $player_1->id || $row['players'][0]->id === $player_2->id 
                             )->count() > 0;
 
                             if ($pair_accounted_for) {
@@ -121,7 +120,7 @@
                             ]);
                         });
 
-                        $rows->sortByDesc('final_score');
+                        $rows = $rows->sortByDesc('final_score');
                     @endphp
 
                     @foreach ($rows as $row)
