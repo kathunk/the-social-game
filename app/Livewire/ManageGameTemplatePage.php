@@ -35,24 +35,20 @@ class ManageGameTemplatePage extends Component
 
     public bool $players_can_join_late;
 
-    public string $gameType;
+    public string $game_type;
 
     public array $modifiers;
 
     #[Computed]
     public function allChallenges()
     {
-        return collect(ChallengeRegistry::getAll())
-            ->filter(fn ($c) => $c::TYPE === $this->gameType)
-            ->sortBy(fn ($c) => $c::NAME);
+        return collect(ChallengeRegistry::getAll())->sortBy(fn ($c) => $c::NAME);
     }
 
     #[Computed]
     public function allModifiers()
     {
-        return collect(ModifierRegistry::getAll())
-            ->filter(fn ($m) => $m::TYPE === $this->gameType)
-            ->sortBy(fn ($m) => $m::NAME);
+        return collect(ModifierRegistry::getAll())->sortBy(fn ($m) => $m::NAME);
     }
 
     public function mount($game_template = null)
@@ -70,7 +66,7 @@ class ManageGameTemplatePage extends Component
             $this->challenges = $game_template->challenges ?? [];
             $this->modifiers = $game_template->modifiers ?? [];
             $this->players_can_join_late = $game_template->players_can_join_late ?? false;
-            $this->gameType = $game_template->type ?? 'individual';
+            $this->game_type = $game_template->type ?? 'individual';
         } else {
             $this->name = '';
             $this->description = '';
@@ -82,7 +78,7 @@ class ManageGameTemplatePage extends Component
             $this->challenges = [];
             $this->modifiers = [];
             $this->players_can_join_late = false;
-            $this->gameType = 'individual';
+            $this->game_type = 'individual';
         }
     }
 
@@ -111,7 +107,7 @@ class ManageGameTemplatePage extends Component
         'challenges.*.challenge_keys' => 'required|array|min:1',
         'challenges.*.duration' => 'required|integer|min:1',
         'players_can_join_late' => 'boolean',
-        'gameType' => 'required|string|in:individual,team',
+        'game_type' => 'required|string|in:individual,team',
     ];
 
     public function saveTemplate()
@@ -134,7 +130,7 @@ class ManageGameTemplatePage extends Component
             name: $this->name,
             description: $this->description,
             pre_game_lobby_message: $this->pre_game_lobby_message,
-            type: $this->gameType,
+            type: $this->game_type,
             min_players: $this->min_players ?? null,
             max_players: $this->max_players ?? null,
             is_public: $this->is_public,
@@ -160,7 +156,7 @@ class ManageGameTemplatePage extends Component
             name: $this->game_template->name.' (copy)',
             description: $this->game_template->description,
             pre_game_lobby_message: $this->game_template->pre_game_lobby_message,
-            type: $this->gameType,
+            type: $this->game_type,
             min_players: $this->game_template->min_players ?? null,
             max_players: $this->game_template->max_players ?? null,
             is_public: $this->game_template->is_public,

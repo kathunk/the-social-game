@@ -1,4 +1,4 @@
-<div x-data="{ game_type: @entangle('game_type') }">
+<div x-data="{ game_type: $wire.entangle('game_type') }">
     <flux:card>
         <div class="flex flex-col gap-6">
             <flux:input wire:model="name" label="Name" />
