@@ -24,11 +24,6 @@
                 <flux:radio value="individual" label="Individual" checked />
                 <flux:radio value="team" label="Team" />
             </flux:radio.group>
-            <flux:radio.group wire:model="scoreboard_type" label="Scoreboard Type">
-                <flux:radio value="individual" label="Individual" checked />
-                <flux:radio value="team" label="Team" />
-                <flux:radio value="blood_oath" label="Blood Oath" />
-            </flux:radio.group>
 
             <div class="flex flex-row gap-2 items-center">
                 <flux:heading size="sm">Modifiers</flux:heading>

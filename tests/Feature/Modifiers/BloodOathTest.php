@@ -88,12 +88,11 @@ it('ensures Blood Oaths can only be used with a blood oath scoreboard', function
         ],
     ];
 
-    expect(function () use ($challenges, $modifiers) {
-        $this->mockGameTemplate(
-            challenges: $challenges,
-            type: 'individual',
-            modifiers: $modifiers,
-            scoreboard_type: 'individual',
-        );
-    })->toThrow(Exception::class, 'The following modifiers are invalid for this template: Blood Oaths can only be used with a blood oath scoreboard.');
+    $this->mockGameTemplate(
+        challenges: $challenges,
+        type: 'individual',
+        modifiers: $modifiers,
+    );
+
+    expect($this->game_template->scoreboard_type)->toBe('blood_oath');
 });

@@ -22,7 +22,7 @@ class TeamHotPotato extends BaseChallengeClass
         return 'team_hot_potato';
     }
 
-    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, string $scoreboard_type)
+    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, array $team_names)
     {
         $keys_for_first_challenge = collect($challenges)->first()['challenge_keys'];
 

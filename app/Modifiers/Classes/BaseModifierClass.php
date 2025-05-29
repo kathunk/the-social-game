@@ -50,7 +50,7 @@ abstract class BaseModifierClass
         return [];
     }
 
-    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, string $scoreboard_type)
+    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, array $team_names)
     {
         return false;
     }

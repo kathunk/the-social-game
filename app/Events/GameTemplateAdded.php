@@ -2,12 +2,13 @@
 
 namespace App\Events;
 
-use App\Challenges\ChallengeRegistry;
-use App\Models\GameTemplate;
-use App\Modifiers\ModifierRegistry;
-use App\States\GameTemplateState;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
+use App\Models\GameTemplate;
+use App\States\GameTemplateState;
+use App\Modifiers\ModifierRegistry;
+use App\Challenges\ChallengeRegistry;
+use App\Modifiers\Classes\BloodOaths;
+use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 
 class GameTemplateAdded extends Event
 {
@@ -36,8 +37,6 @@ class GameTemplateAdded extends Event
 
     public bool $players_can_join_late;
 
-    public ?string $scoreboard_type = 'individual';
-
     public function validate()
     {
         $challenge_keys = collect($this->challenges)->map(fn ($c) => $c['challenge_keys'])->flatten()->unique();
@@ -46,13 +45,13 @@ class GameTemplateAdded extends Event
 
         $challenge_validation_errors = $challenge_keys
             ->map(fn ($c) => ChallengeRegistry::retrieveFromKey($c)
-                ->isInvalidForTemplate($this->challenges, $this->modifiers, $this->type, $this->scoreboard_type)
+                ->isInvalidForTemplate($this->challenges, $this->modifiers, $this->type, $this->team_names)
             )
             ->filter(fn ($error) => $error !== false);
 
         $modifier_validation_errors = $modifier_keys
             ->map(fn ($m) => ModifierRegistry::retrieveFromKey($m)
-                ->isInvalidForTemplate($this->challenges, $this->modifiers, $this->type, $this->scoreboard_type)
+                ->isInvalidForTemplate($this->challenges, $this->modifiers, $this->type, $this->team_names)
             )
             ->filter(fn ($error) => $error !== false);
 
@@ -100,11 +99,6 @@ class GameTemplateAdded extends Event
                 'Challenge duration must be greater than 0.'
             );
         });
-
-        $this->assert(
-            in_array($this->scoreboard_type, ['individual', 'team', 'blood_oath']),
-            'Scoreboard type must be either individual, team, or blood_oath.'
-        );
     }
 
     public function applyToGame(GameTemplateState $game_template)
@@ -120,12 +114,19 @@ class GameTemplateAdded extends Event
         $game_template->description = $this->description;
         $game_template->pre_game_lobby_message = $this->pre_game_lobby_message;
         $game_template->players_can_join_late = $this->players_can_join_late;
-        $game_template->scoreboard_type = $this->scoreboard_type;
+
+        if (in_array(BloodOaths::key(), $this->modifiers)) {
+            $game_template->scoreboard_type = 'blood_oath';
+        } else {
+            $game_template->scoreboard_type = $this->type;
+        }
     }
 
     public function handle()
     {
         $existing = GameTemplate::find($this->game_template_id);
+
+        $scoreboard_type = $this->state(GameTemplateState::class)->scoreboard_type;
 
         if ($existing) {
             $existing->update([
@@ -140,7 +141,7 @@ class GameTemplateAdded extends Event
                 'description' => $this->description,
                 'pre_game_lobby_message' => $this->pre_game_lobby_message,
                 'players_can_join_late' => $this->players_can_join_late,
-                'scoreboard_type' => $this->scoreboard_type,
+                'scoreboard_type' => $scoreboard_type,
             ]);
 
             return;
@@ -159,7 +160,7 @@ class GameTemplateAdded extends Event
             'description' => $this->description,
             'pre_game_lobby_message' => $this->pre_game_lobby_message,
             'players_can_join_late' => $this->players_can_join_late,
-            'scoreboard_type' => $this->scoreboard_type,
+            'scoreboard_type' => $scoreboard_type,
         ]);
     }
 }

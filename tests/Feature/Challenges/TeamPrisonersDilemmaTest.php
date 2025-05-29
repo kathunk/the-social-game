@@ -87,3 +87,20 @@ it('if neither team plays dirty they will each get 20 points', function () {
     expect($this->team_3->fresh()->score)->toBe(30);
     expect($this->team_4->fresh()->score)->toBe(30);
 });
+
+it('cannot be used with an odd number of teams', function () {
+    $challenges = [
+        [
+            'challenge_keys' => [TeamPrisonersDilemma::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    expect(function () use ($challenges) {
+        $this->mockGameTemplate(
+            challenges: $challenges,
+            type: 'team',
+            team_names: ['Team 1', 'Team 2', 'Team 3'],
+        );
+    })->toThrow(Exception::class, 'Prisoner\'s Dilemma requires an even number of teams.');
+});

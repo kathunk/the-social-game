@@ -48,7 +48,7 @@ abstract class BaseChallengeClass
         return new static;
     }
 
-    public function isInvalidForTemplate(array $challenge_keys, array $modifier_keys, string $type, string $scoreboard_type)
+    public function isInvalidForTemplate(array $challenge_keys, array $modifier_keys, string $type, array $team_names)
     {
         return false;
     }

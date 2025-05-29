@@ -21,15 +21,6 @@ class BloodOaths extends BaseModifierClass
         return 'blood_oaths';
     }
 
-    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, string $scoreboard_type)
-    {
-        if ($scoreboard_type !== 'blood_oath') {
-            return "Blood Oaths can only be used with a blood oath scoreboard.";
-        }
-
-        return false;
-    }
-
     public function dataArrayForState(): array
     {
         return ['offers' => [], 'pairs' => [], 'lone_wolves' => []];
