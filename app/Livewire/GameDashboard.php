@@ -79,31 +79,11 @@ class GameDashboard extends Component
         return $this->challenge?->handler();
     }
 
-    // #[Computed]
-    // public function challengeComponent()
-    // {
-    //     if (! $this->challenge) {
-    //         return null;
-    //     }
-
-    //     if ($this->template->type === 'team' && ! $this->current_team) {
-    //         return null;
-    //     }
-
-    //     return $this->challenge_handler->frontendComponent($this->player);
-    // }
-
     #[Computed]
     public function template()
     {
         return $this->game->gameTemplate;
     }
-
-    // #[Computed]
-    // public function modifiers()
-    // {
-    //     return $this->game->modifiers;
-    // }
 
     #[Computed]
     public function showScoreboard()
