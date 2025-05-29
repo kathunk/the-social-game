@@ -21,12 +21,12 @@
                     @foreach ($teams as $team)
                         <flux:table.row>
                             <flux:table.cell>
-                                <flux:button :variant="((string) $team->id === (string) $this->player->team_id) ? 'filled' : 'ghost'" size="sm" :href="route('teams.show', [$team->game_id, $team->id])">
+                                <flux:link :variant="((string) $team->id === (string) $this->player->team_id) ? 'filled' : 'ghost'" size="sm" class="p-0 whitespace-normal break-words" :href="route('teams.show', [$team->game_id, $team->id])">
                                     {{ $team->name }}
                                     @if ((string) $team->id === (string) $this->player->team_id)
                                         (your team)
                                     @endif
-                                </flux:button>
+                                </flux:link>
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if ($this->game->status === 'ended')
@@ -57,9 +57,9 @@
                     @foreach ($players as $player)
                         <flux:table.row>
                             <flux:table.cell>
-                                <flux:button :variant="((string) $player->id === (string) $this->player->id) ? 'filled' : 'ghost'" size="sm" class="p-0" :href="route('players.show', [$player->game_id, $player->id])">
+                                <flux:link :variant="((string) $player->id === (string) $this->player->id) ? 'filled' : 'ghost'" size="sm" class="p-0 whitespace-normal break-words" :href="route('players.show', [$player->game_id, $player->id])">
                                     {{ $player->name }}
-                                </flux:button>
+                                </flux:link>
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if ($this->game->status === 'ended')
@@ -127,7 +127,7 @@
                         <flux:table.row>
                             <flux:table.cell>
                                 <div class="flex items-center gap-2">
-                                    <flux:link :href="route('players.show', [$this->game->id, $row['players'][0]->id])">
+                                    <flux:link :href="route('players.show', [$this->game->id, $row['players'][0]->id])" class="whitespace-normal break-words">
                                         {{ $row['players'][0]->name }}
                                     </flux:link>
                                     @if (collect($row['players'])->count() > 1)
