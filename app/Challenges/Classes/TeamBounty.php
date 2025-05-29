@@ -30,7 +30,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         $keys_for_first_challenge = collect($challenges)->first()['challenge_keys'];
 
         if (in_array(static::key(), $keys_for_first_challenge)) {
-            return "Bounty cannot go first.";
+            return 'Bounty cannot go first.';
         }
 
         return false;

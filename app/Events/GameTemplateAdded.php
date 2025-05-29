@@ -2,13 +2,13 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\Models\GameTemplate;
-use App\States\GameTemplateState;
-use App\Modifiers\ModifierRegistry;
 use App\Challenges\ChallengeRegistry;
+use App\Models\GameTemplate;
 use App\Modifiers\Classes\BloodOaths;
+use App\Modifiers\ModifierRegistry;
+use App\States\GameTemplateState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class GameTemplateAdded extends Event
 {
@@ -40,7 +40,7 @@ class GameTemplateAdded extends Event
     public function validate()
     {
         $challenge_keys = collect($this->challenges)->map(fn ($c) => $c['challenge_keys'])->flatten()->unique();
-        
+
         $modifier_keys = collect($this->modifiers);
 
         $challenge_validation_errors = $challenge_keys
@@ -57,12 +57,12 @@ class GameTemplateAdded extends Event
 
         $this->assert(
             $challenge_validation_errors->isEmpty(),
-            'The following challenges are invalid for this template: ' . $challenge_validation_errors->implode(', ')
+            'The following challenges are invalid for this template: '.$challenge_validation_errors->implode(', ')
         );
 
         $this->assert(
             $modifier_validation_errors->isEmpty(),
-            'The following modifiers are invalid for this template: ' . $modifier_validation_errors->implode(', ')
+            'The following modifiers are invalid for this template: '.$modifier_validation_errors->implode(', ')
         );
 
         $this->assert(
