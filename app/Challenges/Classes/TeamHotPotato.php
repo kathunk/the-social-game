@@ -2,10 +2,9 @@
 
 namespace App\Challenges\Classes;
 
+use App\Events\PlayerPassedPotato;
 use App\Models\Player;
 use App\States\GameState;
-use App\Events\PlayerPassedPotato;
-use Illuminate\Support\Collection;
 
 class TeamHotPotato extends BaseChallengeClass
 {
@@ -27,7 +26,7 @@ class TeamHotPotato extends BaseChallengeClass
         $keys_for_first_challenge = collect($challenges)->first()['challenge_keys'];
 
         if (in_array(static::key(), $keys_for_first_challenge)) {
-            return "Hot Potato cannot go first.";
+            return 'Hot Potato cannot go first.';
         }
 
         return false;

@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Events\UserSwitchedCurrentGame;
 use App\Models\Game;
 use App\Models\Team;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -20,6 +21,10 @@ class GameDashboard extends Component
     public array $round_properties = [];
 
     public array $validation_rules = [];
+
+    public ?array $challenge_component = [];
+
+    public ?Collection $modifiers;
 
     #[Computed]
     public function user()
@@ -75,29 +80,9 @@ class GameDashboard extends Component
     }
 
     #[Computed]
-    public function challengeComponent()
-    {
-        if (! $this->challenge) {
-            return null;
-        }
-
-        if ($this->template->type === 'team' && ! $this->current_team) {
-            return null;
-        }
-
-        return $this->challenge_handler->frontendComponent($this->player);
-    }
-
-    #[Computed]
     public function template()
     {
         return $this->game->gameTemplate;
-    }
-
-    #[Computed]
-    public function modifiers()
-    {
-        return $this->game->modifiers;
     }
 
     #[Computed]
@@ -139,9 +124,18 @@ class GameDashboard extends Component
 
     protected function initializeProperties()
     {
+        $this->challenge_component = $this->game->currentChallenge?->fresh()
+            ->handler()->frontendComponent($this->player);
+
         if ($this->challenge) {
             $this->round_properties[$this->challenge->class_key] = $this->challenge_handler?->propertiesForLivewire($this->player) ?? [];
             $this->validation_rules[$this->challenge->class_key] = $this->challenge_handler?->validationRulesForLivewire($this->player) ?? [];
+        }
+
+        $this->modifiers = $this->game->fresh()->modifiers;
+
+        if (! $this->modifiers) {
+            return;
         }
 
         foreach ($this->modifiers as $modifier) {
@@ -243,10 +237,21 @@ class GameDashboard extends Component
 
         $response = $handler->{$action}($this->player, $params['round_properties']);
 
+        Verbs::commit();
+
+        if ($type === 'challenge') {
+            $this->challenge_component = $this->game->currentChallenge?->fresh()
+                ->handler()->frontendComponent($this->player);
+        }
+
+        if ($type === 'modifier') {
+            $this->modifiers = $this->game->fresh()->modifiers;
+        }
+
         return $response instanceof \Illuminate\Http\RedirectResponse
             || $response instanceof \Livewire\Features\SupportRedirects\Redirector
             ? $response
-            : redirect()->route('game-dashboard', ['game' => $this->game]);
+            : null;
     }
 
     #[On('echo-private:games.{game.id},GameUpdatedForReverb')]

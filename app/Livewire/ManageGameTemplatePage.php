@@ -2,16 +2,16 @@
 
 namespace App\Livewire;
 
+use App\Challenges\ChallengeRegistry;
+use App\Events\GameTemplateAdded;
+use App\Events\GameTemplateArchived;
+use App\Models\GameTemplate;
+use App\Modifiers\ModifierRegistry;
 use Exception;
 use Flux\Flux;
-use Livewire\Component;
-use App\Models\GameTemplate;
-use Thunk\Verbs\Facades\Verbs;
-use App\Events\GameTemplateAdded;
 use Livewire\Attributes\Computed;
-use App\Modifiers\ModifierRegistry;
-use App\Events\GameTemplateArchived;
-use App\Challenges\ChallengeRegistry;
+use Livewire\Component;
+use Thunk\Verbs\Facades\Verbs;
 
 class ManageGameTemplatePage extends Component
 {
@@ -126,18 +126,18 @@ class ManageGameTemplatePage extends Component
 
         try {
             GameTemplateAdded::fire(
-            game_template_id: $id,
-            name: $this->name,
-            description: $this->description,
-            pre_game_lobby_message: $this->pre_game_lobby_message,
-            type: $this->game_type,
-            min_players: $this->min_players ?? null,
-            max_players: $this->max_players ?? null,
-            is_public: $this->is_public,
-            team_names: $teams,
-            challenges: $challenges,
-            modifiers: $this->modifiers,
-            players_can_join_late: $this->players_can_join_late,
+                game_template_id: $id,
+                name: $this->name,
+                description: $this->description,
+                pre_game_lobby_message: $this->pre_game_lobby_message,
+                type: $this->game_type,
+                min_players: $this->min_players ?? null,
+                max_players: $this->max_players ?? null,
+                is_public: $this->is_public,
+                team_names: $teams,
+                challenges: $challenges,
+                modifiers: $this->modifiers,
+                players_can_join_late: $this->players_can_join_late,
             );
         } catch (Exception $e) {
             $this->addError('error', $e->getMessage());
