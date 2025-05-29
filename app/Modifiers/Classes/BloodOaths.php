@@ -2,9 +2,10 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Events\PlayerMadeOathOfSolitude;
-use App\Events\PlayerOfferedBloodOath;
 use App\Models\Player;
+use Illuminate\Support\Collection;
+use App\Events\PlayerOfferedBloodOath;
+use App\Events\PlayerMadeOathOfSolitude;
 
 class BloodOaths extends BaseModifierClass
 {
@@ -18,6 +19,15 @@ class BloodOaths extends BaseModifierClass
     public static function key(): string
     {
         return 'blood_oaths';
+    }
+
+    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, string $scoreboard_type)
+    {
+        if ($scoreboard_type !== 'blood_oath') {
+            return "Blood Oaths can only be used with a blood oath scoreboard.";
+        }
+
+        return false;
     }
 
     public function dataArrayForState(): array

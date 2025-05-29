@@ -40,6 +40,32 @@ class GameTemplateAdded extends Event
 
     public function validate()
     {
+        $challenge_keys = collect($this->challenges)->map(fn ($c) => $c['challenge_keys'])->flatten()->unique();
+        
+        $modifier_keys = collect($this->modifiers);
+
+        $challenge_validation_errors = $challenge_keys
+            ->map(fn ($c) => ChallengeRegistry::retrieveFromKey($c)
+                ->isInvalidForTemplate($this->challenges, $this->modifiers, $this->type, $this->scoreboard_type)
+            )
+            ->filter(fn ($error) => $error !== false);
+
+        $modifier_validation_errors = $modifier_keys
+            ->map(fn ($m) => ModifierRegistry::retrieveFromKey($m)
+                ->isInvalidForTemplate($this->challenges, $this->modifiers, $this->type, $this->scoreboard_type)
+            )
+            ->filter(fn ($error) => $error !== false);
+
+        $this->assert(
+            $challenge_validation_errors->isEmpty(),
+            'The following challenges are invalid for this template: ' . $challenge_validation_errors->implode(', ')
+        );
+
+        $this->assert(
+            $modifier_validation_errors->isEmpty(),
+            'The following modifiers are invalid for this template: ' . $modifier_validation_errors->implode(', ')
+        );
+
         $this->assert(
             GameTemplate::all()->where('id', '!=', $this->game_template_id)->where('name', $this->name)->isEmpty(),
             'A template with this name already exists.'

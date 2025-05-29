@@ -75,3 +75,25 @@ it('facilitates blood oaths', function () {
         ->assertSee('You are in a blood oath with '.$player_2->name)
         ->assertDontSee('If you offer an oath');
 });
+
+it('ensures Blood Oaths can only be used with a blood oath scoreboard', function () {
+    Verbs::commitImmediately();
+
+    $modifiers = [BloodOaths::key()];
+
+    $challenges = [
+        [
+            'challenge_keys' => [IndividualHighScoreQuiz::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    expect(function () use ($challenges, $modifiers) {
+        $this->mockGameTemplate(
+            challenges: $challenges,
+            type: 'individual',
+            modifiers: $modifiers,
+            scoreboard_type: 'individual',
+        );
+    })->toThrow(Exception::class, 'The following modifiers are invalid for this template: Blood Oaths can only be used with a blood oath scoreboard.');
+});

@@ -175,3 +175,21 @@ it('gives expected scores', function () {
     // team 3 does all 3 passes, resulting in 50 points
     expect($this->team_3->fresh()->score)->toBe(50);
 });
+
+it('prevents Hot Potato from going first', function () {
+    Verbs::commitImmediately();
+
+    $challenges = [
+        [
+            'challenge_keys' => [TeamHotPotato::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    expect(function () use ($challenges) {
+        $this->mockGameTemplate(
+            challenges: $challenges,
+            type: 'individual',
+        );
+    })->toThrow(Exception::class, 'The following challenges are invalid for this template: Hot Potato cannot go first.');
+});

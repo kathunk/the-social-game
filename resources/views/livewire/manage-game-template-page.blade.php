@@ -115,6 +115,7 @@
             </flux:table>
 
             <flux:error name="challenges" />
+            <flux:error name="error" />
 
             <flux:button variant="primary" wire:click="saveTemplate">Save</flux:button>
         </div>

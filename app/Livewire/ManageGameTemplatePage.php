@@ -2,15 +2,16 @@
 
 namespace App\Livewire;
 
-use App\Challenges\ChallengeRegistry;
-use App\Events\GameTemplateAdded;
-use App\Events\GameTemplateArchived;
-use App\Models\GameTemplate;
-use App\Modifiers\ModifierRegistry;
+use Exception;
 use Flux\Flux;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
+use App\Models\GameTemplate;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\GameTemplateAdded;
+use Livewire\Attributes\Computed;
+use App\Modifiers\ModifierRegistry;
+use App\Events\GameTemplateArchived;
+use App\Challenges\ChallengeRegistry;
 
 class ManageGameTemplatePage extends Component
 {
@@ -122,12 +123,8 @@ class ManageGameTemplatePage extends Component
     {
         $this->validate();
 
-        // @todo validate that all challenge and modifier types match the game type
-        // we validate this in the events, but we should validate here too
-
         $teams = array_map('trim', explode(',', $this->team_names));
 
-        // Cast challenge durations to integers
         $challenges = array_map(function ($challenge) {
             $challenge['duration'] = (int) $challenge['duration'];
 
@@ -136,7 +133,8 @@ class ManageGameTemplatePage extends Component
 
         $id = $this->game_template->id ?? null;
 
-        GameTemplateAdded::fire(
+        try {
+            GameTemplateAdded::fire(
             game_template_id: $id,
             name: $this->name,
             description: $this->description,
@@ -149,8 +147,13 @@ class ManageGameTemplatePage extends Component
             challenges: $challenges,
             modifiers: $this->modifiers,
             players_can_join_late: $this->players_can_join_late,
-            scoreboard_type: $this->scoreboard_type,
-        );
+                scoreboard_type: $this->scoreboard_type,
+            );
+        } catch (Exception $e) {
+            $this->addError('error', $e->getMessage());
+
+            return;
+        }
 
         Verbs::commit();
 
