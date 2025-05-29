@@ -1,4 +1,4 @@
-<div x-data="{ game_type: @entangle('game_type') }">
+<div x-data="{ game_type: $wire.entangle('game_type') }">
     <flux:card>
         <div class="flex flex-col gap-6">
             <flux:input wire:model="name" label="Name" />
@@ -23,11 +23,6 @@
             <flux:radio.group wire:model="game_type" label="Victory Condition">
                 <flux:radio value="individual" label="Individual" checked />
                 <flux:radio value="team" label="Team" />
-            </flux:radio.group>
-            <flux:radio.group wire:model="scoreboard_type" label="Scoreboard Type">
-                <flux:radio value="individual" label="Individual" checked />
-                <flux:radio value="team" label="Team" />
-                <flux:radio value="blood_oath" label="Blood Oath" />
             </flux:radio.group>
 
             <div class="flex flex-row gap-2 items-center">
@@ -115,6 +110,7 @@
             </flux:table>
 
             <flux:error name="challenges" />
+            <flux:error name="error" />
 
             <flux:button variant="primary" wire:click="saveTemplate">Save</flux:button>
         </div>

@@ -75,3 +75,24 @@ it('facilitates blood oaths', function () {
         ->assertSee('You are in a blood oath with '.$player_2->name)
         ->assertDontSee('If you offer an oath');
 });
+
+it('ensures Blood Oaths can only be used with a blood oath scoreboard', function () {
+    Verbs::commitImmediately();
+
+    $modifiers = [BloodOaths::key()];
+
+    $challenges = [
+        [
+            'challenge_keys' => [IndividualHighScoreQuiz::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    $this->mockGameTemplate(
+        challenges: $challenges,
+        type: 'individual',
+        modifiers: $modifiers,
+    );
+
+    expect($this->game_template->scoreboard_type)->toBe('blood_oath');
+});

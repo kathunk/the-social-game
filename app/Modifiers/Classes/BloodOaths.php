@@ -2,9 +2,10 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Events\PlayerMadeOathOfSolitude;
-use App\Events\PlayerOfferedBloodOath;
 use App\Models\Player;
+use Illuminate\Support\Collection;
+use App\Events\PlayerOfferedBloodOath;
+use App\Events\PlayerMadeOathOfSolitude;
 
 class BloodOaths extends BaseModifierClass
 {

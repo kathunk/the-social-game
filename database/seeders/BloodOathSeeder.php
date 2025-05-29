@@ -52,7 +52,6 @@ class BloodOathSeeder extends Seeder
             ],
             modifiers: [BloodOaths::key()],
             players_can_join_late: false,
-            scoreboard_type: 'blood_oath',
         )->game_template_id;
 
         $template = GameTemplate::find($template_id);

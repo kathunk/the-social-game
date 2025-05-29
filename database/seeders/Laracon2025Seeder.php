@@ -41,7 +41,6 @@ class Laracon2025Seeder extends Seeder
             ],
             modifiers: [TeamResignation::key(), TeamSecretAlliance::key()],
             players_can_join_late: true,
-            scoreboard_type: 'blood_oath',
         )->game_template_id;
 
         $template = GameTemplate::find($template_id);

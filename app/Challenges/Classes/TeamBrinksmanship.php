@@ -26,6 +26,15 @@ class TeamBrinksmanship extends BaseChallengeClass
         return 'brinksmanship';
     }
 
+    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, array $team_names)
+    {
+        if (count($team_names) % 2 !== 0) {
+            return "Brinksmanship requires an even number of teams.";
+        }
+
+        return false;
+    }
+
     public function dataArrayForState(): array
     {
         return $this->challenge_state->game()

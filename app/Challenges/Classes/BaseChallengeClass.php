@@ -2,14 +2,15 @@
 
 namespace App\Challenges\Classes;
 
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
-use App\Models\Challenge;
 use App\Models\Player;
-use App\States\ChallengeState;
+use App\Models\Challenge;
 use App\States\GameState;
-use App\States\PlayerState;
 use App\States\TeamState;
+use App\States\PlayerState;
 use App\Support\FormBuilder;
+use App\States\ChallengeState;
+use Illuminate\Support\Collection;
+use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 
 abstract class BaseChallengeClass
 {
@@ -45,6 +46,11 @@ abstract class BaseChallengeClass
     public static function fromKey(string $key): static
     {
         return new static;
+    }
+
+    public function isInvalidForTemplate(array $challenge_keys, array $modifier_keys, string $type, array $team_names)
+    {
+        return false;
     }
 
     public function dataArrayForState(): array
