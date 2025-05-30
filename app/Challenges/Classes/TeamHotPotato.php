@@ -21,6 +21,17 @@ class TeamHotPotato extends BaseChallengeClass
         return 'team_hot_potato';
     }
 
+    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, array $team_names)
+    {
+        $keys_for_first_challenge = collect($challenges)->first()['challenge_keys'];
+
+        if (in_array(static::key(), $keys_for_first_challenge)) {
+            return 'Hot Potato cannot go first.';
+        }
+
+        return false;
+    }
+
     public function dataArrayForState(): array
     {
         $teams = $this->challenge_state->game()->teams()->sortByDesc('score')->pluck('id');

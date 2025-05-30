@@ -28,6 +28,15 @@ class TeamPrisonersDilemma extends BaseChallengeClass
         return 'team_prisoners_dilemma';
     }
 
+    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, array $team_names)
+    {
+        if (count($team_names) % 2 !== 0) {
+            return "Prisoner's Dilemma requires an even number of teams.";
+        }
+
+        return false;
+    }
+
     public function dataArrayForState(): array
     {
         $teams = $this->challenge_state->game()

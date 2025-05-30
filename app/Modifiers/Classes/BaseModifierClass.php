@@ -49,6 +49,11 @@ abstract class BaseModifierClass
         return [];
     }
 
+    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, array $team_names)
+    {
+        return false;
+    }
+
     public function onSecretDiscovered(Player $player)
     {
         // Optional override

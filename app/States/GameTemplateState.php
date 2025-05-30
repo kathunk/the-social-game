@@ -30,6 +30,8 @@ class GameTemplateState extends State
 
     public bool $is_archived = false;
 
+    public string $scoreboard_type;
+
     public function durationOfAllChallengesInMinutes(): int
     {
         return collect($this->challenges)->sum(fn ($c) => $c['duration'] ?? 0);

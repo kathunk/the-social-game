@@ -177,3 +177,20 @@ describe('validate nuclear code', function () {
             ]);
     });
 });
+
+it('cannot be used with an odd number of teams', function () {
+    $challenges = [
+        [
+            'challenge_keys' => [TeamBrinksmanship::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    expect(function () use ($challenges) {
+        $this->mockGameTemplate(
+            challenges: $challenges,
+            type: 'team',
+            team_names: ['Team 1', 'Team 2', 'Team 3'],
+        );
+    })->toThrow(Exception::class, 'Brinksmanship requires an even number of teams.');
+});

@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\Challenges\ChallengeRegistry;
 use App\Models\GameTemplate;
+use App\Modifiers\Classes\BloodOaths;
 use App\Modifiers\ModifierRegistry;
 use App\States\GameTemplateState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
@@ -38,6 +39,32 @@ class GameTemplateAdded extends Event
 
     public function validate()
     {
+        $challenge_keys = collect($this->challenges)->map(fn ($c) => $c['challenge_keys'])->flatten()->unique();
+
+        $modifier_keys = collect($this->modifiers);
+
+        $challenge_validation_errors = $challenge_keys
+            ->map(fn ($c) => ChallengeRegistry::retrieveFromKey($c)
+                ->isInvalidForTemplate($this->challenges, $this->modifiers, $this->type, $this->team_names)
+            )
+            ->filter(fn ($error) => $error !== false);
+
+        $modifier_validation_errors = $modifier_keys
+            ->map(fn ($m) => ModifierRegistry::retrieveFromKey($m)
+                ->isInvalidForTemplate($this->challenges, $this->modifiers, $this->type, $this->team_names)
+            )
+            ->filter(fn ($error) => $error !== false);
+
+        $this->assert(
+            $challenge_validation_errors->isEmpty(),
+            'The following challenges are invalid for this template: '.$challenge_validation_errors->implode(', ')
+        );
+
+        $this->assert(
+            $modifier_validation_errors->isEmpty(),
+            'The following modifiers are invalid for this template: '.$modifier_validation_errors->implode(', ')
+        );
+
         $this->assert(
             GameTemplate::all()->where('id', '!=', $this->game_template_id)->where('name', $this->name)->isEmpty(),
             'A template with this name already exists.'
@@ -87,11 +114,19 @@ class GameTemplateAdded extends Event
         $game_template->description = $this->description;
         $game_template->pre_game_lobby_message = $this->pre_game_lobby_message;
         $game_template->players_can_join_late = $this->players_can_join_late;
+
+        if (in_array(BloodOaths::key(), $this->modifiers)) {
+            $game_template->scoreboard_type = 'blood_oath';
+        } else {
+            $game_template->scoreboard_type = $this->type;
+        }
     }
 
     public function handle()
     {
         $existing = GameTemplate::find($this->game_template_id);
+
+        $scoreboard_type = $this->state(GameTemplateState::class)->scoreboard_type;
 
         if ($existing) {
             $existing->update([
@@ -106,6 +141,7 @@ class GameTemplateAdded extends Event
                 'description' => $this->description,
                 'pre_game_lobby_message' => $this->pre_game_lobby_message,
                 'players_can_join_late' => $this->players_can_join_late,
+                'scoreboard_type' => $scoreboard_type,
             ]);
 
             return;
@@ -124,6 +160,7 @@ class GameTemplateAdded extends Event
             'description' => $this->description,
             'pre_game_lobby_message' => $this->pre_game_lobby_message,
             'players_can_join_late' => $this->players_can_join_late,
+            'scoreboard_type' => $scoreboard_type,
         ]);
     }
 }

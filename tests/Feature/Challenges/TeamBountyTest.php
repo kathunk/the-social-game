@@ -142,3 +142,21 @@ describe('validate swapTeam', function () {
             ->assertHasErrors(['round_properties.'.TeamBounty::key().'.team_id' => 'exists']);
     });
 });
+
+it('prevents Bounty from going first', function () {
+    Verbs::commitImmediately();
+
+    $challenges = [
+        [
+            'challenge_keys' => [TeamBounty::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    expect(function () use ($challenges) {
+        $this->mockGameTemplate(
+            challenges: $challenges,
+            type: 'individual',
+        );
+    })->toThrow(Exception::class, 'The following challenges are invalid for this template: Bounty cannot go first.');
+});

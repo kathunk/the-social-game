@@ -6,6 +6,7 @@ use App\Events\Traits\HasActivePlayer;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
 use App\States\ModifierState;
+use App\States\PlayerState;
 use Thunk\Verbs\Event;
 
 class PlayerMadeOathOfSolitude extends Event
@@ -32,6 +33,15 @@ class PlayerMadeOathOfSolitude extends Event
         $modifier->modifier_data['lone_wolves'][] = $this->player()->id;
 
         $modifier->modifier_data['offers'][$this->player()->id] = null;
+    }
+
+    public function applyToPlayer(PlayerState $player)
+    {
+        $player->addToScoreHistory(
+            points: 3,
+            description: 'Oath of Solitude',
+            is_hidden: true,
+        );
     }
 
     public function handle()

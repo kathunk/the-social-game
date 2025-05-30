@@ -43,18 +43,28 @@
                         <flux:table.row>
                             <flux:table.cell>
                                 <div class="flex flex-col">
-                                    <flux:heading size="sm" class="{{ $entry['is_hidden'] ? 'text-purple-500 dark:text-purple-300' : '' }}">{{ $entry['description'] }}</flux:heading>
+                                    @if ($entry['is_hidden'])
+                                        <flux:heading class="text-sm whitespace-normal break-words text-purple-500 dark:text-purple-300">{{ $entry['description'] }}</flux:heading>
+                                    @elseif ($entry['points'] > -1)
+                                        <flux:heading class="text-sm whitespace-normal break-words text-green-500">{{ $entry['description'] }}</flux:heading>
+                                    @else
+                                        <flux:heading class="text-sm whitespace-normal break-words text-red-500">{{ $entry['description'] }}</flux:heading>
+                                    @endif
                                     <flux:text class="text-xs">{{ Carbon\Carbon::parse($entry['timestamp'])->diffForHumans() }}</flux:text>
                                 </div>
                             </flux:table.cell>
-                            <flux:table.cell>
-                                @if ($entry['is_hidden'])
-                                    <flux:heading size="sm" class="text-purple-500 dark:text-purple-300">+{{ $entry['points'] }}</flux:heading>
-                                @elseif ($entry['points'] > -1)
-                                    <flux:heading size="sm" class="text-green-500">+{{ $entry['points'] }}</flux:heading>
-                                @else
-                                    <flux:heading size="sm" class="text-red-500">{{ $entry['points'] }}</flux:heading>
-                                @endif
+                            <flux:table.cell class="flex items-start">
+                                <div>
+                                    @if ($entry['is_hidden'])
+                                        <flux:heading size="sm" class="text-purple-500 dark:text-purple-300">
+                                            {{ $entry['points'] > 0 ? '+' : '' }}{{ $entry['points'] }}
+                                        </flux:heading>
+                                    @elseif ($entry['points'] > -1)
+                                        <flux:heading size="sm" class="text-green-500">+{{ $entry['points'] }}</flux:heading>
+                                    @else
+                                        <flux:heading size="sm" class="text-red-500">{{ $entry['points'] }}</flux:heading>
+                                    @endif
+                                </div>
                             </flux:table.cell>
                         </flux:table.row>
                     @endforeach
