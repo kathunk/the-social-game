@@ -9,7 +9,6 @@ use App\States\GameState;
 use App\States\ModifierState;
 use App\States\PlayerState;
 use App\States\TeamState;
-use Illuminate\Support\Facades\Route;
 use Thunk\Verbs\Facades\Verbs;
 
 class TeamSecretAlliance extends BaseModifierClass
@@ -41,10 +40,9 @@ class TeamSecretAlliance extends BaseModifierClass
         $ally = $pair_data->ally();
         $has_connected = $pair_data->hasConnected();
         $player_is_active = $player->status === 'active';
-        $player_is_on_dashboard = Route::currentRouteName() === 'game-dashboard';
         $player_is_lucky = rand(0, 100) > 0;
 
-        if ($player_is_active && $player_is_on_dashboard && ! $ally && $player_is_lucky && $player->team_id) {
+        if ($player_is_active && ! $ally && $player_is_lucky && $player->team_id) {
             return $this->form()
                 ->title(static::NAME)
                 ->subtitle('You discovered a secret! A friend is waiting for you.')
@@ -54,9 +52,15 @@ class TeamSecretAlliance extends BaseModifierClass
                 ->build();
         }
 
-        if ($player_is_on_dashboard) {
-            return [];
-        }
+        return [];
+    }
+
+    public function frontendComponentForDedicatedPage(Player $player): array
+    {
+        $pair_data = new TeamSecretAlliancePairData(player_id: $player->id, modifier: $this->modifier);
+        $ally = $pair_data->ally();
+        $has_connected = $pair_data->hasConnected();
+        $player_is_active = $player->status === 'active';
 
         if ($has_connected) {
             return $this->form()

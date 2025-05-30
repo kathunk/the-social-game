@@ -90,9 +90,18 @@ abstract class BaseModifierClass
         return [];
     }
 
+    public function frontendComponentForDedicatedPage(Player $player): array
+    {
+        return [];
+    }
+
     public function propertiesForLivewire(Player $player): array
     {
         $properties = [];
+
+        if (! isset($this->frontendComponent($player)['elements'])) {
+            return [];
+        }
 
         foreach ($this->frontendComponent($player)['elements'] as $element) {
             if (
@@ -114,6 +123,10 @@ abstract class BaseModifierClass
 
     public function validationRulesForLivewire(Player $player): array
     {
+        if (! isset($this->frontendComponent($player)['elements'])) {
+            return [];
+        }
+
         return collect($this->frontendComponent($player)['elements'])
             ->filter(fn ($element) => isset($element['property_name'], $element['validation_rules']))
             ->reduce(function ($carry, $element) {
