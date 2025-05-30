@@ -61,8 +61,8 @@ class IndividualStealTheBacon extends BaseChallengeClass implements SupportsPeck
             ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
-                upvote_targets: $players->reject(fn ($p) => $p->id === $player->id),
-                downvote_targets: $players->reject(fn ($p) => $p->id === $player->id)
+                upvote_targets: $this->upvoteTargets($player),
+                downvote_targets: $this->downvoteTargets($player)
             )
             )
             ->build();

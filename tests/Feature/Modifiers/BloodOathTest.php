@@ -96,3 +96,33 @@ it('ensures Blood Oaths can only be used with a blood oath scoreboard', function
 
     expect($this->game_template->scoreboard_type)->toBe('blood_oath');
 });
+
+it('does not allow you to upvote your blood oath partner', function () {
+    Verbs::commitImmediately();
+
+    $modifiers = [BloodOaths::key()];
+
+    $challenges = [
+        [
+            'challenge_keys' => [IndividualHighScoreQuiz::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    expect(1)->toBe(0);
+});
+
+it('does not allow you to offer an oath to someone you have already upvoted', function () {
+    Verbs::commitImmediately();
+
+    $modifiers = [BloodOaths::key()];
+
+    $challenges = [
+        [
+            'challenge_keys' => [IndividualHighScoreQuiz::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    expect(1)->toBe(0);
+});

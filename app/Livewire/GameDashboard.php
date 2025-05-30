@@ -235,7 +235,14 @@ class GameDashboard extends Component
             $this->validate($filtered_rules, $filtered_messages);
         }
 
-        $response = $handler->{$action}($this->player, $params['round_properties']);
+        try {
+            $response = $handler->{$action}($this->player, $params['round_properties']);
+        } catch (\Exception $e) {
+            // @todo show the actual error message
+            $this->addError('error', $e->getMessage());
+
+            return;
+        }
 
         Verbs::commit();
 

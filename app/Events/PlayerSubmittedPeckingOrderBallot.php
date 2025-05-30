@@ -2,13 +2,14 @@
 
 namespace App\Events;
 
-use App\Events\Traits\HasChallenge;
-use App\Events\Traits\HasGame;
-use App\Events\Traits\HasPlayer;
-use App\Models\Challenge;
-use App\States\ChallengeState;
-use App\States\GameState;
 use Thunk\Verbs\Event;
+use App\Models\Challenge;
+use App\States\GameState;
+use App\Events\Traits\HasGame;
+use App\States\ChallengeState;
+use App\Events\Traits\HasPlayer;
+use App\Events\Traits\HasChallenge;
+use App\Modifiers\Classes\BloodOaths;
 
 class PlayerSubmittedPeckingOrderBallot extends Event
 {
@@ -28,6 +29,29 @@ class PlayerSubmittedPeckingOrderBallot extends Event
         $this->assert(
             $this->state(GameState::class)->player_ids->contains($this->upvote_player_id),
             'Upvote player is not in the game'
+        );
+
+        $modifiers = $this->state(GameState::class)->modifiers();
+
+        $is_blood_oath_game = $modifiers->filter(fn ($m) => $m->class_key === BloodOaths::key())->count() > 0;
+
+        if (! $is_blood_oath_game) {
+            return;
+        }
+
+        $oath_data = $modifiers->filter(fn ($m) => $m->class_key === BloodOaths::key())->first()->modifier_data;
+
+        $has_buddy = $oath_data['pairs'][$this->player_id] ?? false;
+
+        if (! $has_buddy) {
+            return;
+        }
+
+        $buddy_id = $oath_data['pairs'][$this->player_id];
+
+        $this->assert(
+            $this->upvote_player_id !== $buddy_id,
+            'You cannot upvote your blood oath partner'
         );
     }
 

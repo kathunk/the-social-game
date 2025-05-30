@@ -33,6 +33,18 @@ class PlayerOfferedBloodOath extends Event
             $this->state(GameState::class)->player_ids->contains($this->oath_offer_id),
             'The player you are offering an oath to does not exist',
         );
+
+        $previous_upvotee_ids = $this->state(GameState::class)->challenges()
+            ->map(function ($challenge) {
+                $ballot = $challenge->challenge_data['votes'][$this->player_id] ?? [];
+
+                return $ballot['upvote_player_id'] ?? null;
+            })->filter()->unique()->values()->toArray();
+
+        $this->assert(
+            ! in_array($this->oath_offer_id, $previous_upvotee_ids),
+            'You cannot offer an oath to someone you have already upvoted',
+        );
     }
 
     public function apply(ModifierState $modifier)

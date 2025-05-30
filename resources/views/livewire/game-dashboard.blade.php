@@ -26,6 +26,7 @@
     @if ($this->challenge_component)
         <x-game-components.form :form="$this->challenge_component" type="challenge" class_key="{{ $this->challenge->class_key }}" />
     @endif
+    <flux:error name="error" />
     @if ($this->game->status === 'active' && isset($this->modifiers))
         @foreach ($this->modifiers as $modifier)
             <x-game-components.form :form="$modifier->handler()->frontendComponent($this->player)" type="modifier" class_key="{{ $modifier->class_key }}" />

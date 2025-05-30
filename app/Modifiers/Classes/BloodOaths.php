@@ -47,18 +47,26 @@ class BloodOaths extends BaseModifierClass
         $players = $player->game->players
             ->reject(fn ($p) => $p->id === $player->id);
 
+        $previous_upvotee_ids = $player->game->challenges->map(function ($challenge) use ($player) {
+            $ballots = $challenge->challenge_data['votes'][$player->id] ?? [];
+
+            return $ballots['upvote_player_id'] ?? null;
+        })->filter()->unique()->values()->toArray();
+
         $offer_id = $data['offers'][$player->id] ?? null;
         $offer = Player::find($offer_id);
 
         $incoming_offers = collect($data['offers'])->filter(fn ($id) => $id === $player->id);
         $incoming_offers_players = Player::whereIn('id', $incoming_offers->keys())->get();
 
-        $players = $players->reject(fn ($p) => $p->id === $offer_id);
+        $players = $players->reject(fn ($p) => $p->id === $offer_id)
+            ->reject(fn ($p) => in_array($p->id, $previous_upvotee_ids));
 
         return $this->form()
             ->title('Offer a blood oath')
             ->subtitle('If you offer an oath to a partner who offers you one,
-                your scores will be combined at the end of the game, and you will win or lose as a pair.')
+                your scores will be combined at the end of the game, and you will win or lose as a pair.
+                You cannot choose someone you have upvoted, and you can never upvote your blood oath partner.')
             ->when($offer !== null, function ($form) use ($offer) {
                 return $form->subtitle('Your current offer: '.$offer->name.' (you may change this at any time)');
             })
