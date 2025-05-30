@@ -1,5 +1,6 @@
 @props(['form', 'type', 'class_key'])
 
+@if (isset($form['elements']))
 <flux:card>
     <div class="flex flex-col space-y-4">
         @if ($type === 'challenge')
@@ -72,3 +73,4 @@
         @endforeach
     </div>
 </flux:card>
+@endif

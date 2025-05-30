@@ -9,7 +9,6 @@ use App\Events\GameTemplateAdded;
 use App\Models\Game;
 use App\Models\GameTemplate;
 use App\Models\User;
-use App\Modifiers\Classes\BloodOaths;
 use Illuminate\Database\Seeder;
 use Thunk\Verbs\Facades\Verbs;
 
