@@ -2,13 +2,13 @@
 
 namespace App\Challenges\Support\Traits;
 
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use App\Events\PlayerSubmittedPeckingOrderBallot;
 use App\Models\Player;
+use App\Modifiers\Classes\BloodOaths;
 use App\States\GameState;
 use App\States\PlayerState;
 use Thunk\Verbs\Facades\Verbs;
-use App\Modifiers\Classes\BloodOaths;
-use App\Events\PlayerSubmittedPeckingOrderBallot;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 trait HasPeckingOrderBallots
 {

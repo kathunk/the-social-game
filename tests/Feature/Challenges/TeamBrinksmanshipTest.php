@@ -156,9 +156,8 @@ it('prevents a team from launching multiple strikes', function () {
         launchNuclearStrike($player, 'carpet_bomb', $ally_code);
 
         // Second strike should fail
-        expect(function () use ($player, $ally_code) {
-            launchNuclearStrike($player, 'nuke_ally', $ally_code);
-        })->toThrow(\Exception::class);
+        launchNuclearStrike($player, 'nuke_ally', $ally_code)
+            ->assertHasErrors();
     }
 });
 
