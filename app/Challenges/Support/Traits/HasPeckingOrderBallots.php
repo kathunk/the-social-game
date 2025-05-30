@@ -5,6 +5,7 @@ namespace App\Challenges\Support\Traits;
 use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 use App\Events\PlayerSubmittedPeckingOrderBallot;
 use App\Models\Player;
+use App\Modifiers\Classes\BloodOaths;
 use App\States\GameState;
 use App\States\PlayerState;
 use Thunk\Verbs\Facades\Verbs;
@@ -66,5 +67,33 @@ trait HasPeckingOrderBallots
                 $player->addToScoreHistory(-$downvotes_received, 'Received downvotes');
             }
         });
+    }
+
+    public function upvoteTargets(Player $player)
+    {
+        $modifiers = $this->challenge->game->modifiers;
+
+        $is_blood_oath_game = $modifiers->where('class_key', BloodOaths::key())->count() > 0;
+
+        if (! $is_blood_oath_game) {
+            return $this->challenge->game->players->reject(fn ($p) => $p->id === $player->id);
+        }
+
+        $oath_data = $modifiers->firstWhere('class_key', BloodOaths::key())->modifier_data;
+
+        $has_buddy = $oath_data['pairs'][$player->id] ?? false;
+
+        if (! $has_buddy) {
+            return $this->challenge->game->players->reject(fn ($p) => $p->id === $player->id);
+        }
+
+        $buddy_id = $oath_data['pairs'][$player->id];
+
+        return $this->challenge->game->players->reject(fn ($p) => $p->id === $player->id || $p->id === $buddy_id);
+    }
+
+    public function downvoteTargets(Player $player)
+    {
+        return $this->challenge->game->players->reject(fn ($p) => $p->id === $player->id);
     }
 }

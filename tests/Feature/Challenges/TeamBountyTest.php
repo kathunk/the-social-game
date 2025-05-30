@@ -120,7 +120,11 @@ it('players may only switch teams once during this challenge', function () {
     // First team switch should work
     swapTeam($player->fresh(), $this->team_2->id, TeamBounty::key());
 
-    expect(fn () => swapTeam($player->fresh(), $this->team_3->id, TeamBounty::key()))->toThrow(Exception::class);
+    // Second team switch has no effect
+    swapTeam($player->fresh(), $this->team_3->id, TeamBounty::key())
+        ->assertHasErrors();
+
+    expect($player->fresh()->team_id)->toBe($this->team_2->id);
 
     expect($this->challenge->fresh()->challenge_data['swapper_ids'])->toContain($player->id);
 

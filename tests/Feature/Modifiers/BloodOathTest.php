@@ -96,3 +96,87 @@ it('ensures Blood Oaths can only be used with a blood oath scoreboard', function
 
     expect($this->game_template->scoreboard_type)->toBe('blood_oath');
 });
+
+it('does not allow you to upvote your blood oath partner', function () {
+    Verbs::commitImmediately();
+
+    $modifiers = [BloodOaths::key()];
+
+    $challenges = [
+        [
+            'challenge_keys' => [IndividualHighScoreQuiz::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    $this->mockGameTemplate(
+        challenges: $challenges,
+        type: 'individual',
+        modifiers: $modifiers,
+    );
+
+    $game = $this->createGame();
+    $player_1 = $this->createPlayer();
+    $player_2 = $this->createPlayer();
+    $player_3 = $this->createPlayer();
+    $game->start();
+
+    $challenge = $game->challenges->first();
+
+    Livewire::actingAs($player_1->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('round_properties.'.BloodOaths::key().'.oath_offer_id', $player_2->id)
+        ->call('callClassAction', 'offer_blood_oath', 'modifier', BloodOaths::key());
+
+    Livewire::actingAs($player_2->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('round_properties.'.BloodOaths::key().'.oath_offer_id', $player_1->id)
+        ->call('callClassAction', 'offer_blood_oath', 'modifier', BloodOaths::key());
+
+    Livewire::actingAs($player_1->fresh()->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('round_properties.'.$challenge->class_key.'.upvote_player_id', $player_2->id)
+        ->set('round_properties.'.$challenge->class_key.'.downvote_player_id', $player_3->id)
+        ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)
+        ->assertHasErrors();
+
+    expect($challenge->fresh()->challenge_data['votes'][$player_1->id]['upvote_player_id'])->toBe(null);
+    expect($challenge->fresh()->challenge_data['votes'][$player_1->id]['downvote_player_id'])->toBe(null);
+});
+
+it('does not allow you to offer an oath to someone you have already upvoted', function () {
+    Verbs::commitImmediately();
+
+    $modifiers = [BloodOaths::key()];
+
+    $challenges = [
+        [
+            'challenge_keys' => [IndividualHighScoreQuiz::key()],
+            'duration' => 10,
+        ],
+    ];
+
+    $this->mockGameTemplate(
+        challenges: $challenges,
+        type: 'individual',
+        modifiers: $modifiers,
+    );
+
+    $game = $this->createGame();
+    $player_1 = $this->createPlayer();
+    $player_2 = $this->createPlayer();
+    $player_3 = $this->createPlayer();
+    $game->start();
+
+    $challenge = $game->challenges->first();
+    $modifier = $game->modifiers->first();
+
+    Livewire::actingAs($player_1->fresh()->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('round_properties.'.$challenge->class_key.'.upvote_player_id', $player_2->id)
+        ->set('round_properties.'.$challenge->class_key.'.downvote_player_id', $player_3->id)
+        ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)->assertHasNoErrors();
+
+    Livewire::actingAs($player_1->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->set('round_properties.'.BloodOaths::key().'.oath_offer_id', $player_2->id)
+        ->call('callClassAction', 'offer_blood_oath', 'modifier', BloodOaths::key())
+        ->assertHasErrors();
+
+    expect(isset($modifier->modifier_data['offers'][$player_1->id]))->toBeFalse();
+});
