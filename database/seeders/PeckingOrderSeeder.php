@@ -20,7 +20,7 @@ class PeckingOrderSeeder extends Seeder
         Verbs::commitImmediately();
 
         $template_id = GameTemplateAdded::fire(
-            name: 'Pecking Order: Blood Oaths',
+            name: 'Pecking Order',
             description: 'Play the game with a secret alliance, or as a lone wolf.',
             pre_game_lobby_message: "<h1>A popularity contest for horrible people</h1><h3>Climb to the top of the ranks.</h3><p>Every round, you will upvote and downvote your opponents. But you will also take quizzes about how you expect the votes to turn out. When you are right, you'll accumulate secret points that are revealed at the end of the game. Outsmart your opponents to be at the top of the Pecking Order!</p>",
             type: 'individual',
@@ -36,7 +36,7 @@ class PeckingOrderSeeder extends Seeder
                     'duration' => 10,
                 ],
             ],
-            modifiers: [BloodOaths::key()],
+            modifiers: [],
             players_can_join_late: false,
         )->game_template_id;
 
