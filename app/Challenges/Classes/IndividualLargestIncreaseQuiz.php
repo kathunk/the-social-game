@@ -14,7 +14,7 @@ class IndividualLargestIncreaseQuiz extends BaseChallengeClass implements Suppor
 
     const NAME = 'Rising stars';
 
-    const DESCRIPTION = 'Guess which player will have the largest score increase at the end of this round. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'Guess which player will have the largest score increase at the end of this round. If you are correct, you will gain one hidden point.';
 
     const TYPE = 'individual';
 

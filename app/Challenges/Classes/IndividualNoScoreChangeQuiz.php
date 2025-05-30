@@ -14,7 +14,7 @@ class IndividualNoScoreChangeQuiz extends BaseChallengeClass implements Supports
 
     const NAME = 'Steady Eddies';
 
-    const DESCRIPTION = 'Guess which player will not gain or lose any points at the end of this round. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'Guess which player will not gain or lose any points at the end of this round. If you are correct, you will gain one hidden point.';
 
     const TYPE = 'individual';
 

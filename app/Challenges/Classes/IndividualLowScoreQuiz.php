@@ -14,7 +14,7 @@ class IndividualLowScoreQuiz extends BaseChallengeClass implements SupportsPecki
 
     const NAME = 'Bringing up the rear';
 
-    const DESCRIPTION = 'Guess which player will be at the bottom of the scoreboard at the end of this round. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'Guess which player will be at the bottom of the scoreboard at the end of this round. If you are correct, you will gain one hidden point.';
 
     const TYPE = 'individual';
 

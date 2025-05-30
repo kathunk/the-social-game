@@ -14,7 +14,7 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
 
     const NAME = 'Guess your score';
 
-    const DESCRIPTION = 'Guess what your score will be on the scoreboard at the beginning of the next round. If you are within 1 point of the correct score, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'Guess what your score will be on the scoreboard at the beginning of the next round. If you are within 1 point of the correct score, you will gain one hidden point.';
 
     const TYPE = 'individual';
 

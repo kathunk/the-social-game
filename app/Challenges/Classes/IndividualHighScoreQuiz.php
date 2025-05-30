@@ -14,7 +14,7 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
 
     const NAME = 'Belle of the ball';
 
-    const DESCRIPTION = 'Guess which player will be at the top of the scoreboard at the end of this round. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'Guess which player will be at the top of the scoreboard at the end of this round. If you are correct, you will gain one hidden point.';
 
     const TYPE = 'individual';
 

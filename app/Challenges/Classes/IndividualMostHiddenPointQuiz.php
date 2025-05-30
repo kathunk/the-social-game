@@ -14,7 +14,7 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
 
     const NAME = "Teacher's pet";
 
-    const DESCRIPTION = 'All votes from this challenge will count toward hidden points. Guess which player will have the most hidden points at the end of the challenge. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'All votes from this challenge will count toward hidden points. Guess which player will have the most hidden points at the end of the challenge. If you are correct, you will gain one hidden point.';
 
     const TYPE = 'individual';
 
