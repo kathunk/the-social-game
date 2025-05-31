@@ -26,7 +26,6 @@ class UserSeeder extends Seeder
             ['Taylor Otwell', 'taylor@thunk.dev'],
             ['Josh Hanley', 'josh@thunk.dev'],
             ['Scammy McGee', 'scammy@thunk.dev'],
-            ['Daniel Coulbourne', 'danie1@thunk.dev'],
             ['Cedric Daniels', 'cedric@thunk.dev'],
             ['Jimmy McNulty', 'jimmy@thunk.dev'],
             ['Bubbles', 'bubbles@thunk.dev'],

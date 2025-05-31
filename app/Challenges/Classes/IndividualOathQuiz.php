@@ -14,7 +14,7 @@ class IndividualOathQuiz extends BaseChallengeClass implements SupportsPeckingOr
 {
     use HasPeckingOrderBallots;
 
-    const NAME = 'Oath of blood';
+    const NAME = 'Prior commitments';
 
     const DESCRIPTION = 'Select a player, and guess whether they are in a blood oath, or an oath of solitude. If you are correct, you will gain one hidden point, and they will receive -1 hidden point.';
 
