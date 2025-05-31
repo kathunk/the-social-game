@@ -39,6 +39,7 @@
                     @break
                 @case('input')
                     <flux:input
+                        wire:key="input-{{ $class_key }}-{{ $element['property_name'] }}"
                         label="{{ $element['label']}}"
                         placeholder="{{$element['placeholder']}}"
                         wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
@@ -48,6 +49,7 @@
                     <div class="flex space-x-2 mt-4 justify-end">
                         @foreach ($element['buttons'] as $btn)
                             <flux:button
+                                wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"
                                 variant="primary"
                                 wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}')"
                             >
@@ -58,6 +60,7 @@
                     @break
                 @case('select')
                     <flux:select
+                        wire:key="select-{{ $class_key }}-{{ $element['property_name'] }}"
                         label="{{ $element['label'] }}"
                         wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
                     >
@@ -65,7 +68,7 @@
                         <flux:select.option value="" selected class="placeholder">{{ $element['placeholder'] }}</flux:select.option>
                     @endisset
                         @foreach($element['options'] as $key => $value)
-                            <flux:select.option value="{{ $key }}">{{ $value }}</flux:select.option>
+                            <flux:select.option wire:key="select-option-{{ $class_key }}-{{ $element['property_name'] }}-{{ $key }}" value="{{ $key }}">{{ $value }}</flux:select.option>
                         @endforeach
                     </flux:select>
                     @break

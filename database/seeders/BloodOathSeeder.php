@@ -8,6 +8,7 @@ use App\Challenges\Classes\IndividualBloodOathHunterQuiz;
 use App\Challenges\Classes\IndividualDoubleTrouble;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualOathQuiz;
+use App\Challenges\Classes\IndividualOathSpy;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
 use App\Models\GameTemplate;
@@ -32,6 +33,18 @@ class BloodOathSeeder extends Seeder
             is_public: true,
             team_names: [],
             challenges: [
+                [
+                    'challenge_keys' => [
+                        IndividualHighScoreQuiz::key(),
+                    ],
+                    'duration' => 5,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualOathSpy::key(),
+                    ],
+                    'duration' => 5,
+                ],
                 [
                     'challenge_keys' => [
                         IndividualHighScoreQuiz::key(),
