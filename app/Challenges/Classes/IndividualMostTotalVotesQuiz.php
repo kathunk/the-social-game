@@ -14,7 +14,7 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
 
     const NAME = 'Absolute value champion';
 
-    const DESCRIPTION = 'Guess which player will receive the most votes this round, including upvotes and downvotes. If you are within 1 point of the correct score, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'Guess which player will receive the most votes this round, including upvotes and downvotes. If you are within 1 point of the correct score, you will gain one hidden point.';
 
     const TYPE = 'individual';
 

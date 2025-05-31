@@ -14,7 +14,7 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
 
     const NAME = 'A broken clock that is never right';
 
-    const DESCRIPTION = 'All votes from this challenge will count toward hidden points. Guess which player will have the fewest hidden points at the end of this challenge. If you are correct, you will gain one hidden point, that will not be revealed to your opponents until the end of the game.';
+    const DESCRIPTION = 'All votes from this challenge will count toward hidden points. Guess which player will have the fewest hidden points at the end of this challenge. If you are correct, you will gain one hidden point.';
 
     const TYPE = 'individual';
 

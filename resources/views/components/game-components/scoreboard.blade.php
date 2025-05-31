@@ -90,12 +90,14 @@
                     @php
                         $modifier_data = $this->game->modifiers()->where('class_key', App\Modifiers\Classes\BloodOaths::key())->first()->modifier_data;
                         $pair_ids = collect($modifier_data['pairs']);
-                        $loan_wolves = $players->reject(fn($player) => $pair_ids->has($player->id));
+                        $loan_wolves = $players->reject(fn($player) => 
+                            $pair_ids->has($player->id) || $pair_ids->contains($player->id)
+                        );
 
                         $rows = $loan_wolves->map(fn($player) => [
                             'players' => [$player],
                             'final_score' => $player->score,
-                            'hidden_points' => $player->hidden_score,
+                            'hidden_points' => $player->hidden_score - $player->score,
                         ]);
 
                         $pair_ids->each(function($key, $pair) use ($rows, $players) {
@@ -103,7 +105,7 @@
                             $player_2 = $players->firstWhere('id', $key);
 
                             $pair_accounted_for = $rows->filter(fn($row) => 
-                                $row['players'][0]->id === $player_1->id || $row['players'][0]->id === $player_2->id 
+                                collect($row['players'])->contains(fn($p) => $p->id === $player_1->id || $p->id === $player_2->id)
                             )->count() > 0;
 
                             if ($pair_accounted_for) {

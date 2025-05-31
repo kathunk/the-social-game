@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\IndividualDoubleTrouble;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Challenges\Classes\IndividualSpy;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
 use App\Models\GameTemplate;
@@ -31,6 +33,18 @@ class PeckingOrderSeeder extends Seeder
                 [
                     'challenge_keys' => [
                         IndividualHighScoreQuiz::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualDoubleTrouble::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualSpy::key(),
                     ],
                     'duration' => 10,
                 ],
