@@ -2,6 +2,7 @@
 
 use App\Http\MissingGameHandler;
 use App\Livewire\CreateGame;
+use App\Livewire\GameComponentListPage;
 use App\Livewire\GameDashboard;
 use App\Livewire\GameTemplatesListPage;
 use App\Livewire\Home;
@@ -16,6 +17,8 @@ use Livewire\Volt\Volt;
 Route::get('/', function () {
     return view('welcome');
 })->name('dashboard');
+
+Route::get('/game-components', GameComponentListPage::class)->name('game-components.index');
 
 Route::missing(new MissingGameHandler)->group(function () {
     Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
