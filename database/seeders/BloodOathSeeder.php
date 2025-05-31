@@ -4,9 +4,10 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\IndividualBloodOathHunterQuiz;
 use App\Challenges\Classes\IndividualDoubleTrouble;
-use App\Challenges\Classes\IndividualGrandstandGambit;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Challenges\Classes\IndividualOathQuiz;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
 use App\Models\GameTemplate;
@@ -26,28 +27,34 @@ class BloodOathSeeder extends Seeder
             description: 'Play the game with a secret alliance, or as a lone wolf.',
             pre_game_lobby_message: "<h1>A popularity contest for horrible people</h1><h3>Climb to the top of the ranks.</h3><p>Every round, you will upvote and downvote your opponents. But you will also take quizzes about how you expect the votes to turn out. When you are right, you'll accumulate secret points that are revealed at the end of the game. Outsmart your opponents to be at the top of the Pecking Order!</p>",
             type: 'individual',
-            min_players: 6,
+            min_players: 4,
             max_players: 12,
             is_public: true,
             team_names: [],
             challenges: [
                 [
                     'challenge_keys' => [
-                        IndividualGrandstandGambit::key(),
+                        IndividualHighScoreQuiz::key(),
                     ],
-                    'duration' => 10,
+                    'duration' => 5,
                 ],
                 [
                     'challenge_keys' => [
-                        IndividualHighScoreQuiz::key(),
+                        IndividualOathQuiz::key(),
                     ],
-                    'duration' => 10,
+                    'duration' => 5,
                 ],
                 [
                     'challenge_keys' => [
                         IndividualDoubleTrouble::key(),
                     ],
-                    'duration' => 10,
+                    'duration' => 5,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualBloodOathHunterQuiz::key(),
+                    ],
+                    'duration' => 5,
                 ],
             ],
             modifiers: [BloodOaths::key()],
