@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Challenges\ChallengeRegistry;
 use App\Events\GameTemplateAdded;
 use App\Events\GameTemplateArchived;
+use App\Events\GameTemplateUnarchived;
 use App\Models\GameTemplate;
 use App\Modifiers\ModifierRegistry;
 use Exception;
@@ -178,6 +179,15 @@ class ManageGameTemplatePage extends Component
         Verbs::commit();
 
         return redirect()->route('game-templates.index');
+    }
+
+    public function unarchiveTemplate()
+    {
+        GameTemplateUnarchived::fire(game_template_id: $this->game_template->id);
+
+        Verbs::commit();
+
+        return redirect()->route('game-templates.show', $this->game_template->id);
     }
 
     public function render()
