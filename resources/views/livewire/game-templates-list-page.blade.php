@@ -77,7 +77,7 @@
                         @foreach ($this->archivedGameTemplates as $t)
                             <flux:table.row>
                                 <flux:table.cell>
-                                    <flux:link :href="route('game-templates.show', $t->id)">{{ $t->name }}</flux:link>
+                                    <flux:text>{{ $t->name }}</flux:text>
                                 </flux:table.cell>
                                 <flux:table.cell>{{ ucfirst($t->type) }}</flux:table.cell>
                                 <flux:table.cell>
