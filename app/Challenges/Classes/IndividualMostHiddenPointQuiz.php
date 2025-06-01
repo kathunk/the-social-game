@@ -99,11 +99,11 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
                 ->count();
 
             if ($upvotes_received > 0) {
-                $player->addToScoreHistory($upvotes_received, 'received hidden upvotes', true);
+                $player->addToScoreHistory($upvotes_received, 'Received hidden upvotes', true);
             }
 
             if ($downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received, 'received hidden downvotes', true);
+                $player->addToScoreHistory(-$downvotes_received, 'Received hidden downvotes', true);
             }
         });
 
