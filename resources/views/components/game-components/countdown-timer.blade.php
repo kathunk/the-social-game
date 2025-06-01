@@ -9,11 +9,14 @@
         interval: null,
         tick() {
             let seconds = Math.floor((this.endTime - new Date()) / 1000);
-            if (seconds < 0) seconds = 0;
+            if (seconds <= 0) {
+                this.timeLeft = 'ending...';
+                return;
+            }
 
             const m = Math.floor(seconds / 60).toString().padStart(2, '0');
             const s = (seconds % 60).toString().padStart(2, '0');
-            this.timeLeft = `${m}:${s}`;
+            this.timeLeft = `ends in ${m}:${s}`;
         }
     }"
     x-init="
@@ -22,5 +25,5 @@
     "
     @unload="clearInterval(interval)"
     x-text="timeLeft"
-    class="font-mono font-bold"
+    class="font-mono"
 ></div>

@@ -4,12 +4,19 @@
 <flux:card>
     <div class="flex flex-col space-y-4">
         @if ($type === 'challenge')
+            @php
+                $challenges = $this->game->challenges;
+                $activated_challenges = $challenges->where('status', 'active')->count() + $challenges->where('status', 'ended')->count();
+                $total_challenges = $challenges->count();
+            @endphp
             <div class="flex space-x-2 items-baseline">
                 <flux:heading size="lg">Challenge</flux:heading>
+                <flux:text class="text-sm">
+                    ({{ $activated_challenges }} of {{ $total_challenges }})
+                </flux:text>
             
                 @if ($this->challenge->ends_at->isFuture())
-                    <flux:text variant="subtle" class="flex items-baseline gap-1">
-                        ends in
+                    <flux:text variant="subtle" class="flex items-baseline">
                         <x-game-components.countdown-timer :ends_at="$this->challenge->ends_at->toIsoString()" />
                     </flux:text>
                 @else
