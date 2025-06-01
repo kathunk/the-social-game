@@ -21,7 +21,8 @@
                 <flux:brand name="The Social Game" href="{{ route('dashboard') }}" wire:navigate>
                     <x-slot name="logo">
                         <div class="rounded w-12 bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
-                            <x-app-logo />
+                            {{-- <x-app-logo /> --}}
+                            <x-icons.gossip class="w-6 h-6 mx-auto text-white" />
                         </div>
                     </x-slot>
                 </flux:brand>
