@@ -36,8 +36,8 @@ class GameDashboard extends Component
     public function players()
     {
         return $this->game->status === 'ended'
-            ? $this->game->players->sortBy('name')->sortByDesc('score')
-            : $this->game->players->sortByDesc('hidden_score');
+            ? $this->game->players->sortByDesc('hidden_score')
+            : $this->game->players->sortByDesc('score');
     }
 
     #[Computed]
