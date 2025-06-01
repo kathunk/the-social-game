@@ -119,9 +119,13 @@
     @if ($this->game_template !== null)
         <div class="mt-4 flex flex-row space-x-4 justify-end">
             <flux:button variant="filled" wire:click="duplicateTemplate">Create duplicate</flux:button>
-            <flux:modal.trigger name="archive-template">
-                <flux:button variant="filled">Archive</flux:button>
-            </flux:modal.trigger>
+            @if ($this->game_template->is_archived)
+                <flux:button variant="filled" wire:click="unarchiveTemplate">Unarchive</flux:button>
+            @else
+                <flux:modal.trigger name="archive-template">
+                    <flux:button variant="filled">Archive</flux:button>
+                </flux:modal.trigger>
+            @endif
         </div>
     @endif
 
@@ -183,7 +187,7 @@
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">Archive this template</flux:heading>
-                <flux:text class="mt-2">Are you sure you want to archive this template? This action cannot be undone.</flux:text>
+                <flux:text class="mt-2">Are you sure you want to archive this template?</flux:text>
             </div>
             <flux:button variant="danger" wire:click="archiveTemplate">Archive</flux:button>
         </div>

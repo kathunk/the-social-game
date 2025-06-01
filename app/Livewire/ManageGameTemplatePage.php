@@ -2,16 +2,17 @@
 
 namespace App\Livewire;
 
-use App\Challenges\ChallengeRegistry;
-use App\Events\GameTemplateAdded;
-use App\Events\GameTemplateArchived;
-use App\Models\GameTemplate;
-use App\Modifiers\ModifierRegistry;
 use Exception;
 use Flux\Flux;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
+use App\Models\GameTemplate;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\GameTemplateAdded;
+use Livewire\Attributes\Computed;
+use App\Modifiers\ModifierRegistry;
+use App\Events\GameTemplateArchived;
+use App\Challenges\ChallengeRegistry;
+use App\Events\GameTemplateUnarchived;
 
 class ManageGameTemplatePage extends Component
 {
@@ -178,6 +179,15 @@ class ManageGameTemplatePage extends Component
         Verbs::commit();
 
         return redirect()->route('game-templates.index');
+    }
+
+    public function unarchiveTemplate()
+    {
+        GameTemplateUnarchived::fire(game_template_id: $this->game_template->id);
+
+        Verbs::commit();
+
+        return redirect()->route('game-templates.show', $this->game_template->id);
     }
 
     public function render()
