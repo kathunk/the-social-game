@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use App\Models\GameTemplate;
-use Thunk\Verbs\Facades\Verbs;
-use Livewire\Attributes\Computed;
 use App\Events\GameTemplateUnarchived;
+use App\Models\GameTemplate;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Thunk\Verbs\Facades\Verbs;
 
 class GameTemplatesListPage extends Component
 {
