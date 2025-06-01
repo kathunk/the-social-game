@@ -34,7 +34,7 @@ class PeckingOrderSeeder extends Seeder
                     'challenge_keys' => [
                         IndividualHighScoreQuiz::key(),
                     ],
-                    'duration' => 10,
+                    'duration' => 1,
                 ],
                 [
                     'challenge_keys' => [
