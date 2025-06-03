@@ -238,7 +238,6 @@ class GameDashboard extends Component
         try {
             $response = $handler->{$action}($this->player, $params['round_properties']);
         } catch (\Exception $e) {
-            // @todo show the actual error message
             $this->addError('error', $e->getMessage());
 
             return;

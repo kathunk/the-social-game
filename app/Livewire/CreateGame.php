@@ -35,7 +35,7 @@ class CreateGame extends Component
     public function mount()
     {
         if (! $this->user->is_member) {
-            return redirect()->route('dashboard');
+            return redirect()->route('marketing-page');
         }
 
         $this->game_start_timecode = Carbon::now()->addHours(1)->setSeconds(0);

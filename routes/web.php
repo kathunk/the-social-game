@@ -1,18 +1,19 @@
 <?php
 
-use App\Http\MissingGameHandler;
-use App\Livewire\CreateGame;
-use App\Livewire\GameComponentListPage;
-use App\Livewire\GameDashboard;
-use App\Livewire\GameTemplatesListPage;
 use App\Livewire\Home;
-use App\Livewire\ManageGameTemplatePage;
-use App\Livewire\PlayerPage;
-use App\Livewire\PreGameLobby;
-use App\Livewire\SecretsPage;
-use App\Livewire\TeamPage;
-use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Livewire\TeamPage;
+use App\Livewire\CreateGame;
+use App\Livewire\PlayerPage;
+use App\Livewire\SecretsPage;
+use App\Livewire\PreGameLobby;
+use App\Livewire\GameDashboard;
+use App\Livewire\MarketingPage;
+use App\Http\MissingGameHandler;
+use Illuminate\Support\Facades\Route;
+use App\Livewire\GameComponentListPage;
+use App\Livewire\GameTemplatesListPage;
+use App\Livewire\ManageGameTemplatePage;
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,6 +24,8 @@ Route::get('/game-components', GameComponentListPage::class)->name('game-compone
 Route::missing(new MissingGameHandler)->group(function () {
     Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
 });
+
+Route::get('/marketing-page', MarketingPage::class)->name('marketing-page');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
