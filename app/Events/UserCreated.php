@@ -28,11 +28,19 @@ class UserCreated extends Event
 
     public function handle()
     {
-        return User::create([
+        $user = User::find($this->user_id);
+
+        if ($user) {
+            return $user;
+        }
+
+        $user =User::create([
             'id' => $this->user_id,
             'name' => $this->name,
             'email' => $this->email,
             'password' => $this->encrypted_password,
         ]);
+
+        return $user;
     }
 }
