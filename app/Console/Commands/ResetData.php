@@ -27,7 +27,6 @@ class ResetData extends Command
             'users',
         ];
 
-        // Disable foreign key checks based on the database driver
         if (DB::connection()->getDriverName() === 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=0');
         } else {
@@ -54,32 +53,10 @@ class ResetData extends Command
             }
         }
 
-        // Re-enable foreign key checks based on the database driver
         if (DB::connection()->getDriverName() === 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
         } else {
             DB::statement('PRAGMA foreign_keys = ON');
-        }
-
-        // Final verification of all tables
-        foreach ($tables as $table) {
-            $count = DB::table($table)->count();
-            $this->info("Final count for {$table}: {$count}");
-            
-            if ($count > 0) {
-                $this->error("CRITICAL: Table {$table} still has {$count} records after all cleanup attempts!");
-            }
-        }
-
-        // Clear Verbs event store
-        $this->info('Clearing Verbs event store...');
-        try {
-            // Clear all events from the Verbs store
-            DB::table('verb_events')->delete();
-            DB::table('verb_snapshots')->delete();
-            $this->info('Verbs event store cleared successfully');
-        } catch (\Exception $e) {
-            $this->error('Failed to clear Verbs event store: ' . $e->getMessage());
         }
 
         // Clear Redis cache
