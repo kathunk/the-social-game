@@ -31,11 +31,11 @@ class UserCreated extends Event
     {
         $user = User::find($this->user_id);
 
-        Log::info('UserCreated event received', [
-            'user_id' => $this->user_id, 
-            'email' => $this->email,
-            'existing_user' => $user,
-        ]);
+        // Log::info('UserCreated event received', [
+        //     'user_id' => $this->user_id, 
+        //     'email' => $this->email,
+        //     'existing_user' => $user,
+        // ]);
 
         if ($user) {
             return $user;
