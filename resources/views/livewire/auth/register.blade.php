@@ -34,8 +34,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
-
         $user_id = UserCreated::fire(
             name: $validated['name'],
             email: $validated['email'],
