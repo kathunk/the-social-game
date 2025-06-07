@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Thunk\Verbs\Facades\Verbs;
 
 class ReplayEvents extends Command
 {
@@ -20,8 +19,9 @@ class ReplayEvents extends Command
         $toId = $this->option('to-id');
         $dryRun = $this->option('dry-run');
 
-        if (empty($events) && empty($exclude) && !$fromId && !$toId) {
+        if (empty($events) && empty($exclude) && ! $fromId && ! $toId) {
             $this->error('You must specify at least one filtering option: --events, --exclude, --from-id, or --to-id');
+
             return 1;
         }
 
@@ -36,11 +36,11 @@ class ReplayEvents extends Command
             $query->where('id', '<=', $toId);
         }
 
-        if (!empty($events)) {
+        if (! empty($events)) {
             $query->whereIn('type', $events);
         }
 
-        if (!empty($exclude)) {
+        if (! empty($exclude)) {
             $query->whereNotIn('type', $exclude);
         }
 
@@ -50,6 +50,7 @@ class ReplayEvents extends Command
 
         if ($eventsToReplay->isEmpty()) {
             $this->info('No events found matching the criteria.');
+
             return 0;
         }
 
@@ -63,11 +64,13 @@ class ReplayEvents extends Command
 
         if ($dryRun) {
             $this->info('Dry run mode - no events were actually replayed.');
+
             return 0;
         }
 
-        if (!$this->confirm('Do you want to proceed with replaying these events?')) {
+        if (! $this->confirm('Do you want to proceed with replaying these events?')) {
             $this->info('Operation cancelled.');
+
             return 0;
         }
 
@@ -78,15 +81,16 @@ class ReplayEvents extends Command
             try {
                 // Reconstruct and replay the event
                 $eventClass = $eventData->type;
-                
-                if (!class_exists($eventClass)) {
+
+                if (! class_exists($eventClass)) {
                     $this->error("Event class {$eventClass} not found, skipping...");
                     $bar->advance();
+
                     continue;
                 }
 
                 $event = unserialize($eventData->data);
-                
+
                 // Apply the event to its states
                 if (method_exists($event, 'apply')) {
                     $event->apply();
@@ -99,7 +103,7 @@ class ReplayEvents extends Command
 
                 $bar->advance();
             } catch (\Exception $e) {
-                $this->error("Failed to replay event {$eventData->id} ({$eventData->type}): " . $e->getMessage());
+                $this->error("Failed to replay event {$eventData->id} ({$eventData->type}): ".$e->getMessage());
                 $bar->advance();
             }
         }

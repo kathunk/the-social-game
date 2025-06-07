@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Thunk\Verbs\Facades\Verbs;
 
 class ResetData extends Command
 {
@@ -24,7 +23,6 @@ class ResetData extends Command
             'games',
             'game_templates',
             'modifiers',
-            'users',
         ];
 
         if (DB::connection()->getDriverName() === 'mysql') {
@@ -40,16 +38,16 @@ class ResetData extends Command
                 DB::table($table)->delete();
                 // Then truncate to reset auto-increment
                 DB::table($table)->truncate();
-                
+
                 // Verify the table is empty
                 $count = DB::table($table)->count();
                 $this->info("Table {$table} truncated. Remaining records: {$count}");
-                
+
                 if ($count > 0) {
                     $this->error("WARNING: Table {$table} still has {$count} records after truncate!");
                 }
             } catch (\Exception $e) {
-                $this->error("Failed to truncate {$table}: " . $e->getMessage());
+                $this->error("Failed to truncate {$table}: ".$e->getMessage());
             }
         }
 
@@ -65,7 +63,7 @@ class ResetData extends Command
             \Illuminate\Support\Facades\Redis::flushall();
             $this->info('Redis cache cleared successfully');
         } catch (\Exception $e) {
-            $this->error('Failed to clear Redis cache: ' . $e->getMessage());
+            $this->error('Failed to clear Redis cache: '.$e->getMessage());
         }
     }
 }
