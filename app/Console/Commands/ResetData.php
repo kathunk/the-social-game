@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Thunk\Verbs\Facades\Verbs;
 
 class ResetData extends Command
 {
@@ -68,6 +69,17 @@ class ResetData extends Command
             if ($count > 0) {
                 $this->error("CRITICAL: Table {$table} still has {$count} records after all cleanup attempts!");
             }
+        }
+
+        // Clear Verbs event store
+        $this->info('Clearing Verbs event store...');
+        try {
+            // Clear all events from the Verbs store
+            DB::table('verb_events')->delete();
+            DB::table('verb_snapshots')->delete();
+            $this->info('Verbs event store cleared successfully');
+        } catch (\Exception $e) {
+            $this->error('Failed to clear Verbs event store: ' . $e->getMessage());
         }
 
         // Clear Redis cache

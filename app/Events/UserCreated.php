@@ -3,9 +3,10 @@
 namespace App\Events;
 
 use App\Models\User;
-use App\States\UserState;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
+use App\States\UserState;
+use Illuminate\Support\Facades\Log;
+use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 
 class UserCreated extends Event
 {
@@ -30,8 +31,20 @@ class UserCreated extends Event
     {
         $user = User::find($this->user_id);
 
+        Log::info('UserCreated event received', [
+            'user_id' => $this->user_id, 
+            'email' => $this->email,
+            'existing_user' => $user,
+        ]);
+
         if ($user) {
             return $user;
+        }
+
+        // Also check by email to prevent duplicates during replay
+        $existingUser = User::where('email', $this->email)->first();
+        if ($existingUser) {
+            return $existingUser;
         }
 
         $user = User::create([
