@@ -14,16 +14,16 @@ class ResetData extends Command
     public function handle()
     {
         $tables = [
-            'users',
-            'players',
-            'games',
-            'teams',
+            'memberships',
             'game_admins',
             'game_applications',
             'challenges',
-            'memberships',
+            'players',
+            'teams',
+            'games',
             'game_templates',
             'modifiers',
+            'users',
         ];
 
         // Disable foreign key checks based on the database driver

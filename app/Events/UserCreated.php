@@ -34,7 +34,7 @@ class UserCreated extends Event
             return $user;
         }
 
-        $user =User::create([
+        $user = User::create([
             'id' => $this->user_id,
             'name' => $this->name,
             'email' => $this->email,
