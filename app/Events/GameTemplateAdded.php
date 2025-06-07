@@ -17,25 +17,15 @@ class GameTemplateAdded extends Event
 
     public string $name;
 
-    public string $description;
-
     public string $type;
-
-    public ?int $min_players;
-
-    public ?int $max_players;
-
-    public bool $is_public;
 
     public array $team_names;
 
     public array $challenges;
 
+    public bool $is_public;
+
     public ?array $modifiers = [];
-
-    public string $pre_game_lobby_message;
-
-    public bool $players_can_join_late;
 
     public function validate()
     {
@@ -105,15 +95,10 @@ class GameTemplateAdded extends Event
     {
         $game_template->name = $this->name;
         $game_template->type = $this->type;
-        $game_template->min_players = $this->min_players;
-        $game_template->max_players = $this->max_players;
-        $game_template->is_public = $this->is_public;
         $game_template->team_names = $this->team_names;
         $game_template->challenges = $this->challenges;
         $game_template->modifiers = $this->modifiers;
-        $game_template->description = $this->description;
-        $game_template->pre_game_lobby_message = $this->pre_game_lobby_message;
-        $game_template->players_can_join_late = $this->players_can_join_late;
+        $game_template->is_public = $this->is_public;
 
         if (in_array(BloodOaths::key(), $this->modifiers)) {
             $game_template->scoreboard_type = 'blood_oath';
@@ -132,15 +117,10 @@ class GameTemplateAdded extends Event
             $existing->update([
                 'name' => $this->name,
                 'type' => $this->type,
-                'min_players' => $this->min_players,
-                'max_players' => $this->max_players,
                 'is_public' => $this->is_public,
                 'team_names' => $this->team_names,
                 'challenges' => $this->challenges,
                 'modifiers' => $this->modifiers,
-                'description' => $this->description,
-                'pre_game_lobby_message' => $this->pre_game_lobby_message,
-                'players_can_join_late' => $this->players_can_join_late,
                 'scoreboard_type' => $scoreboard_type,
             ]);
 
@@ -151,15 +131,10 @@ class GameTemplateAdded extends Event
             'id' => $this->game_template_id,
             'name' => $this->name,
             'type' => $this->type,
-            'min_players' => $this->min_players,
-            'max_players' => $this->max_players,
             'is_public' => $this->is_public,
             'team_names' => $this->team_names,
             'challenges' => $this->challenges,
             'modifiers' => $this->modifiers,
-            'description' => $this->description,
-            'pre_game_lobby_message' => $this->pre_game_lobby_message,
-            'players_can_join_late' => $this->players_can_join_late,
             'scoreboard_type' => $scoreboard_type,
         ]);
     }
