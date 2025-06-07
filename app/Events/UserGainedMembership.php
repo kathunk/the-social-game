@@ -26,13 +26,6 @@ class UserGainedMembership extends Event
 
     public function handle()
     {
-        // Check if membership already exists to prevent duplicates during replay
-        $existing = Membership::find($this->membership_id);
-        
-        if ($existing) {
-            return; // Skip creation if membership already exists
-        }
-
         Membership::create([
             'id' => $this->membership_id,
             'user_id' => $this->user_id,
