@@ -3,27 +3,28 @@
 namespace App\Livewire;
 
 use App\Models\Game;
+use Livewire\Component;
+use App\Models\GameMode;
 use App\Models\GameTemplate;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Computed;
-use Livewire\Component;
 
 class CreateGame extends Component
 {
     public Carbon $game_start_timecode;
 
-    public int $game_template_id;
+    public int $game_mode_id;
 
     public bool $requires_admin_approval_to_join = false;
 
     #[Computed]
-    public function game_templates()
+    public function game_modes()
     {
         if ($this->user->is_super_admin) {
-            return GameTemplate::all();
+            return GameMode::all();
         }
 
-        return GameTemplate::where('is_public', true)->get();
+        return GameMode::where('is_public', true)->get();
     }
 
     #[Computed]
@@ -45,8 +46,13 @@ class CreateGame extends Component
     {
         $this->validate();
 
+        $mode = GameMode::find($this->game_mode_id);
+
+        $template = $mode->selectTemplateForUser($this->user);
+
         $game = Game::fromTemplate(
-            template: GameTemplate::find($this->game_template_id),
+            game_mode: $mode,
+            template: $template,
             starts_at: $this->game_start_timecode->setSeconds(0),
             user: $this->user,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
@@ -58,7 +64,7 @@ class CreateGame extends Component
     public function rules()
     {
         return [
-            'game_template_id' => 'required|exists:game_templates,id',
+            'game_mode_id' => 'required|exists:game_modes,id',
             'game_start_timecode' => ['required', 'date', 'after:'.now()],
         ];
     }

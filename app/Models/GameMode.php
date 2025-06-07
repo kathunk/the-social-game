@@ -28,4 +28,19 @@ class GameMode extends Model
     {
         return $this->hasMany(GameTemplate::class);
     }
+
+    public function selectTemplateForUser(User $user)
+    {
+        $available_templates = $user->is_super_admin 
+            ? $this->gameTemplates 
+            : $this->gameTemplates->where('is_public', true);
+
+        $played_template_ids = $user->games->pluck('template_id');
+
+        $available_templates = $available_templates
+            ->shuffle()
+            ->sortBy(fn($t) => $played_template_ids->filter(fn($id) => $id === $t->id)->count());
+
+        return $available_templates->first();
+    }
 }
