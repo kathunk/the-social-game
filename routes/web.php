@@ -4,7 +4,7 @@ use App\Http\MissingGameHandler;
 use App\Livewire\CreateGame;
 use App\Livewire\GameComponentListPage;
 use App\Livewire\GameDashboard;
-use App\Livewire\GameTemplatesListPage;
+use App\Livewire\GameModesListPage;
 use App\Livewire\Home;
 use App\Livewire\ManageGameTemplatePage;
 use App\Livewire\MarketingPage;
@@ -43,9 +43,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/games/{game}/players/{player}', PlayerPage::class)->name('players.show');
     });
 
-    Route::get('/game-templates', GameTemplatesListPage::class)->name('game-templates.index');
+    Route::get('/game-modes', GameModesListPage::class)->name('game-modes.index');
     Route::get('/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');
-    Route::get('/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
+    Route::get('{game_mode}/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
     Route::get('/games/{game}/secrets/{modifier}', SecretsPage::class)->name('games.secrets');
 });
 

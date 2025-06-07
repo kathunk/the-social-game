@@ -3,15 +3,19 @@
 namespace App\Events;
 
 use App\Challenges\ChallengeRegistry;
+use App\Events\Traits\HasGameMode;
 use App\Models\GameTemplate;
 use App\Modifiers\Classes\BloodOaths;
 use App\Modifiers\ModifierRegistry;
+use App\States\GameModeState;
 use App\States\GameTemplateState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
 class GameTemplateAdded extends Event
 {
+    use HasGameMode;
+
     #[StateId(GameTemplateState::class)]
     public ?int $game_template_id = null;
 
@@ -91,14 +95,20 @@ class GameTemplateAdded extends Event
         });
     }
 
-    public function applyToGame(GameTemplateState $game_template)
+    public function applyToGameTemplate(GameTemplateState $game_template)
     {
+        $mode = $this->state(GameModeState::class);
+
         $game_template->name = $this->name;
         $game_template->type = $this->type;
         $game_template->team_names = $this->team_names;
         $game_template->challenges = $this->challenges;
         $game_template->modifiers = $this->modifiers;
         $game_template->is_public = $this->is_public;
+        $game_template->game_mode_id = $this->game_mode_id;
+        $game_template->min_players = $mode->min_players;
+        $game_template->max_players = $mode->max_players;
+        $game_template->players_can_join_late = $mode->players_can_join_late;
 
         if (in_array(BloodOaths::key(), $this->modifiers)) {
             $game_template->scoreboard_type = 'blood_oath';
@@ -107,11 +117,22 @@ class GameTemplateAdded extends Event
         }
     }
 
+    public function applyToGameMode(GameModeState $game_mode)
+    {
+        if ($game_mode->game_template_ids->contains($this->game_template_id)) {
+            return;
+        }
+
+        $game_mode->game_template_ids->push($this->game_template_id);
+    }
+
     public function handle()
     {
         $existing = GameTemplate::find($this->game_template_id);
 
         $scoreboard_type = $this->state(GameTemplateState::class)->scoreboard_type;
+
+        $mode = $this->gameMode();
 
         if ($existing) {
             $existing->update([
@@ -122,6 +143,12 @@ class GameTemplateAdded extends Event
                 'challenges' => $this->challenges,
                 'modifiers' => $this->modifiers,
                 'scoreboard_type' => $scoreboard_type,
+                'game_mode_id' => $this->game_mode_id,
+                'description' => $mode->description,
+                'pre_game_lobby_message' => $mode->pre_game_lobby_message,
+                'min_players' => $mode->min_players,
+                'max_players' => $mode->max_players,
+                'players_can_join_late' => $mode->players_can_join_late,
             ]);
 
             return;
@@ -136,6 +163,12 @@ class GameTemplateAdded extends Event
             'challenges' => $this->challenges,
             'modifiers' => $this->modifiers,
             'scoreboard_type' => $scoreboard_type,
+            'game_mode_id' => $this->game_mode_id,
+            'description' => $mode->description,
+            'pre_game_lobby_message' => $mode->pre_game_lobby_message,
+            'min_players' => $mode->min_players,
+            'max_players' => $mode->max_players,
+            'players_can_join_late' => $mode->players_can_join_late,
         ]);
     }
 }

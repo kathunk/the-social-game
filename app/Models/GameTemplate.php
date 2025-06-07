@@ -25,6 +25,11 @@ class GameTemplate extends Model
         });
     }
 
+    public function gameMode()
+    {
+        return $this->belongsTo(GameMode::class);
+    }
+
     public function getTotalDurationAttribute(): int
     {
         return collect($this->challenges)->sum(fn ($c) => $c['duration'] ?? 0);

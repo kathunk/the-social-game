@@ -23,4 +23,9 @@ class GameMode extends Model
             $builder->where('is_archived', false);
         });
     }
+
+    public function gameTemplates()
+    {
+        return $this->hasMany(GameTemplate::class);
+    }
 }
