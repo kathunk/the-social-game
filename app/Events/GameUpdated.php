@@ -2,19 +2,20 @@
 
 namespace App\Events;
 
-use App\Events\Traits\HasGame;
-use App\Events\Traits\HasGameTemplate;
-use App\Models\Game;
-use App\States\GameState;
-use App\States\GameTemplateState;
-use App\States\UserState;
 use Carbon\Carbon;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use App\Models\Game;
 use Thunk\Verbs\Event;
+use App\States\GameState;
+use App\States\UserState;
+use App\Events\Traits\HasGame;
+use App\States\GameTemplateState;
+use App\Events\Traits\HasGameMode;
+use App\Events\Traits\HasGameTemplate;
+use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 
 class GameUpdated extends Event
 {
-    use HasGame, HasGameTemplate;
+    use HasGame, HasGameTemplate, HasGameMode;
 
     #[StateId(UserState::class)]
     public ?int $user_id = null;
@@ -30,6 +31,7 @@ class GameUpdated extends Event
     public function apply(GameState $game)
     {
         $game->game_template_id = $this->game_template_id;
+        $game->game_mode_id = $this->game_mode_id;
         $game->starts_at = $this->starts_at;
         $game->is_public = $this->is_public;
         $game->requires_admin_approval_to_join = $this->requires_admin_approval_to_join;
@@ -41,8 +43,9 @@ class GameUpdated extends Event
 
     public function handle()
     {
-        $game = Game::find($this->game_id)->update([
+        Game::find($this->game_id)->update([
             'game_template_id' => $this->game_template_id,
+            'game_mode_id' => $this->game_mode_id,
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at,
             'is_public' => $this->is_public,

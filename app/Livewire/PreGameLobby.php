@@ -2,23 +2,24 @@
 
 namespace App\Livewire;
 
-use App\Events\GameUpdated;
-use App\Events\PlayerRemovedFromGame;
-use App\Events\UserAdmittedToGame;
-use App\Events\UserDemotedFromGameAdmin;
-use App\Events\UserPromotedToGameAdmin;
-use App\Events\UserRejectedFromGame;
-use App\Models\Game;
-use App\Models\GameApplication;
-use App\Models\GameTemplate;
-use App\Models\Player;
-use App\Support\HtmlTransformer;
 use Flux\Flux;
-use Illuminate\Support\Carbon;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
+use App\Models\Game;
+use App\Models\Player;
 use Livewire\Component;
+use App\Models\GameMode;
+use App\Events\GameUpdated;
+use Livewire\Attributes\On;
+use App\Models\GameTemplate;
+use Illuminate\Support\Carbon;
 use Thunk\Verbs\Facades\Verbs;
+use App\Models\GameApplication;
+use App\Support\HtmlTransformer;
+use Livewire\Attributes\Computed;
+use App\Events\UserAdmittedToGame;
+use App\Events\UserRejectedFromGame;
+use App\Events\PlayerRemovedFromGame;
+use App\Events\UserPromotedToGameAdmin;
+use App\Events\UserDemotedFromGameAdmin;
 
 class PreGameLobby extends Component
 {
@@ -27,6 +28,8 @@ class PreGameLobby extends Component
     public string $selected_application_id = '';
 
     public Carbon $game_start_timecode;
+
+    public string $game_mode_id;
 
     public string $game_template_id;
 
@@ -41,9 +44,19 @@ class PreGameLobby extends Component
     }
 
     #[Computed]
+    public function gameModes()
+    {
+        return GameMode::all()
+            ->sortBy('name')
+            ->filter(function ($mode) {
+                return $this->user->is_super_admin || $mode->is_public;
+            });
+    }
+
+    #[Computed]
     public function gameTemplates()
     {
-        return GameTemplate::all()
+        return $this->game->gameMode->gameTemplates
             ->sortBy('name')
             ->filter(function ($template) {
                 return $this->user->is_super_admin || $template->is_public;
@@ -165,6 +178,7 @@ class PreGameLobby extends Component
     {
         $this->game = $game;
         $this->game_template_id = (string) $game->gameTemplate->id;
+        $this->game_mode_id = (string) $game->gameMode->id;
         $this->game_start_timecode = $game->starts_at;
         $this->is_public = $game->is_public;
         $this->requires_admin_approval_to_join = $game->requires_admin_approval_to_join;
@@ -289,6 +303,7 @@ class PreGameLobby extends Component
     {
         $this->validate([
             'game_template_id' => 'required|exists:game_templates,id',
+            'game_mode_id' => 'required|exists:game_modes,id',
             'game_start_timecode' => 'required|date',
         ]);
 
@@ -299,6 +314,7 @@ class PreGameLobby extends Component
             game_id: $this->game->id,
             user_id: $this->user->id,
             game_template_id: (int) $this->game_template_id,
+            game_mode_id: (int) $this->game_mode_id,
             starts_at: $this->game_start_timecode,
             ends_at: $ends_at,
             is_public: $this->is_public,
@@ -319,6 +335,7 @@ class PreGameLobby extends Component
             game_id: $this->game->id,
             user_id: $this->user->id,
             game_template_id: (int) $this->game_template_id,
+            game_mode_id: (int) $this->game_mode_id,
             starts_at: now(),
             ends_at: $ends_at,
             is_public: $this->is_public,

@@ -55,6 +55,7 @@ class GameCreated extends Event
             'name' => $this->name,
             'status' => 'upcoming',
             'game_template_id' => $this->game_template_id,
+            'game_mode_id' => $this->game_mode_id,
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at,
             'is_public' => $this->is_public,

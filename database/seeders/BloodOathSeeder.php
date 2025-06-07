@@ -40,7 +40,7 @@ class BloodOathSeeder extends Seeder
 
         $template_id = GameTemplateAdded::fire(
             game_mode_id: $mode_id,
-            name: 'Pecking Order: Blood Oaths',
+            name: 'BO Template 1',
             type: 'individual',
             is_public: true,
             team_names: [],

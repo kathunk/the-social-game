@@ -74,6 +74,11 @@ class Game extends Model
         return $this->belongsTo(GameTemplate::class);
     }
 
+    public function gameMode()
+    {
+        return $this->belongsTo(GameMode::class);
+    }
+
     public static function fromTemplate(
         GameTemplate $template,
         GameMode $game_mode,

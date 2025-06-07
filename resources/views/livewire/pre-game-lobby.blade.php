@@ -72,11 +72,11 @@
     @endif
 
     @if ($this->hasTooManyPlayers)
-        <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameTemplate->name }} only allows {{ $this->game->gameTemplate->max_players }} players. Remove some players, or change the game template." />
+        <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameMode->name }} only allows {{ $this->game->gameMode->max_players }} players. Remove some players, or change the game mode." />
     @endif
 
     @if ($this->hasTooFewPlayers)
-        <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameTemplate->name }} requires {{ $this->game->gameTemplate->min_players }} players. Add more players, or change the game template." />
+        <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameMode->name }} requires {{ $this->game->gameMode->min_players }} players. Add more players, or change the game mode." />
     @endif
 
     @if ($this->is_game_admin && $this->game->status === 'upcoming')
@@ -103,13 +103,23 @@
                     min="{{ now()->addMinute()->second(0)->toIsoString() }}"
                     required
                 />
-                <flux:select wire:model="game_template_id" variant="listbox" label="Game template" searchable placeholder="Choose game template...">
-                    @foreach ($this->gameTemplates as $gameTemplate)
-                        <flux:select.option :value="(string) $gameTemplate->id">
-                            {{ $gameTemplate->name }}
+                <flux:select wire:model="game_mode_id" variant="listbox" label="Game mode" searchable placeholder="Choose game mode...">
+                    @foreach ($this->gameModes as $gameMode)
+                        <flux:select.option :value="(string) $gameMode->id">
+                            {{ $gameMode->name }}
                         </flux:select.option>
                     @endforeach
                 </flux:select>
+
+                @if ($this->user->is_super_admin)
+                    <flux:select wire:model="game_template_id" variant="listbox" label="Game template" searchable placeholder="Choose game template...">
+                        @foreach ($this->gameTemplates as $gameTemplate)
+                            <flux:select.option :value="(string) $gameTemplate->id">
+                                {{ $gameTemplate->name }}
+                            </flux:select.option>
+                        @endforeach
+                    </flux:select>
+                @endif
 
                 <div class="flex flex-col gap-2 mt-4">
                     <flux:checkbox label="Open to all" wire:model="is_public" />
