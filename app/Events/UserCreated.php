@@ -3,10 +3,9 @@
 namespace App\Events;
 
 use App\Models\User;
-use Thunk\Verbs\Event;
 use App\States\UserState;
-use Thunk\Verbs\Facades\Verbs;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class UserCreated extends Event
 {
@@ -29,7 +28,7 @@ class UserCreated extends Event
 
     public function handle()
     {
-        User::create([
+        return User::create([
             'id' => $this->user_id,
             'name' => $this->name,
             'email' => $this->email,

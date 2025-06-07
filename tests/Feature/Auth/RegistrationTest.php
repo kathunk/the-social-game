@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\User;
-use Livewire\Volt\Volt;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Hash;
+use Livewire\Volt\Volt;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

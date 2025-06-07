@@ -16,7 +16,7 @@ class ResetData extends Command
         $tables = [
             'players',
             'games',
-            'teams', 
+            'teams',
             'game_admins',
             'game_applications',
             'challenges',
