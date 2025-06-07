@@ -14,6 +14,7 @@ class ResetData extends Command
     public function handle()
     {
         $tables = [
+            'users',
             'players',
             'games',
             'teams',
@@ -23,11 +24,24 @@ class ResetData extends Command
             'memberships',
             'game_templates',
             'modifiers',
-            'users',
         ];
+
+        // Disable foreign key checks based on the database driver
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        } else {
+            DB::statement('PRAGMA foreign_keys = OFF');
+        }
 
         foreach ($tables as $table) {
             DB::table($table)->truncate();
+        }
+
+        // Re-enable foreign key checks based on the database driver
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        } else {
+            DB::statement('PRAGMA foreign_keys = ON');
         }
     }
 }
