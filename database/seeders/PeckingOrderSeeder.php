@@ -7,8 +7,10 @@ namespace Database\Seeders;
 use App\Challenges\Classes\IndividualDoubleTrouble;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualSpy;
+use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
+use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -20,13 +22,23 @@ class PeckingOrderSeeder extends Seeder
     {
         Verbs::commitImmediately();
 
-        $template_id = GameTemplateAdded::fire(
+        $mode_id = GameModeAdded::fire(
             name: 'Pecking Order',
-            description: 'Play the game with a secret alliance, or as a lone wolf.',
+            description: 'A popularity contest for horrible people.',
             pre_game_lobby_message: "<h1>A popularity contest for horrible people</h1><h3>Climb to the top of the ranks.</h3><p>Every round, you will upvote and downvote your opponents. But you will also take quizzes about how you expect the votes to turn out. When you are right, you'll accumulate secret points that are revealed at the end of the game. Outsmart your opponents to be at the top of the Pecking Order!</p>",
             type: 'individual',
             min_players: 6,
             max_players: 12,
+            is_public: true,
+            players_can_join_late: true,
+        )->game_mode_id;
+
+        $mode = GameMode::find($mode_id);
+
+        $template_id = GameTemplateAdded::fire(
+            game_mode_id: $mode_id,
+            name: 'PO Template 1',
+            type: 'individual',
             is_public: true,
             team_names: [],
             challenges: [
@@ -59,6 +71,7 @@ class PeckingOrderSeeder extends Seeder
 
         $game = Game::fromTemplate(
             template: $template,
+            game_mode: $mode,
             starts_at: now(),
             user: $john,
             is_public: false,

@@ -15,7 +15,6 @@ class GameTemplate extends Model
         'team_names' => 'array',
         'challenges' => 'array',
         'modifiers' => 'array',
-        'players_can_join_late' => 'boolean',
         'is_archived' => 'boolean',
         'is_public' => 'boolean',
     ];
@@ -25,6 +24,11 @@ class GameTemplate extends Model
         static::addGlobalScope('not_archived', function ($builder) {
             $builder->where('is_archived', false);
         });
+    }
+
+    public function gameMode()
+    {
+        return $this->belongsTo(GameMode::class);
     }
 
     public function getTotalDurationAttribute(): int

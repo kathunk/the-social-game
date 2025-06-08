@@ -1,6 +1,7 @@
 <div 
     wire:poll="checkStatus" 
     class="flex flex-col gap-4"
+    x-data="{ gameModeId: $wire.entangle('game_mode_id') }"
 >
     @if ($this->game->status === 'upcoming')
         <div class="mx-auto w-full text-center">
@@ -72,11 +73,11 @@
     @endif
 
     @if ($this->hasTooManyPlayers)
-        <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameTemplate->name }} only allows {{ $this->game->gameTemplate->max_players }} players. Remove some players, or change the game template." />
+        <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameMode->name }} only allows {{ $this->game->gameMode->max_players }} players. Remove some players, or change the game mode." />
     @endif
 
     @if ($this->hasTooFewPlayers)
-        <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameTemplate->name }} requires {{ $this->game->gameTemplate->min_players }} players. Add more players, or change the game template." />
+        <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameMode->name }} requires {{ $this->game->gameMode->min_players }} players. Add more players, or change the game mode." />
     @endif
 
     @if ($this->is_game_admin && $this->game->status === 'upcoming')
@@ -103,13 +104,44 @@
                     min="{{ now()->addMinute()->second(0)->toIsoString() }}"
                     required
                 />
-                <flux:select wire:model="game_template_id" variant="listbox" label="Game template" searchable placeholder="Choose game template...">
-                    @foreach ($this->gameTemplates as $gameTemplate)
-                        <flux:select.option :value="(string) $gameTemplate->id">
-                            {{ $gameTemplate->name }}
-                        </flux:select.option>
+
+                <flux:radio.group 
+                    label="Select Game Mode" 
+                    variant="cards" 
+                    wire:model="game_mode_id"
+                    class="flex-col"
+                >
+                    @foreach ($this->game_modes as $game_mode)
+                        <flux:radio
+                            name="game_mode_id"
+                            value="{{ $game_mode->id }}"
+                            label="{{ $game_mode->name }}"
+                            description="{{ $game_mode->description }}"
+                            x-bind:checked="gameModeId === '{{ $game_mode->id }}'"
+                        />
                     @endforeach
-                </flux:select>
+                </flux:radio.group>
+
+                @if ($this->user->is_super_admin)
+                    <div class="mt-4">
+                        <flux:select 
+                            wire:model="game_template_id" 
+                            variant="listbox" 
+                            label="Game template" 
+                            searchable 
+                            placeholder="Choose game template..."
+                        >
+                            @foreach ($this->gameTemplates as $gameTemplate)
+                                <flux:select.option 
+                                    :value="(string) $gameTemplate->id"
+                                    x-show="gameModeId === '{{ $gameTemplate->game_mode_id }}'"
+                                >
+                                    {{ $gameTemplate->name }}
+                                </flux:select.option>
+                            @endforeach
+                        </flux:select>
+                    </div>
+                @endif
 
                 <div class="flex flex-col gap-2 mt-4">
                     <flux:checkbox label="Open to all" wire:model="is_public" />
@@ -123,7 +155,7 @@
                     <div x-show="!cancelGame">
                         <flux:button variant="ghost" @click="cancelGame = true">Cancel Game</flux:button>
                     </div>
-                    <flux:button @click="editGameSettings = false" wire:click="updateGameSettings">Update</flux:button>
+                    <flux:button wire:click="updateGameSettings">Update</flux:button>
                 </div>
             </div>
         </flux:card>

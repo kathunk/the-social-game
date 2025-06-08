@@ -4,8 +4,9 @@ use App\Http\MissingGameHandler;
 use App\Livewire\CreateGame;
 use App\Livewire\GameComponentListPage;
 use App\Livewire\GameDashboard;
-use App\Livewire\GameTemplatesListPage;
+use App\Livewire\GameModesListPage;
 use App\Livewire\Home;
+use App\Livewire\ManageGameModePage;
 use App\Livewire\ManageGameTemplatePage;
 use App\Livewire\MarketingPage;
 use App\Livewire\PlayerPage;
@@ -18,8 +19,6 @@ use Livewire\Volt\Volt;
 Route::get('/', function () {
     return view('welcome');
 })->name('dashboard');
-
-Route::get('/game-components', GameComponentListPage::class)->name('game-components.index');
 
 Route::missing(new MissingGameHandler)->group(function () {
     Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
@@ -43,9 +42,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/games/{game}/players/{player}', PlayerPage::class)->name('players.show');
     });
 
-    Route::get('/game-templates', GameTemplatesListPage::class)->name('game-templates.index');
-    Route::get('/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');
-    Route::get('/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
+    Route::get('/game-components', GameComponentListPage::class)->name('game-components.index');
+
+    Route::get('/game-modes', GameModesListPage::class)->name('game-modes.index');
+    Route::get('/game-modes/create', ManageGameModePage::class)->name('game-modes.create');
+    Route::get('/game-modes/{game_mode}', ManageGameModePage::class)->name('game-modes.show');
+    Route::get('/{game_mode}/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');
+    Route::get('{game_mode}/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
     Route::get('/games/{game}/secrets/{modifier}', SecretsPage::class)->name('games.secrets');
 });
 

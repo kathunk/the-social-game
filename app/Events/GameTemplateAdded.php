@@ -3,39 +3,33 @@
 namespace App\Events;
 
 use App\Challenges\ChallengeRegistry;
+use App\Events\Traits\HasGameMode;
 use App\Models\GameTemplate;
 use App\Modifiers\Classes\BloodOaths;
 use App\Modifiers\ModifierRegistry;
+use App\States\GameModeState;
 use App\States\GameTemplateState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
 class GameTemplateAdded extends Event
 {
+    use HasGameMode;
+
     #[StateId(GameTemplateState::class)]
     public ?int $game_template_id = null;
 
     public string $name;
 
-    public string $description;
-
     public string $type;
-
-    public ?int $min_players;
-
-    public ?int $max_players;
-
-    public bool $is_public;
 
     public array $team_names;
 
     public array $challenges;
 
+    public bool $is_public;
+
     public ?array $modifiers = [];
-
-    public string $pre_game_lobby_message;
-
-    public bool $players_can_join_late;
 
     public function validate()
     {
@@ -101,19 +95,20 @@ class GameTemplateAdded extends Event
         });
     }
 
-    public function applyToGame(GameTemplateState $game_template)
+    public function applyToGameTemplate(GameTemplateState $game_template)
     {
+        $mode = $this->state(GameModeState::class);
+
         $game_template->name = $this->name;
         $game_template->type = $this->type;
-        $game_template->min_players = $this->min_players;
-        $game_template->max_players = $this->max_players;
-        $game_template->is_public = $this->is_public;
         $game_template->team_names = $this->team_names;
         $game_template->challenges = $this->challenges;
         $game_template->modifiers = $this->modifiers;
-        $game_template->description = $this->description;
-        $game_template->pre_game_lobby_message = $this->pre_game_lobby_message;
-        $game_template->players_can_join_late = $this->players_can_join_late;
+        $game_template->is_public = $this->is_public;
+        $game_template->game_mode_id = $this->game_mode_id;
+        $game_template->min_players = $mode->min_players;
+        $game_template->max_players = $mode->max_players;
+        $game_template->players_can_join_late = $mode->players_can_join_late;
 
         if (in_array(BloodOaths::key(), $this->modifiers)) {
             $game_template->scoreboard_type = 'blood_oath';
@@ -122,26 +117,38 @@ class GameTemplateAdded extends Event
         }
     }
 
+    public function applyToGameMode(GameModeState $game_mode)
+    {
+        if ($game_mode->game_template_ids->contains($this->game_template_id)) {
+            return;
+        }
+
+        $game_mode->game_template_ids->push($this->game_template_id);
+    }
+
     public function handle()
     {
         $existing = GameTemplate::find($this->game_template_id);
 
         $scoreboard_type = $this->state(GameTemplateState::class)->scoreboard_type;
 
+        $mode = $this->gameMode();
+
         if ($existing) {
             $existing->update([
                 'name' => $this->name,
                 'type' => $this->type,
-                'min_players' => $this->min_players,
-                'max_players' => $this->max_players,
                 'is_public' => $this->is_public,
                 'team_names' => $this->team_names,
                 'challenges' => $this->challenges,
                 'modifiers' => $this->modifiers,
-                'description' => $this->description,
-                'pre_game_lobby_message' => $this->pre_game_lobby_message,
-                'players_can_join_late' => $this->players_can_join_late,
                 'scoreboard_type' => $scoreboard_type,
+                'game_mode_id' => $this->game_mode_id,
+                'description' => $mode->description,
+                'pre_game_lobby_message' => $mode->pre_game_lobby_message,
+                'min_players' => $mode->min_players,
+                'max_players' => $mode->max_players,
+                'players_can_join_late' => $mode->players_can_join_late,
             ]);
 
             return;
@@ -151,16 +158,17 @@ class GameTemplateAdded extends Event
             'id' => $this->game_template_id,
             'name' => $this->name,
             'type' => $this->type,
-            'min_players' => $this->min_players,
-            'max_players' => $this->max_players,
             'is_public' => $this->is_public,
             'team_names' => $this->team_names,
             'challenges' => $this->challenges,
             'modifiers' => $this->modifiers,
-            'description' => $this->description,
-            'pre_game_lobby_message' => $this->pre_game_lobby_message,
-            'players_can_join_late' => $this->players_can_join_late,
             'scoreboard_type' => $scoreboard_type,
+            'game_mode_id' => $this->game_mode_id,
+            'description' => $mode->description,
+            'pre_game_lobby_message' => $mode->pre_game_lobby_message,
+            'min_players' => $mode->min_players,
+            'max_players' => $mode->max_players,
+            'players_can_join_late' => $mode->players_can_join_late,
         ]);
     }
 }

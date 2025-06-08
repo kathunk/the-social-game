@@ -10,7 +10,7 @@ class GameState extends State
 {
     public string $name;
 
-    public string $template_class;
+    public int $game_mode_id;
 
     public string $status;
 
@@ -97,6 +97,11 @@ class GameState extends State
     public function currentChallenge()
     {
         return ChallengeState::load($this->current_challenge_id);
+    }
+
+    public function gameMode()
+    {
+        return GameModeState::load($this->game_mode_id);
     }
 
     public function template(): GameTemplateState

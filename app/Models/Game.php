@@ -74,8 +74,14 @@ class Game extends Model
         return $this->belongsTo(GameTemplate::class);
     }
 
+    public function gameMode()
+    {
+        return $this->belongsTo(GameMode::class);
+    }
+
     public static function fromTemplate(
         GameTemplate $template,
+        GameMode $game_mode,
         Carbon $starts_at,
         User $user,
         bool $requires_admin_approval_to_join,
@@ -84,11 +90,12 @@ class Game extends Model
     ): self {
         $game_id = GameCreated::fire(
             user_id: $user->id,
-            name: $template->name,
+            name: $game_mode->name,
             game_template_id: $template->id,
-            type: $template->type,
-            min_players: $template->min_players,
-            max_players: $template->max_players,
+            game_mode_id: $game_mode->id,
+            type: $game_mode->type,
+            min_players: $game_mode->min_players,
+            max_players: $game_mode->max_players,
             is_public: $is_public,
             requires_admin_approval_to_join: $requires_admin_approval_to_join,
             team_names: $template->team_names,

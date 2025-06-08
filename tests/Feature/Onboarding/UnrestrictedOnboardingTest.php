@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Game;
+use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\User;
 use Database\Seeders\Laracon2025Seeder;
@@ -18,6 +19,7 @@ beforeEach(function () {
 
 it('freely allows users to join games where admin approval is not required', function () {
     $game = Game::fromTemplate(
+        game_mode: GameMode::first(),
         template: GameTemplate::first(),
         starts_at: now(),
         user: $this->admin,

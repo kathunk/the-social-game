@@ -2,8 +2,10 @@
 
 namespace Tests;
 
+use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
+use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\Player;
 use App\Models\User;
@@ -18,9 +20,11 @@ abstract class TestCase extends BaseTestCase
 
     public Player $player;
 
+    public GameMode $game_mode;
+
     public GameTemplate $game_template;
 
-    public function createGame(?GameTemplate $template = null, ?Carbon $starts_at = null)
+    public function createGame(?GameMode $game_mode = null, ?GameTemplate $template = null, ?Carbon $starts_at = null)
     {
         if (! isset($this->game_admin)) {
             $this->game_admin = $this->createUser(name: 'game_admin', email: 'game_admin@example.com', encrypted_password: 'password');
@@ -28,6 +32,7 @@ abstract class TestCase extends BaseTestCase
 
         $this->game = Game::fromTemplate(
             template: $template ?? $this->game_template,
+            game_mode: $game_mode ?? $this->game_mode,
             starts_at: $starts_at ?? now(),
             user: $this->game_admin,
             is_public: true,
@@ -86,14 +91,23 @@ abstract class TestCase extends BaseTestCase
             $team_names = $type === 'team' ? ['team1', 'team2', 'team3'] : [];
         }
 
-        $id = GameTemplateAdded::fire(
-            name: $name ?? 'template',
-            description: $description ?? 'description',
-            pre_game_lobby_message: $pre_game_lobby_message ?? 'pre_game_lobby_message',
-            players_can_join_late: $players_can_join_late ?? true,
+        $mode_id = GameModeAdded::fire(
+            name: $name ?? fake()->name(),
+            description: $description ?? fake()->sentence(),
+            pre_game_lobby_message: $pre_game_lobby_message ?? fake()->sentence(),
             type: $type,
             min_players: $min_players ?? null,
             max_players: $max_players ?? null,
+            is_public: $is_public ?? true,
+            players_can_join_late: $players_can_join_late ?? true,
+        )->game_mode_id;
+
+        $this->game_mode = GameMode::find($mode_id);
+
+        $id = GameTemplateAdded::fire(
+            game_mode_id: $mode_id,
+            name: $name ?? fake()->name(),
+            type: $type,
             is_public: $is_public ?? true,
             team_names: $team_names ?? [],
             challenges: $challenges,
