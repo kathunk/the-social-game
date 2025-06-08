@@ -16,6 +16,7 @@ use App\Models\GameApplication;
 use App\Support\HtmlTransformer;
 use Livewire\Attributes\Computed;
 use App\Events\UserAdmittedToGame;
+use Illuminate\Support\Collection;
 use App\Events\UserRejectedFromGame;
 use App\Events\PlayerRemovedFromGame;
 use App\Events\UserPromotedToGameAdmin;
@@ -31,11 +32,15 @@ class PreGameLobby extends Component
 
     public string $game_mode_id;
 
-    public string $game_template_id;
+    public GameTemplate $game_template;
+
+    public GameMode $game_mode;
 
     public bool $is_public;
 
     public bool $requires_admin_approval_to_join;
+
+    public Collection $game_templates;
 
     #[Computed]
     public function user()
@@ -177,8 +182,9 @@ class PreGameLobby extends Component
     public function mount(Game $game)
     {
         $this->game = $game;
-        $this->game_template_id = (string) $game->gameTemplate->id;
-        $this->game_mode_id = (string) $game->gameMode->id;
+        $this->game_template = $game->gameTemplate;
+        $this->game_mode = $game->gameMode;
+        $this->game_templates = $this->game_mode->gameTemplates;
         $this->game_start_timecode = $game->starts_at;
         $this->is_public = $game->is_public;
         $this->requires_admin_approval_to_join = $game->requires_admin_approval_to_join;

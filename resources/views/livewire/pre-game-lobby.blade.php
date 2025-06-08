@@ -1,6 +1,8 @@
 <div 
     wire:poll="checkStatus" 
     class="flex flex-col gap-4"
+    x-data
+    x-init="$store.gameMode.set('{{ $game_mode->id }}')"
 >
     @if ($this->game->status === 'upcoming')
         <div class="mx-auto w-full text-center">
@@ -103,7 +105,14 @@
                     min="{{ now()->addMinute()->second(0)->toIsoString() }}"
                     required
                 />
-                <flux:select wire:model="game_mode_id" variant="listbox" label="Game mode" searchable placeholder="Choose game mode...">
+                <flux:select 
+                    wire:model="game_mode_id" 
+                    variant="listbox" 
+                    label="Game mode" 
+                    searchable 
+                    placeholder="Choose game mode..."
+                    x-on:change="$store.gameMode.set($event.target.value)"
+                >
                     @foreach ($this->gameModes as $gameMode)
                         <flux:select.option :value="(string) $gameMode->id">
                             {{ $gameMode->name }}
@@ -114,7 +123,10 @@
                 @if ($this->user->is_super_admin)
                     <flux:select wire:model="game_template_id" variant="listbox" label="Game template" searchable placeholder="Choose game template...">
                         @foreach ($this->gameTemplates as $gameTemplate)
-                            <flux:select.option :value="(string) $gameTemplate->id">
+                            <flux:select.option 
+                                :value="(string) $gameTemplate->id"
+                                x-show="$store.gameMode.get() === '{{ $gameTemplate->game_mode_id }}'"
+                            >
                                 {{ $gameTemplate->name }}
                             </flux:select.option>
                         @endforeach
