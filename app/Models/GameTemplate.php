@@ -16,6 +16,7 @@ class GameTemplate extends Model
         'challenges' => 'array',
         'modifiers' => 'array',
         'is_archived' => 'boolean',
+        'is_public' => 'boolean',
     ];
 
     protected static function booted()

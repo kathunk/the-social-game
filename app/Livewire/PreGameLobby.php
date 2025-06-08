@@ -2,25 +2,25 @@
 
 namespace App\Livewire;
 
-use Flux\Flux;
-use App\Models\Game;
-use App\Models\Player;
-use Livewire\Component;
-use App\Models\GameMode;
 use App\Events\GameUpdated;
-use Livewire\Attributes\On;
-use App\Models\GameTemplate;
-use Illuminate\Support\Carbon;
-use Thunk\Verbs\Facades\Verbs;
-use App\Models\GameApplication;
-use App\Support\HtmlTransformer;
-use Livewire\Attributes\Computed;
-use App\Events\UserAdmittedToGame;
-use Illuminate\Support\Collection;
-use App\Events\UserRejectedFromGame;
 use App\Events\PlayerRemovedFromGame;
-use App\Events\UserPromotedToGameAdmin;
+use App\Events\UserAdmittedToGame;
 use App\Events\UserDemotedFromGameAdmin;
+use App\Events\UserPromotedToGameAdmin;
+use App\Events\UserRejectedFromGame;
+use App\Models\Game;
+use App\Models\GameApplication;
+use App\Models\GameMode;
+use App\Models\GameTemplate;
+use App\Models\Player;
+use App\Support\HtmlTransformer;
+use Flux\Flux;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Component;
+use Thunk\Verbs\Facades\Verbs;
 
 class PreGameLobby extends Component
 {
@@ -31,6 +31,8 @@ class PreGameLobby extends Component
     public Carbon $game_start_timecode;
 
     public string $game_mode_id;
+
+    public string $game_template_id;
 
     public GameTemplate $game_template;
 
@@ -61,7 +63,7 @@ class PreGameLobby extends Component
     #[Computed]
     public function gameTemplates()
     {
-        return $this->game->gameMode->gameTemplates
+        return GameTemplate::all()
             ->sortBy('name')
             ->filter(function ($template) {
                 return $this->user->is_super_admin || $template->is_public;
@@ -188,6 +190,8 @@ class PreGameLobby extends Component
         $this->game_start_timecode = $game->starts_at;
         $this->is_public = $game->is_public;
         $this->requires_admin_approval_to_join = $game->requires_admin_approval_to_join;
+        $this->game_mode_id = (string) $game->gameMode->id;
+        $this->game_template_id = (string) $game->gameTemplate->id;
 
         if ($this->application) {
             $this->checkStatus();
@@ -307,6 +311,12 @@ class PreGameLobby extends Component
 
     public function updateGameSettings()
     {
+        $mode = GameMode::find($this->game_mode_id);
+
+        if (! $mode->gameTemplates->pluck('id')->contains($this->game_template_id)) {
+            $this->game_template_id = (string) $mode->selectTemplateForUser($this->user)->id;
+        }
+
         $this->validate([
             'game_template_id' => 'required|exists:game_templates,id',
             'game_mode_id' => 'required|exists:game_modes,id',

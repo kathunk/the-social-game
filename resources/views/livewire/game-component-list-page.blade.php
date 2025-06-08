@@ -35,7 +35,7 @@
                                 <flux:text class="whitespace-normal text-xs">
                                     <ul class="list-disc pl-4">
                                         @foreach($this->templates->filter(fn($t) => in_array($challenge::key(), $t['challenges'])) as $template)
-                                            <li><flux:link :href="route('game-templates.show', $template['id'])">{{ $template['name'] }}</flux:link></li>
+                                            <li><flux:link :href="route('game-templates.show', ['game_mode' => $template['game_mode_id'], 'game_template' => $template['id']])">{{ $template['name'] }}</flux:link></li>
                                         @endforeach
                                     </ul>
                                 </flux:text>
@@ -67,7 +67,7 @@
                                 <flux:text class="whitespace-normal text-xs">
                                     <ul class="list-disc pl-4">
                                         @foreach($this->templates->filter(fn($t) => in_array($modifier::key(), $t['modifiers'])) as $template)
-                                            <li><flux:link :href="route('game-templates.show', $template['id'])">{{ $template['name'] }}</flux:link></li>
+                                            <li><flux:link :href="route('game-templates.show', ['game_mode' => $template['game_mode_id'], 'game_template' => $template['id']])">{{ $template['name'] }}</flux:link></li>
                                         @endforeach
                                     </ul>
                                 </flux:text>
@@ -91,7 +91,7 @@
                     @foreach ($this->templates as $template)
                         <flux:table.row x-show="game_type === 'all' || game_type === '{{ $template['type'] }}'">
                             <flux:table.cell class="align-top">
-                                <flux:link class="text-xs whitespace-normal" :href="route('game-templates.show', $template['id'])">{{ $template['name'] }}</flux:link>
+                                <flux:link class="text-xs whitespace-normal" :href="route('game-templates.show', ['game_mode' => $template['game_mode_id'], 'game_template' => $template['id']])">{{ $template['name'] }}</flux:link>
                             </flux:table.cell>
                             <flux:table.cell class="align-top">
                                 <flux:text class="whitespace-normal text-xs">{{ $template['description'] }}</flux:text>

@@ -62,6 +62,7 @@ class ProgressGames extends Command
                 if ($game->starts_at < now()->subMinutes(2)) {
                     GameUpdated::fire(
                         game_id: $game->id,
+                        game_mode_id: $game->game_mode_id,
                         game_template_id: $game->game_template_id,
                         starts_at: now(),
                         ends_at: now()->addMinutes($game->gameTemplate->total_duration),

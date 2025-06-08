@@ -3,11 +3,10 @@
 namespace App\Livewire;
 
 use App\Models\Game;
-use Livewire\Component;
 use App\Models\GameMode;
-use App\Models\GameTemplate;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class CreateGame extends Component
 {

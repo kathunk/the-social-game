@@ -7,7 +7,7 @@ use App\Events\GameModeArchived;
 use App\Events\GameModeUnarchived;
 use App\Models\GameMode;
 use Exception;
-use Flux\Flux;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -30,6 +30,12 @@ class ManageGameModePage extends Component
     public bool $players_can_join_late;
 
     public string $game_type;
+
+    #[Computed]
+    public function gameTemplates()
+    {
+        return $this->game_mode?->gameTemplates ?? collect();
+    }
 
     public function mount($game_mode = null)
     {
@@ -74,7 +80,7 @@ class ManageGameModePage extends Component
         $id = $this->game_mode->id ?? null;
 
         try {
-            GameModeAdded::fire(
+            $new_id = GameModeAdded::fire(
                 game_mode_id: $id,
                 name: $this->name,
                 description: $this->description,
@@ -84,7 +90,7 @@ class ManageGameModePage extends Component
                 max_players: $this->max_players ?? null,
                 is_public: $this->is_public,
                 players_can_join_late: $this->players_can_join_late,
-            );
+            )->game_mode_id;
         } catch (Exception $e) {
             $this->addError('error', $e->getMessage());
 
@@ -93,7 +99,7 @@ class ManageGameModePage extends Component
 
         Verbs::commit();
 
-        Flux::toast('Game mode saved');
+        return redirect()->route('game-modes.show', $new_id);
     }
 
     public function archiveGameMode()

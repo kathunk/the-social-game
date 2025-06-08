@@ -5,11 +5,10 @@ namespace App\Livewire;
 use App\Challenges\ChallengeRegistry;
 use App\Events\GameTemplateAdded;
 use App\Events\GameTemplateArchived;
-use App\Events\GameTemplateUnarchived;
+use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Modifiers\ModifierRegistry;
 use Exception;
-use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
@@ -36,6 +35,8 @@ class ManageGameTemplatePage extends Component
 
     public bool $players_can_join_late;
 
+    public GameMode $game_mode;
+
     public string $game_type;
 
     public array $modifiers;
@@ -43,17 +44,19 @@ class ManageGameTemplatePage extends Component
     #[Computed]
     public function allChallenges()
     {
-        return collect(ChallengeRegistry::getAll())->sortBy(fn ($c) => $c::NAME);
+        return collect(ChallengeRegistry::getAll())->filter(fn ($c) => $c::TYPE === $this->game_type)->sortBy(fn ($c) => $c::NAME);
     }
 
     #[Computed]
     public function allModifiers()
     {
-        return collect(ModifierRegistry::getAll())->sortBy(fn ($m) => $m::NAME);
+        return collect(ModifierRegistry::getAll())->filter(fn ($m) => $m::TYPE === $this->game_type)->sortBy(fn ($m) => $m::NAME);
     }
 
-    public function mount($game_template = null)
+    public function mount($game_mode, $game_template = null)
     {
+        $this->game_mode = $game_mode;
+
         if ($game_template instanceof GameTemplate) {
             $this->game_template = $game_template;
 
@@ -98,17 +101,11 @@ class ManageGameTemplatePage extends Component
 
     public $rules = [
         'name' => 'required|string|max:100',
-        'description' => 'required|string',
-        'pre_game_lobby_message' => 'required|string',
-        'min_players' => 'nullable|integer',
-        'max_players' => 'nullable|integer',
         'is_public' => 'boolean',
         'team_names' => 'nullable|string',
         'challenges' => 'required|array|min:1',
         'challenges.*.challenge_keys' => 'required|array|min:1',
         'challenges.*.duration' => 'required|integer|min:1',
-        'players_can_join_late' => 'boolean',
-        'game_type' => 'required|string|in:individual,team',
     ];
 
     public function saveTemplate()
@@ -126,8 +123,9 @@ class ManageGameTemplatePage extends Component
         $id = $this->game_template->id ?? null;
 
         try {
-            GameTemplateAdded::fire(
+            $new_id = GameTemplateAdded::fire(
                 game_template_id: $id,
+                game_mode_id: $this->game_mode->id,
                 name: $this->name,
                 description: $this->description,
                 pre_game_lobby_message: $this->pre_game_lobby_message,
@@ -139,7 +137,7 @@ class ManageGameTemplatePage extends Component
                 challenges: $challenges,
                 modifiers: $this->modifiers,
                 players_can_join_late: $this->players_can_join_late,
-            );
+            )->game_template_id;
         } catch (Exception $e) {
             $this->addError('error', $e->getMessage());
 
@@ -148,13 +146,14 @@ class ManageGameTemplatePage extends Component
 
         Verbs::commit();
 
-        Flux::toast('Template saved');
+        return redirect()->route('game-templates.show', ['game_mode' => $this->game_mode->id, 'game_template' => $new_id]);
     }
 
     public function duplicateTemplate()
     {
         $id = GameTemplateAdded::fire(
             name: $this->game_template->name.' (copy)',
+            game_mode_id: $this->game_template->game_mode_id,
             description: $this->game_template->description,
             pre_game_lobby_message: $this->game_template->pre_game_lobby_message,
             type: $this->game_type,
@@ -169,7 +168,7 @@ class ManageGameTemplatePage extends Component
 
         Verbs::commit();
 
-        return redirect()->route('game-templates.show', $id);
+        return redirect()->route('game-templates.show', ['game_mode' => $this->game_template->game_mode_id, 'game_template' => $id]);
     }
 
     public function archiveTemplate()
@@ -178,16 +177,7 @@ class ManageGameTemplatePage extends Component
 
         Verbs::commit();
 
-        return redirect()->route('game-templates.index');
-    }
-
-    public function unarchiveTemplate()
-    {
-        GameTemplateUnarchived::fire(game_template_id: $this->game_template->id);
-
-        Verbs::commit();
-
-        return redirect()->route('game-templates.show', $this->game_template->id);
+        return redirect()->route('game-modes.index');
     }
 
     public function render()

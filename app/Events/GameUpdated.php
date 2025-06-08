@@ -2,20 +2,21 @@
 
 namespace App\Events;
 
-use Carbon\Carbon;
-use App\Models\Game;
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\UserState;
 use App\Events\Traits\HasGame;
-use App\States\GameTemplateState;
 use App\Events\Traits\HasGameMode;
 use App\Events\Traits\HasGameTemplate;
+use App\Models\Game;
+use App\States\GameModeState;
+use App\States\GameState;
+use App\States\GameTemplateState;
+use App\States\UserState;
+use Carbon\Carbon;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class GameUpdated extends Event
 {
-    use HasGame, HasGameTemplate, HasGameMode;
+    use HasGame, HasGameMode, HasGameTemplate;
 
     #[StateId(UserState::class)]
     public ?int $user_id = null;
@@ -27,6 +28,14 @@ class GameUpdated extends Event
     public bool $is_public;
 
     public bool $requires_admin_approval_to_join;
+
+    public function validate()
+    {
+        $this->assert(
+            $this->state(GameModeState::class)->game_template_ids->contains($this->game_template_id),
+            'Game template is not valid for this game mode.'
+        );
+    }
 
     public function apply(GameState $game)
     {

@@ -1,13 +1,14 @@
-<div x-data="{ game_type: $wire.entangle('game_type') }">
+<div>
+    <div class="mb-4">
+        <flux:link :href="route('game-modes.index')" variant="ghost">
+            Back to game modes
+        </flux:link>
+    </div>
+
     <flux:card>
         <div class="flex flex-col gap-6">
+            <flux:heading>Template for <flux:link :href="route('game-modes.show', $this->game_mode->id)">{{ $this->game_mode->name }}</flux:link></flux:heading>
             <flux:input wire:model="name" label="Name" />
-            <flux:textarea wire:model="description" label="Description" />
-            <flux:editor wire:model="pre_game_lobby_message" label="Pre Game Lobby Message" description="This message will be sent to players when they join the game lobby." />
-            <div class="flex flex-row gap-4">
-                <flux:input wire:model="min_players" label="Minimum Players" placeholder="Can be left blank"/>
-                <flux:input wire:model="max_players" label="Maximum Players" placeholder="Can be left blank"/>
-            </div>
 
             <flux:input wire:model="team_names" label="Team Names" placeholder="Comma separated. Leave blank for no teams."/>
             <flux:field variant="inline">
@@ -15,15 +16,6 @@
                 <flux:label>Visible to all paying users</flux:label>
                 <flux:error name="is_public" />
             </flux:field>
-            <flux:field variant="inline">
-                <flux:checkbox wire:model="players_can_join_late" />
-                <flux:label>Players can join late</flux:label>
-                <flux:error name="players_can_join_late" />
-            </flux:field>
-            <flux:radio.group wire:model="game_type" label="Victory Condition">
-                <flux:radio value="individual" label="Individual" checked />
-                <flux:radio value="team" label="Team" />
-            </flux:radio.group>
 
             <div class="flex flex-row gap-2 items-center">
                 <flux:heading size="sm">Modifiers</flux:heading>
@@ -144,12 +136,10 @@
 
                 <flux:table.rows>
                     @foreach ($this->allChallenges as $challenge)
-                        <template x-if="game_type === '{{ $challenge::TYPE }}'">
-                            <flux:table.row>
-                                <flux:table.cell>{{ $challenge::NAME }}</flux:table.cell>
-                                <flux:table.cell class="whitespace-normal break-words">{{ $challenge::DESCRIPTION }}</flux:table.cell>
-                            </flux:table.row>
-                        </template>
+                        <flux:table.row>
+                            <flux:table.cell>{{ $challenge::NAME }}</flux:table.cell>
+                            <flux:table.cell class="whitespace-normal break-words">{{ $challenge::DESCRIPTION }}</flux:table.cell>
+                        </flux:table.row>
                     @endforeach
                 </flux:table.rows>
             </flux:table>
@@ -171,12 +161,10 @@
 
                 <flux:table.rows>
                     @foreach ($this->allModifiers as $modifier)
-                        <template x-if="game_type === '{{ $modifier::TYPE }}'">
-                            <flux:table.row>
-                                <flux:table.cell>{{ $modifier::NAME }}</flux:table.cell>
-                                <flux:table.cell class="whitespace-normal break-words">{{ $modifier::DESCRIPTION }}</flux:table.cell>
-                            </flux:table.row>
-                        </template>
+                        <flux:table.row>
+                            <flux:table.cell>{{ $modifier::NAME }}</flux:table.cell>
+                            <flux:table.cell class="whitespace-normal break-words">{{ $modifier::DESCRIPTION }}</flux:table.cell>
+                        </flux:table.row>
                     @endforeach
                 </flux:table.rows>
             </flux:table>
@@ -187,7 +175,7 @@
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">Archive this template</flux:heading>
-                <flux:text class="mt-2">Are you sure you want to archive this template?</flux:text>
+                <flux:text class="mt-2">Are you sure you want to archive this template? This cannot be undone.</flux:text>
             </div>
             <flux:button variant="danger" wire:click="archiveTemplate">Archive</flux:button>
         </div>

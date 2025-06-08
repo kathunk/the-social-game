@@ -34,6 +34,7 @@ class GameComponentListPage extends Component
                     'id' => $t->id,
                     'type' => $t->type,
                     'description' => $t->description,
+                    'game_mode_id' => $t->game_mode_id,
                 ];
             });
     }
