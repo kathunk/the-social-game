@@ -41,9 +41,13 @@
                                 @else
                                     <div class="flex items-center gap-2">
                                         {{ $team->score }}
-                                        @if ($team->id === $this->player->team_id && $team->hidden_score > $team->score)
+                                        @if ($team->id === $this->player->team_id && $team->hidden_score !== $team->score)
                                             <flux:text class="text-purple-500 dark:text-purple-300">
-                                                +{{ $team->hidden_score - $team->score }}
+                                                @if ($team->hidden_score > $team->score)
+                                                    +{{ $team->hidden_score - $team->score }}
+                                                @else
+                                                    {{ $team->hidden_score - $team->score }}
+                                                @endif
                                             </flux:text>
                                         @endif
                                     </div>
@@ -74,9 +78,13 @@
                                 @else
                                     <div class="flex items-center gap-2">
                                         {{ $player->score }}
-                                        @if ($player->id === $this->player->id && $player->hidden_score > $player->score)
+                                        @if ($player->id === $this->player->id && $player->hidden_score !== $player->score)
                                             <flux:text class="text-purple-500 dark:text-purple-300">
-                                                +{{ $player->hidden_score - $player->score }}
+                                                @if ($player->hidden_score > $player->score)
+                                                    +{{ $player->hidden_score - $player->score }}
+                                                @else
+                                                    {{ $player->hidden_score - $player->score }}
+                                                @endif
                                             </flux:text>
                                         @endif
                                     </div>
