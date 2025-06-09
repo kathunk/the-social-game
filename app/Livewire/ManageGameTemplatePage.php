@@ -75,14 +75,14 @@ class ManageGameTemplatePage extends Component
             $this->name = '';
             $this->description = '';
             $this->pre_game_lobby_message = '';
-            $this->min_players = null;
-            $this->max_players = null;
+            $this->min_players = $this->game_mode->min_players ?? null;
+            $this->max_players = $this->game_mode->max_players ?? null;
             $this->is_public = false;
             $this->team_names = '';
             $this->challenges = [];
             $this->modifiers = [];
-            $this->players_can_join_late = false;
-            $this->game_type = 'individual';
+            $this->players_can_join_late = $this->game_mode->players_can_join_late ?? false;
+            $this->game_type = $this->game_mode->type;
         }
     }
 
