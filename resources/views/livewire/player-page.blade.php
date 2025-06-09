@@ -24,7 +24,7 @@
                             @if ($this->player->hidden_score > $this->player->score)
                                 +{{ $this->player->hidden_score - $this->player->score }}
                             @else
-                                -{{ $this->player->hidden_score - $this->player->score }}
+                                {{ $this->player->hidden_score - $this->player->score }}
                             @endif
                         </flux:text>
                     @endif
