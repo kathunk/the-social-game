@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\Classes\TeamFiller;
 use App\Challenges\Classes\TeamHotPotato;
 use App\Livewire\GameDashboard;
 use App\Models\Player;
@@ -17,7 +17,7 @@ beforeEach(function () {
 
     $challenges = [
         [
-            'challenge_keys' => [PyramidScheme::key()],
+            'challenge_keys' => [TeamFiller::key()],
             'duration' => 1,
         ],
         [

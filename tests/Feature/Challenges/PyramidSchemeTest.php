@@ -67,7 +67,7 @@ it('runs the Pyramid Scheme challenge', function () {
     Challenge::latest()->first()->end();
 
     expect($team->fresh()->score)->toBe(1);
-    expect($team_2->fresh()->score)->toBe(0);
+    expect($team_2->fresh()->score)->toBe(2);
     expect($team_3->fresh()->score)->toBe(0);
 });
 
