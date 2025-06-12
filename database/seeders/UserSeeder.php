@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $super_admins = [
-            ['John Rudolph Drexler', 'john@thunk.dev',],
+            ['John Rudolph Drexler', 'john@thunk.dev'],
             ['Jacob Davis', 'jacob@thunk.dev'],
             ['Daniel Coulbourne', 'daniel@thunk.dev'],
             ['Chris Thornton', 'chris@thunk.dev'],
