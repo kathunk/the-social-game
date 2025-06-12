@@ -16,7 +16,7 @@ class PyramidScheme extends BaseChallengeClass implements SupportsTeamSwaps
 
     const NAME = 'Pyramid Scheme';
 
-    const DESCRIPTION = "When a new player joins your team, gain 1 point. At the end of the challenge, the largest team's score will be set to zero.";
+    const DESCRIPTION = 'When a new player joins your team, gain 1 point.';
 
     const TYPE = 'team';
 
@@ -70,18 +70,5 @@ class PyramidScheme extends BaseChallengeClass implements SupportsTeamSwaps
         }
 
         $team_state->addToScoreHistory(1, $player_state->name.' joined team');
-    }
-
-    public function onChallengeEnded(
-        GameState $game_state,
-    ) {
-        $first_place_team = $game_state->teams()->sortByDesc(fn ($t) => $t->score())->first();
-
-        // if multiple teams are tied for first place, set each of their scores to 0
-        $first_place_teams = $game_state->teams()->filter(fn ($t) => $t->score() === $first_place_team->score());
-
-        foreach ($first_place_teams as $team) {
-            $team->addToScoreHistory(-$team->score(), 'Collapsed under the weight of its own success');
-        }
     }
 }
