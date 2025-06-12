@@ -38,9 +38,8 @@ class TeamSecretAlliance extends BaseModifierClass
     {
         $pair_data = new TeamSecretAlliancePairData(player_id: $player->id, modifier: $this->modifier);
         $ally = $pair_data->ally();
-        $has_connected = $pair_data->hasConnected();
         $player_is_active = $player->status === 'active';
-        $player_is_lucky = rand(0, 100) > 98;
+        $player_is_lucky = rand(0, 100) > 0;
 
         if ($player_is_active && ! $ally && $player_is_lucky && $player->team_id) {
             return $this->form()

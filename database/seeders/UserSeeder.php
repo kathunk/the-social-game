@@ -13,15 +13,15 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $super_admins = [
-            ['John Rudolph Drexler', 'john@thunk.dev'],
+            ['John Rudolph Drexler', 'john@thunk.dev',],
             ['Jacob Davis', 'jacob@thunk.dev'],
             ['Daniel Coulbourne', 'daniel@thunk.dev'],
+            ['Chris Thornton', 'chris@thunk.dev'],
         ];
 
         $users = [
             ['Jake Bathman', 'jake@thunk.dev'],
             ['Aaron Belz', 'aaron@thunk.dev'],
-            ['Chris Morrell', 'chris@thunk.dev'],
             ['Caleb Porzio', 'caleb@thunk.dev'],
             ['Taylor Otwell', 'taylor@thunk.dev'],
             ['Josh Hanley', 'josh@thunk.dev'],
