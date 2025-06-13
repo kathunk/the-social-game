@@ -9,6 +9,7 @@ use Livewire\Volt\Component;
 new class extends Component {
     public string $name = '';
     public string $email = '';
+    public bool $has_active_game = false;
 
     /**
      * Mount the component.
@@ -17,10 +18,7 @@ new class extends Component {
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
-
-        if (auth()->user()->currentPlayer) {
-            redirect()->route('dashboard');
-        }
+        $this->has_active_game = Auth::user()->has_active_game;
     }
 
     /**
@@ -78,7 +76,13 @@ new class extends Component {
 
     <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+            <flux:input :disabled="$this->has_active_game" wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+
+            @if ($this->has_active_game)
+                <flux:text>
+                    {{ __('You cannot change your name while you have an active game.') }}
+                </flux:text>
+            @endif
 
             <div>
                 <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
