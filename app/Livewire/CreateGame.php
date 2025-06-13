@@ -52,7 +52,7 @@ class CreateGame extends Component
         $game = Game::fromTemplate(
             game_mode: $mode,
             template: $template,
-            starts_at: $this->game_start_timecode->setSeconds(0),
+            starts_at: Carbon::parse($this->game_start_timecode)->setSeconds(0),
             user: $this->user,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
         );

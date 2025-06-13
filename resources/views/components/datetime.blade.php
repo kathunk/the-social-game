@@ -42,16 +42,20 @@
                 init() {
                     // Wait for next tick to ensure wire:model value is available
                     this.$nextTick(() => {
-                        if (this.$refs.anchor.value) {
-                            this.setDate(this.$refs.anchor.value);
-                        } else {
-                            // Set initial value from wire:model
-                            this.$watch('$wire.' + this.$refs.anchor.getAttribute('wire:model'), (value) => {
-                                if (value) {
-                                    this.setDate(value);
-                                }
-                            });
+                        const wireModel = this.$refs.anchor.getAttribute('wire:model');
+                        
+                        // Get initial value from Livewire
+                        const initialValue = this.$wire.get(wireModel);
+                        if (initialValue) {
+                            this.setDate(initialValue);
                         }
+                        
+                        // Watch for changes
+                        this.$watch('$wire.' + wireModel, (value) => {
+                            if (value) {
+                                this.setDate(value);
+                            }
+                        });
                     });
                 },
                 date: null,

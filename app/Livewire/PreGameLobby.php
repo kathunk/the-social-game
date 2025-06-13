@@ -38,8 +38,6 @@ class PreGameLobby extends Component
 
     public GameMode $game_mode;
 
-    public bool $is_public;
-
     public bool $requires_admin_approval_to_join;
 
     public Collection $game_templates;
@@ -188,7 +186,6 @@ class PreGameLobby extends Component
         $this->game_mode = $game->gameMode;
         $this->game_templates = $this->game_mode->gameTemplates;
         $this->game_start_timecode = $game->starts_at;
-        $this->is_public = $game->is_public;
         $this->requires_admin_approval_to_join = $game->requires_admin_approval_to_join;
         $this->game_mode_id = (string) $game->gameMode->id;
         $this->game_template_id = (string) $game->gameTemplate->id;
@@ -331,9 +328,9 @@ class PreGameLobby extends Component
             user_id: $this->user->id,
             game_template_id: (int) $this->game_template_id,
             game_mode_id: (int) $this->game_mode_id,
-            starts_at: $this->game_start_timecode,
+            starts_at: Carbon::parse($this->game_start_timecode),
             ends_at: $ends_at,
-            is_public: $this->is_public,
+            is_public: true,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
         );
 
@@ -354,7 +351,7 @@ class PreGameLobby extends Component
             game_mode_id: (int) $this->game_mode_id,
             starts_at: now(),
             ends_at: $ends_at,
-            is_public: $this->is_public,
+            is_public: true,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
         );
 

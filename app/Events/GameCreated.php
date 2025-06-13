@@ -9,7 +9,7 @@ use App\Models\Game;
 use App\States\GameModeState;
 use App\States\GameState;
 use App\States\GameTemplateState;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
@@ -38,14 +38,21 @@ class GameCreated extends Event
         $game->status = 'upcoming';
         $game->game_template_id = $this->game_template_id;
         $game->game_mode_id = $this->game_mode_id;
-        $game->starts_at = $this->starts_at;
+        $game->starts_at = Carbon::parse($this->starts_at);
         $game->is_public = $this->is_public;
-        $game->requires_admin_approval_to_join = $this->requires_admin_approval_to_join;
+        $game->requires_admin_approval_to_join =
+            $this->requires_admin_approval_to_join;
         $game->code = $this->code;
-        $game->ends_at = $this->starts_at->copy()->addMinutes(
-            $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
-        );
-        $game->players_can_join_late = $this->state(GameModeState::class)->players_can_join_late;
+        $game->ends_at = Carbon::parse($this->starts_at)
+            ->copy()
+            ->addMinutes(
+                $this->state(
+                    GameTemplateState::class
+                )->durationOfAllChallengesInMinutes()
+            );
+        $game->players_can_join_late = $this->state(
+            GameModeState::class
+        )->players_can_join_late;
     }
 
     public function handle()
@@ -61,7 +68,8 @@ class GameCreated extends Event
             'is_public' => $this->is_public,
             'requires_admin_approval_to_join' => $this->requires_admin_approval_to_join,
             'code' => $this->code,
-            'players_can_join_late' => $this->state(GameModeState::class)->players_can_join_late,
+            'players_can_join_late' => $this->state(GameModeState::class)
+                ->players_can_join_late,
         ]);
     }
 }
