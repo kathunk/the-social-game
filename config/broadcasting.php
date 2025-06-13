@@ -15,10 +15,9 @@ return [
     */
 
     "default" =>
-        // env("APP_ENV") === "testing"
-        //     ? "null"
-        //     : env("BROADCAST_DRIVER", "reverb"),
-        "null",
+        env("APP_ENV") === "testing"
+            ? "null"
+            : env("BROADCAST_DRIVER", "reverb"),
 
     /*
     |--------------------------------------------------------------------------
