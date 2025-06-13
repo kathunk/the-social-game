@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => 'null',
+    'default' => env('APP_ENV') === 'testing' ? 'null' : env('BROADCAST_DRIVER', 'reverb'),
 
     /*
     |--------------------------------------------------------------------------
