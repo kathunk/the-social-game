@@ -201,6 +201,10 @@ class GameDashboard extends Component
 
         $component = $handler->frontendComponent($this->player);
 
+        if (! isset($component['elements'])) {
+            return;
+        }
+
         $all_elements = collect($component['elements'])->flatMap(function ($el) {
             return [
                 $el,
