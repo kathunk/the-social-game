@@ -1,20 +1,23 @@
 <?php
 
-use App\Http\MissingGameHandler;
-use App\Livewire\CreateGame;
-use App\Livewire\GameComponentListPage;
-use App\Livewire\GameDashboard;
-use App\Livewire\GameModesListPage;
 use App\Livewire\Home;
-use App\Livewire\ManageGameModePage;
-use App\Livewire\ManageGameTemplatePage;
-use App\Livewire\MarketingPage;
-use App\Livewire\PlayerPage;
-use App\Livewire\PreGameLobby;
-use App\Livewire\SecretsPage;
-use App\Livewire\TeamPage;
-use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Livewire\TeamPage;
+use App\Livewire\Subscribe;
+use App\Livewire\CreateGame;
+use App\Livewire\PlayerPage;
+use App\Livewire\SecretsPage;
+use App\Livewire\PreGameLobby;
+use App\Livewire\GameDashboard;
+use App\Livewire\MarketingPage;
+use App\Http\MissingGameHandler;
+use App\Livewire\GameModesListPage;
+use App\Livewire\ManageGameModePage;
+use Illuminate\Support\Facades\Route;
+use App\Livewire\GameComponentListPage;
+use App\Livewire\ManageGameTemplatePage;
+use Laravel\Cashier\Http\Controllers\WebhookController;
+use App\Http\Controllers\CheckoutController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -50,6 +53,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/{game_mode}/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');
     Route::get('{game_mode}/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
     Route::get('/games/{game}/secrets/{modifier}', SecretsPage::class)->name('games.secrets');
+
+    Route::prefix('subscribe')->name('subscribe.')->group(function () {
+        Route::get('/', Subscribe::class)->name('index');
+
+        Route::get('success', [CheckoutController::class, 'success'])->name('success');
+        Route::get('cancel', [CheckoutController::class, 'cancel'])->name('cancel');
+    });
 });
+
+Route::post('stripe/webhook',[WebhookController::class, 'handleWebhook'])->name('cashier.webhook')
+    ->withoutMiddleware(['web', 'auth']);
 
 require __DIR__.'/auth.php';
