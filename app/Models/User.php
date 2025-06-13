@@ -209,4 +209,9 @@ class User extends Authenticatable
     {
         return 'https://www.gravatar.com/avatar/'.md5(strtolower(trim($this->email)));
     }
+
+    public function getHasActiveGameAttribute(): bool
+    {
+        return $this->games->where('status', 'active')->isNotEmpty();
+    }
 }
