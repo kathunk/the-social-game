@@ -3,7 +3,7 @@
         <flux:button icon="cog" :href="route('pre-game-lobby', $this->game)" variant="filled">Manage game</flux:button>
     @endif
 
-    @if (! $this->current_team && $this->template->type === 'team' && $this->player->status === 'active')
+    @if (! $this->current_team && $this->template->type === 'team' && $this->player->status === 'active' && $this->game->status === 'active')
         <flux:card>
             <flux:heading>Join a team</flux:heading>
             <flux:subheading>To start playing, join a team. At certain points in the game, you will be able to switch teams.</flux:subheading>
