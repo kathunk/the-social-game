@@ -14,8 +14,8 @@ class Subscribe extends Component
             $checkout = auth()->user()->newSubscription('default', config('services.stripe.price_id'))
                 ->allowPromotionCodes()
                 ->checkout([
-                    'success_url' => URL::signedRoute('subscribe.success'),
-                    'cancel_url' => URL::signedRoute('subscribe.cancel'),
+                    'success_url' => route('subscribe.success'),
+                    'cancel_url' => route('subscribe.cancel'),
                 ]);
 
             return redirect($checkout->url);
