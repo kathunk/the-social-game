@@ -193,6 +193,10 @@ class PreGameLobby extends Component
         if ($this->application) {
             $this->checkStatus();
         }
+
+        if ($this->game->status === 'canceled') {
+            return redirect()->route('dashboard');
+        }
     }
 
     public function checkStatus()

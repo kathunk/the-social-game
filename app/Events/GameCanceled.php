@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\Events\Traits\HasGame;
 use App\Models\Game;
+use App\Models\Player;
 use App\States\GameState;
 use Thunk\Verbs\Event;
 
@@ -31,5 +32,13 @@ class GameCanceled extends Event
         $game = Game::find($this->game_id);
         $game->status = 'canceled';
         $game->save();
+
+        $game->players->each(function (Player $player) {
+            $player->user->update([
+                'current_game_id' => null,
+                'current_player_id' => null,
+            ]);
+            $player->delete();
+        });
     }
 }
