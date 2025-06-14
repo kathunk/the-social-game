@@ -45,30 +45,6 @@ class PeckingOrderSeeder extends Seeder
             challenges: [
                 [
                     'challenge_keys' => [
-                        IndividualChooseSafetyOrDanger::key(),
-                    ],
-                    'duration' => 1,
-                ],
-                [
-                    'challenge_keys' => [
-                        IndividualChooseSafetyOrDanger::key(),
-                    ],
-                    'duration' => 1,
-                ],
-                [
-                    'challenge_keys' => [
-                        IndividualChooseSafetyOrDanger::key(),
-                    ],
-                    'duration' => 1,
-                ],
-                [
-                    'challenge_keys' => [
-                        IndividualChooseSafetyOrDanger::key(),
-                    ],
-                    'duration' => 1,
-                ],
-                [
-                    'challenge_keys' => [
                         IndividualHighScoreQuiz::key(),
                     ],
                     'duration' => 10,
@@ -78,6 +54,12 @@ class PeckingOrderSeeder extends Seeder
                         IndividualDoubleTrouble::key(),
                     ],
                     'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualChooseSafetyOrDanger::key(),
+                    ],
+                    'duration' => 1,
                 ],
                 [
                     'challenge_keys' => [
