@@ -17,6 +17,7 @@ use App\Support\HtmlTransformer;
 use Flux\Flux;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Artisan;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -41,6 +42,8 @@ class PreGameLobby extends Component
     public bool $requires_admin_approval_to_join;
 
     public Collection $game_templates;
+
+    public int $bots_to_add = 0;
 
     #[Computed]
     public function user()
@@ -381,6 +384,15 @@ class PreGameLobby extends Component
     public function refreshGame()
     {
         return redirect()->route('pre-game-lobby', ['game' => $this->game]);
+    }
+
+    public function fillGameWithBots()
+    {
+        try {
+            Artisan::call('app:fill-game-with-bots', ['game_id' => $this->game->id, 'amount' => $this->bots_to_add]);
+        } catch (\Exception $e) {
+            Flux::toast(variant: 'error', heading: 'Error', text: 'Error filling game with bots: '.$e->getMessage());
+        }
     }
 
     public function render()

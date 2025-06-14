@@ -141,6 +141,11 @@
                             @endforeach
                         </flux:select>
                     </div>
+
+                    <div class="mt-4 flex gap-2 items-end">
+                        <flux:input wire:model="bots_to_add" label="Add bots" min="0" />
+                        <flux:button variant="primary" wire:click="fillGameWithBots()">Fill game with bots</flux:button>
+                    </div>
                 @endif
 
                 <div class="flex flex-col gap-2 mt-4">
