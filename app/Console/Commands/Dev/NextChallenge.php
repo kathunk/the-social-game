@@ -2,18 +2,16 @@
 
 namespace App\Console\Commands\Dev;
 
-use App\Events\Dev\ChallengeForceEnded;
-use App\Events\Dev\ChallengeForceStarted;
+use App\Events\ChallengeEnded;
+use App\Events\ChallengeStarted;
 use App\Events\GameEnded;
-use App\Models\Challenge;
 use App\Models\Game;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Thunk\Verbs\Facades\Verbs;
 
 class NextChallenge extends Command
 {
-    protected $signature = 'dev:next';
+    protected $signature = 'dev:next {game_id}';
 
     protected $description = 'force active challenges to end and next challenges to start';
 
@@ -25,46 +23,33 @@ class NextChallenge extends Command
             return;
         }
 
+        $game = Game::find($this->argument('game_id'));
+
         Verbs::commitImmediately();
 
-        $active_challenges = Challenge::where('status', 'active')
-            ->whereIn('id', function ($query) {
-                $query->select('current_challenge_id')
-                    ->from('games')
-                    ->whereNotNull('current_challenge_id');
-            })
-            ->get();
+        $active_challenge = $game->fresh()->challenges->where('status', 'active')->first();
 
-        $next_challenges = Challenge::where('status', 'upcoming')
-            ->whereIn('starts_at', $active_challenges->pluck('ends_at'))
-            ->get();
-
-        $active_challenges
-            ->each(function (Challenge $challenge) {
-                ChallengeForceEnded::commit(
-                    challenge_id: $challenge->id,
-                    game_id: $challenge->game_id,
-                );
-            });
-
-        $next_challenges
-            ->each(function (Challenge $challenge) {
-                ChallengeForceStarted::commit(
-                    challenge_id: $challenge->id,
-                    game_id: $challenge->game_id,
-                );
-            });
-
-        $games_to_end = Game::all()
-            ->filter(function (Game $game) {
-                return $game->status === 'active'
-                && $game->challenges->where('status', 'active')->isEmpty();
-            });
-
-        foreach ($games_to_end as $game) {
-            GameEnded::fire(game_id: $game->id);
+        if ($active_challenge !== null) {
+            ChallengeEnded::fire(
+                challenge_id: $active_challenge->id,
+                game_id: $active_challenge->game_id,
+            );
         }
 
-        Artisan::call('app:progress-games');
+        $next_challenge = $game->fresh()->challenges
+            ->where('status', 'upcoming')
+            ->sortBy('starts_at')
+            ->first();
+
+        if ($next_challenge !== null) {
+            ChallengeStarted::fire(
+                challenge_id: $next_challenge->id,
+                game_id: $next_challenge->game_id,
+            );
+
+            return;
+        }
+
+        GameEnded::fire(game_id: $game->id);
     }
 }

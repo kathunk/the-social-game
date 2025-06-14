@@ -31,20 +31,27 @@ class ChallengeEnded extends Event
         $game->current_challenge_id = null;
         $game->save();
 
-        $game->teams->each(function ($team) {
-            $team->score = $team->state()->score();
-            $team->hidden_score = $team->state()->score(include_hidden: true);
-            $team->save();
-        });
+        $type = $game->gameTemplate->type;
 
-        $game->players->each(function ($player) {
-            $player->score = $player->state()->score();
-            $player->hidden_score = $player->state()->score(include_hidden: true);
-            $player->save();
-        });
+        if ($type === 'team') {
+            $game->teams->each(function ($team) {
+                $team->score = $team->state()->score();
+                $team->hidden_score = $team->state()->score(include_hidden: true);
+                $team->save();
+            });
+        }
+
+        if ($type === 'individual') {
+            $game->players->each(function ($player) {
+                $player->score = $player->state()->score();
+                $player->hidden_score = $player->state()->score(include_hidden: true);
+                $player->save();
+            });
+        }
 
         $challenge = Challenge::find($this->challenge_id);
         $challenge->status = 'ended';
         $challenge->save();
+        $challenge->updateModelWithStateData();
     }
 }

@@ -53,6 +53,12 @@ class BloodOathSeeder extends Seeder
                 ],
                 [
                     'challenge_keys' => [
+                        IndividualBloodOathHunterQuiz::key(),
+                    ],
+                    'duration' => 5,
+                ],
+                [
+                    'challenge_keys' => [
                         IndividualOathSpy::key(),
                     ],
                     'duration' => 5,
@@ -72,12 +78,6 @@ class BloodOathSeeder extends Seeder
                 [
                     'challenge_keys' => [
                         IndividualDoubleTrouble::key(),
-                    ],
-                    'duration' => 5,
-                ],
-                [
-                    'challenge_keys' => [
-                        IndividualBloodOathHunterQuiz::key(),
                     ],
                     'duration' => 5,
                 ],

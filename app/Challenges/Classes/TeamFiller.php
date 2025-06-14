@@ -2,6 +2,8 @@
 
 namespace App\Challenges\Classes;
 
+use App\Models\Player;
+
 class TeamFiller extends BaseChallengeClass
 {
     const NAME = 'Do not use';
@@ -22,5 +24,10 @@ class TeamFiller extends BaseChallengeClass
         }
 
         return 'The filler challenge is for test purposes only';
+    }
+
+    public function frontendComponent(Player $player): array
+    {
+        return $this->form()->build();
     }
 }

@@ -1,9 +1,11 @@
 <?php
 
 use App\Challenges\Classes\IndividualBloodOathHunterQuiz;
+use App\Challenges\Classes\IndividualFiller;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use App\Modifiers\Classes\BloodOaths;
+use Illuminate\Support\Facades\Date;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -13,6 +15,10 @@ it('runs the individual oath quiz', function () {
     Verbs::commitImmediately();
 
     $challenges = [
+        [
+            'challenge_keys' => [IndividualFiller::key()],
+            'duration' => 10,
+        ],
         [
             'challenge_keys' => [IndividualBloodOathHunterQuiz::key()],
             'duration' => 10,
@@ -34,7 +40,7 @@ it('runs the individual oath quiz', function () {
 
     $this->game->start();
 
-    $challenge = Challenge::first();
+    $filler_challenge = Challenge::first();
 
     Livewire::actingAs($player_1->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('round_properties.'.BloodOaths::key().'.oath_offer_id', $player_2->id)
@@ -44,14 +50,20 @@ it('runs the individual oath quiz', function () {
         ->set('round_properties.'.BloodOaths::key().'.oath_offer_id', $player_1->id)
         ->call('callClassAction', 'offer_blood_oath', 'modifier', BloodOaths::key());
 
+    $end = $filler_challenge->ends_at;
+    Date::setTestNow($end->addSeconds(1));
+    $this->artisan('app:progress-games');
+
+    $challenge = Challenge::skip(1)->first();
+
     Livewire::actingAs($player_3->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('round_properties.'.$challenge->class_key.'.guess_player_id', $player_1->id)
-        ->set('round_properties.'.$challenge->class_key.'.guess_player_id_2', $player_2->id)
+        ->set('round_properties.'.$challenge->class_key.'.guess_player_id', (string) $player_1->id)
+        ->set('round_properties.'.$challenge->class_key.'.guess_player_id_2', (string) $player_2->id)
         ->call('callClassAction', 'guess', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     Livewire::actingAs($player_4->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('round_properties.'.$challenge->class_key.'.guess_player_id', $player_2->id)
-        ->set('round_properties.'.$challenge->class_key.'.guess_player_id_2', $player_3->id)
+        ->set('round_properties.'.$challenge->class_key.'.guess_player_id', (string) $player_2->id)
+        ->set('round_properties.'.$challenge->class_key.'.guess_player_id_2', (string) $player_3->id)
         ->call('callClassAction', 'guess', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
     $challenge->refresh();
