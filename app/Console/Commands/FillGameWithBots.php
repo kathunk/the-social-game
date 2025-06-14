@@ -30,9 +30,18 @@ class FillGameWithBots extends Command
         $game = Game::find($this->argument('game_id'));
         $max = ($game->gameTemplate->max_players ?? 1000) - $game->players->count();
 
+        if (! is_numeric($this->argument('amount'))) {
+            $this->error('Amount must be an integer');
+            return;
+        }
+
         if ($this->argument('amount') > $max) {
             $this->error('Amount cannot be greater than '.$max);
+            return;
+        }
 
+        if ($this->argument('amount') <= 0) {
+            $this->error('Amount must be greater than 0');
             return;
         }
 
