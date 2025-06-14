@@ -33,11 +33,11 @@ beforeEach(function () {
 it('provides a challenge handler', function () {
     config(['app.env' => 'local']);
 
-    Artisan::call('dev:next');
+    Artisan::call('dev:next', ['game_id' => $this->game->fresh()->id]);
 
-    expect($this->game->refresh()->currentChallenge->class_key === StayOnMessage::key())->toBeTrue();
+    expect($this->game->fresh()->currentChallenge->class_key === StayOnMessage::key())->toBeTrue();
 
-    Artisan::call('dev:next');
+    Artisan::call('dev:next', ['game_id' => $this->game->fresh()->id]);
 
-    expect($this->game->refresh()->currentChallenge->class_key === FlattenTheCurve::key())->toBeTrue();
+    expect($this->game->fresh()->currentChallenge->class_key === FlattenTheCurve::key())->toBeTrue();
 });

@@ -26,7 +26,8 @@ class NextChallengeButton extends Component
             abort(403, 'This action is unauthorized.');
         }
 
-        Artisan::call('dev:next');
+        $game = auth()->user()->currentGame;
+        Artisan::call('dev:next', ['game_id' => $game->id]);
 
         $this->dispatch('challenge-complete');
     }
