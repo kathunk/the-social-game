@@ -106,7 +106,7 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
             }
 
             if ($choices[$player->id] === 'danger' && $downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received * 2, 'Received downvotes after choosing danger');
+                $player->addToScoreHistory(-$downvotes_received * 2, 'Received '.$downvotes_received.' downvotes after choosing danger');
             }
 
             if ($choices[$player->id] === 'danger') {
@@ -114,7 +114,11 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
             }
 
             if ($choices[$player->id] === 'safety' && $downvotes_received > 0) {
-                $player->addToScoreHistory(0, 'Blocked downvotes after choosing safety');
+                $player->addToScoreHistory(0, 'Blocked '.$downvotes_received.' downvotes after choosing safety');
+            }
+
+            if ($choices[$player->id] === null && $downvotes_received > 0) {
+                $player->addToScoreHistory(-$downvotes_received, 'Received downvotes');
             }
         });
     }
