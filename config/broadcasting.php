@@ -49,11 +49,11 @@ return [
 
         "pusher" => [
             "driver" => "pusher",
-            "key" => "",
-            "secret" => "",
-            "app_id" => "",
+            "key" => env("PUSHER_APP_KEY", "dummy-key"),
+            "secret" => env("PUSHER_APP_SECRET", "dummy-secret"),
+            "app_id" => env("PUSHER_APP_ID", "dummy-id"),
             "options" => [
-                "cluster" => "",
+                "cluster" => env("PUSHER_APP_CLUSTER", "mt1"),
                 "useTLS" => true,
             ],
             "client_options" => [
