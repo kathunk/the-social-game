@@ -41,10 +41,10 @@ class GameUpdated extends Event
     {
         $game->game_template_id = $this->game_template_id;
         $game->game_mode_id = $this->game_mode_id;
-        $game->starts_at = $this->starts_at;
+        $game->starts_at = Carbon::parse($this->starts_at);
         $game->is_public = $this->is_public;
         $game->requires_admin_approval_to_join = $this->requires_admin_approval_to_join;
-        $game->ends_at = $this->starts_at->copy()->addMinutes(
+        $game->ends_at = Carbon::parse($this->starts_at)->addMinutes(
             $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
         );
         $game->players_can_join_late = $this->state(GameTemplateState::class)->players_can_join_late;
