@@ -2,17 +2,17 @@
 
 namespace App\Events;
 
+use App\Models\Game;
+use Thunk\Verbs\Event;
+use App\States\GameState;
+use App\States\UserState;
+use App\States\GameModeState;
 use App\Events\Traits\HasGame;
+use Illuminate\Support\Carbon;
+use App\States\GameTemplateState;
 use App\Events\Traits\HasGameMode;
 use App\Events\Traits\HasGameTemplate;
-use App\Models\Game;
-use App\States\GameModeState;
-use App\States\GameState;
-use App\States\GameTemplateState;
-use App\States\UserState;
-use Carbon\Carbon;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
-use Thunk\Verbs\Event;
 
 class GameUpdated extends Event
 {
