@@ -393,6 +393,8 @@ class PreGameLobby extends Component
         } catch (\Exception $e) {
             Flux::toast(variant: 'error', heading: 'Error', text: 'Error filling game with bots: '.$e->getMessage());
         }
+
+        return redirect()->route('pre-game-lobby', ['game' => $this->game]);
     }
 
     public function render()
