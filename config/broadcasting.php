@@ -15,9 +15,7 @@ return [
     */
 
     "default" =>
-        env("APP_ENV") === "testing"
-            ? "null"
-            : env("BROADCAST_DRIVER", "reverb"),
+        env("APP_ENV") === "testing" ? "null" : env("BROADCAST_DRIVER", "null"),
 
     /*
     |--------------------------------------------------------------------------
@@ -49,9 +47,9 @@ return [
 
         "pusher" => [
             "driver" => "pusher",
-            "key" => env("PUSHER_APP_KEY", "dummy-key"),
-            "secret" => env("PUSHER_APP_SECRET", "dummy-secret"),
-            "app_id" => env("PUSHER_APP_ID", "dummy-id"),
+            "key" => env("PUSHER_APP_KEY", "dummy-pusher-key"),
+            "secret" => env("PUSHER_APP_SECRET", "dummy-pusher-secret"),
+            "app_id" => env("PUSHER_APP_ID", "123456"),
             "options" => [
                 "cluster" => env("PUSHER_APP_CLUSTER", "mt1"),
                 "useTLS" => true,
