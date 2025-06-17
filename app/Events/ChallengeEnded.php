@@ -18,6 +18,9 @@ class ChallengeEnded extends Event
     {
         $this->state(ChallengeState::class)->handler()->onChallengeEnded($state);
         $state->current_challenge_id = null;
+
+        $state->modifiers()->each(fn ($modifier) => $modifier->handler()->onChallengeEnded($state)
+        );
     }
 
     public function applyToChallenge(ChallengeState $state)
