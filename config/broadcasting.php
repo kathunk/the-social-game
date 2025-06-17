@@ -14,8 +14,7 @@ return [
     |
     */
 
-    "default" =>
-        env("APP_ENV") === "testing" ? "null" : env("BROADCAST_DRIVER", "null"),
+    'default' => env('APP_ENV') === 'testing' ? 'null' : env('BROADCAST_DRIVER', 'null'),
 
     /*
     |--------------------------------------------------------------------------
@@ -28,48 +27,48 @@ return [
     |
     */
 
-    "connections" => [
-        "reverb" => [
-            "driver" => "reverb",
-            "key" => env("REVERB_APP_KEY"),
-            "secret" => env("REVERB_APP_SECRET"),
-            "app_id" => env("REVERB_APP_ID"),
-            "options" => [
-                "host" => env("REVERB_HOST"),
-                "port" => env("REVERB_PORT", 443),
-                "scheme" => env("REVERB_SCHEME", "https"),
-                "useTLS" => env("REVERB_SCHEME", "https") === "https",
+    'connections' => [
+        'reverb' => [
+            'driver' => 'reverb',
+            'key' => env('REVERB_APP_KEY'),
+            'secret' => env('REVERB_APP_SECRET'),
+            'app_id' => env('REVERB_APP_ID'),
+            'options' => [
+                'host' => env('REVERB_HOST'),
+                'port' => env('REVERB_PORT', 443),
+                'scheme' => env('REVERB_SCHEME', 'https'),
+                'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
-            "client_options" => [
+            'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
             ],
         ],
 
-        "pusher" => [
-            "driver" => "pusher",
-            "key" => env("PUSHER_APP_KEY", "dummy-pusher-key"),
-            "secret" => env("PUSHER_APP_SECRET", "dummy-pusher-secret"),
-            "app_id" => env("PUSHER_APP_ID", "123456"),
-            "options" => [
-                "cluster" => env("PUSHER_APP_CLUSTER", "mt1"),
-                "useTLS" => true,
+        'pusher' => [
+            'driver' => 'pusher',
+            'key' => env('PUSHER_APP_KEY', 'dummy-pusher-key'),
+            'secret' => env('PUSHER_APP_SECRET', 'dummy-pusher-secret'),
+            'app_id' => env('PUSHER_APP_ID', '123456'),
+            'options' => [
+                'cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
+                'useTLS' => true,
             ],
-            "client_options" => [
+            'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
             ],
         ],
 
-        "ably" => [
-            "driver" => "ably",
-            "key" => env("ABLY_KEY"),
+        'ably' => [
+            'driver' => 'ably',
+            'key' => env('ABLY_KEY'),
         ],
 
-        "log" => [
-            "driver" => "log",
+        'log' => [
+            'driver' => 'log',
         ],
 
-        "null" => [
-            "driver" => "null",
+        'null' => [
+            'driver' => 'null',
         ],
     ],
 ];
