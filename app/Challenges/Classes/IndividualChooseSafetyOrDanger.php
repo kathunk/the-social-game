@@ -14,7 +14,7 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
 
     const NAME = 'Choose Safety or Danger';
 
-    const DESCRIPTION = 'Choose safety or danger. If you choose safety, no downvotes will count against you this round. If you choose danger, you will gain 2 hidden points, but all downvotes you receive will count double.';
+    const DESCRIPTION = 'If you choose safety, no downvotes will count against you this round. If you choose danger, you will gain 2 hidden points, but all downvotes you receive will count double.';
 
     const TYPE = 'individual';
 
