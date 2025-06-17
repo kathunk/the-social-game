@@ -1,5 +1,5 @@
-<div 
-    wire:poll="checkStatus" 
+<div
+    wire:poll="checkStatus"
     class="flex flex-col gap-4"
     x-data="{ gameModeId: $wire.entangle('game_mode_id') }"
 >
@@ -85,9 +85,9 @@
             <flux:heading class="mb-4">Game Settings</flux:heading>
             <div x-show="!editGameSettings" class="flex gap-2">
                 @unless ($this->hasTooManyPlayers || $this->hasTooFewPlayers)
-                    <flux:button 
-                        variant="primary" 
-                        wire:click="startGame" 
+                    <flux:button
+                        variant="primary"
+                        wire:click="startGame"
                         icon="rocket-launch"
                         :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers"
                     >
@@ -96,6 +96,7 @@
                 @endunless
                 <flux:button @click="editGameSettings = true" icon="pencil">Edit</flux:button>
             </div>
+
             <div x-show="editGameSettings">
                 <x-datetime
                     label="Start time"
@@ -105,9 +106,28 @@
                     required
                 />
 
-                <flux:radio.group 
-                    label="Select Game Mode" 
-                    variant="cards" 
+                <div class="flex flex-col gap-2 mb-4" x-data="{use_challenge_length_override: $wire.entangle('use_challenge_length_override')}">
+                    <flux:field variant="inline">
+                        <flux:checkbox wire:model="use_challenge_length_override" />
+                        <flux:label>Use custom round lengths</flux:label>
+                    </flux:field>
+
+                    <div x-show="use_challenge_length_override" class="mb-4">
+                        <flux:field>
+                            <flux:description>
+                                The game has {{ count($this->game_template->challenges) }} rounds,
+                                and a total length of {{ $this->game->total_duration }} minutes.
+                                If you fill this field, you will override that and set a new standard length for each round.
+                            </flux:description>
+                            <flux:input wire:model="challenge_length_override" />
+                            <flux:error name="challenge_length_override" />
+                        </flux:field>
+                    </div>
+                </div>
+
+                <flux:radio.group
+                    label="Select Game Mode"
+                    variant="cards"
                     wire:model="game_mode_id"
                     class="flex-col"
                 >
@@ -124,15 +144,15 @@
 
                 @if ($this->user->is_super_admin)
                     <div class="mt-4">
-                        <flux:select 
-                            wire:model="game_template_id" 
-                            variant="listbox" 
-                            label="Game template" 
-                            searchable 
+                        <flux:select
+                            wire:model="game_template_id"
+                            variant="listbox"
+                            label="Game template"
+                            searchable
                             placeholder="Choose game template..."
                         >
                             @foreach ($this->gameTemplates as $gameTemplate)
-                                <flux:select.option 
+                                <flux:select.option
                                     :value="(string) $gameTemplate->id"
                                     x-show="gameModeId === '{{ $gameTemplate->game_mode_id }}'"
                                 >
@@ -249,7 +269,7 @@
                                         <flux:button variant="subtle" size="sm" wire:click="promoteToAdmin('{{ $player->id }}')">
                                             <div class="flex items-center gap-2">
                                                 <x-icons.crown class="w-4 h-4" />
-                                                Promote 
+                                                Promote
                                             </div>
                                         </flux:button>
                                     </div>
@@ -265,7 +285,7 @@
                                         <flux:button variant="subtle" size="sm" wire:click="demoteFromAdmin('{{ $player->id }}')">
                                             <div class="flex items-center gap-2">
                                                 <x-icons.crown-slash class="w-4 h-4" />
-                                                Demote 
+                                                Demote
                                             </div>
                                         </flux:button>
                                     </div>
