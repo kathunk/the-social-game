@@ -45,6 +45,10 @@ class PreGameLobby extends Component
 
     public int $bots_to_add = 0;
 
+    public ?int $challenge_length_override = null;
+
+    public bool $use_challenge_length_override = false;
+
     #[Computed]
     public function user()
     {
@@ -192,7 +196,8 @@ class PreGameLobby extends Component
         $this->requires_admin_approval_to_join = $game->requires_admin_approval_to_join;
         $this->game_mode_id = (string) $game->gameMode->id;
         $this->game_template_id = (string) $game->gameTemplate->id;
-
+        $this->challenge_length_override = $game->challenge_length_override;
+        $this->use_challenge_length_override = $game->challenge_length_override ? true : false;
         if ($this->application) {
             $this->checkStatus();
         }
@@ -325,9 +330,19 @@ class PreGameLobby extends Component
             'game_template_id' => 'required|exists:game_templates,id',
             'game_mode_id' => 'required|exists:game_modes,id',
             'game_start_timecode' => 'required|date',
+            'challenge_length_override' => 'nullable|integer|min:1',
         ]);
 
-        $duration = GameTemplate::find($this->game_template_id)->total_duration;
+        if (! $this->use_challenge_length_override) {
+            $this->challenge_length_override = null;
+        }
+
+        $game_template = GameTemplate::find($this->game_template_id);
+
+        $duration = $this->challenge_length_override
+            ? $this->challenge_length_override * count($game_template->challenges)
+            : $game_template->total_duration;
+
         $ends_at = Carbon::parse($this->game_start_timecode)->addMinutes($duration);
 
         GameUpdated::fire(
@@ -339,6 +354,7 @@ class PreGameLobby extends Component
             ends_at: $ends_at,
             is_public: true,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
+            challenge_length_override: $this->challenge_length_override,
         );
 
         Verbs::commit();
@@ -360,6 +376,7 @@ class PreGameLobby extends Component
             ends_at: $ends_at,
             is_public: true,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
+            challenge_length_override: $this->game->challenge_length_override,
         );
 
         Verbs::commit();

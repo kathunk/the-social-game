@@ -21,6 +21,8 @@ class GameUpdated extends Event
     #[StateId(UserState::class)]
     public ?int $user_id = null;
 
+    public ?int $challenge_length_override = null;
+
     public Carbon $starts_at;
 
     public Carbon $ends_at;
@@ -48,6 +50,7 @@ class GameUpdated extends Event
             $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
         );
         $game->players_can_join_late = $this->state(GameTemplateState::class)->players_can_join_late;
+        $game->challenge_length_override = $this->challenge_length_override;
     }
 
     public function handle()
@@ -60,6 +63,7 @@ class GameUpdated extends Event
             'is_public' => $this->is_public,
             'requires_admin_approval_to_join' => $this->requires_admin_approval_to_join,
             'players_can_join_late' => $this->state(GameTemplateState::class)->players_can_join_late,
+            'challenge_length_override' => $this->challenge_length_override,
         ]);
     }
 }
