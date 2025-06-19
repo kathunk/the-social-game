@@ -27,6 +27,7 @@ class Game extends Model
         'ends_at' => 'datetime',
         'is_public' => 'boolean',
         'requires_admin_approval_to_join' => 'boolean',
+        'social_links' => 'array',
     ];
 
     public function state(): GameState
@@ -88,6 +89,7 @@ class Game extends Model
         ?bool $is_public = false,
         ?array $challenges = null,
         ?int $challenge_length_override = null,
+        ?array $social_links = null,
     ): self {
         $game_id = GameCreated::fire(
             user_id: $user->id,
@@ -105,6 +107,7 @@ class Game extends Model
             ends_at: $starts_at->copy()->addMinutes($template->totalDuration),
             code: self::uniqueGameCode(),
             challenge_length_override: $challenge_length_override,
+            social_links: $social_links,
         )->game_id;
 
         Verbs::commit();

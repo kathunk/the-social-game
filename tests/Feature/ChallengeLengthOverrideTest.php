@@ -48,7 +48,7 @@ it('sets the appropriate challenge lengths for overrides', function () {
 
     $this->game->refresh();
 
-    expect($this->game->total_duration)->toBe(20);
+    expect($this->game->fresh()->total_duration)->toBe(20);
     expect($this->game->ends_at->toDateTimeString())->toBe(
         $baseTime->copy()->addMinutes(80)->toDateTimeString()
     );

@@ -34,6 +34,8 @@ class GameCreated extends Event
 
     public ?int $challenge_length_override = null;
 
+    public ?array $social_links = [];
+
     public function apply(GameState $game)
     {
         $game->name = $this->name;
@@ -56,6 +58,7 @@ class GameCreated extends Event
             GameModeState::class
         )->players_can_join_late;
         $game->challenge_length_override = $this->challenge_length_override;
+        $game->social_links = $this->social_links ?? [];
     }
 
     public function handle()
@@ -74,6 +77,7 @@ class GameCreated extends Event
             'players_can_join_late' => $this->state(GameModeState::class)
                 ->players_can_join_late,
             'challenge_length_override' => $this->challenge_length_override,
+            'social_links' => $this->social_links,
         ]);
     }
 }
