@@ -26,7 +26,7 @@ abstract class BaseModifierClass
 
     public function __construct(
         public ?Modifier $modifier = null,
-        public ?ModifierState $modifier_state = null,
+        public ?ModifierState $modifier_state = null
     ) {}
 
     public static function fromModel(Modifier $modifier): static
@@ -49,8 +49,12 @@ abstract class BaseModifierClass
         return [];
     }
 
-    public function isInvalidForTemplate(array $challenges, array $modifiers, string $type, array $team_names)
-    {
+    public function isInvalidForTemplate(
+        array $challenges,
+        array $modifiers,
+        string $type,
+        array $team_names
+    ) {
         return false;
     }
 
@@ -69,14 +73,13 @@ abstract class BaseModifierClass
         TeamState $team_state,
         GameState $game_state,
         ModifierState $modifier_state,
-        ?TeamState $previous_team = null,
+        ?TeamState $previous_team = null
     ) {
         // Optional override
     }
 
-    public function onChallengeEnded(
-        GameState $game_state,
-    ) {
+    public function onChallengeEnded(GameState $game_state)
+    {
         // Optional override
     }
 
@@ -99,21 +102,21 @@ abstract class BaseModifierClass
     {
         $properties = [];
 
-        if (! isset($this->frontendComponent($player)['elements'])) {
+        $component = $this->frontendComponent($player);
+
+        if (! isset($component['elements'])) {
             return [];
         }
 
-        foreach ($this->frontendComponent($player)['elements'] as $element) {
+        foreach ($component['elements'] as $element) {
             if (
-                isset($element['property_name'])
-                && isset($element['type'])
-                && $element['type'] === 'select'
+                isset($element['property_name']) &&
+                isset($element['type']) &&
+                $element['type'] === 'select'
             ) {
                 // null selects must be empty strings for LW
                 $properties[$element['property_name']] = '';
-            } elseif (
-                isset($element['property_name'])
-            ) {
+            } elseif (isset($element['property_name'])) {
                 $properties[$element['property_name']] = null;
             }
         }
@@ -123,27 +126,41 @@ abstract class BaseModifierClass
 
     public function validationRulesForLivewire(Player $player): array
     {
-        if (! isset($this->frontendComponent($player)['elements'])) {
-            return [];
+        $component = $this->frontendComponent($player);
+
+        if (! isset($component['elements'])) {
+            return ['rules' => [], 'messages' => []];
         }
 
-        return collect($this->frontendComponent($player)['elements'])
-            ->filter(fn ($element) => isset($element['property_name'], $element['validation_rules']))
-            ->reduce(function ($carry, $element) {
-                $property = "{$element['property_name']}";
+        return collect($component['elements'])
+            ->filter(
+                fn ($element) => isset(
+                    $element['property_name'],
+                    $element['validation_rules']
+                )
+            )
+            ->reduce(
+                function ($carry, $element) {
+                    $property = "{$element['property_name']}";
 
-                $carry['rules'][$property] = $element['validation_rules'];
+                    $carry['rules'][$property] = $element['validation_rules'];
 
-                if (isset($element['validation_messages'])) {
-                    $carry['messages'] = array_merge(
-                        $carry['messages'] ?? [],
-                        collect($element['validation_messages'])
-                            ->mapWithKeys(fn ($message, $rule) => ["{$property}.{$rule}" => $message])
-                            ->all()
-                    );
-                }
+                    if (isset($element['validation_messages'])) {
+                        $carry['messages'] = array_merge(
+                            $carry['messages'] ?? [],
+                            collect($element['validation_messages'])
+                                ->mapWithKeys(
+                                    fn ($message, $rule) => [
+                                        "{$property}.{$rule}" => $message,
+                                    ]
+                                )
+                                ->all()
+                        );
+                    }
 
-                return $carry;
-            }, ['rules' => [], 'messages' => []]);
+                    return $carry;
+                },
+                ['rules' => [], 'messages' => []]
+            );
     }
 }
