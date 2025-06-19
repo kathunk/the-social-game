@@ -149,7 +149,7 @@ class PreGameLobby extends Component
     #[Computed]
     public function description()
     {
-        return (new HtmlTransformer($this->game->gameTemplate->pre_game_lobby_message))->formatted();
+        return (new HtmlTransformer($this->game->gameMode->pre_game_lobby_message))->formatted();
     }
 
     #[Computed]
