@@ -42,18 +42,30 @@
                 init() {
                     const wireModel = this.$refs.anchor.getAttribute('wire:model');
 
-                    // Set up the watcher first
+                    // Set up the watcher for ongoing changes
                     this.$watch('$wire.' + wireModel, (value) => {
                         if (value) {
                             this.setDate(value);
                         }
                     });
 
-                    // Try to get initial value, but use a more reliable method
-                    this.$wire.$nextTick(() => {
-                        const initialValue = this.$wire.get(wireModel);
-                        if (initialValue) {
-                            this.setDate(initialValue);
+                    // Listen for Livewire initialization to get initial value
+                    document.addEventListener('livewire:init', () => {
+                        this.$nextTick(() => {
+                            const initialValue = this.$wire.get(wireModel);
+                            if (initialValue) {
+                                this.setDate(initialValue);
+                            }
+                        });
+                    });
+
+                    // Also try to get value immediately in case Livewire is already initialized
+                    this.$nextTick(() => {
+                        if (this.$wire && typeof this.$wire.get === 'function') {
+                            const initialValue = this.$wire.get(wireModel);
+                            if (initialValue) {
+                                this.setDate(initialValue);
+                            }
                         }
                     });
                 },
