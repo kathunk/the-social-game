@@ -10,7 +10,7 @@ use App\States\GameModeState;
 use App\States\GameState;
 use App\States\GameTemplateState;
 use App\States\UserState;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
@@ -21,6 +21,8 @@ class GameUpdated extends Event
     #[StateId(UserState::class)]
     public ?int $user_id = null;
 
+    public ?int $challenge_length_override = null;
+
     public Carbon $starts_at;
 
     public Carbon $ends_at;
@@ -28,6 +30,8 @@ class GameUpdated extends Event
     public bool $is_public;
 
     public bool $requires_admin_approval_to_join;
+
+    public ?array $social_links = null;
 
     public function validate()
     {
@@ -41,13 +45,15 @@ class GameUpdated extends Event
     {
         $game->game_template_id = $this->game_template_id;
         $game->game_mode_id = $this->game_mode_id;
-        $game->starts_at = $this->starts_at;
+        $game->starts_at = Carbon::parse($this->starts_at);
         $game->is_public = $this->is_public;
         $game->requires_admin_approval_to_join = $this->requires_admin_approval_to_join;
-        $game->ends_at = $this->starts_at->copy()->addMinutes(
+        $game->ends_at = Carbon::parse($this->starts_at)->addMinutes(
             $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
         );
         $game->players_can_join_late = $this->state(GameTemplateState::class)->players_can_join_late;
+        $game->challenge_length_override = $this->challenge_length_override;
+        $game->social_links = $this->social_links;
     }
 
     public function handle()
@@ -60,6 +66,8 @@ class GameUpdated extends Event
             'is_public' => $this->is_public,
             'requires_admin_approval_to_join' => $this->requires_admin_approval_to_join,
             'players_can_join_late' => $this->state(GameTemplateState::class)->players_can_join_late,
+            'challenge_length_override' => $this->challenge_length_override,
+            'social_links' => $this->social_links,
         ]);
     }
 }

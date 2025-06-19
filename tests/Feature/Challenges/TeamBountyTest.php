@@ -1,7 +1,7 @@
 <?php
 
-use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\TeamFiller;
 use App\Models\Player;
 use App\Models\Team;
 use Illuminate\Support\Facades\Date;
@@ -16,7 +16,7 @@ beforeEach(function () {
     // @todo we need to run a simple challenge first because we need for all the teams to have at least 3 players BEFORE Bounty starts
     $challenges = [
         [
-            'challenge_keys' => [PyramidScheme::key()],
+            'challenge_keys' => [TeamFiller::key()],
             'duration' => 30,
         ],
         [

@@ -25,5 +25,4 @@
     "
     @unload="clearInterval(interval)"
     x-text="timeLeft"
-    class="font-mono"
 ></div>

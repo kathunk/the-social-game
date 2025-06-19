@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\TeamBrinksmanship;
 use App\Challenges\Classes\TeamHotPotato;
 use App\Events\GameModeAdded;
@@ -42,6 +43,10 @@ class Laracon2025Seeder extends Seeder
             type: 'team',
             team_names: ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
             challenges: [
+                [
+                    'challenge_keys' => [PyramidScheme::key()],
+                    'duration' => 10000,
+                ],
                 [
                     'challenge_keys' => [TeamBrinksmanship::key()],
                     'duration' => 10000,

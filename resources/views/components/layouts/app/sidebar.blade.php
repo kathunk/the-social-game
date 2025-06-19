@@ -18,20 +18,14 @@
             <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
 
             <div class="flex items-center">
-                <flux:brand name="The Social Game" href="{{ route('dashboard') }}" wire:navigate>
-                    <x-slot name="logo">
-                        <div class="rounded w-12 bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
-                            <x-app-logo />
-                        </div>
-                    </x-slot>
-                </flux:brand>
+                <x-brand class="pl-1" />
                 <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
             </div>
 
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Games')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Home') }}</flux:navlist.item>
-                    <flux:navlist.item icon="plus" :href="route('create-game')" :current="request()->routeIs('create-game')" wire:navigate>{{ __('Create Game') }}</flux:navlist.item>
+                    <flux:navlist.item icon="plus" :href="route('create-game')" :current="request()->routeIs('create-game')" wire:navigate>{{ __('New Game') }}</flux:navlist.item>
                     @if ($user?->is_super_admin)
                         <flux:navlist.item icon="cog" :href="route('game-modes.index')" :current="request()->routeIs('game-modes.index')" wire:navigate>{{ __('Manage Game Modes') }}</flux:navlist.item>
                         <flux:navlist.item icon="puzzle-piece" :href="route('game-components.index')" :current="request()->routeIs('game-components.index')" wire:navigate>{{ __('All Components') }}</flux:navlist.item>
@@ -69,13 +63,11 @@
                         </div>
                     </flux:menu.radio.group>
 
-                    @if (!$user?->currentPlayer)
-                        <flux:menu.separator />
+                    <flux:menu.separator />
 
-                        <flux:menu.radio.group>
-                            <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
-                        </flux:menu.radio.group>
-                    @endif
+                    <flux:menu.radio.group>
+                        <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+                    </flux:menu.radio.group>
 
                     <flux:menu.separator />
 

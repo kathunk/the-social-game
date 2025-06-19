@@ -68,6 +68,8 @@ class ProgressGames extends Command
                         ends_at: now()->addMinutes($game->gameTemplate->total_duration),
                         is_public: $game->is_public,
                         requires_admin_approval_to_join: $game->requires_admin_approval_to_join,
+                        challenge_length_override: $game->challenge_length_override,
+                        social_links: $game->social_links ?? [],
                     );
                 }
 

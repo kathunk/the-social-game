@@ -1,5 +1,5 @@
-<div 
-    wire:poll="checkStatus" 
+<div
+    wire:poll="checkStatus"
     class="flex flex-col gap-4"
     x-data="{ gameModeId: $wire.entangle('game_mode_id') }"
 >
@@ -61,14 +61,21 @@
     </flux:card>
 
     @if ($this->game->status !== 'ended')
-        <flux:card>
+        <flux:card x-data="{showQr: false}">
             <flux:heading class="mb-2">Invite your friends</flux:heading>
             <div class="flex gap-2">
                 <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
-                <flux:modal.trigger name="qr-code">
-                    <flux:button variant="filled">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
-                </flux:modal.trigger>
+                <flux:button variant="filled" @click="showQr = ! showQr">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
             </div>
+
+            <div x-show="showQr" class="mt-2">
+                <x-qr :url="$this->game->url" />
+            </div>
+
+            @if ($this->game->social_links && $this->game->social_links[0])
+                <flux:heading class="mt-4">Game chat</flux:heading>
+                <flux:button variant="primary" href="{{ $this->game->social_links[0] }}" target="_blank" class="mt-2">Join game chat</flux:button>
+            @endif
         </flux:card>
     @endif
 
@@ -80,23 +87,103 @@
         <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $this->game->gameMode->name }} requires {{ $this->game->gameMode->min_players }} players. Add more players, or change the game mode." />
     @endif
 
-    @if ($this->is_game_admin && $this->game->status === 'upcoming')
-        <flux:card x-data="{editGameSettings: false}">
+    @if ($this->is_game_admin)
+        <flux:card x-data="{editGameMode: false, editTime: false, addBots: false}">
             <flux:heading class="mb-4">Game Settings</flux:heading>
-            <div x-show="!editGameSettings" class="flex gap-2">
-                @unless ($this->hasTooManyPlayers || $this->hasTooFewPlayers)
-                    <flux:button 
-                        variant="primary" 
-                        wire:click="startGame" 
+            <div x-show="!editGameMode && !editTime && !addBots" class="flex gap-2 flex-wrap">
+                @unless ($this->hasTooManyPlayers || $this->hasTooFewPlayers || $this->game->status !== 'upcoming')
+                    <flux:button
+                        variant="primary"
+                        wire:click="startGame"
                         icon="rocket-launch"
                         :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers"
                     >
                         Start Game Now
                     </flux:button>
                 @endunless
-                <flux:button @click="editGameSettings = true" icon="pencil">Edit</flux:button>
+                <flux:button @click="editGameMode = true" icon="pencil">Settings</flux:button>
+                @if ($this->game->status === 'upcoming')
+                    <flux:button @click="editTime = true" icon="pencil">Time</flux:button>
+                @endif
+                @if ($this->user->is_super_admin && $this->is_joinable)
+                    <flux:button @click="addBots = true">Add Bots</flux:button>
+                @endif
+                @if ($this->game->status === 'upcoming')
+                    <div x-data="{cancelGame: false}">
+                        <div x-show="cancelGame">
+                            <flux:button variant="danger" wire:click="cancelGame">Seriously cancel?</flux:button>
+                        </div>
+                        <div x-show="!cancelGame">
+                            <flux:button variant="subtle" icon="trash" @click="cancelGame = true">Cancel Game</flux:button>
+                        </div>
+                    </div>
+                @endif
             </div>
-            <div x-show="editGameSettings">
+
+            <div x-show="editGameMode">
+                @if ($this->game->status === 'upcoming')
+                    <flux:radio.group
+                        label="Select Game Mode"
+                        variant="cards"
+                        wire:model="game_mode_id"
+                        class="flex-col"
+                    >
+                        @foreach ($this->game_modes as $game_mode)
+                            <flux:radio
+                                name="game_mode_id"
+                                value="{{ $game_mode->id }}"
+                                label="{{ $game_mode->name }}"
+                                description="{{ $game_mode->description }}"
+                                x-bind:checked="gameModeId === '{{ $game_mode->id }}'"
+                            />
+                        @endforeach
+                    </flux:radio.group>
+
+                    @if ($this->user->is_super_admin)
+                        <div class="mt-4">
+                            <flux:select
+                                wire:model="game_template_id"
+                                variant="listbox"
+                                label="Game template"
+                                searchable
+                                placeholder="Choose game template..."
+                            >
+                                @foreach ($this->gameTemplates as $gameTemplate)
+                                    <flux:select.option
+                                        :value="(string) $gameTemplate->id"
+                                        x-show="gameModeId === '{{ $gameTemplate->game_mode_id }}'"
+                                    >
+                                        {{ $gameTemplate->name }}
+                                    </flux:select.option>
+                                @endforeach
+                            </flux:select>
+                        </div>
+                    @endif
+                @endif
+
+                <div class="flex flex-col space-y-2 mt-4">
+                    <flux:heading size="sm">Chat Link</flux:heading>
+                    <flux:text>Tell players where game chat will be held. Discord, Slack, Telegram all work well.</flux:text>
+                    <flux:input.group>
+                        <flux:input.group.prefix>https://</flux:input.group.prefix>
+                        <flux:input wire:model="social_link_url" placeholder="discord.gg/your-server" />
+                    </flux:input.group>
+                    <flux:error name="social_link_url" />
+                </div>
+
+                <div class="flex flex-col gap-2 mt-4">
+                    <flux:checkbox label="Requires your approval to join" wire:model="requires_admin_approval_to_join" />
+                </div>
+
+                <div class="flex justify-end mt-4 gap-2" x-data="{cancelGame: false}">
+                    <div class="flex justify-end mt-4 gap-2">
+                        <flux:button variant="ghost" @click="editGameMode = false">Close without saving</flux:button>
+                        <flux:button variant="primary" wire:click="updateGameSettings">Update</flux:button>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="editTime">
                 <x-datetime
                     label="Start time"
                     name="game_start_timecode"
@@ -105,57 +192,35 @@
                     required
                 />
 
-                <flux:radio.group 
-                    label="Select Game Mode" 
-                    variant="cards" 
-                    wire:model="game_mode_id"
-                    class="flex-col"
-                >
-                    @foreach ($this->game_modes as $game_mode)
-                        <flux:radio
-                            name="game_mode_id"
-                            value="{{ $game_mode->id }}"
-                            label="{{ $game_mode->name }}"
-                            description="{{ $game_mode->description }}"
-                            x-bind:checked="gameModeId === '{{ $game_mode->id }}'"
-                        />
-                    @endforeach
-                </flux:radio.group>
+                <div class="flex flex-col gap-2 mb-4" x-data="{use_challenge_length_override: $wire.entangle('use_challenge_length_override')}">
+                    <flux:field variant="inline" class="mt-4">
+                        <flux:checkbox wire:model="use_challenge_length_override" />
+                        <flux:label>Use custom round lengths</flux:label>
+                    </flux:field>
 
-                @if ($this->user->is_super_admin)
-                    <div class="mt-4">
-                        <flux:select 
-                            wire:model="game_template_id" 
-                            variant="listbox" 
-                            label="Game template" 
-                            searchable 
-                            placeholder="Choose game template..."
-                        >
-                            @foreach ($this->gameTemplates as $gameTemplate)
-                                <flux:select.option 
-                                    :value="(string) $gameTemplate->id"
-                                    x-show="gameModeId === '{{ $gameTemplate->game_mode_id }}'"
-                                >
-                                    {{ $gameTemplate->name }}
-                                </flux:select.option>
-                            @endforeach
-                        </flux:select>
+                    <div x-show="use_challenge_length_override" class="mb-4">
+                        <flux:field>
+                            <flux:description>
+                                The game has {{ count($this->game_template->challenges) }} rounds,
+                                and a total length of {{ $this->game->total_duration }} minutes.
+                                If you fill this field, you will override that and set a new standard length for each round.
+                            </flux:description>
+                            <flux:input wire:model="challenge_length_override" />
+                            <flux:error name="challenge_length_override" />
+                        </flux:field>
                     </div>
-                @endif
-
-                <div class="flex flex-col gap-2 mt-4">
-                    <flux:checkbox label="Open to all" wire:model="is_public" />
-                    <flux:checkbox label="Requires your approval to join" wire:model="requires_admin_approval_to_join" />
                 </div>
+                <div class="flex justify-end mt-4 gap-2">
+                    <flux:button variant="ghost" @click="editTime = false">Close without saving</flux:button>
+                    <flux:button variant="primary" wire:click="updateGameSettings">Update</flux:button>
+                </div>
+            </div>
 
-                <div class="flex justify-end mt-4 gap-2" x-data="{cancelGame: false}">
-                    <div x-show="cancelGame">
-                        <flux:button variant="danger" wire:click="cancelGame">Seriously cancel?</flux:button>
-                    </div>
-                    <div x-show="!cancelGame">
-                        <flux:button variant="ghost" @click="cancelGame = true">Cancel Game</flux:button>
-                    </div>
-                    <flux:button wire:click="updateGameSettings">Update</flux:button>
+            <div x-show="addBots">
+                <div class="mt-4 flex gap-2 items-end">
+                    <flux:input wire:model="bots_to_add" label="Add bots" min="0" />
+                    <flux:button variant="primary" wire:click="fillGameWithBots()">Fill game with bots</flux:button>
+                    <flux:button variant="subtle" @click="addBots = false">Cancel</flux:button>
                 </div>
             </div>
         </flux:card>
@@ -245,7 +310,7 @@
                                         <flux:button variant="subtle" size="sm" wire:click="promoteToAdmin('{{ $player->id }}')">
                                             <div class="flex items-center gap-2">
                                                 <x-icons.crown class="w-4 h-4" />
-                                                Promote 
+                                                Promote
                                             </div>
                                         </flux:button>
                                     </div>
@@ -261,7 +326,7 @@
                                         <flux:button variant="subtle" size="sm" wire:click="demoteFromAdmin('{{ $player->id }}')">
                                             <div class="flex items-center gap-2">
                                                 <x-icons.crown-slash class="w-4 h-4" />
-                                                Demote 
+                                                Demote
                                             </div>
                                         </flux:button>
                                     </div>
@@ -273,12 +338,6 @@
             </flux:table.rows>
         </flux:table>
     </flux:card>
-
-    <flux:modal name="qr-code">
-        <div class="flex justify-center p-6">
-            <x-qr :url="$this->game->url" />
-        </div>
-    </flux:modal>
 
     <flux:toast />
 </div>

@@ -53,7 +53,7 @@
                     />
                     @break
                 @case('button_group')
-                    <div class="flex space-x-2 mt-4 justify-end">
+                    <div class="flex flex-wrap gap-2 mt-4 justify-end">
                         @foreach ($element['buttons'] as $btn)
                             <flux:button
                                 wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"

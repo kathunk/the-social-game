@@ -36,8 +36,8 @@ it('runs individual steal the bacon', function () {
 
     $this->game->fresh()->challenges->first()->end();
 
-    expect($player_1->fresh()->state()->score(include_hidden: true))->toBe(7);
-    expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(7);
-    expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(-7);
-    expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(-7);
+    expect($player_1->fresh()->state()->score(include_hidden: true))->toBe(5);
+    expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(5);
+    expect($player_3->fresh()->state()->score(include_hidden: true))->toBe(-5);
+    expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(-5);
 });

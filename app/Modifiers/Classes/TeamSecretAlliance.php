@@ -38,7 +38,6 @@ class TeamSecretAlliance extends BaseModifierClass
     {
         $pair_data = new TeamSecretAlliancePairData(player_id: $player->id, modifier: $this->modifier);
         $ally = $pair_data->ally();
-        $has_connected = $pair_data->hasConnected();
         $player_is_active = $player->status === 'active';
         $player_is_lucky = rand(0, 100) > 0;
 
@@ -199,7 +198,8 @@ class TeamSecretAlliance extends BaseModifierClass
                 }
 
                 return $pair;
-            });
+            })
+            ->toArray();
     }
 }
 
@@ -218,8 +218,8 @@ class TeamSecretAlliancePairData
     protected function pairData(): ?array
     {
         $pairs = $this->modifier
-            ? $this->modifier->modifier_data['pairs'] ?? []
-            : ($this->modifier_state->modifier_data['pairs'] ?? []);
+            ? collect($this->modifier->modifier_data['pairs'])
+            : collect($this->modifier_state->modifier_data['pairs']);
 
         return collect($pairs)
             ->first(fn ($pair) => in_array($this->player_id, [$pair['player_1_id'], $pair['player_2_id']]));

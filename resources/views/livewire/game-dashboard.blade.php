@@ -3,7 +3,7 @@
         <flux:button icon="cog" :href="route('pre-game-lobby', $this->game)" variant="filled">Manage game</flux:button>
     @endif
 
-    @if (! $this->current_team && $this->template->type === 'team' && $this->player->status === 'active')
+    @if (! $this->current_team && $this->template->type === 'team' && $this->player->status === 'active' && $this->game->status === 'active')
         <flux:card>
             <flux:heading>Join a team</flux:heading>
             <flux:subheading>To start playing, join a team. At certain points in the game, you will be able to switch teams.</flux:subheading>
@@ -36,15 +36,24 @@
         <x-game-components.scoreboard :teams="$this->teams" :players="$this->players" :type="$this->template->scoreboard_type" />
     @endif
     @if ($this->game->status === 'active')
-        @if ($this->template->players_can_join_late)
-            <flux:card>
-                <flux:heading class="mb-2">Invite your friends</flux:heading>
-                <div class="flex gap-2">
-                    <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
-                    <flux:modal.trigger name="qr-code">
-                        <flux:button variant="filled">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
-                    </flux:modal.trigger>
-                </div>
+        @if ($this->template->players_can_join_late || $this->socialLink)
+            <flux:card x-data="{showQr: false}">
+                @if ($this->template->players_can_join_late)
+                    <flux:heading class="mb-2">Invite your friends</flux:heading>
+                    <div class="flex gap-2">
+                        <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
+                        <flux:button variant="filled" @click="showQr = ! showQr">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
+                    </div>
+
+                    <div x-show="showQr" class="mt-2">
+                        <x-qr :url="$this->game->url" />
+                    </div>
+                @endif
+
+                @if ($this->socialLink)
+                    <flux:heading class="mt-4">Game chat</flux:heading>
+                    <flux:button variant="primary" href="{{ $this->game->social_links[0] }}" target="_blank" class="{{ $this->template->players_can_join_late ? 'mt-2' : '' }}">Join game chat</flux:button>
+                @endif
             </flux:card>
         @endif
     @endif

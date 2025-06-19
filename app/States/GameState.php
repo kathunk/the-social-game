@@ -50,6 +50,10 @@ class GameState extends State
 
     public int $code;
 
+    public ?int $challenge_length_override;
+
+    public array $social_links = [];
+
     public function __construct()
     {
         $this->player_ids = collect();

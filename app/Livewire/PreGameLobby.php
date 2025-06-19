@@ -17,6 +17,8 @@ use App\Support\HtmlTransformer;
 use Flux\Flux;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -38,11 +40,17 @@ class PreGameLobby extends Component
 
     public GameMode $game_mode;
 
-    public bool $is_public;
-
     public bool $requires_admin_approval_to_join;
 
     public Collection $game_templates;
+
+    public int $bots_to_add = 0;
+
+    public ?int $challenge_length_override = null;
+
+    public bool $use_challenge_length_override = false;
+
+    public string $social_link_url = '';
 
     #[Computed]
     public function user()
@@ -144,7 +152,7 @@ class PreGameLobby extends Component
     #[Computed]
     public function description()
     {
-        return (new HtmlTransformer($this->game->gameTemplate->pre_game_lobby_message))->formatted();
+        return (new HtmlTransformer($this->game->gameMode->pre_game_lobby_message))->formatted();
     }
 
     #[Computed]
@@ -188,13 +196,19 @@ class PreGameLobby extends Component
         $this->game_mode = $game->gameMode;
         $this->game_templates = $this->game_mode->gameTemplates;
         $this->game_start_timecode = $game->starts_at;
-        $this->is_public = $game->is_public;
         $this->requires_admin_approval_to_join = $game->requires_admin_approval_to_join;
         $this->game_mode_id = (string) $game->gameMode->id;
         $this->game_template_id = (string) $game->gameTemplate->id;
+        $this->challenge_length_override = $game->challenge_length_override;
+        $this->use_challenge_length_override = $game->challenge_length_override ? true : false;
+        $this->social_link_url = preg_replace('/^https?:\/\//', '', $game->social_links[0] ?? '');
 
         if ($this->application) {
             $this->checkStatus();
+        }
+
+        if ($this->game->status === 'canceled') {
+            return redirect()->route('dashboard');
         }
     }
 
@@ -321,9 +335,29 @@ class PreGameLobby extends Component
             'game_template_id' => 'required|exists:game_templates,id',
             'game_mode_id' => 'required|exists:game_modes,id',
             'game_start_timecode' => 'required|date',
+            'challenge_length_override' => 'nullable|integer|min:1',
         ]);
 
-        $duration = GameTemplate::find($this->game_template_id)->total_duration;
+        $url_input = $this->social_link_url;
+
+        if (! empty($url_input)) {
+            if (! str_starts_with($url_input, 'http://') && ! str_starts_with($url_input, 'https://')) {
+                $url_input = 'https://'.$url_input;
+            }
+
+            Validator::make(['url' => $url_input], ['url' => 'url'])->validate();
+        }
+
+        if (! $this->use_challenge_length_override) {
+            $this->challenge_length_override = null;
+        }
+
+        $game_template = GameTemplate::find($this->game_template_id);
+
+        $duration = $this->challenge_length_override
+            ? $this->challenge_length_override * count($game_template->challenges)
+            : $game_template->total_duration;
+
         $ends_at = Carbon::parse($this->game_start_timecode)->addMinutes($duration);
 
         GameUpdated::fire(
@@ -331,10 +365,12 @@ class PreGameLobby extends Component
             user_id: $this->user->id,
             game_template_id: (int) $this->game_template_id,
             game_mode_id: (int) $this->game_mode_id,
-            starts_at: $this->game_start_timecode,
+            starts_at: Carbon::parse($this->game_start_timecode),
             ends_at: $ends_at,
-            is_public: $this->is_public,
+            is_public: true,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
+            challenge_length_override: $this->challenge_length_override,
+            social_links: ! empty($url_input) ? [$url_input] : [],
         );
 
         Verbs::commit();
@@ -354,8 +390,10 @@ class PreGameLobby extends Component
             game_mode_id: (int) $this->game_mode_id,
             starts_at: now(),
             ends_at: $ends_at,
-            is_public: $this->is_public,
+            is_public: true,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
+            challenge_length_override: $this->game->challenge_length_override,
+            social_links: $this->game->social_links,
         );
 
         Verbs::commit();
@@ -379,6 +417,17 @@ class PreGameLobby extends Component
     #[On('echo-private:games.{game.id},GameUpdatedForReverb')]
     public function refreshGame()
     {
+        return redirect()->route('pre-game-lobby', ['game' => $this->game]);
+    }
+
+    public function fillGameWithBots()
+    {
+        try {
+            Artisan::call('app:fill-game-with-bots', ['game_id' => $this->game->id, 'amount' => $this->bots_to_add]);
+        } catch (\Exception $e) {
+            Flux::toast(variant: 'error', heading: 'Error', text: 'Error filling game with bots: '.$e->getMessage());
+        }
+
         return redirect()->route('pre-game-lobby', ['game' => $this->game]);
     }
 

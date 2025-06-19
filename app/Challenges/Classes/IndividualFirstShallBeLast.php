@@ -13,7 +13,7 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
 
     const NAME = 'First Shall Be Last';
 
-    const DESCRIPTION = 'After votes are tallied at the end of this round, the player(s) at the top of the scoreboard will get -{half_player_count}) points. The player(s) at the bottom of the scoreboard will get +{half_player_count} points.';
+    const DESCRIPTION = 'After votes are tallied at the end of this round, the player(s) at the top of the scoreboard will get -{player_count}) points. The player(s) at the bottom of the scoreboard will get +{player_count} points.';
 
     const TYPE = 'individual';
 
@@ -40,7 +40,7 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
         $player_count = $players->count();
 
         $description = strtr(self::DESCRIPTION, [
-            '{half_player_count}' => ceil($player_count / 2),
+            '{player_count}' => $player_count,
         ]);
 
         return $this->form()
@@ -70,11 +70,11 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
 
         $game_state->players()->each(function ($player) use ($leader_ids, $loser_ids, $player_count) {
             if ($leader_ids->contains($player->id)) {
-                $player->addToScoreHistory(-ceil($player_count / 2), 'First Shall Be Last');
+                $player->addToScoreHistory(-$player_count, 'First Shall Be Last');
             }
 
             if ($loser_ids->contains($player->id)) {
-                $player->addToScoreHistory(ceil($player_count / 2), 'Last Shall Be First');
+                $player->addToScoreHistory($player_count, 'Last Shall Be First');
             }
         });
     }

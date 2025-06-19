@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
 use App\Challenges\Classes\IndividualDoubleTrouble;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualSpy;
@@ -46,13 +47,19 @@ class PeckingOrderSeeder extends Seeder
                     'challenge_keys' => [
                         IndividualHighScoreQuiz::key(),
                     ],
-                    'duration' => 1,
+                    'duration' => 10,
                 ],
                 [
                     'challenge_keys' => [
                         IndividualDoubleTrouble::key(),
                     ],
                     'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualChooseSafetyOrDanger::key(),
+                    ],
+                    'duration' => 1,
                 ],
                 [
                     'challenge_keys' => [

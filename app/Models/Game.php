@@ -27,6 +27,7 @@ class Game extends Model
         'ends_at' => 'datetime',
         'is_public' => 'boolean',
         'requires_admin_approval_to_join' => 'boolean',
+        'social_links' => 'array',
     ];
 
     public function state(): GameState
@@ -87,6 +88,8 @@ class Game extends Model
         bool $requires_admin_approval_to_join,
         ?bool $is_public = false,
         ?array $challenges = null,
+        ?int $challenge_length_override = null,
+        ?array $social_links = null,
     ): self {
         $game_id = GameCreated::fire(
             user_id: $user->id,
@@ -103,6 +106,8 @@ class Game extends Model
             starts_at: $starts_at,
             ends_at: $starts_at->copy()->addMinutes($template->totalDuration),
             code: self::uniqueGameCode(),
+            challenge_length_override: $challenge_length_override,
+            social_links: $social_links,
         )->game_id;
 
         Verbs::commit();
@@ -141,6 +146,14 @@ class Game extends Model
         }
 
         $challenges = $this->gameTemplate->challenges;
+
+        if ($this->challenge_length_override) {
+            $challenges = array_map(function ($challenge) {
+                $challenge['duration'] = $this->challenge_length_override;
+
+                return $challenge;
+            }, $challenges);
+        }
 
         $used_challenge_keys = [];
         $mapped_challenges = [];
@@ -256,5 +269,16 @@ class Game extends Model
             game_id: $this->id,
             admin_id: $admin->id,
         );
+    }
+
+    public function getTotalDurationAttribute(): int
+    {
+        $challenges = collect($this->gameTemplate->challenges);
+
+        if ($this->challenge_length_override) {
+            return $this->challenge_length_override * $challenges->count();
+        }
+
+        return $challenges->sum(fn ($c) => $c['duration'] ?? 0);
     }
 }

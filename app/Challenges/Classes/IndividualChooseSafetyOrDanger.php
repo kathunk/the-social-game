@@ -14,7 +14,7 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
 
     const NAME = 'Choose Safety or Danger';
 
-    const DESCRIPTION = 'Choose safety or danger. If you choose safety, no downvotes will count against you this round. If you choose danger, you will gain 2 hidden points, but all downvotes you receive will count double.';
+    const DESCRIPTION = 'If you choose safety, no downvotes will count against you this round. If you choose danger, you will gain 2 hidden points, but all downvotes you receive will count double.';
 
     const TYPE = 'individual';
 
@@ -106,7 +106,7 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
             }
 
             if ($choices[$player->id] === 'danger' && $downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received * 2, 'Received downvotes after choosing danger');
+                $player->addToScoreHistory(-$downvotes_received * 2, 'Received '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing danger');
             }
 
             if ($choices[$player->id] === 'danger') {
@@ -114,7 +114,11 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
             }
 
             if ($choices[$player->id] === 'safety' && $downvotes_received > 0) {
-                $player->addToScoreHistory(0, 'Blocked downvotes after choosing safety');
+                $player->addToScoreHistory(0, 'Blocked '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing safety');
+            }
+
+            if ($choices[$player->id] === null && $downvotes_received > 0) {
+                $player->addToScoreHistory(-$downvotes_received, 'Received '.($downvotes_received === 1 ? 'downvote' : 'downvotes'));
             }
         });
     }

@@ -10,7 +10,7 @@
         x-ref="picker"
         type="datetime-local"
         @change="changeDate"
-        class="mb-4 bg-steel-20 p-2 relative text-steel-95 block border-1 border-gray-200 dark:border-gray-500 rounded-[10px]
+        class="bg-steel-20 p-2 relative text-steel-95 block border-1 border-gray-200 dark:border-gray-500 rounded-[10px]
                focus:bg-steel-20 focus:outline-none"
         {{
             $attributes->filter(
@@ -40,17 +40,32 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('datetime', () => ({
                 init() {
-                    // Wait for next tick to ensure wire:model value is available
+                    const wireModel = this.$refs.anchor.getAttribute('wire:model');
+
+                    // Set up the watcher for ongoing changes
+                    this.$watch('$wire.' + wireModel, (value) => {
+                        if (value) {
+                            this.setDate(value);
+                        }
+                    });
+
+                    // Listen for Livewire initialization to get initial value
+                    document.addEventListener('livewire:init', () => {
+                        this.$nextTick(() => {
+                            const initialValue = this.$wire.get(wireModel);
+                            if (initialValue) {
+                                this.setDate(initialValue);
+                            }
+                        });
+                    });
+
+                    // Also try to get value immediately in case Livewire is already initialized
                     this.$nextTick(() => {
-                        if (this.$refs.anchor.value) {
-                            this.setDate(this.$refs.anchor.value);
-                        } else {
-                            // Set initial value from wire:model
-                            this.$watch('$wire.' + this.$refs.anchor.getAttribute('wire:model'), (value) => {
-                                if (value) {
-                                    this.setDate(value);
-                                }
-                            });
+                        if (this.$wire && typeof this.$wire.get === 'function') {
+                            const initialValue = this.$wire.get(wireModel);
+                            if (initialValue) {
+                                this.setDate(initialValue);
+                            }
                         }
                     });
                 },

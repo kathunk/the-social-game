@@ -14,7 +14,7 @@ class IndividualChooseHopeOrFear extends BaseChallengeClass implements SupportsP
 
     const NAME = 'Choose Hope or Fear';
 
-    const DESCRIPTION = 'Choose hope or fear. If you choose hope, and your score increases, you will gain a hidden point. If you choose fear, and your score decreases, you will lose a hidden point.';
+    const DESCRIPTION = 'If you choose hope and your score increases, you will gain a hidden point. If you choose fear and your score decreases, you will gain a hidden point.';
 
     const TYPE = 'individual';
 

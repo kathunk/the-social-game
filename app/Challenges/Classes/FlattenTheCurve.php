@@ -7,6 +7,7 @@ use App\Challenges\Support\Traits\HasTeamSwaps;
 use App\Models\Player;
 use App\States\GameState;
 use App\States\PlayerState;
+use App\States\TeamState;
 use Illuminate\Support\Collection;
 
 class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
@@ -65,6 +66,17 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
         }
 
         return false;
+    }
+
+    public function onPlayerJoinedTeam(
+        PlayerState $player_state,
+        TeamState $team_state,
+        GameState $game_state,
+        ?TeamState $previous_team = null,
+    ) {
+        if ($previous_team) {
+            $this->challenge_state->challenge_data['swapper_ids'][] = $player_state->id;
+        }
     }
 
     public function onChallengeEnded(GameState $game_state)
