@@ -31,6 +31,8 @@ class GameUpdated extends Event
 
     public bool $requires_admin_approval_to_join;
 
+    public ?array $social_links = null;
+
     public function validate()
     {
         $this->assert(
@@ -51,6 +53,7 @@ class GameUpdated extends Event
         );
         $game->players_can_join_late = $this->state(GameTemplateState::class)->players_can_join_late;
         $game->challenge_length_override = $this->challenge_length_override;
+        $game->social_links = $this->social_links;
     }
 
     public function handle()
@@ -64,6 +67,7 @@ class GameUpdated extends Event
             'requires_admin_approval_to_join' => $this->requires_admin_approval_to_join,
             'players_can_join_late' => $this->state(GameTemplateState::class)->players_can_join_late,
             'challenge_length_override' => $this->challenge_length_override,
+            'social_links' => $this->social_links,
         ]);
     }
 }

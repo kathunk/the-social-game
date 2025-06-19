@@ -18,6 +18,7 @@ use Flux\Flux;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -48,6 +49,8 @@ class PreGameLobby extends Component
     public ?int $challenge_length_override = null;
 
     public bool $use_challenge_length_override = false;
+
+    public string $social_link_url = '';
 
     #[Computed]
     public function user()
@@ -198,6 +201,8 @@ class PreGameLobby extends Component
         $this->game_template_id = (string) $game->gameTemplate->id;
         $this->challenge_length_override = $game->challenge_length_override;
         $this->use_challenge_length_override = $game->challenge_length_override ? true : false;
+        $this->social_link_url = preg_replace('/^https?:\/\//', '', $game->social_links[0] ?? '');
+
         if ($this->application) {
             $this->checkStatus();
         }
@@ -333,6 +338,16 @@ class PreGameLobby extends Component
             'challenge_length_override' => 'nullable|integer|min:1',
         ]);
 
+        $url_input = $this->social_link_url;
+
+        if (! empty($url_input)) {
+            if (! str_starts_with($url_input, 'http://') && ! str_starts_with($url_input, 'https://')) {
+                $url_input = 'https://'.$url_input;
+            }
+
+            Validator::make(['url' => $url_input], ['url' => 'url'])->validate();
+        }
+
         if (! $this->use_challenge_length_override) {
             $this->challenge_length_override = null;
         }
@@ -355,6 +370,7 @@ class PreGameLobby extends Component
             is_public: true,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
             challenge_length_override: $this->challenge_length_override,
+            social_links: ! empty($url_input) ? [$url_input] : [],
         );
 
         Verbs::commit();
@@ -377,6 +393,7 @@ class PreGameLobby extends Component
             is_public: true,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
             challenge_length_override: $this->game->challenge_length_override,
+            social_links: $this->game->social_links,
         );
 
         Verbs::commit();

@@ -10,7 +10,7 @@
         x-ref="picker"
         type="datetime-local"
         @change="changeDate"
-        class="mb-4 bg-steel-20 p-2 relative text-steel-95 block border-1 border-gray-200 dark:border-gray-500 rounded-[10px]
+        class="bg-steel-20 p-2 relative text-steel-95 block border-1 border-gray-200 dark:border-gray-500 rounded-[10px]
                focus:bg-steel-20 focus:outline-none"
         {{
             $attributes->filter(

@@ -96,6 +96,12 @@ class GameDashboard extends Component
         return ! $this->challenge_handler::HIDE_SCOREBOARD;
     }
 
+    #[Computed]
+    public function socialLink()
+    {
+        return $this->game->social_links[0] ?? null;
+    }
+
     public function mount(Game $game)
     {
         $this->game = $game;
