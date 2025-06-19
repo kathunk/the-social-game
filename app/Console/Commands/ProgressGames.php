@@ -69,7 +69,7 @@ class ProgressGames extends Command
                         is_public: $game->is_public,
                         requires_admin_approval_to_join: $game->requires_admin_approval_to_join,
                         challenge_length_override: $game->challenge_length_override,
-                        social_links: [],
+                        social_links: $game->social_links ?? [],
                     );
                 }
 
