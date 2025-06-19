@@ -40,22 +40,21 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('datetime', () => ({
                 init() {
-                    // Wait for next tick to ensure wire:model value is available
-                    this.$nextTick(() => {
-                        const wireModel = this.$refs.anchor.getAttribute('wire:model');
-                        
-                        // Get initial value from Livewire
+                    const wireModel = this.$refs.anchor.getAttribute('wire:model');
+
+                    // Set up the watcher first
+                    this.$watch('$wire.' + wireModel, (value) => {
+                        if (value) {
+                            this.setDate(value);
+                        }
+                    });
+
+                    // Try to get initial value, but use a more reliable method
+                    this.$wire.$nextTick(() => {
                         const initialValue = this.$wire.get(wireModel);
                         if (initialValue) {
                             this.setDate(initialValue);
                         }
-                        
-                        // Watch for changes
-                        this.$watch('$wire.' + wireModel, (value) => {
-                            if (value) {
-                                this.setDate(value);
-                            }
-                        });
                     });
                 },
                 date: null,
