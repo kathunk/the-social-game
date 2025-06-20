@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Events\UserSwitchedCurrentGame;
 use App\Models\Game;
 use App\Models\Team;
+use App\Support\HtmlTransformer;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -107,6 +108,26 @@ class GameDashboard extends Component
     public function socialLink()
     {
         return $this->game->social_links[0] ?? null;
+    }
+
+    #[Computed]
+    public function footerMessage()
+    {
+        if ($this->game->status !== 'active' || ! $this->game->gameMode->footer_message) {
+            return null;
+        }
+
+        return (new HtmlTransformer($this->game->gameMode->footer_message))->formatted();
+    }
+
+    #[Computed]
+    public function postGameMessage()
+    {
+        if ($this->game->status !== 'ended' || ! $this->game->gameMode->post_game_message) {
+            return null;
+        }
+
+        return (new HtmlTransformer($this->game->gameMode->post_game_message))->formatted();
     }
 
     public function mount(Game $game)
