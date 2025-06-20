@@ -305,7 +305,6 @@ class GameDashboard extends Component
         }
 
         if ($type === 'modifier') {
-            // Get fresh modifier directly from the game relationship
             $modifier = $this->game
                 ->fresh()
                 ->modifiers()
