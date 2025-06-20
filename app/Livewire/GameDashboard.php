@@ -59,7 +59,9 @@ class GameDashboard extends Component
     #[Computed]
     public function teams()
     {
-        return $this->game->teams->sortByDesc('score');
+        $sort_by = $this->game->status === 'ended' ? 'hidden_score' : 'score';
+
+        return $this->game->teams->sortByDesc($sort_by);
     }
 
     #[Computed]
