@@ -16,7 +16,10 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
 
     const NAME = 'Flatten the Curve';
 
-    const DESCRIPTION = 'The current average team size is {average}. At the end of the game, every team will get: ({average} - {your_team_size}) * 5. For your current team, you will get: {score} points.';
+    const DESCRIPTION = 'At the end of this challenge, every team will get: 
+        ({average team size} - {size of team}) * 5. 
+        Average team size: {average}. {team} size: {team_size}.
+        {team} is on track to score {score} points.';
 
     const TYPE = 'team';
 
@@ -36,17 +39,20 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
         $team_size = $player->team->players->count();
         $score = ($average_team_size - $team_size) * 5;
 
-        if ($this->playerCanSwapTeams(player: $player)) {
-            return $this->form()
-                ->title(self::NAME)
-                ->subtitle('The current average team size is '.$average_team_size.'. At the end of the game, every team will get: ('.$average_team_size.' - {your_team_size}) * 5. For your current team, you will get: '.$score.' points.')
-                ->teamSwap(teams: $this->availableTeams($player))
-                ->build();
-        }
+        $description = strtr(self::DESCRIPTION, [
+            '{average}' => $average_team_size,
+            '{team_size}' => $team_size,
+            '{score}' => $score,
+            '{team}' => $player->team->name,
+        ]);
 
         return $this->form()
-            ->title('Flatten the Curve')
-            ->subtitle('The current average team size is '.$average_team_size.'. At the end of the game, every team will get: ('.$average_team_size.' - {your_team_size}) * 5. For your current team, you will get: '.$score.' points.')
+            ->title(self::NAME)
+            ->subtitle($description)
+            ->when(
+                $this->playerCanSwapTeams(player: $player),
+                fn ($form) => $form->teamSwap(teams: $this->availableTeams($player))
+            )
             ->build();
     }
 

@@ -113,21 +113,31 @@ class GameDashboard extends Component
     #[Computed]
     public function footerMessage()
     {
-        if ($this->game->status !== 'active' || ! $this->game->gameMode->footer_message) {
+        if (
+            $this->game->status !== 'active' ||
+            ! $this->game->gameMode->footer_message
+        ) {
             return null;
         }
 
-        return (new HtmlTransformer($this->game->gameMode->footer_message))->formatted();
+        return (new HtmlTransformer(
+            $this->game->gameMode->footer_message
+        ))->formatted();
     }
 
     #[Computed]
     public function postGameMessage()
     {
-        if ($this->game->status !== 'ended' || ! $this->game->gameMode->post_game_message) {
+        if (
+            $this->game->status !== 'ended' ||
+            ! $this->game->gameMode->post_game_message
+        ) {
             return null;
         }
 
-        return (new HtmlTransformer($this->game->gameMode->post_game_message))->formatted();
+        return (new HtmlTransformer(
+            $this->game->gameMode->post_game_message
+        ))->formatted();
     }
 
     public function mount(Game $game)
@@ -322,7 +332,7 @@ class GameDashboard extends Component
             $this->challenge_component = $this->game->currentChallenge
                 ?->fresh()
                 ->handler()
-                ->frontendComponent($this->player);
+                ->frontendComponent($this->player->fresh());
         }
 
         if ($type === 'modifier') {
@@ -333,23 +343,42 @@ class GameDashboard extends Component
                 ->first();
 
             $this->round_properties[$modifier->class_key] =
-                $modifier->handler()?->propertiesForLivewire($this->player) ??
-                [];
+                $modifier
+                    ->handler()
+                    ?->propertiesForLivewire($this->player->fresh()) ?? [];
 
             $this->validation_rules[$modifier->class_key] =
                 $modifier
                     ->handler()
-                    ?->validationRulesForLivewire($this->player) ?? [];
+                    ?->validationRulesForLivewire($this->player->fresh()) ?? [];
 
-            $this->modifier_components[$modifier->class_key] = $modifier->fresh()
+            $this->modifier_components[$modifier->class_key] = $modifier
+                ->fresh()
                 ->handler()
-                ->frontendComponent($this->player);
+                ->frontendComponent($this->player->fresh());
         }
 
         return $response instanceof \Illuminate\Http\RedirectResponse ||
             $response instanceof \Livewire\Features\SupportRedirects\Redirector
             ? $response
             : null;
+    }
+
+    protected function refreshComputedProperties()
+    {
+        // Clear computed property cache using reflection
+        $reflection = new \ReflectionClass($this);
+        $properties = ['player', 'players', 'teams', 'current_team'];
+
+        foreach ($properties as $property) {
+            if ($reflection->hasProperty($property)) {
+                $prop = $reflection->getProperty($property);
+                $prop->setAccessible(true);
+                if ($prop->isInitialized($this)) {
+                    unset($this->{$property});
+                }
+            }
+        }
     }
 
     #[On('echo-private:games.{game.id},GameUpdatedForReverb')]

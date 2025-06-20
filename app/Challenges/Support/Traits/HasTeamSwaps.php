@@ -23,5 +23,7 @@ trait HasTeamSwaps
         );
 
         Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 }

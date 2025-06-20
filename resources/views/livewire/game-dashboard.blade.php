@@ -9,20 +9,24 @@
         </flux:card>
     @endif
 
-    @if (! $this->current_team && $this->template->type === 'team' && $this->player->status === 'active' && $this->game->status === 'active')
+    @if ($this->template->type === 'team' && $this->player->status === 'active' && $this->game->status === 'active')
         <flux:card>
-            <flux:heading>Join a team</flux:heading>
-            <span class="join-team-select">
-                <flux:select label="Select a team" class="[&>[data-flux-label]]:!sr-only mt-4" wire:model="selected_team_id">
-                <flux:select.option value="" selected class="placeholder">Select a team</flux:select.option>
-                    @foreach ($this->teams as $team)
-                        <flux:select.option :value="(string) $team->id">{{ $team->name }}</flux:select.option>
-                    @endforeach
-                </flux:select>
-            </span>
-            <div class="mt-4 flex justify-end">
-                <flux:button variant="primary" wire:click="joinTeam">Join</flux:button>
-            </div>
+            @if (! $this->current_team)
+                <flux:heading>Join a team</flux:heading>
+                <span class="join-team-select">
+                    <flux:select label="Select a team" class="[&>[data-flux-label]]:!sr-only mt-4" wire:model="selected_team_id">
+                    <flux:select.option value="" selected class="placeholder">Select a team</flux:select.option>
+                        @foreach ($this->teams as $team)
+                            <flux:select.option :value="(string) $team->id">{{ $team->name }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+                </span>
+                <div class="mt-4 flex justify-end">
+                    <flux:button variant="primary" wire:click="joinTeam">Join</flux:button>
+                </div>
+            @else
+                <flux:heading>You are on team {{ $this->current_team->name }}</flux:heading>
+            @endif
         </flux:card>
     @endif
     @if ($this->game->status !== 'ended')

@@ -3,9 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\TeamBrinksmanship;
-use App\Challenges\Classes\TeamHotPotato;
+use App\Challenges\Classes\FlattenTheCurve;
 use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
@@ -44,15 +42,15 @@ class Laracon2025Seeder extends Seeder
             team_names: ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
             challenges: [
                 [
-                    'challenge_keys' => [PyramidScheme::key()],
+                    'challenge_keys' => [FlattenTheCurve::key()],
                     'duration' => 10000,
                 ],
                 [
-                    'challenge_keys' => [TeamBrinksmanship::key()],
+                    'challenge_keys' => [FlattenTheCurve::key()],
                     'duration' => 10000,
                 ],
                 [
-                    'challenge_keys' => [TeamHotPotato::key()],
+                    'challenge_keys' => [FlattenTheCurve::key()],
                     'duration' => 60,
                 ],
             ],
