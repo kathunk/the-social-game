@@ -27,9 +27,9 @@
         <x-game-components.form :form="$this->challenge_component" type="challenge" class_key="{{ $this->challenge->class_key }}" />
     @endif
     <flux:error name="error" />
-    @if ($this->game->status === 'active' && isset($this->modifiers))
-        @foreach ($this->modifiers as $modifier)
-            <x-game-components.form :form="$modifier->handler()->frontendComponent($this->player)" type="modifier" class_key="{{ $modifier->class_key }}" />
+    @if ($this->game->status === 'active' && count($this->modifier_components) > 0)
+        @foreach ($this->modifier_components as $class_key => $modifier)
+            <x-game-components.form :form="$modifier" type="modifier" class_key="{{ $class_key }}" />
         @endforeach
     @endif
     @if ($this->showScoreboard)
