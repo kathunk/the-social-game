@@ -90,15 +90,19 @@
     @if ($this->is_game_admin)
         <flux:card x-data="{editGameMode: false, editTime: false, addBots: false}">
             <flux:heading class="mb-4">Game Settings</flux:heading>
-            <div x-show="!editGameMode && !editTime && !addBots" class="flex gap-2 flex-wrap">
+            <div x-show="!editGameMode && !editTime && !addBots" class="flex gap-2 flex-wrap" x-data="{startGame: false}">
                 @unless ($this->hasTooManyPlayers || $this->hasTooFewPlayers || $this->game->status !== 'upcoming')
+                    <flux:button variant="primary" icon="rocket-launch" @click="startGame = true" x-show="!startGame" :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers">
+                        Start Game Now
+                    </flux:button>
                     <flux:button
                         variant="primary"
                         wire:click="startGame"
                         icon="rocket-launch"
+                        x-show="startGame"
                         :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers"
                     >
-                        Start Game Now
+                        You sure?
                     </flux:button>
                 @endunless
                 <flux:button @click="editGameMode = true" icon="pencil">Settings</flux:button>
