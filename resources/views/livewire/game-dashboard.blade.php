@@ -43,6 +43,11 @@
     @endif
     @if ($this->showScoreboard)
         <x-game-components.scoreboard :teams="$this->teams" :players="$this->players" :type="$this->template->scoreboard_type" />
+    @else
+        <flux:card>
+            <flux:heading>Scoreboard</flux:heading>
+            <flux:subheading>The scoreboard is hidden for this challenge.</flux:subheading>
+        </flux:card>
     @endif
     @if ($this->game->status === 'active')
         @if ($this->template->players_can_join_late || $this->socialLink)

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Challenges\Classes\FlattenTheCurve;
+use App\Challenges\Classes\TheGreatRealignment;
 use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
@@ -42,7 +43,7 @@ class Laracon2025Seeder extends Seeder
             team_names: ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
             challenges: [
                 [
-                    'challenge_keys' => [FlattenTheCurve::key()],
+                    'challenge_keys' => [TheGreatRealignment::key()],
                     'duration' => 10000,
                 ],
                 [
