@@ -28,6 +28,10 @@ class GameModeAdded extends Event
 
     public bool $players_can_join_late;
 
+    public ?string $footer_message = '';
+
+    public ?string $post_game_message = '';
+
     public function validate()
     {
         $this->assert(
@@ -51,6 +55,8 @@ class GameModeAdded extends Event
         $game_mode->description = $this->description;
         $game_mode->pre_game_lobby_message = $this->pre_game_lobby_message;
         $game_mode->players_can_join_late = $this->players_can_join_late;
+        $game_mode->footer_message = $this->footer_message;
+        $game_mode->post_game_message = $this->post_game_message;
     }
 
     public function handle()
@@ -67,6 +73,8 @@ class GameModeAdded extends Event
                 'description' => $this->description,
                 'pre_game_lobby_message' => $this->pre_game_lobby_message,
                 'players_can_join_late' => $this->players_can_join_late,
+                'footer_message' => $this->footer_message,
+                'post_game_message' => $this->post_game_message,
             ]);
 
             return;
@@ -82,6 +90,8 @@ class GameModeAdded extends Event
             'description' => $this->description,
             'pre_game_lobby_message' => $this->pre_game_lobby_message,
             'players_can_join_late' => $this->players_can_join_late,
+            'footer_message' => $this->footer_message,
+            'post_game_message' => $this->post_game_message,
         ]);
     }
 }

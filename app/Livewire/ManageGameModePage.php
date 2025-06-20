@@ -21,6 +21,10 @@ class ManageGameModePage extends Component
 
     public string $pre_game_lobby_message;
 
+    public string $footer_message;
+
+    public string $post_game_message;
+
     public ?int $min_players;
 
     public ?int $max_players;
@@ -45,6 +49,8 @@ class ManageGameModePage extends Component
             $this->name = $game_mode->name ?? '';
             $this->description = $game_mode->description ?? '';
             $this->pre_game_lobby_message = $game_mode->pre_game_lobby_message ?? '';
+            $this->footer_message = $game_mode->footer_message ?? '';
+            $this->post_game_message = $game_mode->post_game_message ?? '';
             $this->min_players = $game_mode->min_players ?? null;
             $this->max_players = $game_mode->max_players ?? null;
             $this->is_public = $game_mode->is_public ?? false;
@@ -54,6 +60,8 @@ class ManageGameModePage extends Component
             $this->name = '';
             $this->description = '';
             $this->pre_game_lobby_message = '';
+            $this->footer_message = '';
+            $this->post_game_message = '';
             $this->min_players = null;
             $this->max_players = null;
             $this->is_public = false;
@@ -66,6 +74,8 @@ class ManageGameModePage extends Component
         'name' => 'required|string|max:100',
         'description' => 'required|string',
         'pre_game_lobby_message' => 'required|string',
+        'footer_message' => 'nullable|string',
+        'post_game_message' => 'nullable|string',
         'min_players' => 'nullable|integer',
         'max_players' => 'nullable|integer',
         'is_public' => 'boolean',
@@ -85,6 +95,8 @@ class ManageGameModePage extends Component
                 name: $this->name,
                 description: $this->description,
                 pre_game_lobby_message: $this->pre_game_lobby_message,
+                footer_message: $this->footer_message,
+                post_game_message: $this->post_game_message,
                 type: $this->game_type,
                 min_players: $this->min_players ?? null,
                 max_players: $this->max_players ?? null,
