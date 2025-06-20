@@ -364,23 +364,6 @@ class GameDashboard extends Component
             : null;
     }
 
-    protected function refreshComputedProperties()
-    {
-        // Clear computed property cache using reflection
-        $reflection = new \ReflectionClass($this);
-        $properties = ['player', 'players', 'teams', 'current_team'];
-
-        foreach ($properties as $property) {
-            if ($reflection->hasProperty($property)) {
-                $prop = $reflection->getProperty($property);
-                $prop->setAccessible(true);
-                if ($prop->isInitialized($this)) {
-                    unset($this->{$property});
-                }
-            }
-        }
-    }
-
     #[On('echo-private:games.{game.id},GameUpdatedForReverb')]
     public function refreshGame()
     {
