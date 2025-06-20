@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Events\UserSwitchedCurrentGame;
 use App\Models\Game;
 use App\Models\Team;
-use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -24,7 +23,7 @@ class GameDashboard extends Component
 
     public ?array $challenge_component = [];
 
-    public ?Collection $modifiers;
+    public ?array $modifier_components = [];
 
     #[Computed]
     public function user()
@@ -74,6 +73,12 @@ class GameDashboard extends Component
     public function challenge()
     {
         return $this->game->currentChallenge;
+    }
+
+    #[Computed]
+    public function modifiers()
+    {
+        return $this->game->modifiers;
     }
 
     #[Computed]
@@ -150,9 +155,7 @@ class GameDashboard extends Component
                 ) ?? [];
         }
 
-        $this->modifiers = $this->game->fresh()->modifiers;
-
-        if (! $this->modifiers) {
+        if ($this->modifiers->count() === 0) {
             return;
         }
 
@@ -160,10 +163,15 @@ class GameDashboard extends Component
             $this->round_properties[$modifier->class_key] =
                 $modifier->handler()?->propertiesForLivewire($this->player) ??
                 [];
+
             $this->validation_rules[$modifier->class_key] =
                 $modifier
                     ->handler()
                     ?->validationRulesForLivewire($this->player) ?? [];
+
+            $this->modifier_components[$modifier->class_key] = $modifier
+                ->handler()
+                ->frontendComponent($this->player);
         }
     }
 
@@ -297,7 +305,24 @@ class GameDashboard extends Component
         }
 
         if ($type === 'modifier') {
-            $this->modifiers = $this->game->fresh()->modifiers;
+            $modifier = $this->game
+                ->fresh()
+                ->modifiers()
+                ->where('class_key', $class_key)
+                ->first();
+
+            $this->round_properties[$modifier->class_key] =
+                $modifier->handler()?->propertiesForLivewire($this->player) ??
+                [];
+
+            $this->validation_rules[$modifier->class_key] =
+                $modifier
+                    ->handler()
+                    ?->validationRulesForLivewire($this->player) ?? [];
+
+            $this->modifier_components[$modifier->class_key] = $modifier->fresh()
+                ->handler()
+                ->frontendComponent($this->player);
         }
 
         return $response instanceof \Illuminate\Http\RedirectResponse ||

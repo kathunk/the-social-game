@@ -60,5 +60,7 @@ class TeamResignation extends BaseModifierClass
             game_id: $player->game_id,
             team_id: $player->team_id,
         );
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 }
