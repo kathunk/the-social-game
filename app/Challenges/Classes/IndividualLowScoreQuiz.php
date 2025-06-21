@@ -38,12 +38,17 @@ class IndividualLowScoreQuiz extends BaseChallengeClass implements SupportsPecki
     {
         $players = $player->game->players;
         $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_voted = $this->hasVoted($player);
+
+        $quiz_description = $has_guessed
+            ? '🤔 Guessed that '. Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
+                ' will be at the bottom of the scoreboard at the end of this round.'
+            : null;
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_guessed, fn ($form) => $form->subtitle('You have already guessed.')
+            ->when($has_guessed, fn ($form) => $form->subtitle($quiz_description)
             )
             ->when(! $has_guessed, fn ($form) => $form->select(
                 property_name: 'guess_player_id',
@@ -62,7 +67,7 @@ class IndividualLowScoreQuiz extends BaseChallengeClass implements SupportsPecki
             )
             ->when(! $has_guessed || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -94,8 +99,14 @@ class IndividualLowScoreQuiz extends BaseChallengeClass implements SupportsPecki
         $game_state->players()->each(function ($player) use ($loser_ids) {
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
 
+            if ($guess_id === null) {
+                return;
+            }
+
             if ($loser_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, 'Correctly guessed the player in last place', true);
+                $player->addToScoreHistory(1, '🤔 Correctly guessed that '. Player::find($guess_id)->name. ' would be at the bottom of the scoreboard', true);
+            } else {
+                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '. Player::find($guess_id)->name. ' would be at the bottom of the scoreboard', true);
             }
         });
     }

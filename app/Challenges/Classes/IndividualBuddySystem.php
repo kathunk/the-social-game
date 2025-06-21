@@ -2,10 +2,11 @@
 
 namespace App\Challenges\Classes;
 
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
-use App\Challenges\Support\Traits\HasPeckingOrderBallots;
 use App\Models\Player;
 use App\States\GameState;
+use App\States\PlayerState;
+use App\Challenges\Support\Traits\HasPeckingOrderBallots;
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 class IndividualBuddySystem extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {
@@ -34,15 +35,12 @@ class IndividualBuddySystem extends BaseChallengeClass implements SupportsPeckin
 
     public function frontendComponent(Player $player): array
     {
-        $players = $player->game->players;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
-
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($this->hasVoted($player), fn ($form) => $form->subtitle($this->voteDescription($player))
             )
-            ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
+            ->when(! $this->hasVoted($player), fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
                 downvote_targets: $this->downvoteTargets($player)
             )
@@ -65,7 +63,9 @@ class IndividualBuddySystem extends BaseChallengeClass implements SupportsPeckin
                 : false;
 
             if ($buddy_upvoted_player) {
-                $player->addToScoreHistory(1, 'Found a buddy', true);
+                $player->addToScoreHistory(1, '🤝 Found a buddy: '. PlayerState::load($buddy_id)->name, true);
+            } else {
+                $player->addToScoreHistory(0, '😔 Did not find a buddy', true);
             }
         });
     }

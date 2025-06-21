@@ -52,6 +52,10 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
             '{3 players}' => collect($bounties)->map(function ($id) {
                 $player = Player::find($id);
 
+                if (in_array($player->id, $this->challenge->challenge_data['swapper_ids'])) {
+                    return $player->name.' (ineligible: already moved to '.$player->team->name.')';
+                }
+
                 return $player->name.' ('.$player->team->name.')';
             })->implode(', '),
         ]);
@@ -137,7 +141,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         $team_bounties = $this->challenge_state->challenge_data['team_bounties'][$team_state->id] ?? [];
 
         if (in_array($player_state->id, $team_bounties)) {
-            $team_state->addToScoreHistory(25, "Recruited {$player_state->name} during the Bounty challenge");
+            $team_state->addToScoreHistory(25, "💰 Recruited {$player_state->name} during the Bounty challenge");
         }
     }
 }

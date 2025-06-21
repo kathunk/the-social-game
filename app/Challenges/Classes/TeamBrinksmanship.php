@@ -14,7 +14,7 @@ class TeamBrinksmanship extends BaseChallengeClass
 
     const NAME = 'Brinksmanship';
 
-    const DESCRIPTION = "Your team has nuclear codes, and you've been assigned an ally team: {ally_team}.
+    const DESCRIPTION = "{your_team}has nuclear codes, and you've been assigned an ally team: {ally_team}.
         You also have a field to input your ally's code.
         When you put in your ally's code, you'll have the option to either:
         Carpet Bomb (-5 points to all teams other than you and your ally), or Nuke Ally (-40 points to your ally).";
@@ -56,6 +56,7 @@ class TeamBrinksmanship extends BaseChallengeClass
         $ally_team = $player->game->teams->firstWhere('id', $team_data['ally_team_id']);
 
         $description = strtr(self::DESCRIPTION, [
+            '{your_team}' => $player->team->name,
             '{ally_team}' => $ally_team->name,
         ]);
 
@@ -158,7 +159,7 @@ class TeamBrinksmanship extends BaseChallengeClass
                     if ($other_team->id !== $team_id && $other_team->id !== $ally_team_id) {
                         $other_team->addToScoreHistory(
                             -5,
-                            'Carpet bombed by '.TeamState::load($team_id)->name
+                            '💣 Carpet bombed by '.TeamState::load($team_id)->name
                         );
                     }
                 }
@@ -169,7 +170,7 @@ class TeamBrinksmanship extends BaseChallengeClass
 
                 $ally_team->addToScoreHistory(
                     -40,
-                    'Nuked by ally team '.$team->name
+                    '💣 Nuked by ally team '.$team->name
                 );
             }
         }

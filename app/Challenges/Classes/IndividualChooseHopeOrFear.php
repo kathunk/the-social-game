@@ -36,14 +36,21 @@ class IndividualChooseHopeOrFear extends BaseChallengeClass implements SupportsP
 
     public function frontendComponent(Player $player): array
     {
-        $players = $player->game->players;
         $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_voted = $this->hasVoted($player);
+
+        if ($this->challenge->challenge_data['choices'][$player->id] === 'hope') {
+            $choice_description = '🤞 Chose hope';
+        } elseif ($this->challenge->challenge_data['choices'][$player->id] === 'fear') {
+            $choice_description = '😱 Chose fear';
+        } else {
+            $choice_description = null;
+        }
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_chosen, fn ($form) => $form->subtitle('You have made your choice.')
+            ->when($has_chosen, fn ($form) => $form->subtitle($choice_description)
             )
             ->when(! $has_chosen, fn ($form) => $form
                 ->buttonGroup()
@@ -53,7 +60,7 @@ class IndividualChooseHopeOrFear extends BaseChallengeClass implements SupportsP
             )
             ->when(! $has_chosen || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -106,11 +113,19 @@ class IndividualChooseHopeOrFear extends BaseChallengeClass implements SupportsP
             $score_change = $upvotes_received - $downvotes_received;
 
             if ($choices[$player->id] === 'hope' && $score_change > 0) {
-                $player->addToScoreHistory(1, 'Chose hope', true);
+                $player->addToScoreHistory(1, '🤞 Chose hope', true);
+            }
+
+            if ($choices[$player->id] === 'hope' && $score_change <= 0) {
+                $player->addToScoreHistory(0, '🤞 Chose hope but score did not increase', true);
             }
 
             if ($choices[$player->id] === 'fear' && $score_change < 0) {
-                $player->addToScoreHistory(1, 'Chose fear', true);
+                $player->addToScoreHistory(1, '😱 Chose fear', true);
+            }
+
+            if ($choices[$player->id] === 'fear' && $score_change >= 0) {
+                $player->addToScoreHistory(0, '😱 Chose fear but score did not decrease', true);
             }
         });
     }
