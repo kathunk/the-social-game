@@ -69,6 +69,6 @@ class PyramidScheme extends BaseChallengeClass implements SupportsTeamSwaps
             return;
         }
 
-        $team_state->addToScoreHistory(1, '🔺 ' . $player_state->name.' joined team');
+        $team_state->addToScoreHistory(1, '🔺 '.$player_state->name.' joined team');
     }
 }

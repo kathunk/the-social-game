@@ -58,18 +58,18 @@ class TeamHotPotato extends BaseChallengeClass
 
         $form
             ->when($has_potato, fn ($form) => $form
-            ->subtitle('You have the potato!')
-            ->select(
-                property_name: 'recipient_player_id',
-                options: $player->team->players->reject(fn ($p) => $p->id === $player->id)->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
-                label: 'Pass the potato to...',
-                placeholder: 'Select a player...',
-                validation_rules: 'required|in:'.implode(',', $player->team->players->reject(fn ($p) => $p->id === $player->id)->pluck('id')->toArray()),
-                validation_messages: [
-                    'required' => 'Must select a player',
-                    'in' => 'Must select a valid player',
-                ],
-            )
+                ->subtitle('You have the potato!')
+                ->select(
+                    property_name: 'recipient_player_id',
+                    options: $player->team->players->reject(fn ($p) => $p->id === $player->id)->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
+                    label: 'Pass the potato to...',
+                    placeholder: 'Select a player...',
+                    validation_rules: 'required|in:'.implode(',', $player->team->players->reject(fn ($p) => $p->id === $player->id)->pluck('id')->toArray()),
+                    validation_messages: [
+                        'required' => 'Must select a player',
+                        'in' => 'Must select a valid player',
+                    ],
+                )
                 ->buttonGroup()
                 ->button('Pass the potato', 'passThePotato')
                 ->endGroup()

@@ -41,7 +41,7 @@ class IndividualLargestIncreaseQuiz extends BaseChallengeClass implements Suppor
         $has_voted = $this->hasVoted($player);
 
         $quiz_description = $has_guessed
-            ? '🤔 Guessed that '. Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
+            ? '🤔 Guessed that '.Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
                 ' will have the largest score increase at the end of this round.'
             : null;
 
@@ -108,9 +108,9 @@ class IndividualLargestIncreaseQuiz extends BaseChallengeClass implements Suppor
             }
 
             if ($largest_increase_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, '🤔 Correctly guessed that '. Player::find($guess_id)->name. ' will have the largest score increase', true);
+                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' will have the largest score increase', true);
             } else {
-                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '. Player::find($guess_id)->name. ' will have the largest score increase', true);
+                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' will have the largest score increase', true);
             }
         });
     }

@@ -39,9 +39,9 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
         $players = $player->game->players;
         $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
         $has_voted = $this->hasVoted($player);
-        
+
         $quiz_description = $has_guessed
-            ? '🤔 Guessed that '. Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
+            ? '🤔 Guessed that '.Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
                 ' will have the most hidden points at the end of this round.'
             : null;
 
@@ -127,9 +127,9 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
             }
 
             if ($most_hidden_points_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, '🤔 Correctly guessed that '. Player::find($guess_id)->name. ' will have the most hidden points', true);
+                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' will have the most hidden points', true);
             } else {
-                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '. Player::find($guess_id)->name. ' will have the most hidden points', true);
+                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' will have the most hidden points', true);
             }
         });
     }

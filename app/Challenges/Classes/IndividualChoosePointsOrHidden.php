@@ -43,7 +43,7 @@ class IndividualChoosePointsOrHidden extends BaseChallengeClass implements Suppo
         $points_text = $this->challenge->challenge_data['choices'][$player->id] === 'points' ? 'Points' : 'Hidden Points';
 
         $choice_description = $has_chosen
-            ? '📈 Chose '. $points_text
+            ? '📈 Chose '.$points_text
             : null;
 
         $player_count = $players->count();

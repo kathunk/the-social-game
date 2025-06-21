@@ -40,7 +40,7 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
         $has_voted = $this->hasVoted($player);
 
         $quiz_description = $has_guessed
-            ? '🤔 Guessed that your score will be '. $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_score'] . '.'
+            ? '🤔 Guessed that your score will be '.$this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_score'].'.'
             : null;
 
         return $this->form()
@@ -103,9 +103,9 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
             }
 
             if ($guess_score >= $player_scores[$player->id] - 1 && $guess_score <= $player_scores[$player->id] + 1) {
-                $player->addToScoreHistory(1, '🤔 Correctly guessed their score was within 1 point of '. $guess_score, true);
+                $player->addToScoreHistory(1, '🤔 Correctly guessed their score was within 1 point of '.$guess_score, true);
             } else {
-                $player->addToScoreHistory(0, '🤔 Incorrectly guessed their score was within 1 point of '. $guess_score, true);
+                $player->addToScoreHistory(0, '🤔 Incorrectly guessed their score was within 1 point of '.$guess_score, true);
             }
         });
     }

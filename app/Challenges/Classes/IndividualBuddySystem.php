@@ -2,11 +2,11 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Traits\HasPeckingOrderBallots;
 use App\Models\Player;
 use App\States\GameState;
 use App\States\PlayerState;
-use App\Challenges\Support\Traits\HasPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 class IndividualBuddySystem extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {
@@ -63,7 +63,7 @@ class IndividualBuddySystem extends BaseChallengeClass implements SupportsPeckin
                 : false;
 
             if ($buddy_upvoted_player) {
-                $player->addToScoreHistory(1, '🤝 Found a buddy: '. PlayerState::load($buddy_id)->name, true);
+                $player->addToScoreHistory(1, '🤝 Found a buddy: '.PlayerState::load($buddy_id)->name, true);
             } else {
                 $player->addToScoreHistory(0, '😔 Did not find a buddy', true);
             }

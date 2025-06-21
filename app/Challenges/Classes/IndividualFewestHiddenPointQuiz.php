@@ -41,7 +41,7 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
         $has_voted = $this->hasVoted($player);
 
         $quiz_description = $has_guessed
-            ? '🤔 Guessed that '. Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
+            ? '🤔 Guessed that '.Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
                 ' had the fewest hidden points at the beginning of this challenge.'
             : null;
 
@@ -127,9 +127,9 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
             }
 
             if ($fewest_hidden_points_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, '🤔 Correctly guessed that '. Player::find($guess_id)->name. ' had the fewest hidden points', true);
+                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' had the fewest hidden points', true);
             } else {
-                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '. Player::find($guess_id)->name. ' had the fewest hidden points', true);
+                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' had the fewest hidden points', true);
             }
         });
     }

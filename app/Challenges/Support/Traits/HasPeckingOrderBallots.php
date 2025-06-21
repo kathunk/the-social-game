@@ -100,6 +100,7 @@ trait HasPeckingOrderBallots
     public function hasVoted(Player $player)
     {
         $vote_ids = $this->challenge->challenge_data['votes'][$player->id];
+
         return isset($vote_ids['upvote_player_id']) && isset($vote_ids['downvote_player_id']);
     }
 
@@ -114,6 +115,6 @@ trait HasPeckingOrderBallots
         $upvoted_player = Player::find($vote_ids['upvote_player_id']);
         $downvoted_player = Player::find($vote_ids['downvote_player_id']);
 
-        return '🗳️ Upvoted '. $upvoted_player->name.' and downvoted '. $downvoted_player->name.'.';
+        return '🗳️ Upvoted '.$upvoted_player->name.' and downvoted '.$downvoted_player->name.'.';
     }
 }

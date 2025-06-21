@@ -41,7 +41,7 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
         $has_voted = $this->hasVoted($player);
 
         $quiz_description = $has_guessed
-            ? '🤔 Guessed that '. Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
+            ? '🤔 Guessed that '.Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
                 ' will receive the most votes this round.'
             : null;
 
@@ -113,9 +113,9 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
             }
 
             if (in_array($guess_id, $players_with_most_votes)) {
-                $player->addToScoreHistory(1, '🤔 Correctly guessed that '. Player::find($guess_id)->name. ' will receive the most votes', true);
+                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' will receive the most votes', true);
             } else {
-                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '. Player::find($guess_id)->name. ' will receive the most votes', true);
+                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' will receive the most votes', true);
             }
         });
     }
