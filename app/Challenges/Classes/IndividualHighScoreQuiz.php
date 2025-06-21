@@ -38,12 +38,17 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
     {
         $players = $player->game->players;
         $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_voted = $this->hasVoted($player);
+
+        $quiz_description = $has_guessed
+            ? '🤔 Guessed that '.Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
+                ' will be at the top of the scoreboard at the end of this round.'
+            : null;
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_guessed, fn ($form) => $form->subtitle('You have already guessed.')
+            ->when($has_guessed, fn ($form) => $form->subtitle($quiz_description)
             )
             ->when(! $has_guessed, fn ($form) => $form->select(
                 property_name: 'guess_player_id',
@@ -66,7 +71,7 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
             )
             ->when(! $has_guessed || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -98,8 +103,14 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
         $game_state->players()->each(function ($player) use ($leader_ids) {
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
 
+            if ($guess_id === null) {
+                return;
+            }
+
             if ($leader_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, 'Correctly guessed the player in first place', true);
+                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' will be at the top of the scoreboard', true);
+            } else {
+                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' will be at the top of the scoreboard', true);
             }
         });
     }

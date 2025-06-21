@@ -38,12 +38,17 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
     {
         $players = $player->game->players;
         $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_voted = $this->hasVoted($player);
+
+        $quiz_description = $has_guessed
+            ? '🤔 Guessed that '.Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
+                ' had the fewest hidden points at the beginning of this challenge.'
+            : null;
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_guessed, fn ($form) => $form->subtitle('You have already guessed.')
+            ->when($has_guessed, fn ($form) => $form->subtitle($quiz_description)
             )
             ->when(! $has_guessed, fn ($form) => $form->select(
                 property_name: 'guess_player_id',
@@ -62,7 +67,7 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
             )
             ->when(! $has_guessed || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -99,11 +104,11 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
                 ->count();
 
             if ($upvotes_received > 0) {
-                $player->addToScoreHistory($upvotes_received, 'received hidden upvotes', true);
+                $player->addToScoreHistory($upvotes_received, '👍 Received hidden upvotes', true);
             }
 
             if ($downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received, 'received hidden downvotes', true);
+                $player->addToScoreHistory(-$downvotes_received, '👎 Received hidden downvotes', true);
             }
         });
 
@@ -117,8 +122,14 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
         $game_state->players()->each(function ($player) use ($fewest_hidden_points_ids) {
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
 
+            if ($guess_id === null) {
+                return;
+            }
+
             if ($fewest_hidden_points_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, 'Correctly guessed the player with the fewest hidden points', true);
+                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' had the fewest hidden points', true);
+            } else {
+                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' had the fewest hidden points', true);
             }
         });
     }

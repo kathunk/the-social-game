@@ -35,7 +35,7 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_voted = $this->hasVoted($player);
 
         $player_count = $players->count();
 
@@ -46,7 +46,7 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
         return $this->form()
             ->title(self::NAME)
             ->subtitle($description)
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -70,11 +70,11 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
 
         $game_state->players()->each(function ($player) use ($leader_ids, $loser_ids, $player_count) {
             if ($leader_ids->contains($player->id)) {
-                $player->addToScoreHistory(-$player_count, 'First Shall Be Last');
+                $player->addToScoreHistory(-$player_count, '👇 First Shall Be Last');
             }
 
             if ($loser_ids->contains($player->id)) {
-                $player->addToScoreHistory($player_count, 'Last Shall Be First');
+                $player->addToScoreHistory($player_count, '👆 Last Shall Be First');
             }
         });
     }

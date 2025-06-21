@@ -189,7 +189,7 @@ class TeamSecretAlliance extends BaseModifierClass
             return;
         }
 
-        $team_state->addToScoreHistory(5, $player_state->name.' and '.$ally->name.' were secret allies', true);
+        $team_state->addToScoreHistory(5, '🤝 '.$player_state->name.' and '.$ally->name.' were secret allies', true);
 
         $modifier_state->modifier_data['pairs'] = collect($modifier_state->modifier_data['pairs'])
             ->map(function ($pair) use ($player_state) {

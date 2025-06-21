@@ -45,11 +45,11 @@ class PlayerBoughtImmunity extends Event
     public function applyToPlayer(PlayerState $player)
     {
         if ($this->cost_in_hidden_points > 0) {
-            $player->addToScoreHistory(-$this->cost_in_hidden_points, 'Bought immunity', true);
+            $player->addToScoreHistory(-$this->cost_in_hidden_points, '🛡️ Bought immunity', true);
         }
 
         if ($this->cost_in_points > 0) {
-            $player->addToScoreHistory(-$this->cost_in_points, 'Bought immunity');
+            $player->addToScoreHistory(-$this->cost_in_points, '🛡️ Bought immunity');
         }
     }
 

@@ -70,7 +70,7 @@ class TeamPrisonersDilemma extends BaseChallengeClass
                 ->button('Play Dirty', 'playDirty')
                 ->endGroup();
         } else {
-            $form->subtitle('You played dirty.');
+            $form->subtitle('😈 You played dirty.');
         }
 
         return $form->build();
@@ -137,17 +137,17 @@ class TeamPrisonersDilemma extends BaseChallengeClass
                 $containsTeamId
                 && $containsPairedTeamId
             ) {
-                $team->addToScoreHistory(-20, 'Both teams played dirty');
+                $team->addToScoreHistory(-20, '😩 Both teams played dirty');
             } elseif (
                 $containsTeamId
                 && ! $containsPairedTeamId
             ) {
-                $team->addToScoreHistory(50, 'You played dirty and they did not');
+                $team->addToScoreHistory(50, '😈 You played dirty and they did not');
             } elseif (
                 ! $containsTeamId
                 && ! $containsPairedTeamId
             ) {
-                $team->addToScoreHistory(20, 'Neither team played dirty');
+                $team->addToScoreHistory(20, '😇 Neither team played dirty');
             }
         }
     }

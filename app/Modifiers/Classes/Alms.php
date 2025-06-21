@@ -39,7 +39,7 @@ class Alms extends BaseModifierClass
 
         $players->each(function ($player) use ($lowest_score) {
             if ($player->score() === $lowest_score) {
-                $player->addToScoreHistory(1, 'Alms', is_hidden: true);
+                $player->addToScoreHistory(1, '🪙 Collected alms for being at the bottom of the scoreboard', is_hidden: true);
             }
         });
     }

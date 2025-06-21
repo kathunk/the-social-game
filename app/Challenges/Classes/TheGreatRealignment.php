@@ -75,8 +75,8 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
         $previous_team_score = $previous_team->score();
         $points = round($previous_team_score / $previous_team->player_ids->count());
 
-        $team_state->addToScoreHistory($points, $player_state->name.' joined the team');
-        $previous_team->addToScoreHistory(-$points, $player_state->name.' left the team');
+        $team_state->addToScoreHistory($points, '👋 '.$player_state->name.' joined the team');
+        $previous_team->addToScoreHistory(-$points, '👻 '.$player_state->name.' left the team');
     }
 
     public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool

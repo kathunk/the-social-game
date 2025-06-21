@@ -71,17 +71,21 @@ class IndividualBloodOathHunterQuiz extends BaseChallengeClass implements Suppor
             $this->challenge->challenge_data['quiz_submissions'][$player->id][
                 'guess_player_ids'
             ] !== null;
-        $has_voted =
-            $this->challenge->challenge_data['votes'][$player->id][
-                'upvote_player_id'
-            ] !== null;
+
+        $quiz_description = $has_guessed
+            ? '🤔 Guessed that '.
+                Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_ids'][0])->name.
+                ' and '.
+                Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_ids'][1])->name.
+                ' are in a blood oath.'
+            : null;
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
             ->when(
                 $has_guessed,
-                fn ($form) => $form->subtitle('You have already guessed.')
+                fn ($form) => $form->subtitle($quiz_description)
             )
             ->when(
                 ! $has_guessed,
@@ -125,13 +129,13 @@ class IndividualBloodOathHunterQuiz extends BaseChallengeClass implements Suppor
                     )
                     ->endGroup()
             )
-            ->when(! $has_guessed || ! $has_voted, fn ($form) => $form->divider())
+            ->when(! $has_guessed || ! $this->hasVoted($player), fn ($form) => $form->divider())
             ->when(
-                $has_voted,
-                fn ($form) => $form->subtitle('You have already voted.')
+                $this->hasVoted($player),
+                fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(
-                ! $has_voted,
+                ! $this->hasVoted($player),
                 fn ($form) => $form->peckingOrderBallot(
                     upvote_targets: $this->upvoteTargets($player),
                     downvote_targets: $this->downvoteTargets($player)
@@ -191,7 +195,7 @@ class IndividualBloodOathHunterQuiz extends BaseChallengeClass implements Suppor
             if ($guessed_players_are_in_blood_oath) {
                 $player->addToScoreHistory(
                     1,
-                    'Correctly guessed that '.
+                    '🤔 Correctly guessed that '.
                         $guessed_player_1->name.
                         ' and '.
                         $guessed_player_2->name.
@@ -200,12 +204,22 @@ class IndividualBloodOathHunterQuiz extends BaseChallengeClass implements Suppor
                 );
                 $guessed_player_1->addToScoreHistory(
                     -1,
-                    $player->name.' guessed that you are in a blood oath',
+                    '🎯 '.$player->name.' guessed that you are in a blood oath',
                     true
                 );
                 $guessed_player_2->addToScoreHistory(
                     -1,
-                    $player->name.' guessed that you are in a blood oath',
+                    '🎯 '.$player->name.' guessed that you are in a blood oath',
+                    true
+                );
+            } else {
+                $player->addToScoreHistory(
+                    0,
+                    '🤔 Incorrectly guessed that '.
+                        $guessed_player_1->name.
+                        ' and '.
+                        $guessed_player_2->name.
+                        ' are in a blood oath',
                     true
                 );
             }
