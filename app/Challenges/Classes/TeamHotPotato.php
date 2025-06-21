@@ -57,7 +57,9 @@ class TeamHotPotato extends BaseChallengeClass
         $challenge_forfeited = $challenge_data['status'] === 'forfeited';
 
         $form
-            ->when($has_potato, fn ($form) => $form->select(
+            ->when($has_potato, fn ($form) => $form
+            ->subtitle('You have the potato!')
+            ->select(
                 property_name: 'recipient_player_id',
                 options: $player->team->players->reject(fn ($p) => $p->id === $player->id)->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
                 label: 'Pass the potato to...',
@@ -126,7 +128,7 @@ class TeamHotPotato extends BaseChallengeClass
             $percentage = $held / $total;
             $points = ($percentage - 0.5) * 100;
 
-            $team->addToScoreHistory(round($points), "Completed the Hot Potato Challenge. $held of $total players held the potato.");
+            $team->addToScoreHistory(round($points), "🥔 Completed the Hot Potato challenge. $held of $total players held the potato.");
         });
     }
 }

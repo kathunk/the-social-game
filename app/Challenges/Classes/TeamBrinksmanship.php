@@ -14,10 +14,9 @@ class TeamBrinksmanship extends BaseChallengeClass
 
     const NAME = 'Brinksmanship';
 
-    const DESCRIPTION = "{your_team}has nuclear codes, and you've been assigned an ally team: {ally_team}.
-        You also have a field to input your ally's code.
+    const DESCRIPTION = "{your_team} has a secret code that is only useful to your ally team: {ally_team}. They have a code that you can use.
         When you put in your ally's code, you'll have the option to either:
-        Carpet Bomb (-5 points to all teams other than you and your ally), or Nuke Ally (-40 points to your ally).";
+        Give -10 points to all teams other than you and your ally, or betray your ally and give them -50 points.";
 
     const TYPE = 'team';
 
@@ -66,28 +65,28 @@ class TeamBrinksmanship extends BaseChallengeClass
             ->subtitle('Your nuclear code: '.$team_data['code'])
             ->when($team_data['has_launched'], function ($form) use ($team_data, $ally_team) {
                 $strike_message = $team_data['strike_type'] === 'carpet_bomb'
-                    ? 'You carpet bombed all other teams!'
-                    : "You launched a nuclear strike against {$ally_team->name}!";
+                    ? 'You gave -10 points to all other teams!'
+                    : "You betrayed {$ally_team->name} and gave them -50 points!";
 
                 return $form->subtitle($strike_message);
             })
             ->when(! $team_data['has_launched'], fn ($form) => $form->input(
                 property_name: 'target_code',
-                label: 'Enter your ally\'s nuclear code',
+                label: 'Enter your ally\'s code',
                 validation_rules: 'required|nuclear_code',
                 validation_messages: [
-                    'required' => 'You must enter a nuclear code',
-                    'nuclear_code' => 'The nuclear code is incorrect. Please verify the code with your ally team.',
+                    'required' => 'You must enter a code',
+                    'nuclear_code' => 'The code is incorrect. Please verify the code with your ally team.',
                 ]
             )
                 ->buttonGroup()
                 ->button(
-                    label: 'Carpet Bomb (-10 to all other teams)',
+                    label: 'Give -10 points to all other teams',
                     action: 'carpetBomb',
                     properties_to_validate: ['target_code'],
                 )
                 ->button(
-                    label: 'Nuke Ally (-40 to ally)',
+                    label: 'Betray your ally and give them -50 points',
                     action: 'nukeAlly',
                     properties_to_validate: ['target_code'],
                 )
@@ -158,19 +157,19 @@ class TeamBrinksmanship extends BaseChallengeClass
                 foreach ($teams as $other_team) {
                     if ($other_team->id !== $team_id && $other_team->id !== $ally_team_id) {
                         $other_team->addToScoreHistory(
-                            -5,
-                            '💣 Carpet bombed by '.TeamState::load($team_id)->name
+                            -10,
+                            '👊 Attacked by '.TeamState::load($team_id)->name
                         );
                     }
                 }
-                // Apply -40 points to ally team
+                // Apply -50 points to ally team
             } elseif ($strike_type === 'nuke_ally') {
                 $ally_team = TeamState::load($ally_team_id);
                 $team = TeamState::load($team_id);
 
                 $ally_team->addToScoreHistory(
-                    -40,
-                    '💣 Nuked by ally team '.$team->name
+                    -50,
+                    '🗡️ Betrayed by '.$team->name
                 );
             }
         }

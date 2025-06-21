@@ -121,13 +121,14 @@ it('gives -5 points to all other teams when a team launches a carpet bomb', func
     $this->challenge->end();
 
     // all teams carpet bomb, so it's -30 points for each team
+    // keeping in mind there are 4 teams, and each only hits 2 other teams
     foreach ($this->game->teams as $team) {
-        expect($team->fresh()->score)->toBe(-10);
-        expect($ally_team->fresh()->score)->toBe(-10);
+        expect($team->fresh()->score)->toBe(-20);
+        expect($ally_team->fresh()->score)->toBe(-20);
     }
 });
 
-it('gives -40 points to ally team when a team launches a nuke ally strike', function () {
+it('gives -50 points to ally team when a team launches a nuke ally strike', function () {
     foreach ($this->game->teams as $team) {
         $player = $team->players->first();
         $ally_team = ally_team($team);
@@ -141,8 +142,8 @@ it('gives -40 points to ally team when a team launches a nuke ally strike', func
 
     // all teams ally strike, so it's -40 points for each team
     foreach ($this->game->teams as $team) {
-        expect($team->fresh()->score)->toBe(-40);
-        expect($ally_team->fresh()->score)->toBe(-40);
+        expect($team->fresh()->score)->toBe(-50);
+        expect($ally_team->fresh()->score)->toBe(-50);
     }
 });
 

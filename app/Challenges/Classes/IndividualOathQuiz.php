@@ -51,9 +51,10 @@ class IndividualOathQuiz extends BaseChallengeClass implements SupportsPeckingOr
         $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
         $has_voted = $this->hasVoted($player);
 
-        if ($this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type'] === 'blood_oath') {
+        if (isset($this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type']) 
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type'] === 'blood_oath') {
             $oath_type_description = 'a Blood Oath';
-        } elseif ($this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type'] === 'oath_of_solitude') {
+        } elseif (isset($this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type']) && $this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type'] === 'oath_of_solitude') {
             $oath_type_description = 'an Oath of Solitude';
         } else {
             $oath_type_description = null;
