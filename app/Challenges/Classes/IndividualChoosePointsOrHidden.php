@@ -117,6 +117,10 @@ class IndividualChoosePointsOrHidden extends BaseChallengeClass implements Suppo
             : 0;
 
         $game_state->players()->each(function ($player) use ($choices, $points_per_player, $hidden_points_per_player) {
+            if ($choices[$player->id] === null) {
+                return;
+            }
+
             if ($choices[$player->id] === 'points') {
                 $player->addToScoreHistory($points_per_player, '📈 Chose points');
             } else {
