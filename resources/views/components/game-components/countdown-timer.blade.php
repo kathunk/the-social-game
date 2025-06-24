@@ -2,7 +2,7 @@
 
 @if ($ends_at > now()->addMinutes(60))
     <div>
-        ends {{ $ends_at->diffForHumans() }}
+        ends {{ Carbon\Carbon::parse($ends_at)->diffForHumans() }}
     </div>
 @else
     <div
