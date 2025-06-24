@@ -1,6 +1,6 @@
 @props(['ends_at'])
 
-@if ($ends_at < now()->addMinutes(60))
+@if ($ends_at > now()->addMinutes(60))
     <div>
         ends {{ $ends_at->diffForHumans() }}
     </div>
