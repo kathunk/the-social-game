@@ -42,7 +42,7 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
 
         $quiz_description = $has_guessed
             ? '🤔 Guessed that '.Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
-                ' had the fewest hidden points at the beginning of this challenge.'
+                ' will have the fewest hidden points at the end of this challenge.'
             : null;
 
         return $this->form()
@@ -53,7 +53,7 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
             ->when(! $has_guessed, fn ($form) => $form->select(
                 property_name: 'guess_player_id',
                 options: $players->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
-                label: 'Guess which player had the fewest hidden points at the beginning of this challenge',
+                label: 'Guess which player will have the fewest hidden points at the end of this challenge',
                 placeholder: 'Select a player...',
                 validation_rules: 'required|in:'.implode(',', $players->pluck('id')->toArray()),
                 validation_messages: [

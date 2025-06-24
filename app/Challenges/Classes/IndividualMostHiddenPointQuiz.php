@@ -53,7 +53,7 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
             ->when(! $has_guessed, fn ($form) => $form->select(
                 property_name: 'guess_player_id',
                 options: $players->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
-                label: 'Guess which player had the most hidden points at the beginning of this challenge',
+                label: 'Guess which player will have the most hidden points at the end of this challenge',
                 placeholder: 'Select a player...',
                 validation_rules: 'required|in:'.implode(',', $players->pluck('id')->toArray()),
                 validation_messages: [
