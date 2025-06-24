@@ -65,7 +65,7 @@
                 @endif
 
                 @if ($this->socialLink)
-                    <flux:heading class="mt-4">Game chat</flux:heading>
+                    <flux:heading class="my-4">Game chat</flux:heading>
                     <flux:button variant="primary" href="{{ $this->game->social_links[0] }}" target="_blank" class="{{ $this->template->players_can_join_late ? 'mt-2' : '' }}">Join game chat</flux:button>
                 @endif
             </flux:card>
