@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             Laracon2025Seeder::class,
             PeckingOrderSeeder::class,
             BloodOathSeeder::class,
+            PyramidSchemeSeeder::class,
         ]);
     }
 }
