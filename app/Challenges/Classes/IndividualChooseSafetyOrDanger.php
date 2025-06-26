@@ -36,12 +36,13 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
 
     public function frontendComponent(Player $player): array
     {
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
         $has_voted = $this->hasVoted($player);
 
-        if ($this->challenge->challenge_data['choices'][$player->id] === 'safety') {
+        if ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'safety') {
             $choice_description = '☺️ Chose safety';
-        } elseif ($this->challenge->challenge_data['choices'][$player->id] === 'danger') {
+        } elseif ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'danger') {
             $choice_description = '☠️ Chose danger';
         } else {
             $choice_description = null;

@@ -36,12 +36,13 @@ class IndividualChooseHopeOrFear extends BaseChallengeClass implements SupportsP
 
     public function frontendComponent(Player $player): array
     {
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
         $has_voted = $this->hasVoted($player);
 
-        if ($this->challenge->challenge_data['choices'][$player->id] === 'hope') {
+        if ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'hope') {
             $choice_description = '🤞 Chose hope';
-        } elseif ($this->challenge->challenge_data['choices'][$player->id] === 'fear') {
+        } elseif ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'fear') {
             $choice_description = '😱 Chose fear';
         } else {
             $choice_description = null;

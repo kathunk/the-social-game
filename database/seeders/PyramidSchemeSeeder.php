@@ -4,21 +4,24 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Challenges\Classes\IndividualChoosePointsOrHidden;
-use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
+use App\Models\Game;
+use App\Models\User;
+use App\Models\GameMode;
+use App\Models\GameTemplate;
+use App\Events\GameModeAdded;
+use Thunk\Verbs\Facades\Verbs;
+use Illuminate\Database\Seeder;
+use App\Events\GameTemplateAdded;
+use App\Modifiers\Classes\IndividualRecruiter;
+use App\Modifiers\Classes\IndividualResignation;
+use App\Challenges\Classes\IndividualBuddySystem;
 use App\Challenges\Classes\IndividualDoubleTrouble;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualStealTheBacon;
-use App\Events\GameModeAdded;
-use App\Events\GameTemplateAdded;
-use App\Models\Game;
-use App\Models\GameMode;
-use App\Models\GameTemplate;
-use App\Models\User;
-use App\Modifiers\Classes\IndividualRecruiter;
-use App\Modifiers\Classes\IndividualResignation;
-use Illuminate\Database\Seeder;
-use Thunk\Verbs\Facades\Verbs;
+use App\Challenges\Classes\IndividualChooseHopeOrFear;
+use App\Challenges\Classes\IndividualGrandstandGambit;
+use App\Challenges\Classes\IndividualChoosePointsOrHidden;
+use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
 
 class PyramidSchemeSeeder extends Seeder
 {
@@ -54,13 +57,19 @@ class PyramidSchemeSeeder extends Seeder
                 ],
                 [
                     'challenge_keys' => [
-                        IndividualChoosePointsOrHidden::key(),
+                        IndividualStealTheBacon::key(),
                     ],
                     'duration' => 10,
                 ],
                 [
                     'challenge_keys' => [
-                        IndividualStealTheBacon::key(),
+                        IndividualChooseHopeOrFear::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualBuddySystem::key(),
                     ],
                     'duration' => 10,
                 ],
@@ -70,6 +79,19 @@ class PyramidSchemeSeeder extends Seeder
                     ],
                     'duration' => 1,
                 ],
+                [
+                    'challenge_keys' => [
+                        IndividualGrandstandGambit::key(),
+                    ],
+                    'duration' => 1,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualChoosePointsOrHidden::key(),
+                    ],
+                    'duration' => 10,
+                ],
+
                 [
                     'challenge_keys' => [
                         IndividualDoubleTrouble::key(),

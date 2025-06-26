@@ -99,6 +99,10 @@ trait HasPeckingOrderBallots
 
     public function hasVoted(Player $player)
     {
+        if (! isset($this->challenge->challenge_data['votes'][$player->id])) {
+            return false;
+        }
+
         $vote_ids = $this->challenge->challenge_data['votes'][$player->id];
 
         return isset($vote_ids['upvote_player_id']) && isset($vote_ids['downvote_player_id']);

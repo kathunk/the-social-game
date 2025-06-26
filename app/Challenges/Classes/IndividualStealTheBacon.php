@@ -37,7 +37,10 @@ class IndividualStealTheBacon extends BaseChallengeClass implements SupportsPeck
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
+
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
+
         $has_voted = $this->hasVoted($player);
 
         $player_count = $players->count();

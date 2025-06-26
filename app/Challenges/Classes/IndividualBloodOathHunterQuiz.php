@@ -68,9 +68,8 @@ class IndividualBloodOathHunterQuiz extends BaseChallengeClass implements Suppor
     {
         $players = $player->game->players;
         $has_guessed =
-            $this->challenge->challenge_data['quiz_submissions'][$player->id][
-                'guess_player_ids'
-            ] !== null;
+            isset($this->challenge->challenge_data['quiz_submissions'][$player->id])
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_ids'] !== null;
 
         $quiz_description = $has_guessed
             ? '🤔 Guessed that '.
