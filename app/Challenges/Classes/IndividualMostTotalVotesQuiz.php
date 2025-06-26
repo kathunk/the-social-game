@@ -37,7 +37,8 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
+        $has_guessed = isset($this->challenge->challenge_data['quiz_submissions'][$player->id])
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
         $has_voted = $this->hasVoted($player);
 
         $quiz_description = $has_guessed
@@ -106,6 +107,10 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
         $players_with_most_votes = $vote_counts->filter(fn ($count) => $count === $max_votes)->keys()->toArray();
 
         $game_state->players()->each(function ($player) use ($players_with_most_votes) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
 
             if ($guess_id === null) {

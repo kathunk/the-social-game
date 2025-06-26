@@ -64,11 +64,11 @@ class PlayerResignedInIndividualGame extends Event
         $hidden_points_beneficiary = PlayerState::load($this->hidden_points_beneficiary_id);
 
         if ($this->points !== 0) {
-            $points_beneficiary->addToScoreHistory($this->points, '🎁 Inherited from '.$this->state(PlayerState::class)->name);
+            $points_beneficiary->addToScoreHistory($this->points, '🎁 Inherited points from '.$this->state(PlayerState::class)->name);
         }
 
         if ($this->hidden_points !== 0) {
-            $hidden_points_beneficiary->addToScoreHistory($this->hidden_points, '🎁 Inherited from '.$this->state(PlayerState::class)->name, true);
+            $hidden_points_beneficiary->addToScoreHistory($this->hidden_points, '🎁 Inherited hidden points from '.$this->state(PlayerState::class)->name, true);
         }
     }
 

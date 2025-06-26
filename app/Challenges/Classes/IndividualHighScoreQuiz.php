@@ -37,7 +37,8 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
+        $has_guessed = isset($this->challenge->challenge_data['quiz_submissions'][$player->id])
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
         $has_voted = $this->hasVoted($player);
 
         $quiz_description = $has_guessed
@@ -101,6 +102,10 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
         $leader_ids = $game_state->players()->filter(fn ($p) => $p->score() === $highest_score)->pluck('id');
 
         $game_state->players()->each(function ($player) use ($leader_ids) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
 
             if ($guess_id === null) {

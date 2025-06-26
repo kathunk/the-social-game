@@ -36,7 +36,8 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
 
     public function frontendComponent(Player $player): array
     {
-        $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_score'] !== null;
+        $has_guessed = isset($this->challenge->challenge_data['quiz_submissions'][$player->id])
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_score'] !== null;
         $has_voted = $this->hasVoted($player);
 
         $quiz_description = $has_guessed
@@ -96,6 +97,10 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
         $player_scores = $game_state->players()->mapWithKeys(fn ($p) => [$p->id => $p->score(include_hidden: false)]);
 
         $game_state->players()->each(function ($player) use ($player_scores) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess_score = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_score'];
 
             if ($guess_score === null) {

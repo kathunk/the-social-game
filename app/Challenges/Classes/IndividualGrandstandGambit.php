@@ -36,7 +36,8 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
 
     public function frontendComponent(Player $player): array
     {
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
         $has_voted = $this->hasVoted($player);
 
         return $this->form()
@@ -81,7 +82,7 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
         $players = $game_state->players();
 
         $players->each(function ($player) use ($choices) {
-            if ($choices[$player->id] === null) {
+            if (! isset($choices[$player->id]) || $choices[$player->id] === null) {
                 $player->addToScoreHistory(1, '🫥 Did not take Grandstand Gambit', true);
 
                 return;
@@ -95,6 +96,10 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
         $leader_ids = $players->filter(fn ($p) => $p->score() === $highest_score)->pluck('id');
 
         $players->each(function ($player) use ($choices, $leader_ids) {
+            if (! isset($choices[$player->id]) || $choices[$player->id] === null) {
+                return;
+            }
+
             if ($choices[$player->id] !== null && $leader_ids->contains($player->id)) {
                 $player->addToScoreHistory(-$player->score(), '😩 Grandstand Gambit too close to the sun');
             }

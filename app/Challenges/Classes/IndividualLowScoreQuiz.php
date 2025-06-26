@@ -37,7 +37,8 @@ class IndividualLowScoreQuiz extends BaseChallengeClass implements SupportsPecki
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
+        $has_guessed = isset($this->challenge->challenge_data['quiz_submissions'][$player->id])
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
         $has_voted = $this->hasVoted($player);
 
         $quiz_description = $has_guessed
@@ -97,6 +98,10 @@ class IndividualLowScoreQuiz extends BaseChallengeClass implements SupportsPecki
         $loser_ids = $game_state->players()->filter(fn ($p) => $p->score() === $lowest_score)->pluck('id');
 
         $game_state->players()->each(function ($player) use ($loser_ids) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
 
             if ($guess_id === null) {

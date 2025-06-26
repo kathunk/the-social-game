@@ -37,7 +37,10 @@ class IndividualStealTheBacon extends BaseChallengeClass implements SupportsPeck
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
+
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
+
         $has_voted = $this->hasVoted($player);
 
         $player_count = $players->count();
@@ -87,6 +90,10 @@ class IndividualStealTheBacon extends BaseChallengeClass implements SupportsPeck
         $number_of_stealers = collect($this->challenge_state->challenge_data['choices'])->filter(fn ($choice) => $choice === 'steal')->count();
 
         $game_state->players()->each(function ($player) use ($choices, $number_of_stealers, $player_count) {
+            if (! isset($choices[$player->id])) {
+                return;
+            }
+
             if ($choices[$player->id] === 'steal') {
                 $player->addToScoreHistory(-($number_of_stealers - ceil($player_count / 2)), '🥓 Stole the Bacon');
             }

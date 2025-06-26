@@ -56,6 +56,10 @@ class IndividualBuddySystem extends BaseChallengeClass implements SupportsPeckin
         $votes = collect($this->challenge_state->challenge_data['votes']);
 
         $game_state->players()->each(function ($player) use ($votes) {
+            if (! isset($votes[$player->id])) {
+                return;
+            }
+
             $buddy_id = $votes[$player->id]['upvote_player_id'];
 
             $buddy_upvoted_player = $buddy_id && $votes[$buddy_id]['upvote_player_id']

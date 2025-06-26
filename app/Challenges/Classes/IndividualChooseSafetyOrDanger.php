@@ -36,12 +36,13 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
 
     public function frontendComponent(Player $player): array
     {
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
         $has_voted = $this->hasVoted($player);
 
-        if ($this->challenge->challenge_data['choices'][$player->id] === 'safety') {
+        if ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'safety') {
             $choice_description = '☺️ Chose safety';
-        } elseif ($this->challenge->challenge_data['choices'][$player->id] === 'danger') {
+        } elseif ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'danger') {
             $choice_description = '☠️ Chose danger';
         } else {
             $choice_description = null;
@@ -112,6 +113,16 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
                 $player->addToScoreHistory($upvotes_received, '👍 Received upvotes');
             }
 
+            $did_not_make_choice = ! isset($choices[$player->id]) || $choices[$player->id] === null;
+
+            if ($did_not_make_choice && $downvotes_received > 0) {
+                $player->addToScoreHistory(-$downvotes_received, '👎 Received '.($downvotes_received === 1 ? 'downvote' : 'downvotes'));
+            }
+
+            if ($did_not_make_choice) {
+                return;
+            }
+
             if ($choices[$player->id] === 'danger' && $downvotes_received > 0) {
                 $player->addToScoreHistory(-$downvotes_received * 2, '👎 Received '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing danger');
             }
@@ -122,10 +133,6 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
 
             if ($choices[$player->id] === 'safety' && $downvotes_received > 0) {
                 $player->addToScoreHistory(0, '☺️ Blocked '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing safety');
-            }
-
-            if ($choices[$player->id] === null && $downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received, '👎 Received '.($downvotes_received === 1 ? 'downvote' : 'downvotes'));
             }
         });
     }

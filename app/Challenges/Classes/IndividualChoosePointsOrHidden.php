@@ -37,14 +37,17 @@ class IndividualChoosePointsOrHidden extends BaseChallengeClass implements Suppo
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
         $has_voted = $this->hasVoted($player);
 
-        $points_text = $this->challenge->challenge_data['choices'][$player->id] === 'points' ? 'Points' : 'Hidden Points';
-
-        $choice_description = $has_chosen
-            ? '📈 Chose '.$points_text
-            : null;
+        if ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'points') {
+            $choice_description = '📈 Chose points';
+        } elseif ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'hidden') {
+            $choice_description = '📈 Chose hidden points';
+        } else {
+            $choice_description = null;
+        }
 
         $player_count = $players->count();
 
@@ -117,7 +120,7 @@ class IndividualChoosePointsOrHidden extends BaseChallengeClass implements Suppo
             : 0;
 
         $game_state->players()->each(function ($player) use ($choices, $points_per_player, $hidden_points_per_player) {
-            if ($choices[$player->id] === null) {
+            if (! isset($choices[$player->id]) || $choices[$player->id] === null) {
                 return;
             }
 

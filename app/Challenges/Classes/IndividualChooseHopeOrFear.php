@@ -36,12 +36,13 @@ class IndividualChooseHopeOrFear extends BaseChallengeClass implements SupportsP
 
     public function frontendComponent(Player $player): array
     {
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
         $has_voted = $this->hasVoted($player);
 
-        if ($this->challenge->challenge_data['choices'][$player->id] === 'hope') {
+        if ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'hope') {
             $choice_description = '🤞 Chose hope';
-        } elseif ($this->challenge->challenge_data['choices'][$player->id] === 'fear') {
+        } elseif ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'fear') {
             $choice_description = '😱 Chose fear';
         } else {
             $choice_description = null;
@@ -102,6 +103,10 @@ class IndividualChooseHopeOrFear extends BaseChallengeClass implements SupportsP
         $players = $game_state->players();
 
         $players->each(function ($player) use ($votes, $choices) {
+            if (! isset($choices[$player->id])) {
+                return;
+            }
+
             $upvotes_received = collect($votes)
                 ->filter(fn ($v) => $v['upvote_player_id'] === $player->id)
                 ->count();

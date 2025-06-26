@@ -48,7 +48,8 @@ class IndividualOathQuiz extends BaseChallengeClass implements SupportsPeckingOr
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
+        $has_guessed = isset($this->challenge->challenge_data['quiz_submissions'][$player->id])
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
         $has_voted = $this->hasVoted($player);
 
         if (isset($this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type'])
@@ -133,6 +134,10 @@ class IndividualOathQuiz extends BaseChallengeClass implements SupportsPeckingOr
         $oath_data = $game_state->modifiers()->firstWhere('class_key', BloodOaths::key())->modifier_data;
 
         $game_state->players()->each(function ($player) use ($oath_data) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess = $this->challenge_state->challenge_data['quiz_submissions'][$player->id];
 
             if ($guess['guess_player_id'] === null || $guess['oath_type'] === null) {

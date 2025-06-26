@@ -36,7 +36,9 @@ class IndividualSpy extends BaseChallengeClass implements SupportsPeckingOrderBa
 
     public function frontendComponent(Player $player): array
     {
-        $information = $this->challenge->challenge_data['information_bought'][$player->id];
+        $information = isset($this->challenge->challenge_data['information_bought'][$player->id])
+            ? $this->challenge->challenge_data['information_bought'][$player->id]
+            : null;
         $has_voted = $this->hasVoted($player);
 
         return $this->form()

@@ -4,9 +4,12 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\IndividualBuddySystem;
+use App\Challenges\Classes\IndividualChooseHopeOrFear;
 use App\Challenges\Classes\IndividualChoosePointsOrHidden;
 use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
 use App\Challenges\Classes\IndividualDoubleTrouble;
+use App\Challenges\Classes\IndividualGrandstandGambit;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualStealTheBacon;
 use App\Events\GameModeAdded;
@@ -54,13 +57,19 @@ class PyramidSchemeSeeder extends Seeder
                 ],
                 [
                     'challenge_keys' => [
-                        IndividualChoosePointsOrHidden::key(),
+                        IndividualStealTheBacon::key(),
                     ],
                     'duration' => 10,
                 ],
                 [
                     'challenge_keys' => [
-                        IndividualStealTheBacon::key(),
+                        IndividualChooseHopeOrFear::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualBuddySystem::key(),
                     ],
                     'duration' => 10,
                 ],
@@ -70,6 +79,19 @@ class PyramidSchemeSeeder extends Seeder
                     ],
                     'duration' => 1,
                 ],
+                [
+                    'challenge_keys' => [
+                        IndividualGrandstandGambit::key(),
+                    ],
+                    'duration' => 1,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualChoosePointsOrHidden::key(),
+                    ],
+                    'duration' => 10,
+                ],
+
                 [
                     'challenge_keys' => [
                         IndividualDoubleTrouble::key(),
