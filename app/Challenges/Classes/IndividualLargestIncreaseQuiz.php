@@ -102,6 +102,10 @@ class IndividualLargestIncreaseQuiz extends BaseChallengeClass implements Suppor
         $largest_increase_ids = $score_changes->filter(fn ($score_change) => $score_change === $largest_increase)->keys();
 
         $game_state->players()->each(function ($player) use ($largest_increase_ids) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
 
             if ($guess_id === null) {

@@ -100,6 +100,10 @@ class IndividualNoScoreChangeQuiz extends BaseChallengeClass implements Supports
         $steady_ids = $score_changes->filter(fn ($score_change) => $score_change === 0)->keys();
 
         $game_state->players()->each(function ($player) use ($steady_ids) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
 
             if ($guess_id === null) {

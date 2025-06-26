@@ -103,6 +103,10 @@ class IndividualChooseHopeOrFear extends BaseChallengeClass implements SupportsP
         $players = $game_state->players();
 
         $players->each(function ($player) use ($votes, $choices) {
+            if (! isset($choices[$player->id])) {
+                return;
+            }
+
             $upvotes_received = collect($votes)
                 ->filter(fn ($v) => $v['upvote_player_id'] === $player->id)
                 ->count();

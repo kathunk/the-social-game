@@ -97,6 +97,10 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
         $player_scores = $game_state->players()->mapWithKeys(fn ($p) => [$p->id => $p->score(include_hidden: false)]);
 
         $game_state->players()->each(function ($player) use ($player_scores) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess_score = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_score'];
 
             if ($guess_score === null) {

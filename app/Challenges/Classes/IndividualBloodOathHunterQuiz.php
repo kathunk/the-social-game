@@ -171,6 +171,10 @@ class IndividualBloodOathHunterQuiz extends BaseChallengeClass implements Suppor
             ->firstWhere('class_key', BloodOaths::key())->modifier_data;
 
         $game_state->players()->each(function ($player) use ($oath_data) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess =
                 $this->challenge_state->challenge_data['quiz_submissions'][
                     $player->id

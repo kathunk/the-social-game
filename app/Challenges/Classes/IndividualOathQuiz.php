@@ -134,6 +134,10 @@ class IndividualOathQuiz extends BaseChallengeClass implements SupportsPeckingOr
         $oath_data = $game_state->modifiers()->firstWhere('class_key', BloodOaths::key())->modifier_data;
 
         $game_state->players()->each(function ($player) use ($oath_data) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess = $this->challenge_state->challenge_data['quiz_submissions'][$player->id];
 
             if ($guess['guess_player_id'] === null || $guess['oath_type'] === null) {
