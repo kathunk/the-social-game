@@ -25,7 +25,7 @@ class HtmlTransformer
             'ul' => fn ($node, $html) => "<ul class=\"list-disc pl-5 mb-4\">{$html}</ul>",
             'ol' => fn ($node, $html) => "<ol class=\"list-decimal pl-5 mb-4\">{$html}</ol>",
             'li' => fn ($node, $html) => "<li class=\"mb-2\">{$html}</li>",
-            'a' => fn ($node, $html) => "<a class=\"inline font-medium underline-offset-[6px] hover:decoration-current underline [[data-color]>&]:text-inherit [[data-color]>&]:decoration-current/20 dark:[[data-color]>&]:decoration-current/50 [[data-color]>&]:hover:decoration-current text-[var(--color-accent-content)] decoration-[color-mix(in_oklab,var(--color-accent-content),transparent_80%)]\" href=\"{$node->getAttribute('href')}\" data-flux-link=\"\">{$html}</a>",
+            'a' => fn ($node, $html) => "<a class=\"inline font-medium underline-offset-[6px] hover:decoration-current underline [[data-color]>&]:text-inherit [[data-color]>&]:decoration-current/20 dark:[[data-color]>&]:decoration-current/50 [[data-color]>&]:hover:decoration-current text-[var(--color-accent-content)] decoration-[color-mix(in_oklab,var(--color-accent-content),transparent_80%)]\" href=\"{$node->getAttribute('href')}\" target=\"_blank\" data-flux-link=\"\">{$html}</a>",
             'blockquote' => fn ($node, $html) => "<blockquote class=\"border-l-4 pl-4 italic text-gray-600 mb-4\">{$html}</blockquote>",
         ];
 
