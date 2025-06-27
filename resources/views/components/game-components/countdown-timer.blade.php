@@ -1,6 +1,6 @@
 @props(['ends_at'])
 
-@if ($ends_at > now()->addMinutes(60))
+@if (Carbon\Carbon::parse($ends_at) > now()->addMinutes(60))
     <div>
         ends {{ Carbon\Carbon::parse($ends_at)->diffForHumans() }}
     </div>
