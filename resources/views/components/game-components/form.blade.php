@@ -66,6 +66,8 @@
                         wire:key="select-{{ $class_key }}-{{ $element['property_name'] }}"
                         label="{{ $element['label'] }}"
                         wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
+                        variant="listbox"
+                        :searchable="$element['searchable']"
                     >
                     @isset($element['placeholder'])
                         <flux:select.option value="" selected class="placeholder">{{ $element['placeholder'] }}</flux:select.option>
