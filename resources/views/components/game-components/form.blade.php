@@ -15,13 +15,9 @@
                     ({{ $activated_challenges }} of {{ $total_challenges }})
                 </flux:text>
             
-                @if ($this->challenge->ends_at->isFuture())
-                    <flux:text variant="subtle" class="flex items-baseline">
-                        <x-game-components.countdown-timer :ends_at="$this->challenge->ends_at->toIsoString()" />
-                    </flux:text>
-                @else
-                    <flux:text variant="subtle">ending...</flux:text>
-                @endif
+                <flux:text variant="subtle" class="flex items-baseline">
+                    <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
+                </flux:text>
             </div>
         @endif
         @foreach ($form['elements'] as $element)

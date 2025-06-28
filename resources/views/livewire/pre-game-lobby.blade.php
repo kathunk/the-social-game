@@ -5,13 +5,15 @@
 >
     @if ($this->game->status === 'upcoming')
         <div class="mx-auto w-full text-center">
-            <flux:text>
-                @if ($this->game->starts_at->isFuture())
-                    Starts {{ $this->game->starts_at->diffForHumans() }}
-                @else
-                    Game did not start because the player count is not correct.
-                @endif
-            </flux:text>
+            @if ($this->hasTooManyPlayers || $this->hasTooFewPlayers)
+                <flux:text variant="subtle" class="flex items-baseline">
+                    Player count is not correct.
+                </flux:text>
+            @else 
+                <flux:text variant="subtle" class="flex space-x-1 items-baseline justify-center">
+                    <x-game-components.countdown-timer :time="$this->game->starts_at->toIsoString()" type="starts" />
+                </flux:text>
+            @endif
         </div>
     @endif
 
