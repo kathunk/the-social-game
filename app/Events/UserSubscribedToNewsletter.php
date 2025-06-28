@@ -2,8 +2,8 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
 use App\Events\Traits\HasUser;
+use Thunk\Verbs\Event;
 
 class UserSubscribedToNewsletter extends Event
 {
