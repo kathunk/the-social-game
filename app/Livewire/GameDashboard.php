@@ -268,7 +268,10 @@ class GameDashboard extends Component
                 ->handler(),
         };
 
-        $component = $handler->frontendComponent($this->player);
+        $component = match ($type) {
+            'challenge' => $this->challenge_component,
+            'modifier' => $this->modifier_components[$class_key],
+        };
 
         if (! isset($component['elements'])) {
             return;
