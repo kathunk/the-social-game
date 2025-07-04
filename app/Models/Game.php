@@ -2,19 +2,20 @@
 
 namespace App\Models;
 
-use App\Events\ChallengeCreated;
-use App\Events\ChallengeStarted;
-use App\Events\GameCanceled;
-use App\Events\GameCreated;
 use App\Events\GameEnded;
-use App\Events\GameStarted;
-use App\Events\ModifierCreated;
-use App\Events\TeamCreated;
 use App\States\GameState;
-use Glhd\Bits\Database\HasSnowflakes;
-use Illuminate\Database\Eloquent\Model;
+use App\Events\GameCreated;
+use App\Events\GameStarted;
+use App\Events\GameUpdated;
+use App\Events\TeamCreated;
+use App\Events\GameCanceled;
 use Illuminate\Support\Carbon;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\ModifierCreated;
+use App\Events\ChallengeCreated;
+use App\Events\ChallengeStarted;
+use Glhd\Bits\Database\HasSnowflakes;
+use Illuminate\Database\Eloquent\Model;
 
 class Game extends Model
 {
@@ -83,9 +84,9 @@ class Game extends Model
     public static function fromTemplate(
         GameTemplate $template,
         GameMode $game_mode,
-        Carbon $starts_at,
         User $user,
         bool $requires_admin_approval_to_join,
+        ?Carbon $starts_at = null,
         ?bool $is_public = false,
         ?array $challenges = null,
         ?int $challenge_length_override = null,
@@ -104,7 +105,7 @@ class Game extends Model
             team_names: $template->team_names,
             challenges: $template->challenges,
             starts_at: $starts_at,
-            ends_at: $starts_at->copy()->addMinutes($template->totalDuration),
+            ends_at: $starts_at ? $starts_at->copy()->addMinutes($template->totalDuration) : null,
             code: self::uniqueGameCode(),
             challenge_length_override: $challenge_length_override,
             social_links: $social_links,
@@ -138,6 +139,25 @@ class Game extends Model
 
     public function start()
     {
+        if (! $this->starts_at) {
+            $duration = GameTemplate::find($this->game_template_id)->total_duration;
+            $ends_at = Carbon::parse(now())->addMinutes($duration);
+    
+            GameUpdated::fire(
+                game_id: $this->id,
+                game_template_id: $this->game_template_id,
+                game_mode_id: $this->game_mode_id,
+                starts_at: now(),
+                ends_at: $ends_at,
+                is_public: true,
+                requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
+                challenge_length_override: $this->challenge_length_override,
+                social_links: $this->social_links,
+            );
+    
+            Verbs::commit();
+        }
+
         foreach ($this->gameTemplate->team_names as $team_name) {
             TeamCreated::fire(
                 game_id: $this->id,
@@ -177,7 +197,7 @@ class Game extends Model
             ];
         }
 
-        $next_challenge_starts_at = $this->starts_at->copy();
+        $next_challenge_starts_at = $this->fresh()->starts_at->copy();
 
         $challenges_with_times = collect($mapped_challenges)->reduce(function ($carry, $challenge) use ($next_challenge_starts_at) {
             if (empty($carry)) {

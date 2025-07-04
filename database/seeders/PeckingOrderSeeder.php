@@ -87,7 +87,6 @@ class PeckingOrderSeeder extends Seeder
         $game = Game::fromTemplate(
             template: $template,
             game_mode: $mode,
-            starts_at: now(),
             user: $john,
             is_public: false,
             requires_admin_approval_to_join: false,

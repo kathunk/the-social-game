@@ -380,24 +380,6 @@ class PreGameLobby extends Component
 
     public function startGame()
     {
-        $duration = GameTemplate::find($this->game_template_id)->total_duration;
-        $ends_at = Carbon::parse(now())->addMinutes($duration);
-
-        GameUpdated::fire(
-            game_id: $this->game->id,
-            user_id: $this->user->id,
-            game_template_id: (int) $this->game_template_id,
-            game_mode_id: (int) $this->game_mode_id,
-            starts_at: now(),
-            ends_at: $ends_at,
-            is_public: true,
-            requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
-            challenge_length_override: $this->game->challenge_length_override,
-            social_links: $this->game->social_links,
-        );
-
-        Verbs::commit();
-
         $this->game->fresh()->start();
 
         Verbs::commit();

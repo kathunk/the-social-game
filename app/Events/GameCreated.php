@@ -22,9 +22,9 @@ class GameCreated extends Event
 
     public string $name;
 
-    public Carbon $starts_at;
+    public ?Carbon $starts_at = null;
 
-    public Carbon $ends_at;
+    public ?Carbon $ends_at = null;
 
     public ?bool $is_public = false;
 
@@ -42,18 +42,12 @@ class GameCreated extends Event
         $game->status = 'upcoming';
         $game->game_template_id = $this->game_template_id;
         $game->game_mode_id = $this->game_mode_id;
-        $game->starts_at = Carbon::parse($this->starts_at);
+        $game->starts_at = $this->starts_at ? Carbon::parse($this->starts_at) : null;
+        $game->ends_at = $this->ends_at ? Carbon::parse($this->ends_at) : null;
         $game->is_public = $this->is_public;
         $game->requires_admin_approval_to_join =
             $this->requires_admin_approval_to_join;
         $game->code = $this->code;
-        $game->ends_at = Carbon::parse($this->starts_at)
-            ->copy()
-            ->addMinutes(
-                $this->state(
-                    GameTemplateState::class
-                )->durationOfAllChallengesInMinutes()
-            );
         $game->players_can_join_late = $this->state(
             GameModeState::class
         )->players_can_join_late;
