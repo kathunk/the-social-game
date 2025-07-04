@@ -11,7 +11,9 @@ use Livewire\Component;
 
 class CreateGame extends Component
 {
-    public Carbon $game_start_timecode;
+    public bool $has_scheduled_start = false;
+
+    public ?Carbon $game_start_timecode = null;
 
     public int $game_mode_id;
 
@@ -40,8 +42,6 @@ class CreateGame extends Component
         if (! $this->user->is_member) {
             return redirect()->route('marketing-page');
         }
-
-        $this->game_start_timecode = Carbon::now()->addHours(1)->setSeconds(0);
     }
 
     public function createGame()
@@ -50,7 +50,6 @@ class CreateGame extends Component
 
         $url_input = $this->social_link_url;
 
-        // Only process URL if it's not empty
         if (! empty($url_input)) {
             if (! str_starts_with($url_input, 'http://') && ! str_starts_with($url_input, 'https://')) {
                 $url_input = 'https://'.$url_input;
@@ -66,7 +65,7 @@ class CreateGame extends Component
         $game = Game::fromTemplate(
             game_mode: $mode,
             template: $template,
-            starts_at: Carbon::parse($this->game_start_timecode)->setSeconds(0),
+            starts_at: $this->game_start_timecode ? Carbon::parse($this->game_start_timecode)->setSeconds(0) : null,
             user: $this->user,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
             social_links: ! empty($url_input) ? [$url_input] : [],
@@ -79,7 +78,7 @@ class CreateGame extends Component
     {
         return [
             'game_mode_id' => 'required|exists:game_modes,id',
-            'game_start_timecode' => ['required', 'date', 'after:'.now()],
+            'game_start_timecode' => ['nullable', 'date', 'after:'.now()],
         ];
     }
 

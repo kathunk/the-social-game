@@ -1,6 +1,10 @@
+@props(['label' => null, 'description' => null])
+
 <div class="text-steel-95 text-sm" x-data="datetime" {{ $attributes->wire('model') }}>
     <div class="mb-2">
-        <flux:heading>{{ $label }}</flux:heading>
+        @if(isset($label))
+            <flux:heading>{{ $label }}</flux:heading>
+        @endif
         @if(isset($description))
             <flux:text>{{ $description }}</flux:text>
         @endif
@@ -22,10 +26,6 @@
     >
     </input>
 
-    @error($name)
-        <div class="text-red-600 text-sm mb-3">{{ $message }}</div>
-    @enderror
-
     @if (session()->has('message'))
         <div class="pt-1 text-gray-600 text-sm">
             {{ session('message') }}
@@ -46,26 +46,6 @@
                     this.$watch('$wire.' + wireModel, (value) => {
                         if (value) {
                             this.setDate(value);
-                        }
-                    });
-
-                    // Listen for Livewire initialization to get initial value
-                    document.addEventListener('livewire:init', () => {
-                        this.$nextTick(() => {
-                            const initialValue = this.$wire.get(wireModel);
-                            if (initialValue) {
-                                this.setDate(initialValue);
-                            }
-                        });
-                    });
-
-                    // Also try to get value immediately in case Livewire is already initialized
-                    this.$nextTick(() => {
-                        if (this.$wire && typeof this.$wire.get === 'function') {
-                            const initialValue = this.$wire.get(wireModel);
-                            if (initialValue) {
-                                this.setDate(initialValue);
-                            }
                         }
                     });
                 },
