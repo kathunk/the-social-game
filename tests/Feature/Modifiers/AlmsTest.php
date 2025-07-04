@@ -61,17 +61,16 @@ it('facilitates alms', function () {
     Date::setTestNow($end->addSeconds(1));
     $this->artisan('app:progress-games');
 
-    // does not take hidden points into account. Even though player has loads of hidden points, they are still at the bottom of the scoreboard.
     expect($player_1->fresh()->score)->toBe(10);
     expect($player_1->fresh()->hidden_score)->toBe(10);
     expect($player_2->fresh()->score)->toBe(0);
-    expect($player_2->fresh()->hidden_score)->toBe(12);
+    expect($player_2->fresh()->hidden_score)->toBe(11);
     expect($player_3->fresh()->score)->toBe(0);
     expect($player_3->fresh()->hidden_score)->toBe(2);
     expect($player_4->fresh()->score)->toBe(0);
     expect($player_4->fresh()->hidden_score)->toBe(2);
 
-    Livewire::actingAs($player_2->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
+    Livewire::actingAs($player_3->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->call('callClassAction', 'choose_points', 'challenge', IndividualChoosePointsOrHidden::key())
         ->assertHasNoErrors();
 
@@ -82,10 +81,10 @@ it('facilitates alms', function () {
     // applies after the challenge is resolved. Player 2 gained 8 real points, and no hidden points
     expect($player_1->fresh()->score)->toBe(10);
     expect($player_1->fresh()->hidden_score)->toBe(10);
-    expect($player_2->fresh()->score)->toBe(8);
-    expect($player_2->fresh()->hidden_score)->toBe(20);
-    expect($player_3->fresh()->score)->toBe(0);
-    expect($player_3->fresh()->hidden_score)->toBe(3);
+    expect($player_2->fresh()->score)->toBe(0);
+    expect($player_2->fresh()->hidden_score)->toBe(11);
+    expect($player_3->fresh()->score)->toBe(8);
+    expect($player_3->fresh()->hidden_score)->toBe(10);
     expect($player_4->fresh()->score)->toBe(0);
     expect($player_4->fresh()->hidden_score)->toBe(3);
 });
