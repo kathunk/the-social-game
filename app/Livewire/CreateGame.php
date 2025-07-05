@@ -68,22 +68,6 @@ class CreateGame extends Component
 
         $template = $mode->selectTemplateForUser($this->user);
 
-        if ($this->has_scheduled_start) {
-            \Log::info('CreateGame DEBUG:', [
-                'raw_game_start_timecode' => $this->game_start_timecode,
-                'game_start_timecode_type' => gettype(
-                    $this->game_start_timecode
-                ),
-                'parsed_carbon' => Carbon::parse($this->game_start_timecode),
-                'parsed_carbon_timezone' => Carbon::parse(
-                    $this->game_start_timecode
-                )->timezone,
-                'parsed_carbon_utc' => Carbon::parse(
-                    $this->game_start_timecode
-                )->utc(),
-            ]);
-        }
-
         $game = Game::fromTemplate(
             game_mode: $mode,
             template: $template,
