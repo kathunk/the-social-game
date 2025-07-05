@@ -58,14 +58,14 @@ it('runs the equilibrium challenge', function () {
         ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)
         ->assertHasNoErrors();
 
-        $challenge->refresh();
-        $challenge->end();
-    
-        // visible scores show this
-        expect($player_2->fresh()->score)->toBe(29);
-        expect($player_4->fresh()->score)->toBe(1);
-    
-        // but with hidden scores included, we see this
-        expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(29);
-        expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(101);
+    $challenge->refresh();
+    $challenge->end();
+
+    // visible scores show this
+    expect($player_2->fresh()->score)->toBe(29);
+    expect($player_4->fresh()->score)->toBe(1);
+
+    // but with hidden scores included, we see this
+    expect($player_2->fresh()->state()->score(include_hidden: true))->toBe(29);
+    expect($player_4->fresh()->state()->score(include_hidden: true))->toBe(101);
 });

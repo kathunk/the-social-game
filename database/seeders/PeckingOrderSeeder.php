@@ -7,6 +7,8 @@ namespace Database\Seeders;
 use App\Challenges\Classes\IndividualChoosePointsOrHidden;
 use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
 use App\Challenges\Classes\IndividualDoubleTrouble;
+use App\Challenges\Classes\IndividualEquilibrium;
+use App\Challenges\Classes\IndividualFirstShallBeLast;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualSpy;
 use App\Events\GameModeAdded;
@@ -48,6 +50,18 @@ class PeckingOrderSeeder extends Seeder
                 [
                     'challenge_keys' => [
                         IndividualChoosePointsOrHidden::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualEquilibrium::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualFirstShallBeLast::key(),
                     ],
                     'duration' => 10,
                 ],
