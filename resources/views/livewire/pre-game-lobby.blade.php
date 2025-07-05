@@ -1,19 +1,13 @@
 <div
     wire:poll="checkStatus"
     class="flex flex-col gap-4"
-    x-data="{ gameModeId: $wire.entangle('game_mode_id') }"
+    x-data="{ gameModeId: $wire.entangle('game_mode_id'), has_scheduled_start: $wire.entangle('has_scheduled_start') }"
 >
-    @if ($this->game->status === 'upcoming')
+    @if ($this->game->status === 'upcoming' && $this->game->starts_at)
         <div class="mx-auto w-full text-center">
-            @if ($this->hasTooManyPlayers || $this->hasTooFewPlayers)
-                <flux:text variant="subtle" class="flex items-baseline">
-                    Player count is not correct.
-                </flux:text>
-            @else 
-                <flux:text variant="subtle" class="flex space-x-1 items-baseline justify-center">
-                    <x-game-components.countdown-timer :time="$this->game->starts_at->toIsoString()" type="starts" />
-                </flux:text>
-            @endif
+            <flux:text variant="subtle" class="flex space-x-1 items-baseline justify-center">
+                <x-game-components.countdown-timer :time="$this->game->starts_at->toIsoString()" type="starts" />
+            </flux:text>
         </div>
     @endif
 
@@ -190,13 +184,18 @@
             </div>
 
             <div x-show="editTime">
-                <x-datetime
-                    label="Start time"
-                    name="game_start_timecode"
-                    wire:model="game_start_timecode"
-                    min="{{ now()->addMinute()->second(0)->toIsoString() }}"
-                    required
-                />
+                <div class="flex flex-col gap-2">
+                    <flux:switch label="Scheduled start time" @click="has_scheduled_start = !has_scheduled_start" x-bind:checked="has_scheduled_start" />
+                    <div x-show="has_scheduled_start">
+                        <x-datetime
+                            label="Start time"
+                            name="game_start_timecode"
+                            wire:model="game_start_timecode"
+                            min="{{ now()->addMinute()->second(0)->toIsoString() }}"
+                            required
+                        />
+                    </div>
+                </div>
 
                 <div class="flex flex-col gap-2 mb-4" x-data="{use_challenge_length_override: $wire.entangle('use_challenge_length_override')}">
                     <flux:field variant="inline" class="mt-4">

@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ has_scheduled_start: $wire.entangle('has_scheduled_start') }">
     <flux:card>
         <div class="flex flex-col space-y-6">
             <flux:heading size="lg">Create Game</flux:heading>
@@ -14,8 +14,8 @@
                 @endforeach
             </flux:radio.group>
             <flux:checkbox label="Requires your approval to join" wire:model="requires_admin_approval_to_join" />
-            <div x-data="{ has_scheduled_start: false }" class="flex flex-col space-y-2">
-                <flux:switch label="Scheduled start time" @click="has_scheduled_start = !has_scheduled_start" />
+            <div class="flex flex-col space-y-2">
+                <flux:switch label="Scheduled start time" @click="has_scheduled_start = !has_scheduled_start" x-bind:checked="has_scheduled_start" />
                 <div x-show="has_scheduled_start">
                     <x-datetime
                         name="game_start_timecode"

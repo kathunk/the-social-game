@@ -2,20 +2,20 @@
 
 namespace App\Models;
 
-use App\Events\GameEnded;
-use App\States\GameState;
-use App\Events\GameCreated;
-use App\Events\GameStarted;
-use App\Events\GameUpdated;
-use App\Events\TeamCreated;
-use App\Events\GameCanceled;
-use Illuminate\Support\Carbon;
-use Thunk\Verbs\Facades\Verbs;
-use App\Events\ModifierCreated;
 use App\Events\ChallengeCreated;
 use App\Events\ChallengeStarted;
+use App\Events\GameCanceled;
+use App\Events\GameCreated;
+use App\Events\GameEnded;
+use App\Events\GameStarted;
+use App\Events\GameUpdated;
+use App\Events\ModifierCreated;
+use App\Events\TeamCreated;
+use App\States\GameState;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Thunk\Verbs\Facades\Verbs;
 
 class Game extends Model
 {
@@ -142,7 +142,7 @@ class Game extends Model
         if (! $this->starts_at) {
             $duration = GameTemplate::find($this->game_template_id)->total_duration;
             $ends_at = Carbon::parse(now())->addMinutes($duration);
-    
+
             GameUpdated::fire(
                 game_id: $this->id,
                 game_template_id: $this->game_template_id,
@@ -154,7 +154,7 @@ class Game extends Model
                 challenge_length_override: $this->challenge_length_override,
                 social_links: $this->social_links,
             );
-    
+
             Verbs::commit();
         }
 

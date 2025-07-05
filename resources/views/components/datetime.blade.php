@@ -1,4 +1,4 @@
-@props(['label' => null, 'description' => null])
+@props(['label' => null, 'description' => null, 'name' => null])
 
 <div class="text-steel-95 text-sm" x-data="datetime" {{ $attributes->wire('model') }}>
     <div class="mb-2">
@@ -26,6 +26,10 @@
     >
     </input>
 
+    @error($name)
+        <div class="text-red-600 text-sm my-3">{{ $message }}</div>
+    @enderror
+
     @if (session()->has('message'))
         <div class="pt-1 text-gray-600 text-sm">
             {{ session('message') }}
@@ -46,6 +50,16 @@
                     this.$watch('$wire.' + wireModel, (value) => {
                         if (value) {
                             this.setDate(value);
+                        }
+                    });
+
+                    // Initialize with existing value if it exists
+                    this.$nextTick(() => {
+                        if (this.$wire && typeof this.$wire.get === 'function') {
+                            const initialValue = this.$wire.get(wireModel);
+                            if (initialValue) {
+                                this.setDate(initialValue);
+                            }
                         }
                     });
                 },

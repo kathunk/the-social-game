@@ -8,7 +8,6 @@ use App\Events\Traits\HasUser;
 use App\Models\Game;
 use App\States\GameModeState;
 use App\States\GameState;
-use App\States\GameTemplateState;
 use Illuminate\Support\Carbon;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
