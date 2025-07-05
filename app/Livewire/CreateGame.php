@@ -13,7 +13,7 @@ class CreateGame extends Component
 {
     public bool $has_scheduled_start = false;
 
-    public ?Carbon $game_start_timecode = null;
+    public ?string $game_start_timecode = null;
 
     public int $game_mode_id;
 
