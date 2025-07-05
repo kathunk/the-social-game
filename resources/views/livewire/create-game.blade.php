@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ has_scheduled_start: $wire.entangle('has_scheduled_start') }">
     <flux:card>
         <div class="flex flex-col space-y-6">
             <flux:heading size="lg">Create Game</flux:heading>
@@ -14,14 +14,18 @@
                 @endforeach
             </flux:radio.group>
             <flux:checkbox label="Requires your approval to join" wire:model="requires_admin_approval_to_join" />
-            <x-datetime
-                label="Start time"
-                name="game_start_timecode"
-                wire:model="game_start_timecode"
-                description="You can change this any time before the game starts."
-                min="{{ now()->addMinute()->second(0)->toIsoString() }}"
-                required
-            />
+            <div class="flex flex-col space-y-2">
+                <flux:switch label="Scheduled start time" @click="has_scheduled_start = !has_scheduled_start" x-bind:checked="has_scheduled_start" />
+                <div x-show="has_scheduled_start">
+                    <x-datetime
+                        name="game_start_timecode"
+                        wire:model="game_start_timecode"
+                        description="You can change this any time before the game starts."
+                        min="{{ now()->addMinute()->second(0)->toIsoString() }}"
+                        required
+                    />
+                </div>
+            </div>
             <div class="flex flex-col space-y-2">
                 <flux:heading size="sm">Chat Link (optional)</flux:heading>
                 <flux:text>Tell players where game chat will be held. Discord, Slack, Telegram all work well.</flux:text>

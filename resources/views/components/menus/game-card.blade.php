@@ -17,7 +17,7 @@
                                         <flux:link wire:click="goToGame('{{ $game->id }}')">
                                             {{ $game->name }}
                                         </flux:link>
-                                        <flux:text variant="subtle" class="text-xs">{{ $game->starts_at->diffForHumans() }}</flux:text>
+                                        <flux:text variant="subtle" class="text-xs">{{ $game->starts_at?->diffForHumans() }}</flux:text>
                                     </div>
                                     @if ($game->status === 'upcoming')
                                         @if ($this->user->isGameAdmin($game))

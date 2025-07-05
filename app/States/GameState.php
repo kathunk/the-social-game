@@ -30,9 +30,9 @@ class GameState extends State
 
     public Collection $team_ids;
 
-    public Carbon $starts_at;
+    public ?Carbon $starts_at;
 
-    public Carbon $ends_at;
+    public ?Carbon $ends_at;
 
     public Collection $challenge_ids;
 
@@ -52,7 +52,7 @@ class GameState extends State
 
     public ?int $challenge_length_override;
 
-    public array $social_links = [];
+    public ?array $social_links = [];
 
     public function __construct()
     {
