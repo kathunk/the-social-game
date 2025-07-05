@@ -36,7 +36,7 @@
         </div>
     @endif
 
-    <input type="hidden" x-ref="anchor" {{ $attributes->whereStartsWith('wire:model') }} @change="changeDate"/>
+    <input type="hidden" x-ref="anchor" />
 </div>
 
     <script>
@@ -44,34 +44,40 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('datetime', () => ({
                 init() {
-                    const wireModel = this.$refs.anchor.getAttribute('wire:model');
+                    const wireModel = this.$el.getAttribute('wire:model');
 
-                    // Set up the watcher for ongoing changes
-                    this.$watch('$wire.' + wireModel, (value) => {
-                        if (value) {
-                            this.setDate(value);
-                        }
-                    });
+                    // Store wireModel for later use
+                    this.wireModel = wireModel;
 
-                    // Initialize with existing value if it exists
-                    this.$nextTick(() => {
-                        if (this.$wire && typeof this.$wire.get === 'function') {
-                            const initialValue = this.$wire.get(wireModel);
-                            if (initialValue) {
-                                this.setDate(initialValue);
+                    if (wireModel) {
+                        // Set up the watcher for ongoing changes
+                        this.$watch('$wire.' + wireModel, (value) => {
+                            if (value) {
+                                this.setDate(value);
                             }
-                        }
-                    });
+                        });
+
+                        // Initialize with existing value if it exists
+                        this.$nextTick(() => {
+                            if (this.$wire && typeof this.$wire.get === 'function') {
+                                const initialValue = this.$wire.get(wireModel);
+                                if (initialValue) {
+                                    this.setDate(initialValue);
+                                }
+                            }
+                        });
+                    }
                 },
+                wireModel: null,
                 date: null,
                 min: {!! isset($min) ? "'$min'" : 'null' !!},
                 max: {!! isset($max) ? "'$max'" : 'null' !!},
                 get minFormatted() {
-                    console.log({min: this.min})
+
                     return this.min ? toISOLocal(new Date(this.min)) : null
                 },
                 get maxFormatted() {
-                    console.log({max: this.max})
+
                     return this.max ? toISOLocal(new Date(this.max)) : null
                 },
                 get dateTimeLocalString() {
@@ -90,7 +96,10 @@
 
                     this.setDate(e.target.value);
 
-                    this.$dispatch('input', this.utcIsoString)
+                    // Use the stored wireModel from init
+                    if (this.wireModel) {
+                        this.$wire.set(this.wireModel, this.utcIsoString);
+                    }
                 }
             }))
         })

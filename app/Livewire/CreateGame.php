@@ -13,7 +13,7 @@ class CreateGame extends Component
 {
     public bool $has_scheduled_start = false;
 
-    public ?Carbon $game_start_timecode = null;
+    public ?string $game_start_timecode = null;
 
     public int $game_mode_id;
 
@@ -67,6 +67,22 @@ class CreateGame extends Component
         $mode = GameMode::find($this->game_mode_id);
 
         $template = $mode->selectTemplateForUser($this->user);
+
+        if ($this->has_scheduled_start) {
+            \Log::info('CreateGame DEBUG:', [
+                'raw_game_start_timecode' => $this->game_start_timecode,
+                'game_start_timecode_type' => gettype(
+                    $this->game_start_timecode
+                ),
+                'parsed_carbon' => Carbon::parse($this->game_start_timecode),
+                'parsed_carbon_timezone' => Carbon::parse(
+                    $this->game_start_timecode
+                )->timezone,
+                'parsed_carbon_utc' => Carbon::parse(
+                    $this->game_start_timecode
+                )->utc(),
+            ]);
+        }
 
         $game = Game::fromTemplate(
             game_mode: $mode,
