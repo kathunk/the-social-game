@@ -11,6 +11,7 @@ use App\Challenges\Classes\IndividualEquilibrium;
 use App\Challenges\Classes\IndividualFirstShallBeLast;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualHighTrustEnvironment;
+use App\Challenges\Classes\IndividualGerrymander;
 use App\Challenges\Classes\IndividualSpy;
 use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
@@ -48,6 +49,12 @@ class PeckingOrderSeeder extends Seeder
             is_public: true,
             team_names: [],
             challenges: [
+                [
+                    'challenge_keys' => [
+                        IndividualGerrymander::key(),
+                    ],
+                    'duration' => 10,
+                ],
                 [
                     'challenge_keys' => [
                         IndividualHighTrustEnvironment::key(),
