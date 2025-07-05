@@ -56,8 +56,6 @@ class PlayerBoughtImmunity extends Event
     public function handle()
     {
         $this->challenge()->updateModelWithStateData();
-
-        $this->applyToChallenge($this->challenge()->state());
         $this->game()->players->each(fn ($p) => $p->updateModelWithStateData());
     }
 }
