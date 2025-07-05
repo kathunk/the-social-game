@@ -44,7 +44,7 @@ it('runs the equilibrium challenge', function () {
     $this->actingAs($player_3->user);
 
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->assertSee('The average score (not including hidde points) is 10.')
+        ->assertSee('The average score (not including hidden points) is 10.')
         ->set('round_properties.'.$challenge->class_key.'.upvote_player_id', $player_2->id)
         ->set('round_properties.'.$challenge->class_key.'.downvote_player_id', $player_4->id)
         ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)
