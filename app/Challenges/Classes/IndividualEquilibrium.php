@@ -13,7 +13,7 @@ class IndividualEquilibrium extends BaseChallengeClass implements SupportsPeckin
 
     const NAME = 'Equilibrium';
 
-    const DESCRIPTION = 'The average score (not including hidde points) is {average}. You cannot upvote a player with a score higher than {average}, or downvote a player with a score lower than {average}.';
+    const DESCRIPTION = 'The average score (not including hidden points) is {average}. You cannot upvote a player with a score higher than {average}, or downvote a player with a score lower than {average}.';
 
     const TYPE = 'individual';
 

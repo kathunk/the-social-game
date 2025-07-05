@@ -42,7 +42,7 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
 
         $description = strtr(self::DESCRIPTION, [
             '{([# of points separating 1st and last] + [# of players])/2}' => ($score_gap + $player_count) / 2,
-            '{(# of players / 3)}' => $player_count / 3,
+            '{# of players / 3}' => $player_count / 3,
         ]);
 
         return $this->form()
