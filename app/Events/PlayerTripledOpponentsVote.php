@@ -13,7 +13,7 @@ class PlayerTripledOpponentsVote extends Event
 {
     use HasChallenge, HasGame, HasPlayer;
 
-    public array $tripled_player_id;
+    public int $tripled_player_id;
 
     public function apply(ChallengeState $challenge)
     {

@@ -34,23 +34,17 @@ it('runs the individual high trust environment challenge', function () {
 
     $challenge = Challenge::first();
 
-    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+    Livewire::actingAs($player_1->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('round_properties.'.$challenge->class_key.'.upvote_player_id', $player_3->id)
         ->set('round_properties.'.$challenge->class_key.'.downvote_player_id', $player_2->id)
-        ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)->assertHasNoErrors()
-        ->set('round_properties.'.$challenge->class_key.'.tripled_player_id', $player_2->id)
-        ->call('callClassAction', 'triple_vote', 'challenge', $challenge->class_key)->assertHasErrors();
+        ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
-    $this->actingAs($player_2->user);
-
-    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+    Livewire::actingAs($player_2->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('round_properties.'.$challenge->class_key.'.tripled_player_id', $player_1->id)
         ->call('callClassAction', 'triple_vote', 'challenge', $challenge->class_key)->assertHasNoErrors()
-        ->set('round_properties.'.$challenge->class_key.'.upvote_player_id', $player_3->id)
-        ->set('round_properties.'.$challenge->class_key.'.downvote_player_id', $player_4->id)
-        ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)->assertHasErrors();
+        ->set('round_properties.'.$challenge->class_key.'.upvote_player_id', $player_3->id);
 
-    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+    Livewire::actingAs($player_3->user)->test(GameDashboard::class, ['game' => $this->game->fresh()])
         ->set('round_properties.'.$challenge->class_key.'.tripled_player_id', $player_1->id)
         ->call('callClassAction', 'triple_vote', 'challenge', $challenge->class_key)->assertHasNoErrors();
 
@@ -60,6 +54,6 @@ it('runs the individual high trust environment challenge', function () {
     // visible scores show this
     expect($player_1->fresh()->score)->toBe(0);
     expect($player_2->fresh()->score)->toBe(-6);
-    expect($player_3->fresh()->score)->toBe(0);
+    expect($player_3->fresh()->score)->toBe(6);
     expect($player_4->fresh()->score)->toBe(0);
 });

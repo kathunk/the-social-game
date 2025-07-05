@@ -2,12 +2,11 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Traits\HasPeckingOrderBallots;
+use App\Events\PlayerTripledOpponentsVote;
 use App\Models\Player;
 use App\States\GameState;
-use App\Events\PlayerSubmittedQuizGuess;
-use App\Events\PlayerTripledOpponentsVote;
-use App\Challenges\Support\Traits\HasPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 class IndividualHighTrustEnvironment extends BaseChallengeClass implements SupportsPeckingOrderBallots
 {
@@ -51,7 +50,7 @@ class IndividualHighTrustEnvironment extends BaseChallengeClass implements Suppo
             )
             ->when(! $has_opted_out && ! $has_voted, fn ($form) => $form->select(
                 property_name: 'tripled_player_id',
-                options: $players->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
+                options: $players->reject(fn ($p) => $p->id === $player->id)->mapWithKeys(fn ($p) => [$p->id => $p->name])->toArray(),
                 label: 'Select a player to triple the value of their vote',
                 placeholder: 'Select a player...',
                 validation_rules: 'required|in:'.implode(',', $players->reject(fn ($p) => $p->id === $player->id)->pluck('id')->toArray()),
@@ -82,7 +81,7 @@ class IndividualHighTrustEnvironment extends BaseChallengeClass implements Suppo
             player_id: $player->id,
             challenge_id: $this->challenge->id,
             game_id: $this->challenge->game_id,
-            tripled_player_id: $params['tripled_player_id'],
+            tripled_player_id: (int) $params['tripled_player_id'],
         );
     }
 
