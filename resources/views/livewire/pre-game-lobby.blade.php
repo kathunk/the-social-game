@@ -229,6 +229,10 @@
                 </div>
             </div>
         </flux:card>
+
+        @foreach ($this->modifiersRequiringSetup as $modifier)
+            <x-game-components.form :form="$modifier->frontendComponentForSetup($this->user)" />
+        @endforeach
     @endif
 
     @if ($this->is_game_admin && $this->game->requires_admin_approval_to_join && $this->game->status !== 'ended')

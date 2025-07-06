@@ -197,6 +197,14 @@ class PreGameLobby extends Component
         return $min && $this->players->count() < $min;
     }
 
+    #[Computed]
+    public function modifiersRequiringSetup()
+    {
+        return $this->game->gameTemplate->modifiers->filter(function ($modifier) {
+            return $modifier::REQUIRES_PRE_GAME_SETUP;
+        });
+    }
+
     public function mount(Game $game)
     {
         $this->game = $game;

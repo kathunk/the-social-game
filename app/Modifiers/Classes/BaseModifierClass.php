@@ -2,13 +2,14 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Modifier;
+use App\Models\User;
 use App\Models\Player;
+use App\Models\Modifier;
 use App\States\GameState;
-use App\States\ModifierState;
-use App\States\PlayerState;
 use App\States\TeamState;
+use App\States\PlayerState;
 use App\Support\FormBuilder;
+use App\States\ModifierState;
 
 abstract class BaseModifierClass
 {
@@ -17,6 +18,8 @@ abstract class BaseModifierClass
     const DESCRIPTION = 'Base Modifier description';
 
     const TYPE = 'team'; // team or individual
+
+    const REQUIRES_PRE_GAME_SETUP = false;
 
     abstract public static function key(): string;
 
@@ -94,6 +97,11 @@ abstract class BaseModifierClass
     }
 
     public function frontendComponentForDedicatedPage(Player $player): array
+    {
+        return [];
+    }
+
+    public function frontendComponentForSetup(User $user): array
     {
         return [];
     }

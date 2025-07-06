@@ -3,18 +3,19 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Challenges\Classes\FlattenTheCurve;
-use App\Challenges\Classes\TheGreatRealignment;
-use App\Events\GameModeAdded;
-use App\Events\GameTemplateAdded;
 use App\Models\Game;
+use App\Models\User;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
-use App\Models\User;
-use App\Modifiers\Classes\TeamResignation;
-use App\Modifiers\Classes\TeamSecretAlliance;
-use Illuminate\Database\Seeder;
+use App\Events\GameModeAdded;
 use Thunk\Verbs\Facades\Verbs;
+use Illuminate\Database\Seeder;
+use App\Events\GameTemplateAdded;
+use App\Modifiers\Classes\TeamResignation;
+use App\Modifiers\Classes\TeamSecretCodes;
+use App\Challenges\Classes\FlattenTheCurve;
+use App\Modifiers\Classes\TeamSecretAlliance;
+use App\Challenges\Classes\TheGreatRealignment;
 
 class Laracon2025Seeder extends Seeder
 {
@@ -55,7 +56,7 @@ class Laracon2025Seeder extends Seeder
                     'duration' => 60,
                 ],
             ],
-            modifiers: [TeamResignation::key(), TeamSecretAlliance::key()],
+            modifiers: [TeamResignation::key(), TeamSecretAlliance::key(), TeamSecretCodes::key()],
         )->game_template_id;
 
         $template = GameTemplate::find($template_id);

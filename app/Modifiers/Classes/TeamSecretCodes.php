@@ -2,14 +2,9 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Events\PlayerAssignedSecretAllyInTeamGame;
-use App\Models\Modifier;
+use App\Models\User;
 use App\Models\Player;
-use App\States\GameState;
-use App\States\ModifierState;
-use App\States\PlayerState;
-use App\States\TeamState;
-use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerInputSecretCode;
 
 class TeamSecretCodes extends BaseModifierClass
 {
@@ -21,9 +16,11 @@ class TeamSecretCodes extends BaseModifierClass
 
     const TYPE = 'team';
 
+    const REQUIRES_PRE_GAME_SETUP = true;
+
     public static function key(): string
     {
-        return 'team_secret_alliance';
+        return 'team_secret_codes';
     }
 
     public function dataArrayForState(): array
@@ -33,6 +30,26 @@ class TeamSecretCodes extends BaseModifierClass
             'used_codes' => [],
             'banned_player_ids' => [],
         ];
+    }
+
+    public function frontendComponentForSetup(User $user): array
+    {
+        if ($this->modifier->game->status === 'upcoming') {
+            return $this->form()
+                ->title('Secret codes')
+                ->subtitle('Add secret codes, separated by commas. Each code must be unique and cannot be more than 100 characters. You will not be able to see or change these codes once the game begins.')
+                ->input(
+                    property_name: 'codes',
+                    validation_rules: 'required|array|min:1',
+                    validation_messages: [
+                        'required' => 'You must add at least one code.',
+                        'array' => 'Codes must be separated by commas.',
+                        'min' => 'You must add at least one code.',
+                    ]
+                )->build();
+        }
+
+        return [];
     }
 
     public function frontendComponentForDedicatedPage(Player $player): array
@@ -75,8 +92,9 @@ class TeamSecretCodes extends BaseModifierClass
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
             game_type: 'team',
-            hidden_point_reward: 1,
-            point_reward: 0,
+            point_reward: 1,
+            points_are_hidden: true,
             team_id: $player->team_id,
         );
     }
+}
