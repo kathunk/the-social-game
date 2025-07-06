@@ -15,13 +15,9 @@
                     ({{ $activated_challenges }} of {{ $total_challenges }})
                 </flux:text>
             
-                @if ($this->challenge->ends_at->isFuture())
-                    <flux:text variant="subtle" class="flex items-baseline">
-                        <x-game-components.countdown-timer :ends_at="$this->challenge->ends_at->toIsoString()" />
-                    </flux:text>
-                @else
-                    <flux:text variant="subtle">ending...</flux:text>
-                @endif
+                <flux:text variant="subtle" class="flex items-baseline">
+                    <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
+                </flux:text>
             </div>
         @endif
         @foreach ($form['elements'] as $element)
@@ -70,6 +66,8 @@
                         wire:key="select-{{ $class_key }}-{{ $element['property_name'] }}"
                         label="{{ $element['label'] }}"
                         wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
+                        variant="listbox"
+                        :searchable="$element['searchable']"
                     >
                     @isset($element['placeholder'])
                         <flux:select.option value="" selected class="placeholder">{{ $element['placeholder'] }}</flux:select.option>

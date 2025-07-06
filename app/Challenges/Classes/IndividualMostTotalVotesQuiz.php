@@ -37,13 +37,19 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_guessed = isset($this->challenge->challenge_data['quiz_submissions'][$player->id])
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
+        $has_voted = $this->hasVoted($player);
+
+        $quiz_description = $has_guessed
+            ? '🤔 Guessed that '.Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
+                ' will receive the most votes this round.'
+            : null;
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_guessed, fn ($form) => $form->subtitle('You have already guessed.')
+            ->when($has_guessed, fn ($form) => $form->subtitle($quiz_description)
             )
             ->when(! $has_guessed, fn ($form) => $form->select(
                 property_name: 'guess_player_id',
@@ -62,7 +68,7 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
             )
             ->when(! $has_guessed || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -101,10 +107,20 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
         $players_with_most_votes = $vote_counts->filter(fn ($count) => $count === $max_votes)->keys()->toArray();
 
         $game_state->players()->each(function ($player) use ($players_with_most_votes) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess_id = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_player_id'];
 
+            if ($guess_id === null) {
+                return;
+            }
+
             if (in_array($guess_id, $players_with_most_votes)) {
-                $player->addToScoreHistory(1, 'Correctly guessed the player with the most votes', true);
+                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' will receive the most votes', true);
+            } else {
+                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' will receive the most votes', true);
             }
         });
     }

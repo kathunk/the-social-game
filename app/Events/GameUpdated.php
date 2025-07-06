@@ -23,9 +23,9 @@ class GameUpdated extends Event
 
     public ?int $challenge_length_override = null;
 
-    public Carbon $starts_at;
+    public ?Carbon $starts_at = null;
 
-    public Carbon $ends_at;
+    public ?Carbon $ends_at = null;
 
     public bool $is_public;
 
@@ -45,12 +45,10 @@ class GameUpdated extends Event
     {
         $game->game_template_id = $this->game_template_id;
         $game->game_mode_id = $this->game_mode_id;
-        $game->starts_at = Carbon::parse($this->starts_at);
+        $game->starts_at = $this->starts_at ? Carbon::parse($this->starts_at) : null;
+        $game->ends_at = $this->ends_at ? Carbon::parse($this->ends_at) : null;
         $game->is_public = $this->is_public;
         $game->requires_admin_approval_to_join = $this->requires_admin_approval_to_join;
-        $game->ends_at = Carbon::parse($this->starts_at)->addMinutes(
-            $this->state(GameTemplateState::class)->durationOfAllChallengesInMinutes()
-        );
         $game->players_can_join_late = $this->state(GameTemplateState::class)->players_can_join_late;
         $game->challenge_length_override = $this->challenge_length_override;
         $game->social_links = $this->social_links;
@@ -58,11 +56,13 @@ class GameUpdated extends Event
 
     public function handle()
     {
+        $state = $this->state(GameState::class);
+
         Game::find($this->game_id)->update([
             'game_template_id' => $this->game_template_id,
             'game_mode_id' => $this->game_mode_id,
-            'starts_at' => $this->starts_at,
-            'ends_at' => $this->ends_at,
+            'starts_at' => $state->starts_at,
+            'ends_at' => $state->ends_at,
             'is_public' => $this->is_public,
             'requires_admin_approval_to_join' => $this->requires_admin_approval_to_join,
             'players_can_join_late' => $this->state(GameTemplateState::class)->players_can_join_late,

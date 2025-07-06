@@ -123,6 +123,7 @@ class FormBuilder
         string $validation_rules,
         array $validation_messages,
         ?string $placeholder = null,
+        ?bool $searchable = true,
     ): static {
         $this->elements[] = [
             'type' => 'select',
@@ -132,6 +133,7 @@ class FormBuilder
             'validation_rules' => $validation_rules,
             'validation_messages' => $validation_messages,
             'placeholder' => $placeholder,
+            'searchable' => $searchable,
         ];
 
         return $this;

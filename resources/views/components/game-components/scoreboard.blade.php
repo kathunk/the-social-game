@@ -13,6 +13,9 @@
                         Players
                     @endif
                 </flux:table.column>
+                @if ($type === 'team')
+                    <flux:table.column>Players</flux:table.column>
+                @endif
                 <flux:table.column>Score</flux:table.column>
             </flux:table.columns>
 
@@ -27,6 +30,9 @@
                                         (your team)
                                     @endif
                                 </flux:link>
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                {{ $this->players->where('team_id', $team->id)->count() }}
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if ($this->game->status === 'ended')

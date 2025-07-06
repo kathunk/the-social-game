@@ -60,11 +60,11 @@ trait HasPeckingOrderBallots
                 ->count();
 
             if ($upvotes_received > 0) {
-                $player->addToScoreHistory($upvotes_received, 'Received upvotes');
+                $player->addToScoreHistory($upvotes_received, '👍 Received upvotes');
             }
 
             if ($downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received, 'Received downvotes');
+                $player->addToScoreHistory(-$downvotes_received, '👎 Received downvotes');
             }
         });
     }
@@ -95,5 +95,30 @@ trait HasPeckingOrderBallots
     public function downvoteTargets(Player $player)
     {
         return $this->challenge->game->players->reject(fn ($p) => $p->id === $player->id);
+    }
+
+    public function hasVoted(Player $player)
+    {
+        if (! isset($this->challenge->challenge_data['votes'][$player->id])) {
+            return false;
+        }
+
+        $vote_ids = $this->challenge->challenge_data['votes'][$player->id];
+
+        return isset($vote_ids['upvote_player_id']) && isset($vote_ids['downvote_player_id']);
+    }
+
+    public function voteDescription(Player $player)
+    {
+        if (! $this->hasVoted($player)) {
+            return null;
+        }
+
+        $vote_ids = $this->challenge->challenge_data['votes'][$player->id];
+
+        $upvoted_player = Player::find($vote_ids['upvote_player_id']);
+        $downvoted_player = Player::find($vote_ids['downvote_player_id']);
+
+        return '🗳️ Upvoted '.$upvoted_player->name.' and downvoted '.$downvoted_player->name.'.';
     }
 }

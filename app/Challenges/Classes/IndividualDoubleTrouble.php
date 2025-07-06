@@ -36,16 +36,15 @@ class IndividualDoubleTrouble extends BaseChallengeClass implements SupportsPeck
 
     public function frontendComponent(Player $player): array
     {
-        $players = $player->game->players;
         $has_bought_immunity = in_array($player->id, $this->challenge->challenge_data['immune_player_ids']);
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_voted = $this->hasVoted($player);
 
         $can_afford_immunity = $player->hidden_score > 1;
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_bought_immunity, fn ($form) => $form->subtitle('You have bought immunity.')
+            ->when($has_bought_immunity, fn ($form) => $form->subtitle('🛡️ You have bought immunity.')
             )
             ->when(! $has_bought_immunity && $can_afford_immunity, fn ($form) => $form
                 ->buttonGroup()
@@ -54,7 +53,7 @@ class IndividualDoubleTrouble extends BaseChallengeClass implements SupportsPeck
             )
             ->when(! $has_bought_immunity || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -94,15 +93,15 @@ class IndividualDoubleTrouble extends BaseChallengeClass implements SupportsPeck
                 ->count();
 
             if ($upvotes_received > 0) {
-                $player->addToScoreHistory($upvotes_received * 2, 'Received doubled upvotes');
+                $player->addToScoreHistory($upvotes_received * 2, '👍 Received doubled upvotes');
             }
 
             if ($immune_player_ids->contains($player->id) && $downvotes_received > 0) {
-                $player->addToScoreHistory(0, 'Blocked '.$downvotes_received * 2 .' downvotes');
+                $player->addToScoreHistory(0, '🛡️ Blocked '.$downvotes_received * 2 .' downvotes');
             }
 
             if (! $immune_player_ids->contains($player->id) && $downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received * 2, 'Received doubled downvotes');
+                $player->addToScoreHistory(-$downvotes_received * 2, '👎 Received doubled downvotes');
             }
         });
     }

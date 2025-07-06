@@ -1,6 +1,10 @@
+@props(['label' => null, 'description' => null, 'name' => null])
+
 <div class="text-steel-95 text-sm" x-data="datetime" {{ $attributes->wire('model') }}>
     <div class="mb-2">
-        <flux:heading>{{ $label }}</flux:heading>
+        @if(isset($label))
+            <flux:heading>{{ $label }}</flux:heading>
+        @endif
         @if(isset($description))
             <flux:text>{{ $description }}</flux:text>
         @endif
@@ -23,7 +27,7 @@
     </input>
 
     @error($name)
-        <div class="text-red-600 text-sm mb-3">{{ $message }}</div>
+        <div class="text-red-600 text-sm my-3">{{ $message }}</div>
     @enderror
 
     @if (session()->has('message'))
@@ -32,7 +36,7 @@
         </div>
     @endif
 
-    <input type="hidden" x-ref="anchor" {{ $attributes->whereStartsWith('wire:model') }} @change="changeDate"/>
+    <input type="hidden" x-ref="anchor" />
 </div>
 
     <script>
@@ -40,44 +44,40 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('datetime', () => ({
                 init() {
-                    const wireModel = this.$refs.anchor.getAttribute('wire:model');
+                    const wireModel = this.$el.getAttribute('wire:model');
 
-                    // Set up the watcher for ongoing changes
-                    this.$watch('$wire.' + wireModel, (value) => {
-                        if (value) {
-                            this.setDate(value);
-                        }
-                    });
+                    // Store wireModel for later use
+                    this.wireModel = wireModel;
 
-                    // Listen for Livewire initialization to get initial value
-                    document.addEventListener('livewire:init', () => {
-                        this.$nextTick(() => {
-                            const initialValue = this.$wire.get(wireModel);
-                            if (initialValue) {
-                                this.setDate(initialValue);
+                    if (wireModel) {
+                        // Set up the watcher for ongoing changes
+                        this.$watch('$wire.' + wireModel, (value) => {
+                            if (value) {
+                                this.setDate(value);
                             }
                         });
-                    });
 
-                    // Also try to get value immediately in case Livewire is already initialized
-                    this.$nextTick(() => {
-                        if (this.$wire && typeof this.$wire.get === 'function') {
-                            const initialValue = this.$wire.get(wireModel);
-                            if (initialValue) {
-                                this.setDate(initialValue);
+                        // Initialize with existing value if it exists
+                        this.$nextTick(() => {
+                            if (this.$wire && typeof this.$wire.get === 'function') {
+                                const initialValue = this.$wire.get(wireModel);
+                                if (initialValue) {
+                                    this.setDate(initialValue);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 },
+                wireModel: null,
                 date: null,
                 min: {!! isset($min) ? "'$min'" : 'null' !!},
                 max: {!! isset($max) ? "'$max'" : 'null' !!},
                 get minFormatted() {
-                    console.log({min: this.min})
+
                     return this.min ? toISOLocal(new Date(this.min)) : null
                 },
                 get maxFormatted() {
-                    console.log({max: this.max})
+
                     return this.max ? toISOLocal(new Date(this.max)) : null
                 },
                 get dateTimeLocalString() {
@@ -96,7 +96,10 @@
 
                     this.setDate(e.target.value);
 
-                    this.$dispatch('input', this.utcIsoString)
+                    // Use the stored wireModel from init
+                    if (this.wireModel) {
+                        this.$wire.set(this.wireModel, this.utcIsoString);
+                    }
                 }
             }))
         })

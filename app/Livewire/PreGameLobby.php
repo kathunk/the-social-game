@@ -13,6 +13,7 @@ use App\Models\GameApplication;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\Player;
+use App\Models\User;
 use App\Support\HtmlTransformer;
 use Flux\Flux;
 use Illuminate\Support\Carbon;
@@ -30,7 +31,9 @@ class PreGameLobby extends Component
 
     public string $selected_application_id = '';
 
-    public Carbon $game_start_timecode;
+    public ?Carbon $game_start_timecode = null;
+
+    public bool $has_scheduled_start;
 
     public string $game_mode_id;
 
@@ -81,7 +84,8 @@ class PreGameLobby extends Component
     #[Computed]
     public function players()
     {
-        return $this->game->players()
+        return $this->game
+            ->players()
             ->where('status', '!=', 'rejected')
             ->where('status', '!=', 'removed')
             ->with('user')
@@ -122,7 +126,9 @@ class PreGameLobby extends Component
     #[Computed]
     public function application()
     {
-        return $this->user?->gameApplications->where('game_id', $this->game->id)->first();
+        return $this->user?->gameApplications
+            ->where('game_id', $this->game->id)
+            ->first();
     }
 
     #[Computed]
@@ -152,7 +158,9 @@ class PreGameLobby extends Component
     #[Computed]
     public function description()
     {
-        return (new HtmlTransformer($this->game->gameMode->pre_game_lobby_message))->formatted();
+        return (new HtmlTransformer(
+            $this->game->gameMode->pre_game_lobby_message
+        ))->formatted();
     }
 
     #[Computed]
@@ -196,12 +204,20 @@ class PreGameLobby extends Component
         $this->game_mode = $game->gameMode;
         $this->game_templates = $this->game_mode->gameTemplates;
         $this->game_start_timecode = $game->starts_at;
-        $this->requires_admin_approval_to_join = $game->requires_admin_approval_to_join;
+        $this->has_scheduled_start = $game->starts_at ? true : false;
+        $this->requires_admin_approval_to_join =
+            $game->requires_admin_approval_to_join;
         $this->game_mode_id = (string) $game->gameMode->id;
         $this->game_template_id = (string) $game->gameTemplate->id;
         $this->challenge_length_override = $game->challenge_length_override;
-        $this->use_challenge_length_override = $game->challenge_length_override ? true : false;
-        $this->social_link_url = preg_replace('/^https?:\/\//', '', $game->social_links[0] ?? '');
+        $this->use_challenge_length_override = $game->challenge_length_override
+            ? true
+            : false;
+        $this->social_link_url = preg_replace(
+            "/^https?:\/\//",
+            '',
+            $game->social_links[0] ?? ''
+        );
 
         if ($this->application) {
             $this->checkStatus();
@@ -240,13 +256,20 @@ class PreGameLobby extends Component
             user_id: $player->user_id,
             game_id: $this->game->id,
             admin_id: $this->user->id,
-            application_id: $player->user->gameApplications->firstWhere('game_id', $this->game->id)->id,
+            application_id: $player->user->gameApplications->firstWhere(
+                'game_id',
+                $this->game->id
+            )->id
         );
 
         Verbs::commit();
         unset($this->players);
 
-        Flux::toast(variant: 'success', heading: 'User removed', text: $player->user->name.' has been removed from the game.');
+        Flux::toast(
+            variant: 'success',
+            heading: 'User removed',
+            text: $player->user->name.' has been removed from the game.'
+        );
     }
 
     public function promoteToAdmin(string $player_id)
@@ -256,13 +279,17 @@ class PreGameLobby extends Component
         UserPromotedToGameAdmin::fire(
             user_id: $player->user_id,
             game_id: $this->game->id,
-            admin_id: $this->user->id,
+            admin_id: $this->user->id
         );
 
         Verbs::commit();
         unset($this->admins);
 
-        Flux::toast(variant: 'success', heading: 'User promoted', text: $player->user->name.' has been promoted to admin.');
+        Flux::toast(
+            variant: 'success',
+            heading: 'User promoted',
+            text: $player->user->name.' has been promoted to admin.'
+        );
     }
 
     public function demoteFromAdmin(string $player_id)
@@ -272,13 +299,17 @@ class PreGameLobby extends Component
         UserDemotedFromGameAdmin::fire(
             user_id: $player->user_id,
             game_id: $this->game->id,
-            admin_id: $this->user->id,
+            admin_id: $this->user->id
         );
 
         Verbs::commit();
         unset($this->admins);
 
-        Flux::toast(variant: 'success', heading: 'User demoted', text: $player->user->name.' has been demoted from admin.');
+        Flux::toast(
+            variant: 'success',
+            heading: 'User demoted',
+            text: $player->user->name.' has been demoted from admin.'
+        );
     }
 
     public function approveUser()
@@ -287,19 +318,26 @@ class PreGameLobby extends Component
             'selected_application_id' => 'required|exists:game_applications,id',
         ]);
 
-        $application = $this->newApplications->firstWhere('id', (int) $this->selected_application_id);
+        $application = $this->newApplications->firstWhere(
+            'id',
+            (int) $this->selected_application_id
+        );
 
         UserAdmittedToGame::fire(
             user_id: (int) $application->user_id,
             admin_id: $this->user->id,
             game_id: $this->game->id,
-            application_id: $application->id,
+            application_id: $application->id
         );
 
         $this->selected_application_id = '';
         unset($this->newApplications);
 
-        Flux::toast(variant: 'success', heading: 'User approved', text: 'The user has been approved to join the game.');
+        Flux::toast(
+            variant: 'success',
+            heading: 'User approved',
+            text: 'The user has been approved to join the game.'
+        );
     }
 
     public function rejectUser()
@@ -308,44 +346,75 @@ class PreGameLobby extends Component
             'selected_application_id' => 'required|exists:game_applications,id',
         ]);
 
-        $application = $this->newApplications->firstWhere('id', (int) $this->selected_application_id);
+        $application = $this->newApplications->firstWhere(
+            'id',
+            (int) $this->selected_application_id
+        );
 
         UserRejectedFromGame::fire(
             user_id: (int) $application->user_id,
             admin_id: $this->user->id,
             game_id: $this->game->id,
-            application_id: $application->id,
+            application_id: $application->id
         );
 
         $this->selected_application_id = '';
         unset($this->newApplications);
 
-        Flux::toast(variant: 'success', heading: 'User rejected', text: 'The user has been rejected from the game.');
+        Flux::toast(
+            variant: 'success',
+            heading: 'User rejected',
+            text: 'The user has been rejected from the game.'
+        );
     }
 
     public function updateGameSettings()
     {
         $mode = GameMode::find($this->game_mode_id);
 
-        if (! $mode->gameTemplates->pluck('id')->contains($this->game_template_id)) {
-            $this->game_template_id = (string) $mode->selectTemplateForUser($this->user)->id;
+        if (
+            ! $mode->gameTemplates
+                ->pluck('id')
+                ->contains($this->game_template_id)
+        ) {
+            $this->game_template_id = (string) $mode->selectTemplateForUser(
+                $this->user
+            )->id;
         }
 
-        $this->validate([
+        $rules = [
             'game_template_id' => 'required|exists:game_templates,id',
             'game_mode_id' => 'required|exists:game_modes,id',
-            'game_start_timecode' => 'required|date',
             'challenge_length_override' => 'nullable|integer|min:1',
+        ];
+
+        if ($this->has_scheduled_start) {
+            $rules['game_start_timecode'] = [
+                'required',
+                'date',
+                'after:'.now(),
+            ];
+        }
+
+        $this->validate($rules, [
+            'game_start_timecode.required' => 'Scheduled start time is required',
+            'game_start_timecode.after' => 'Scheduled start must be in the future',
         ]);
 
         $url_input = $this->social_link_url;
 
         if (! empty($url_input)) {
-            if (! str_starts_with($url_input, 'http://') && ! str_starts_with($url_input, 'https://')) {
+            if (
+                ! str_starts_with($url_input, 'http://') &&
+                ! str_starts_with($url_input, 'https://')
+            ) {
                 $url_input = 'https://'.$url_input;
             }
 
-            Validator::make(['url' => $url_input], ['url' => 'url'])->validate();
+            Validator::make(
+                ['url' => $url_input],
+                ['url' => 'url']
+            )->validate();
         }
 
         if (! $this->use_challenge_length_override) {
@@ -355,22 +424,29 @@ class PreGameLobby extends Component
         $game_template = GameTemplate::find($this->game_template_id);
 
         $duration = $this->challenge_length_override
-            ? $this->challenge_length_override * count($game_template->challenges)
+            ? $this->challenge_length_override *
+                count($game_template->challenges)
             : $game_template->total_duration;
 
-        $ends_at = Carbon::parse($this->game_start_timecode)->addMinutes($duration);
+        $starts_at = $this->has_scheduled_start
+            ? Carbon::parse($this->game_start_timecode)
+            : null;
+
+        $ends_at = $this->has_scheduled_start
+            ? Carbon::parse($this->game_start_timecode)->addMinutes($duration)
+            : null;
 
         GameUpdated::fire(
             game_id: $this->game->id,
             user_id: $this->user->id,
             game_template_id: (int) $this->game_template_id,
             game_mode_id: (int) $this->game_mode_id,
-            starts_at: Carbon::parse($this->game_start_timecode),
+            starts_at: $starts_at,
             ends_at: $ends_at,
             is_public: true,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
             challenge_length_override: $this->challenge_length_override,
-            social_links: ! empty($url_input) ? [$url_input] : [],
+            social_links: ! empty($url_input) ? [$url_input] : []
         );
 
         Verbs::commit();
@@ -380,24 +456,6 @@ class PreGameLobby extends Component
 
     public function startGame()
     {
-        $duration = GameTemplate::find($this->game_template_id)->total_duration;
-        $ends_at = Carbon::parse(now())->addMinutes($duration);
-
-        GameUpdated::fire(
-            game_id: $this->game->id,
-            user_id: $this->user->id,
-            game_template_id: (int) $this->game_template_id,
-            game_mode_id: (int) $this->game_mode_id,
-            starts_at: now(),
-            ends_at: $ends_at,
-            is_public: true,
-            requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
-            challenge_length_override: $this->game->challenge_length_override,
-            social_links: $this->game->social_links,
-        );
-
-        Verbs::commit();
-
         $this->game->fresh()->start();
 
         Verbs::commit();
@@ -422,10 +480,27 @@ class PreGameLobby extends Component
 
     public function fillGameWithBots()
     {
+        $available = User::where('email', 'like', 'bot%@bot.bot')->count();
+
+        if ($this->bots_to_add > $available) {
+            Artisan::call('app:create-bots', [
+                'amount' => $this->bots_to_add - $available,
+            ]);
+        }
+
+        Verbs::commit();
+
         try {
-            Artisan::call('app:fill-game-with-bots', ['game_id' => $this->game->id, 'amount' => $this->bots_to_add]);
+            Artisan::call('app:fill-game-with-bots', [
+                'game_id' => $this->game->id,
+                'amount' => $this->bots_to_add,
+            ]);
         } catch (\Exception $e) {
-            Flux::toast(variant: 'error', heading: 'Error', text: 'Error filling game with bots: '.$e->getMessage());
+            Flux::toast(
+                variant: 'error',
+                heading: 'Error',
+                text: 'Error filling game with bots: '.$e->getMessage()
+            );
         }
 
         return redirect()->route('pre-game-lobby', ['game' => $this->game]);

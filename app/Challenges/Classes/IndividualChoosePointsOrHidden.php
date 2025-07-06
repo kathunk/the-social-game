@@ -37,8 +37,17 @@ class IndividualChoosePointsOrHidden extends BaseChallengeClass implements Suppo
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
+        $has_voted = $this->hasVoted($player);
+
+        if ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'points') {
+            $choice_description = '📈 Chose points';
+        } elseif ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'hidden') {
+            $choice_description = '📈 Chose hidden points';
+        } else {
+            $choice_description = null;
+        }
 
         $player_count = $players->count();
 
@@ -50,7 +59,7 @@ class IndividualChoosePointsOrHidden extends BaseChallengeClass implements Suppo
         return $this->form()
             ->title(self::NAME)
             ->subtitle($description)
-            ->when($has_chosen, fn ($form) => $form->subtitle('You have made your choice.')
+            ->when($has_chosen, fn ($form) => $form->subtitle($choice_description)
             )
             ->when(! $has_chosen, fn ($form) => $form
                 ->buttonGroup()
@@ -60,7 +69,7 @@ class IndividualChoosePointsOrHidden extends BaseChallengeClass implements Suppo
             )
             ->when(! $has_chosen || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -102,19 +111,23 @@ class IndividualChoosePointsOrHidden extends BaseChallengeClass implements Suppo
         $number_of_players_who_chose_points = collect($choices)->filter(fn ($choice) => $choice === 'points')->count();
         $number_of_players_who_chose_hidden = collect($choices)->filter(fn ($choice) => $choice === 'hidden')->count();
 
-        // Handle cases where no players chose either option
         $points_per_player = $number_of_players_who_chose_points > 0
             ? floor($points / $number_of_players_who_chose_points)
             : 0;
+
         $hidden_points_per_player = $number_of_players_who_chose_hidden > 0
             ? floor($hidden_points / $number_of_players_who_chose_hidden)
             : 0;
 
         $game_state->players()->each(function ($player) use ($choices, $points_per_player, $hidden_points_per_player) {
+            if (! isset($choices[$player->id]) || $choices[$player->id] === null) {
+                return;
+            }
+
             if ($choices[$player->id] === 'points') {
-                $player->addToScoreHistory($points_per_player, 'Chose points');
+                $player->addToScoreHistory($points_per_player, '📈 Chose points');
             } else {
-                $player->addToScoreHistory($hidden_points_per_player, 'Chose hidden points', true);
+                $player->addToScoreHistory($hidden_points_per_player, '📈 Chose hidden points', true);
             }
         });
     }

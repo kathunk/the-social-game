@@ -8,6 +8,7 @@ use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use App\Events\UserCreated;
+use App\Events\UserSubscribedToNewsletter;
 use Thunk\Verbs\Facades\Verbs;
 
 new #[Layout('components.layouts.auth')] class extends Component {
@@ -15,7 +16,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
-    
+    public bool $subscribed_to_newsletter = true;
+
     public ?string $game = null;
 
     public function mount(): void
@@ -47,6 +49,10 @@ new #[Layout('components.layouts.auth')] class extends Component {
         event(new Registered($user));
 
         Auth::login($user);
+
+        if ($this->subscribed_to_newsletter) {
+            UserSubscribedToNewsletter::fire(user_id: $user->id);
+        }
 
         if ($this->game) {
             $this->redirect(route('pre-game-lobby', ['game' => $this->game], absolute: false), navigate: true);
@@ -103,6 +109,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
             autocomplete="new-password"
             :placeholder="__('Confirm password')"
         />
+
+        <div class="flex items-center justify-between">
+            <flux:checkbox
+                wire:model="subscribed_to_newsletter"
+                :label="__('Email me when something cool drops')"
+            />
+        </div>
 
         <div class="flex items-center justify-end">
             <flux:button type="submit" variant="primary" class="w-full">

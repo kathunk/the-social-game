@@ -39,9 +39,9 @@ class TeamSecretAlliance extends BaseModifierClass
         $pair_data = new TeamSecretAlliancePairData(player_id: $player->id, modifier: $this->modifier);
         $ally = $pair_data->ally();
         $player_is_active = $player->status === 'active';
-        $player_is_lucky = rand(0, 100) > 0;
+        $player_is_lucky = rand(0, 100) > 90;
 
-        if ($player_is_active && ! $ally && $player_is_lucky && $player->team_id) {
+        if ($ally || ($player_is_active && $player_is_lucky && $player->team_id)) {
             return $this->form()
                 ->title(static::NAME)
                 ->subtitle('You discovered a secret! A friend is waiting for you.')
@@ -189,7 +189,7 @@ class TeamSecretAlliance extends BaseModifierClass
             return;
         }
 
-        $team_state->addToScoreHistory(5, $player_state->name.' and '.$ally->name.' were secret allies', true);
+        $team_state->addToScoreHistory(5, '🤝 '.$player_state->name.' and '.$ally->name.' were secret allies', true);
 
         $modifier_state->modifier_data['pairs'] = collect($modifier_state->modifier_data['pairs'])
             ->map(function ($pair) use ($player_state) {

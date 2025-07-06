@@ -48,13 +48,28 @@ class IndividualOathQuiz extends BaseChallengeClass implements SupportsPeckingOr
     public function frontendComponent(Player $player): array
     {
         $players = $player->game->players;
-        $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_guessed = isset($this->challenge->challenge_data['quiz_submissions'][$player->id])
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'] !== null;
+        $has_voted = $this->hasVoted($player);
+
+        if (isset($this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type'])
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type'] === 'blood_oath') {
+            $oath_type_description = 'a Blood Oath';
+        } elseif (isset($this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type']) && $this->challenge->challenge_data['quiz_submissions'][$player->id]['oath_type'] === 'oath_of_solitude') {
+            $oath_type_description = 'an Oath of Solitude';
+        } else {
+            $oath_type_description = null;
+        }
+
+        $quiz_description = $has_guessed
+            ? '🤔 Guessed that '.Player::find($this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_player_id'])->name.
+                ' is in '.$oath_type_description.'.'
+            : null;
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_guessed, fn ($form) => $form->subtitle('You have already guessed.')
+            ->when($has_guessed, fn ($form) => $form->subtitle($quiz_description)
             )
             ->when(! $has_guessed, fn ($form) => $form->select(
                 property_name: 'guess_player_id',
@@ -88,7 +103,7 @@ class IndividualOathQuiz extends BaseChallengeClass implements SupportsPeckingOr
             )
             ->when(! $has_guessed || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -119,6 +134,10 @@ class IndividualOathQuiz extends BaseChallengeClass implements SupportsPeckingOr
         $oath_data = $game_state->modifiers()->firstWhere('class_key', BloodOaths::key())->modifier_data;
 
         $game_state->players()->each(function ($player) use ($oath_data) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess = $this->challenge_state->challenge_data['quiz_submissions'][$player->id];
 
             if ($guess['guess_player_id'] === null || $guess['oath_type'] === null) {
@@ -132,14 +151,22 @@ class IndividualOathQuiz extends BaseChallengeClass implements SupportsPeckingOr
             $guessed_player_is_in_blood_oath = isset($oath_data['pairs'][$guessed_player_id]);
             $guessed_player_is_in_solitude = collect($oath_data['lone_wolves'])->contains($guessed_player_id);
 
-            if ($guessed_player_is_in_blood_oath && $guessed_oath_type === 'blood_oath') {
-                $player->addToScoreHistory(1, 'Correctly guessed that '.$guessed_player->name.' is in a blood oath', true);
-                $guessed_player->addToScoreHistory(-1, $player->name.' guessed that you are in a blood oath', true);
+            if ($guessed_oath_type === 'blood_oath') {
+                if ($guessed_player_is_in_blood_oath) {
+                    $player->addToScoreHistory(1, '🤔 Correctly guessed that '.$guessed_player->name.' is in a blood oath', true);
+                    $guessed_player->addToScoreHistory(-1, '🎯 '.$player->name.' guessed that you are in a blood oath', true);
+                } else {
+                    $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.$guessed_player->name.' is in a blood oath', true);
+                }
             }
 
-            if ($guessed_player_is_in_solitude && $guessed_oath_type === 'oath_of_solitude') {
-                $player->addToScoreHistory(1, 'Correctly guessed that '.$guessed_player->name.' is in an oath of solitude', true);
-                $guessed_player->addToScoreHistory(-1, $player->name.' guessed that you are in an oath of solitude', true);
+            if ($guessed_oath_type === 'oath_of_solitude') {
+                if ($guessed_player_is_in_solitude) {
+                    $player->addToScoreHistory(1, '🤔 Correctly guessed that '.$guessed_player->name.' is in an oath of solitude', true);
+                    $guessed_player->addToScoreHistory(-1, '🎯 '.$player->name.' guessed that you are in an oath of solitude', true);
+                } else {
+                    $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.$guessed_player->name.' is in an oath of solitude', true);
+                }
             }
         });
     }

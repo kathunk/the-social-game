@@ -39,7 +39,7 @@ class PlayerMadeOathOfSolitude extends Event
     {
         $player->addToScoreHistory(
             points: 3,
-            description: 'Oath of Solitude',
+            description: '🐺 Oath of Solitude',
             is_hidden: true,
         );
     }

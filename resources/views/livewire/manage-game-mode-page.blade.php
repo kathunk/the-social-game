@@ -10,6 +10,8 @@
             <flux:input wire:model="name" label="Name" />
             <flux:textarea wire:model="description" label="Description" />
             <flux:editor wire:model="pre_game_lobby_message" label="Pre Game Lobby Message" description="This message will be sent to players when they join the game lobby." />
+            <flux:editor wire:model="footer_message" label="Footer Message" description="This message will be shown at the bottom of the game dashboard while the game is active." />
+            <flux:editor wire:model="post_game_message" label="Post Game Message" description="This message will be shown at the end of the game." />
             <div class="flex flex-row gap-4">
                 <flux:input wire:model="min_players" label="Minimum Players" placeholder="Can be left blank"/>
                 <flux:input wire:model="max_players" label="Maximum Players" placeholder="Can be left blank"/>

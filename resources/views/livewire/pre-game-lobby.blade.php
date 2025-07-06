@@ -1,16 +1,12 @@
 <div
     wire:poll="checkStatus"
     class="flex flex-col gap-4"
-    x-data="{ gameModeId: $wire.entangle('game_mode_id') }"
+    x-data="{ gameModeId: $wire.entangle('game_mode_id'), has_scheduled_start: $wire.entangle('has_scheduled_start') }"
 >
-    @if ($this->game->status === 'upcoming')
+    @if ($this->game->status === 'upcoming' && $this->game->starts_at)
         <div class="mx-auto w-full text-center">
-            <flux:text>
-                @if ($this->game->starts_at->isFuture())
-                    Starts {{ $this->game->starts_at->diffForHumans() }}
-                @else
-                    Game did not start because the player count is not correct.
-                @endif
+            <flux:text variant="subtle" class="flex space-x-1 items-baseline justify-center">
+                <x-game-components.countdown-timer :time="$this->game->starts_at->toIsoString()" type="starts" />
             </flux:text>
         </div>
     @endif
@@ -90,15 +86,19 @@
     @if ($this->is_game_admin)
         <flux:card x-data="{editGameMode: false, editTime: false, addBots: false}">
             <flux:heading class="mb-4">Game Settings</flux:heading>
-            <div x-show="!editGameMode && !editTime && !addBots" class="flex gap-2 flex-wrap">
+            <div x-show="!editGameMode && !editTime && !addBots" class="flex gap-2 flex-wrap" x-data="{startGame: false}">
                 @unless ($this->hasTooManyPlayers || $this->hasTooFewPlayers || $this->game->status !== 'upcoming')
+                    <flux:button variant="primary" icon="rocket-launch" @click="startGame = true" x-show="!startGame" :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers">
+                        Start Game Now
+                    </flux:button>
                     <flux:button
                         variant="primary"
                         wire:click="startGame"
                         icon="rocket-launch"
+                        x-show="startGame"
                         :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers"
                     >
-                        Start Game Now
+                        You sure?
                     </flux:button>
                 @endunless
                 <flux:button @click="editGameMode = true" icon="pencil">Settings</flux:button>
@@ -184,13 +184,18 @@
             </div>
 
             <div x-show="editTime">
-                <x-datetime
-                    label="Start time"
-                    name="game_start_timecode"
-                    wire:model="game_start_timecode"
-                    min="{{ now()->addMinute()->second(0)->toIsoString() }}"
-                    required
-                />
+                <div class="flex flex-col gap-2">
+                    <flux:switch label="Scheduled start time" @click="has_scheduled_start = !has_scheduled_start" x-bind:checked="has_scheduled_start" />
+                    <div x-show="has_scheduled_start">
+                        <x-datetime
+                            label="Start time"
+                            name="game_start_timecode"
+                            wire:model="game_start_timecode"
+                            min="{{ now()->addMinute()->second(0)->toIsoString() }}"
+                            required
+                        />
+                    </div>
+                </div>
 
                 <div class="flex flex-col gap-2 mb-4" x-data="{use_challenge_length_override: $wire.entangle('use_challenge_length_override')}">
                     <flux:field variant="inline" class="mt-4">

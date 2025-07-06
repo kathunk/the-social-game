@@ -46,8 +46,10 @@ class IndividualOathSpy extends BaseChallengeClass implements SupportsPeckingOrd
 
     public function frontendComponent(Player $player): array
     {
-        $information = $this->challenge->challenge_data['information_bought'][$player->id];
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $information = isset($this->challenge->challenge_data['information_bought'][$player->id])
+            ? $this->challenge->challenge_data['information_bought'][$player->id]
+            : null;
+        $has_voted = $this->hasVoted($player);
 
         return $this->form()
             ->title(self::NAME)
@@ -65,7 +67,7 @@ class IndividualOathSpy extends BaseChallengeClass implements SupportsPeckingOrd
             )
             ->when(! $information || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -118,7 +120,7 @@ class IndividualOathSpy extends BaseChallengeClass implements SupportsPeckingOrd
             challenge_id: $this->challenge->id,
             game_id: $this->challenge->game_id,
             spied_opponent_ids: $spied_opponents,
-            ui_message: 'You spied on your opponents. Here are their scores when you spied them. '.$blood_oath_message.' '.$solitude_message.' '.$no_oath_message,
+            ui_message: '🔍 You spied on your opponents. Here are their scores when you spied them. '.$blood_oath_message.' '.$solitude_message.' '.$no_oath_message,
             score_cost: 0,
             hidden_score_cost: 1,
         );

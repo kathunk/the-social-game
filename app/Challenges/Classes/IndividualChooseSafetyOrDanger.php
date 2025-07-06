@@ -36,14 +36,22 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
 
     public function frontendComponent(Player $player): array
     {
-        $players = $player->game->players;
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
+        $has_voted = $this->hasVoted($player);
+
+        if ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'safety') {
+            $choice_description = '☺️ Chose safety';
+        } elseif ($has_chosen && $this->challenge->challenge_data['choices'][$player->id] === 'danger') {
+            $choice_description = '☠️ Chose danger';
+        } else {
+            $choice_description = null;
+        }
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_chosen, fn ($form) => $form->subtitle('You have made your choice.')
+            ->when($has_chosen, fn ($form) => $form->subtitle($choice_description)
             )
             ->when(! $has_chosen, fn ($form) => $form
                 ->buttonGroup()
@@ -53,7 +61,7 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
             )
             ->when(! $has_chosen || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -102,23 +110,29 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
                 ->count();
 
             if ($upvotes_received > 0) {
-                $player->addToScoreHistory($upvotes_received, 'Received upvotes');
+                $player->addToScoreHistory($upvotes_received, '👍 Received upvotes');
+            }
+
+            $did_not_make_choice = ! isset($choices[$player->id]) || $choices[$player->id] === null;
+
+            if ($did_not_make_choice && $downvotes_received > 0) {
+                $player->addToScoreHistory(-$downvotes_received, '👎 Received '.($downvotes_received === 1 ? 'downvote' : 'downvotes'));
+            }
+
+            if ($did_not_make_choice) {
+                return;
             }
 
             if ($choices[$player->id] === 'danger' && $downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received * 2, 'Received '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing danger');
+                $player->addToScoreHistory(-$downvotes_received * 2, '👎 Received '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing danger');
             }
 
             if ($choices[$player->id] === 'danger') {
-                $player->addToScoreHistory(2, 'Chose danger', true);
+                $player->addToScoreHistory(2, '☠️ Chose danger', true);
             }
 
             if ($choices[$player->id] === 'safety' && $downvotes_received > 0) {
-                $player->addToScoreHistory(0, 'Blocked '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing safety');
-            }
-
-            if ($choices[$player->id] === null && $downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received, 'Received '.($downvotes_received === 1 ? 'downvote' : 'downvotes'));
+                $player->addToScoreHistory(0, '☺️ Blocked '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing safety');
             }
         });
     }

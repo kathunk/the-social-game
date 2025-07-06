@@ -47,13 +47,13 @@ class BloodOathSeeder extends Seeder
             challenges: [
                 [
                     'challenge_keys' => [
-                        IndividualHighScoreQuiz::key(),
+                        IndividualBloodOathHunterQuiz::key(),
                     ],
                     'duration' => 5,
                 ],
                 [
                     'challenge_keys' => [
-                        IndividualBloodOathHunterQuiz::key(),
+                        IndividualHighScoreQuiz::key(),
                     ],
                     'duration' => 5,
                 ],

@@ -4,9 +4,16 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\IndividualChoosePointsOrHidden;
 use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
 use App\Challenges\Classes\IndividualDoubleTrouble;
+use App\Challenges\Classes\IndividualEquilibrium;
+use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
+use App\Challenges\Classes\IndividualFirstShallBeLast;
+use App\Challenges\Classes\IndividualGerrymander;
 use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Challenges\Classes\IndividualHighTrustEnvironment;
+use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
 use App\Challenges\Classes\IndividualSpy;
 use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
@@ -14,6 +21,7 @@ use App\Models\Game;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\User;
+use App\Modifiers\Classes\Alms;
 use Illuminate\Database\Seeder;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -45,6 +53,48 @@ class PeckingOrderSeeder extends Seeder
             challenges: [
                 [
                     'challenge_keys' => [
+                        IndividualMostHiddenPointQuiz::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualFewestHiddenPointQuiz::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualGerrymander::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualHighTrustEnvironment::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualChoosePointsOrHidden::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualEquilibrium::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
+                        IndividualFirstShallBeLast::key(),
+                    ],
+                    'duration' => 10,
+                ],
+                [
+                    'challenge_keys' => [
                         IndividualHighScoreQuiz::key(),
                     ],
                     'duration' => 10,
@@ -68,7 +118,7 @@ class PeckingOrderSeeder extends Seeder
                     'duration' => 10,
                 ],
             ],
-            modifiers: [],
+            modifiers: [Alms::key()],
             players_can_join_late: false,
         )->game_template_id;
 
@@ -79,7 +129,6 @@ class PeckingOrderSeeder extends Seeder
         $game = Game::fromTemplate(
             template: $template,
             game_mode: $mode,
-            starts_at: now(),
             user: $john,
             is_public: false,
             requires_admin_approval_to_join: false,

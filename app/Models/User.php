@@ -37,6 +37,7 @@ class User extends Authenticatable
         'current_game_id',
         'current_player_id',
         'is_super_admin',
+        'subscribed_to_newsletter',
     ];
 
     /**

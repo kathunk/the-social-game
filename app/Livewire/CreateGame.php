@@ -11,7 +11,9 @@ use Livewire\Component;
 
 class CreateGame extends Component
 {
-    public Carbon $game_start_timecode;
+    public bool $has_scheduled_start = false;
+
+    public ?string $game_start_timecode = null;
 
     public int $game_mode_id;
 
@@ -40,8 +42,6 @@ class CreateGame extends Component
         if (! $this->user->is_member) {
             return redirect()->route('marketing-page');
         }
-
-        $this->game_start_timecode = Carbon::now()->addHours(1)->setSeconds(0);
     }
 
     public function createGame()
@@ -50,13 +50,18 @@ class CreateGame extends Component
 
         $url_input = $this->social_link_url;
 
-        // Only process URL if it's not empty
         if (! empty($url_input)) {
-            if (! str_starts_with($url_input, 'http://') && ! str_starts_with($url_input, 'https://')) {
+            if (
+                ! str_starts_with($url_input, 'http://') &&
+                ! str_starts_with($url_input, 'https://')
+            ) {
                 $url_input = 'https://'.$url_input;
             }
 
-            Validator::make(['url' => $url_input], ['url' => 'url'])->validate();
+            Validator::make(
+                ['url' => $url_input],
+                ['url' => 'url']
+            )->validate();
         }
 
         $mode = GameMode::find($this->game_mode_id);
@@ -66,10 +71,12 @@ class CreateGame extends Component
         $game = Game::fromTemplate(
             game_mode: $mode,
             template: $template,
-            starts_at: Carbon::parse($this->game_start_timecode)->setSeconds(0),
+            starts_at: $this->has_scheduled_start
+                ? Carbon::parse($this->game_start_timecode)->setSeconds(0)
+                : null,
             user: $this->user,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
-            social_links: ! empty($url_input) ? [$url_input] : [],
+            social_links: ! empty($url_input) ? [$url_input] : []
         );
 
         return redirect()->route('pre-game-lobby', $game);
@@ -77,9 +84,26 @@ class CreateGame extends Component
 
     public function rules()
     {
-        return [
+        $rules = [
             'game_mode_id' => 'required|exists:game_modes,id',
-            'game_start_timecode' => ['required', 'date', 'after:'.now()],
+        ];
+
+        if ($this->has_scheduled_start) {
+            $rules['game_start_timecode'] = [
+                'required',
+                'date',
+                'after:'.now(),
+            ];
+        }
+
+        return $rules;
+    }
+
+    public function messages()
+    {
+        return [
+            'game_start_timecode.required' => 'Scheduled start time is required',
+            'game_start_timecode.after' => 'Scheduled start must be in the future',
         ];
     }
 

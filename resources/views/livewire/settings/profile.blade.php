@@ -5,11 +5,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
+use App\Events\UserSubscribedToNewsletter;
+use App\Events\UserUnsubscribedFromNewsletter;
 
 new class extends Component {
     public string $name = '';
     public string $email = '';
     public bool $has_active_game = false;
+    public bool $subscribed_to_newsletter;
 
     /**
      * Mount the component.
@@ -19,6 +22,7 @@ new class extends Component {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
         $this->has_active_game = Auth::user()->has_active_game;
+        $this->subscribed_to_newsletter = Auth::user()->subscribed_to_newsletter;
     }
 
     /**
@@ -45,6 +49,12 @@ new class extends Component {
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
+        }
+
+        if ($this->subscribed_to_newsletter !== $user->subscribed_to_newsletter) {
+            $this->subscribed_to_newsletter 
+                ? UserSubscribedToNewsletter::fire(user_id: $user->id) 
+                : UserUnsubscribedFromNewsletter::fire(user_id: $user->id);
         }
 
         $user->save();
@@ -104,6 +114,13 @@ new class extends Component {
                         @endif
                     </div>
                 @endif
+            </div>
+
+            <div class="flex items-center justify-between">
+                <flux:checkbox
+                    wire:model="subscribed_to_newsletter"
+                    :label="__('Email me when something cool drops')"
+                />
             </div>
 
             <div class="flex items-center gap-4">

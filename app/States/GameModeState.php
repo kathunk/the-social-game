@@ -25,6 +25,10 @@ class GameModeState extends State
 
     public string $description;
 
+    public ?string $footer_message = '';
+
+    public ?string $post_game_message = '';
+
     public Collection $game_template_ids;
 
     public function __construct()

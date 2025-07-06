@@ -96,8 +96,8 @@ it('only awards points when a team recruits their bounty', function () {
         swapTeam($bounty_player, $team->id, TeamBounty::key());
         expect($bounty_player->refresh()->team_id)->toBe($assigned_team_id);
 
-        // assigned team gets 15 points for recruiting their bounty
-        expect($team->fresh()->score)->toBe(15);
+        // assigned team gets 25 points for recruiting their bounty
+        expect($team->fresh()->score)->toBe(25);
 
         // recruit a player not assigned to the team
         $non_bounty_player = Player::query()
@@ -110,7 +110,7 @@ it('only awards points when a team recruits their bounty', function () {
         expect($non_bounty_player->refresh()->team_id)->toBe($assigned_team_id);
 
         // assigned team does not get points for recruiting a non-bounty player
-        expect($team->fresh()->score)->toBe(15);
+        expect($team->fresh()->score)->toBe(25);
     }
 });
 

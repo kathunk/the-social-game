@@ -36,14 +36,14 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
 
     public function frontendComponent(Player $player): array
     {
-        $players = $player->game->players;
-        $has_chosen = $this->challenge->challenge_data['choices'][$player->id] !== null;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_chosen = isset($this->challenge->challenge_data['choices'][$player->id])
+            && $this->challenge->challenge_data['choices'][$player->id] !== null;
+        $has_voted = $this->hasVoted($player);
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_chosen, fn ($form) => $form->subtitle('You have made your choice.')
+            ->when($has_chosen, fn ($form) => $form->subtitle('📈 You will gain 5 points.')
             )
             ->when(! $has_chosen, fn ($form) => $form
                 ->buttonGroup()
@@ -52,7 +52,7 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
             )
             ->when(! $has_chosen || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -82,13 +82,13 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
         $players = $game_state->players();
 
         $players->each(function ($player) use ($choices) {
-            if ($choices[$player->id] === null) {
-                $player->addToScoreHistory(1, 'Did not take Grandstand Gambit', true);
+            if (! isset($choices[$player->id]) || $choices[$player->id] === null) {
+                $player->addToScoreHistory(1, '🫥 Did not take Grandstand Gambit', true);
 
                 return;
             }
 
-            $player->addToScoreHistory(5, 'Grandstand Gambit');
+            $player->addToScoreHistory(5, '📈 Grandstand Gambit');
         });
 
         $highest_score = $players->max(fn ($p) => $p->score());
@@ -96,8 +96,12 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
         $leader_ids = $players->filter(fn ($p) => $p->score() === $highest_score)->pluck('id');
 
         $players->each(function ($player) use ($choices, $leader_ids) {
+            if (! isset($choices[$player->id]) || $choices[$player->id] === null) {
+                return;
+            }
+
             if ($choices[$player->id] !== null && $leader_ids->contains($player->id)) {
-                $player->addToScoreHistory(-$player->score(), 'Grandstand Gambit too close to the sun');
+                $player->addToScoreHistory(-$player->score(), '😩 Grandstand Gambit too close to the sun');
             }
         });
     }

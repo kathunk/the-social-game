@@ -36,14 +36,18 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
 
     public function frontendComponent(Player $player): array
     {
-        $players = $player->game->players;
-        $has_guessed = $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_score'] !== null;
-        $has_voted = $this->challenge->challenge_data['votes'][$player->id]['upvote_player_id'] !== null;
+        $has_guessed = isset($this->challenge->challenge_data['quiz_submissions'][$player->id])
+            && $this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_score'] !== null;
+        $has_voted = $this->hasVoted($player);
+
+        $quiz_description = $has_guessed
+            ? '🤔 Guessed that your score will be '.$this->challenge->challenge_data['quiz_submissions'][$player->id]['guess_score'].'.'
+            : null;
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
-            ->when($has_guessed, fn ($form) => $form->subtitle('You have already guessed.')
+            ->when($has_guessed, fn ($form) => $form->subtitle($quiz_description)
             )
             ->when(! $has_guessed, fn ($form) => $form->input(
                 property_name: 'guess_score',
@@ -65,7 +69,7 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
             )
             ->when(! $has_guessed || ! $has_voted, fn ($form) => $form->divider()
             )
-            ->when($has_voted, fn ($form) => $form->subtitle('You have already voted.')
+            ->when($has_voted, fn ($form) => $form->subtitle($this->voteDescription($player))
             )
             ->when(! $has_voted, fn ($form) => $form->peckingOrderBallot(
                 upvote_targets: $this->upvoteTargets($player),
@@ -93,6 +97,10 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
         $player_scores = $game_state->players()->mapWithKeys(fn ($p) => [$p->id => $p->score(include_hidden: false)]);
 
         $game_state->players()->each(function ($player) use ($player_scores) {
+            if (! isset($this->challenge_state->challenge_data['quiz_submissions'][$player->id])) {
+                return;
+            }
+
             $guess_score = $this->challenge_state->challenge_data['quiz_submissions'][$player->id]['guess_score'];
 
             if ($guess_score === null) {
@@ -100,7 +108,9 @@ class IndividualSpecificScoreQuiz extends BaseChallengeClass implements Supports
             }
 
             if ($guess_score >= $player_scores[$player->id] - 1 && $guess_score <= $player_scores[$player->id] + 1) {
-                $player->addToScoreHistory(1, 'Correctly guessed their own score', true);
+                $player->addToScoreHistory(1, '🤔 Correctly guessed their score was within 1 point of '.$guess_score, true);
+            } else {
+                $player->addToScoreHistory(0, '🤔 Incorrectly guessed their score was within 1 point of '.$guess_score, true);
             }
         });
     }

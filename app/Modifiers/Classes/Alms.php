@@ -9,7 +9,7 @@ class Alms extends BaseModifierClass
 {
     const NAME = 'Alms';
 
-    const DESCRIPTION = 'After each challenge is resolved, the player(s) at the bottom of the scoreboard will gain 1 hidden point.';
+    const DESCRIPTION = 'After each challenge is resolved, the player(s) with the lowest score (including hidden points) will gain 1 hidden point.';
 
     const TYPE = 'individual';
 
@@ -35,11 +35,11 @@ class Alms extends BaseModifierClass
     public function onChallengeEnded(GameState $game_state)
     {
         $players = $game_state->players();
-        $lowest_score = $players->min(fn ($player) => $player->score());
+        $lowest_score = $players->min(fn ($player) => $player->score(include_hidden: true));
 
         $players->each(function ($player) use ($lowest_score) {
-            if ($player->score() === $lowest_score) {
-                $player->addToScoreHistory(1, 'Alms', is_hidden: true);
+            if ($player->score(include_hidden: true) === $lowest_score) {
+                $player->addToScoreHistory(1, '🪙 Collected alms for being at the bottom of the scoreboard', is_hidden: true);
             }
         });
     }

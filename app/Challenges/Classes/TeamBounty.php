@@ -16,7 +16,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
 
     const NAME = 'Bounty';
 
-    const DESCRIPTION = 'Your team has been assigned 3 players from other teams as bounties: {3 players}. For each bounty you can convince to defect and join you, your team gains 15 points. But be careful - other teams are trying to recruit your teammates too!';
+    const DESCRIPTION = 'Your team has been assigned 3 players from other teams as bounties: {3 players}. For each bounty you can convince to defect and join you, your team gains 25 points. But be careful - other teams are trying to recruit your teammates too!';
 
     const TYPE = 'team';
 
@@ -51,6 +51,10 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         $description = strtr(self::DESCRIPTION, [
             '{3 players}' => collect($bounties)->map(function ($id) {
                 $player = Player::find($id);
+
+                if (in_array($player->id, $this->challenge->challenge_data['swapper_ids'])) {
+                    return $player->name.' (ineligible: already moved to '.$player->team->name.')';
+                }
 
                 return $player->name.' ('.$player->team->name.')';
             })->implode(', '),
@@ -90,7 +94,6 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
 
     public function onChallengeStarted(GameState $game_state)
     {
-        // team_id => [player_id, player_id, player_id]
         $marked_as_bounty = [];
 
         $teams = $game_state->teams();
@@ -138,7 +141,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         $team_bounties = $this->challenge_state->challenge_data['team_bounties'][$team_state->id] ?? [];
 
         if (in_array($player_state->id, $team_bounties)) {
-            $team_state->addToScoreHistory(15, "Recruited {$player_state->name} during the Bounty challenge");
+            $team_state->addToScoreHistory(25, "💰 Recruited {$player_state->name} during the Bounty challenge");
         }
     }
 }

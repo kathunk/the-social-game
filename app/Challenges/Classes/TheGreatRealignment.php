@@ -16,7 +16,7 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
 
     const NAME = 'The Great Realignment';
 
-    const DESCRIPTION = 'You may swap teams once during this challenge.If you leave your team, you will take your portion of the team\'s points with you. Currently you carry {points} points. However, the scoreboard will be hidden for this entire challenge.';
+    const DESCRIPTION = 'You may swap teams once during this challenge. If you leave your team, you will take your portion of the team\'s points with you. Currently you carry {points} points (hidden points are not included). However, the scoreboard will be hidden for this entire challenge.';
 
     const TYPE = 'team';
 
@@ -75,8 +75,8 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
         $previous_team_score = $previous_team->score();
         $points = round($previous_team_score / $previous_team->player_ids->count());
 
-        $team_state->addToScoreHistory($points, $player_state->name.' joined the team');
-        $previous_team->addToScoreHistory(-$points, $player_state->name.' left the team');
+        $team_state->addToScoreHistory($points, '👋 '.$player_state->name.' joined the team');
+        $previous_team->addToScoreHistory(-$points, '👻 '.$player_state->name.' left the team');
     }
 
     public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool

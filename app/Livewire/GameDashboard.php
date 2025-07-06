@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Events\UserSwitchedCurrentGame;
 use App\Models\Game;
 use App\Models\Team;
-use Illuminate\Support\Collection;
+use App\Support\HtmlTransformer;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -24,7 +24,7 @@ class GameDashboard extends Component
 
     public ?array $challenge_component = [];
 
-    public ?Collection $modifiers;
+    public ?array $modifier_components = [];
 
     #[Computed]
     public function user()
@@ -59,7 +59,9 @@ class GameDashboard extends Component
     #[Computed]
     public function teams()
     {
-        return $this->game->teams->sortByDesc('score');
+        $sort_by = $this->game->status === 'ended' ? 'hidden_score' : 'score';
+
+        return $this->game->teams->sortByDesc($sort_by);
     }
 
     #[Computed]
@@ -72,6 +74,12 @@ class GameDashboard extends Component
     public function challenge()
     {
         return $this->game->currentChallenge;
+    }
+
+    #[Computed]
+    public function modifiers()
+    {
+        return $this->game->modifiers;
     }
 
     #[Computed]
@@ -100,6 +108,36 @@ class GameDashboard extends Component
     public function socialLink()
     {
         return $this->game->social_links[0] ?? null;
+    }
+
+    #[Computed]
+    public function footerMessage()
+    {
+        if (
+            $this->game->status !== 'active' ||
+            ! $this->game->gameMode->footer_message
+        ) {
+            return null;
+        }
+
+        return (new HtmlTransformer(
+            $this->game->gameMode->footer_message
+        ))->formatted();
+    }
+
+    #[Computed]
+    public function postGameMessage()
+    {
+        if (
+            $this->game->status !== 'ended' ||
+            ! $this->game->gameMode->post_game_message
+        ) {
+            return null;
+        }
+
+        return (new HtmlTransformer(
+            $this->game->gameMode->post_game_message
+        ))->formatted();
     }
 
     public function mount(Game $game)
@@ -148,9 +186,7 @@ class GameDashboard extends Component
                 ) ?? [];
         }
 
-        $this->modifiers = $this->game->fresh()->modifiers;
-
-        if (! $this->modifiers) {
+        if ($this->modifiers->count() === 0) {
             return;
         }
 
@@ -158,10 +194,15 @@ class GameDashboard extends Component
             $this->round_properties[$modifier->class_key] =
                 $modifier->handler()?->propertiesForLivewire($this->player) ??
                 [];
+
             $this->validation_rules[$modifier->class_key] =
                 $modifier
                     ->handler()
                     ?->validationRulesForLivewire($this->player) ?? [];
+
+            $this->modifier_components[$modifier->class_key] = $modifier
+                ->handler()
+                ->frontendComponent($this->player);
         }
     }
 
@@ -227,7 +268,10 @@ class GameDashboard extends Component
                 ->handler(),
         };
 
-        $component = $handler->frontendComponent($this->player);
+        $component = match ($type) {
+            'challenge' => $this->challenge_component,
+            'modifier' => $this->modifier_components[$class_key],
+        };
 
         if (! isset($component['elements'])) {
             return;
@@ -291,11 +335,30 @@ class GameDashboard extends Component
             $this->challenge_component = $this->game->currentChallenge
                 ?->fresh()
                 ->handler()
-                ->frontendComponent($this->player);
+                ->frontendComponent($this->player->fresh());
         }
 
         if ($type === 'modifier') {
-            $this->modifiers = $this->game->fresh()->modifiers;
+            $modifier = $this->game
+                ->fresh()
+                ->modifiers()
+                ->where('class_key', $class_key)
+                ->first();
+
+            $this->round_properties[$modifier->class_key] =
+                $modifier
+                    ->handler()
+                    ?->propertiesForLivewire($this->player->fresh()) ?? [];
+
+            $this->validation_rules[$modifier->class_key] =
+                $modifier
+                    ->handler()
+                    ?->validationRulesForLivewire($this->player->fresh()) ?? [];
+
+            $this->modifier_components[$modifier->class_key] = $modifier
+                ->fresh()
+                ->handler()
+                ->frontendComponent($this->player->fresh());
         }
 
         return $response instanceof \Illuminate\Http\RedirectResponse ||
