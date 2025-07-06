@@ -1,7 +1,7 @@
 {
   "http-basic": {
     "composer.fluxui.dev": {
-      "username": "daniel@thunk.dev",
+      "username": "daniel@thunk.dev ",
       "password": "04d6edec-a606-4196-b70c-949051d2b1eb"
     }
   }
