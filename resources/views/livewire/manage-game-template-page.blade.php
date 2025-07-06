@@ -91,6 +91,9 @@
                             <flux:table.cell class="max-w-4">
                                 <flux:input wire:model="challenges.{{ $i }}.duration"/>
                             </flux:table.cell>
+                            <flux:table.cell>
+                                <flux:button size="xs" icon="trash" variant="subtle" wire:click="removeChallenge({{ $i }})"></flux:button>
+                            </flux:table.cell>
                         </flux:table.row>
                     @endforeach
                     <flux:table.row>

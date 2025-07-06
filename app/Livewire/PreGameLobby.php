@@ -13,6 +13,7 @@ use App\Models\GameApplication;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\Player;
+use App\Models\User;
 use App\Support\HtmlTransformer;
 use Flux\Flux;
 use Illuminate\Support\Carbon;
@@ -479,6 +480,16 @@ class PreGameLobby extends Component
 
     public function fillGameWithBots()
     {
+        $available = User::where('email', 'like', 'bot%@bot.bot')->count();
+
+        if ($this->bots_to_add > $available) {
+            Artisan::call('app:create-bots', [
+                'amount' => $this->bots_to_add - $available,
+            ]);
+        }
+
+        Verbs::commit();
+
         try {
             Artisan::call('app:fill-game-with-bots', [
                 'game_id' => $this->game->id,
