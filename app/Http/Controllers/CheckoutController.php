@@ -11,8 +11,11 @@ class CheckoutController extends Controller
         return view('subscribe.success');
     }
 
-    public function cancel()
+    public function cancel(Request $request)
     {
-        return view('subscribe.cancel');
+        $error = $request->query('error');
+        $message = $request->query('message', 'Your subscription process was cancelled. No charges were made.');
+
+        return view('subscribe.cancel', compact('error', 'message'));
     }
 }

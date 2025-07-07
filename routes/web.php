@@ -16,7 +16,7 @@ use App\Livewire\ManageGameModePage;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\GameComponentListPage;
 use App\Livewire\ManageGameTemplatePage;
-use Laravel\Cashier\Http\Controllers\WebhookController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\CheckoutController;
 
 Route::get('/', function () {
@@ -62,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-Route::post('stripe/webhook',[WebhookController::class, 'handleWebhook'])->name('cashier.webhook')
+Route::post('stripe/webhook',[StripeWebhookController::class, 'handleWebhook'])->name('cashier.webhook')
     ->withoutMiddleware(['web', 'auth']);
 
 require __DIR__.'/auth.php';
