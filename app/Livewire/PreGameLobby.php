@@ -198,11 +198,9 @@ class PreGameLobby extends Component
     }
 
     #[Computed]
-    public function modifiersRequiringSetup()
+    public function modifierConfigurations()
     {
-        return $this->game->gameTemplate->modifiers->filter(function ($modifier) {
-            return $modifier::REQUIRES_PRE_GAME_SETUP;
-        });
+        return $this->game->modifierConfigurations;
     }
 
     public function mount(Game $game)

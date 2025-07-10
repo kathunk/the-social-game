@@ -19,7 +19,7 @@ abstract class BaseModifierClass
 
     const TYPE = 'team'; // team or individual
 
-    const REQUIRES_PRE_GAME_SETUP = false;
+    const REQUIRES_PRE_GAME_CONFIGURATION = false;
 
     abstract public static function key(): string;
 

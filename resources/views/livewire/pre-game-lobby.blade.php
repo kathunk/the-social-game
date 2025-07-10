@@ -230,8 +230,8 @@
             </div>
         </flux:card>
 
-        @foreach ($this->modifiersRequiringSetup as $modifier)
-            <x-game-components.form :form="$modifier->frontendComponentForSetup($this->user)" />
+        @foreach ($this->modifierConfigurations as $modifierConfiguration)
+            <x-game-components.form :form="$modifierConfiguration->frontendComponentForSetup($this->user)" />
         @endforeach
     @endif
 

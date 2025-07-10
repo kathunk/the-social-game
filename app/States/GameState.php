@@ -38,6 +38,8 @@ class GameState extends State
 
     public Collection $modifier_ids;
 
+    public Collection $modifier_configuration_ids;
+
     public $current_challenge_id;
 
     public int $game_template_id;
@@ -66,6 +68,7 @@ class GameState extends State
         $this->challenge_ids = collect();
         $this->removed_player_ids = collect();
         $this->modifier_ids = collect();
+        $this->modifier_configuration_ids = collect();
     }
 
     public function players()
@@ -96,6 +99,14 @@ class GameState extends State
     public function modifiers()
     {
         return $this->modifier_ids->map(fn (int $modifier_id) => ModifierState::load($modifier_id));
+    }
+
+    public function modifierConfigurations()
+    {
+        return $this->modifier_configuration_ids
+            ->map(fn (int $modifier_configuration_id) => 
+                ModifierConfigurationState::load($modifier_configuration_id)
+            );
     }
 
     public function currentChallenge()

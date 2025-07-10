@@ -16,11 +16,18 @@ class TeamSecretCodes extends BaseModifierClass
 
     const TYPE = 'team';
 
-    const REQUIRES_PRE_GAME_SETUP = true;
+    const REQUIRES_PRE_GAME_CONFIGURATION = true;
 
     public static function key(): string
     {
         return 'team_secret_codes';
+    }
+
+    public static function defaultDataForPreGameConfiguration(): array
+    {
+        return [
+            'codes' => ['1234567890', '0987654321'],
+        ];
     }
 
     public function dataArrayForState(): array
