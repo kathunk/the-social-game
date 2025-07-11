@@ -1,4 +1,4 @@
-@props(['form', 'type', 'class_key'])
+@props(['form', 'type' => null, 'class_key'])
 
 @if (isset($form['elements']))
 <flux:card>
@@ -41,12 +41,21 @@
                     <flux:table :rows="$element['rows']" />
                     @break
                 @case('input')
-                    <flux:input
-                        wire:key="input-{{ $class_key }}-{{ $element['property_name'] }}"
-                        label="{{ $element['label']}}"
-                        placeholder="{{$element['placeholder']}}"
-                        wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
-                    />
+                    @if ($element['size'] === 'large')
+                        <flux:textarea
+                            wire:key="input-{{ $class_key }}-{{ $element['property_name'] }}"
+                            label="{{ $element['label']}}"
+                            placeholder="{{$element['placeholder']}}"
+                            wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
+                        />
+                    @else
+                        <flux:input
+                            wire:key="input-{{ $class_key }}-{{ $element['property_name'] }}"
+                            label="{{ $element['label']}}"
+                            placeholder="{{$element['placeholder']}}"
+                            wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
+                        />
+                    @endif
                     @break
                 @case('button_group')
                     <div class="flex flex-wrap gap-2 mt-4 justify-end">

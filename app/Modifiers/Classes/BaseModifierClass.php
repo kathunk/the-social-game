@@ -101,7 +101,7 @@ abstract class BaseModifierClass
         return [];
     }
 
-    public function frontendComponentForSetup(User $user): array
+    public static function frontendComponentForSetup(User $user): array
     {
         return [];
     }

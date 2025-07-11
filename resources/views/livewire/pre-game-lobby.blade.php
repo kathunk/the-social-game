@@ -231,7 +231,7 @@
         </flux:card>
 
         @foreach ($this->modifierConfigurations as $modifierConfiguration)
-            <x-game-components.form :form="$modifierConfiguration->frontendComponentForSetup($this->user)" />
+            <x-game-components.form :form="$modifierConfiguration->frontendComponentForSetup($this->user)" class_key="{{ $modifierConfiguration::key() }}" />
         @endforeach
     @endif
 

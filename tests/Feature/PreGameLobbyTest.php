@@ -88,25 +88,23 @@ it("creates modifier configurations before the game starts", function () {
 
     $game = Game::first();
 
-    $this->assertDatabaseHas("modifier_configurations", [
-        "game_id" => $game->id,
-        "modifier_key" => TeamSecretCodes::key(),
-    ]);
+    $modifier_configuration = $game->modifierConfigurations->first();
+
+    expect($modifier_configuration->modifier_key)->toBe(TeamSecretCodes::key());
+    expect($modifier_configuration->modifier_data)->toBe(TeamSecretCodes::defaultDataForPreGameConfiguration());
 
     Livewire::test(PreGameLobby::class, ['game' => $game])
         ->set("game_mode_id", $this->individual_mode->id)
         ->call("updateGameSettings");
 
-    expect($game->modifierConfigurations->count())->toBe(0);
+    expect($game->fresh()->modifierConfigurations->count())->toBe(0);
 
     Livewire::test(PreGameLobby::class, ['game' => $game])
         ->set("game_mode_id", $this->team_mode->id)
         ->call("updateGameSettings");
 
-    expect($game->modifierConfigurations->count())->toBe(1);
+    $modifier_configuration = $game->fresh()->modifierConfigurations->first();
 
-    $this->assertDatabaseHas("modifier_configurations", [
-        "game_id" => $game->id,
-        "modifier_key" => TeamSecretCodes::key(),
-    ]);
+    expect($modifier_configuration->modifier_key)->toBe(TeamSecretCodes::key());
+    expect($modifier_configuration->modifier_data)->toBe(TeamSecretCodes::defaultDataForPreGameConfiguration());
 });

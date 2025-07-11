@@ -2,28 +2,29 @@
 
 namespace App\Livewire;
 
-use App\Events\GameUpdated;
-use App\Events\PlayerRemovedFromGame;
-use App\Events\UserAdmittedToGame;
-use App\Events\UserDemotedFromGameAdmin;
-use App\Events\UserPromotedToGameAdmin;
-use App\Events\UserRejectedFromGame;
-use App\Models\Game;
-use App\Models\GameApplication;
-use App\Models\GameMode;
-use App\Models\GameTemplate;
-use App\Models\Player;
-use App\Models\User;
-use App\Support\HtmlTransformer;
 use Flux\Flux;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Validator;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
+use App\Models\Game;
+use App\Models\User;
+use App\Models\Player;
 use Livewire\Component;
+use App\Models\GameMode;
+use App\Events\GameUpdated;
+use Livewire\Attributes\On;
+use App\Models\GameTemplate;
+use Illuminate\Support\Carbon;
 use Thunk\Verbs\Facades\Verbs;
+use App\Models\GameApplication;
+use App\Support\HtmlTransformer;
+use Livewire\Attributes\Computed;
+use App\Events\UserAdmittedToGame;
+use Illuminate\Support\Collection;
+use App\Modifiers\ModifierRegistry;
+use App\Events\UserRejectedFromGame;
+use App\Events\PlayerRemovedFromGame;
+use App\Events\UserPromotedToGameAdmin;
+use Illuminate\Support\Facades\Artisan;
+use App\Events\UserDemotedFromGameAdmin;
+use Illuminate\Support\Facades\Validator;
 
 class PreGameLobby extends Component
 {
@@ -200,7 +201,8 @@ class PreGameLobby extends Component
     #[Computed]
     public function modifierConfigurations()
     {
-        return $this->game->modifierConfigurations;
+        return $this->game->modifierConfigurations
+            ->map(fn ($mc) => ModifierRegistry::retrieveFromKey($mc->modifier_key));
     }
 
     public function mount(Game $game)
@@ -442,14 +444,12 @@ class PreGameLobby extends Component
             ? Carbon::parse($this->game_start_timecode)->addMinutes($duration)
             : null;
 
-        GameUpdated::fire(
-            game_id: $this->game->id,
-            user_id: $this->user->id,
-            game_template_id: (int) $this->game_template_id,
-            game_mode_id: (int) $this->game_mode_id,
+        $this->game->updateGame(
+            user: $this->user,
+            game_template: $game_template,
+            game_mode: $mode,
             starts_at: $starts_at,
             ends_at: $ends_at,
-            is_public: true,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
             challenge_length_override: $this->challenge_length_override,
             social_links: ! empty($url_input) ? [$url_input] : []

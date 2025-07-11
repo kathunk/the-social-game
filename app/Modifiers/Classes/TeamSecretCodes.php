@@ -4,6 +4,7 @@ namespace App\Modifiers\Classes;
 
 use App\Models\User;
 use App\Models\Player;
+use App\Support\FormBuilder;
 use App\Events\PlayerInputSecretCode;
 
 class TeamSecretCodes extends BaseModifierClass
@@ -39,10 +40,9 @@ class TeamSecretCodes extends BaseModifierClass
         ];
     }
 
-    public function frontendComponentForSetup(User $user): array
+    public static function frontendComponentForSetup(User $user): array
     {
-        if ($this->modifier->game->status === 'upcoming') {
-            return $this->form()
+        return (new FormBuilder())
                 ->title('Secret codes')
                 ->subtitle('Add secret codes, separated by commas. Each code must be unique and cannot be more than 100 characters. You will not be able to see or change these codes once the game begins.')
                 ->input(
@@ -52,11 +52,9 @@ class TeamSecretCodes extends BaseModifierClass
                         'required' => 'You must add at least one code.',
                         'array' => 'Codes must be separated by commas.',
                         'min' => 'You must add at least one code.',
-                    ]
+                    ],
+                    size: 'large',
                 )->build();
-        }
-
-        return [];
     }
 
     public function frontendComponentForDedicatedPage(Player $player): array
