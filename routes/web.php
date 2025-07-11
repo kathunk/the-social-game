@@ -1,20 +1,21 @@
 <?php
 
-use App\Http\MissingGameHandler;
-use App\Livewire\CreateGame;
-use App\Livewire\GameComponentListPage;
-use App\Livewire\GameDashboard;
-use App\Livewire\GameModesListPage;
 use App\Livewire\Home;
-use App\Livewire\ManageGameModePage;
-use App\Livewire\ManageGameTemplatePage;
-use App\Livewire\MarketingPage;
-use App\Livewire\PlayerPage;
-use App\Livewire\PreGameLobby;
-use App\Livewire\SecretsPage;
-use App\Livewire\TeamPage;
-use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Livewire\TeamPage;
+use App\Livewire\CreateGame;
+use App\Livewire\PlayerPage;
+use App\Livewire\SecretsPage;
+use App\Livewire\PreGameLobby;
+use App\Livewire\GameDashboard;
+use App\Livewire\MarketingPage;
+use App\Http\MissingGameHandler;
+use App\Livewire\GameModesListPage;
+use App\Livewire\ManageGameModePage;
+use Illuminate\Support\Facades\Route;
+use App\Livewire\GameComponentListPage;
+use App\Livewire\ManageGameTemplatePage;
+use App\Livewire\ModifierConfigurationPage;
 
 Route::get('/', function () {
     return view('welcome');
@@ -50,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/{game_mode}/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');
     Route::get('{game_mode}/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
     Route::get('/games/{game}/secrets/{modifier}', SecretsPage::class)->name('games.secrets');
+    Route::get('/games/{game}/modifier-configurations', ModifierConfigurationPage::class)->name('games.modifier-configurations');
 });
 
 require __DIR__.'/auth.php';

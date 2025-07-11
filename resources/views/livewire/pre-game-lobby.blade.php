@@ -101,6 +101,11 @@
                         You sure?
                     </flux:button>
                 @endunless
+                @if ($this->modifierConfigurations->count() > 0)
+                    <flux:button icon="wrench" href="{{ route('games.modifier-configurations', ['game' => $this->game]) }}">
+                        Manage modifiers
+                    </flux:button>
+                @endif
                 <flux:button @click="editGameMode = true" icon="pencil">Settings</flux:button>
                 @if ($this->game->status === 'upcoming')
                     <flux:button @click="editTime = true" icon="pencil">Time</flux:button>
@@ -229,10 +234,6 @@
                 </div>
             </div>
         </flux:card>
-
-        @foreach ($this->modifierConfigurations as $modifierConfiguration)
-            <x-game-components.form :form="$modifierConfiguration->frontendComponentForSetup($this->user)" class_key="{{ $modifierConfiguration::key() }}" />
-        @endforeach
     @endif
 
     @if ($this->is_game_admin && $this->game->requires_admin_approval_to_join && $this->game->status !== 'ended')
