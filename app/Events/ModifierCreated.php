@@ -27,7 +27,14 @@ class ModifierCreated extends Event
     {
         $modifier->game_id = $this->game_id;
         $modifier->class_key = $this->class_key;
-        $modifier->modifier_data = $modifier->handler()->dataArrayForState();
+
+        $config = $this->state(GameState::class)->modifierConfigurations()->firstWhere('modifier_key', $this->class_key);
+
+        if ($config) {
+            $modifier->modifier_data = $config->modifier_data;
+        } else {
+            $modifier->modifier_data = $modifier->handler()->dataArrayForState();
+        }
     }
 
     public function handle()

@@ -101,6 +101,7 @@ class FormBuilder
         string $property_name, // this will be the name of the property in livewire
         string $validation_rules,
         array $validation_messages,
+        ?string $size = 'small',
         ?string $label = null,
         ?string $placeholder = null,
     ): static {
@@ -111,6 +112,7 @@ class FormBuilder
             'placeholder' => $placeholder,
             'validation_rules' => $validation_rules,
             'validation_messages' => $validation_messages,
+            'size' => $size,
         ];
 
         return $this;

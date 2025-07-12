@@ -9,6 +9,7 @@ use App\States\ModifierState;
 use App\States\PlayerState;
 use App\States\TeamState;
 use App\Support\FormBuilder;
+use App\Support\FrontendComponentProcessor;
 
 abstract class BaseModifierClass
 {
@@ -17,6 +18,8 @@ abstract class BaseModifierClass
     const DESCRIPTION = 'Base Modifier description';
 
     const TYPE = 'team'; // team or individual
+
+    const REQUIRES_PRE_GAME_CONFIGURATION = false;
 
     abstract public static function key(): string;
 
@@ -100,67 +103,16 @@ abstract class BaseModifierClass
 
     public function propertiesForLivewire(Player $player): array
     {
-        $properties = [];
-
-        $component = $this->frontendComponent($player);
-
-        if (! isset($component['elements'])) {
-            return [];
-        }
-
-        foreach ($component['elements'] as $element) {
-            if (
-                isset($element['property_name']) &&
-                isset($element['type']) &&
-                $element['type'] === 'select'
-            ) {
-                // null selects must be empty strings for LW
-                $properties[$element['property_name']] = '';
-            } elseif (isset($element['property_name'])) {
-                $properties[$element['property_name']] = null;
-            }
-        }
-
-        return $properties;
+        return FrontendComponentProcessor::propertiesForLivewire(
+            $this->frontendComponent($player),
+            useEmptyStringForSelects: true
+        );
     }
 
     public function validationRulesForLivewire(Player $player): array
     {
-        $component = $this->frontendComponent($player);
-
-        if (! isset($component['elements'])) {
-            return ['rules' => [], 'messages' => []];
-        }
-
-        return collect($component['elements'])
-            ->filter(
-                fn ($element) => isset(
-                    $element['property_name'],
-                    $element['validation_rules']
-                )
-            )
-            ->reduce(
-                function ($carry, $element) {
-                    $property = "{$element['property_name']}";
-
-                    $carry['rules'][$property] = $element['validation_rules'];
-
-                    if (isset($element['validation_messages'])) {
-                        $carry['messages'] = array_merge(
-                            $carry['messages'] ?? [],
-                            collect($element['validation_messages'])
-                                ->mapWithKeys(
-                                    fn ($message, $rule) => [
-                                        "{$property}.{$rule}" => $message,
-                                    ]
-                                )
-                                ->all()
-                        );
-                    }
-
-                    return $carry;
-                },
-                ['rules' => [], 'messages' => []]
-            );
+        return FrontendComponentProcessor::validationRulesForLivewire(
+            $this->frontendComponent($player)
+        );
     }
 }

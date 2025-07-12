@@ -13,6 +13,7 @@ use App\Models\GameTemplate;
 use App\Models\User;
 use App\Modifiers\Classes\TeamResignation;
 use App\Modifiers\Classes\TeamSecretAlliance;
+use App\Modifiers\Classes\TeamSecretCodes;
 use Illuminate\Database\Seeder;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -55,7 +56,7 @@ class Laracon2025Seeder extends Seeder
                     'duration' => 60,
                 ],
             ],
-            modifiers: [TeamResignation::key(), TeamSecretAlliance::key()],
+            modifiers: [TeamResignation::key(), TeamSecretAlliance::key(), TeamSecretCodes::key()],
         )->game_template_id;
 
         $template = GameTemplate::find($template_id);
