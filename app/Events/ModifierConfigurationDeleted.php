@@ -6,15 +6,10 @@ use Thunk\Verbs\Event;
 use App\States\GameState;
 use App\Events\Traits\HasGame;
 use App\Models\ModifierConfiguration;
-use App\States\ModifierConfigurationState;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 
 class ModifierConfigurationDeleted extends Event
 {
-    use HasGame;
-
-    #[StateId(ModifierConfigurationState::class)]
-    public int $modifier_configuration_id;
+    use HasGame, HasModifierConfiguration;
 
     public function applyToGame(GameState $state)
     {

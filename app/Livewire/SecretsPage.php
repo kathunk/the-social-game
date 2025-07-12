@@ -3,9 +3,10 @@
 namespace App\Livewire;
 
 use App\Models\Game;
-use App\Models\Modifier;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
+use App\Models\Modifier;
+use Thunk\Verbs\Facades\Verbs;
+use Livewire\Attributes\Computed;
 
 class SecretsPage extends Component
 {
@@ -31,6 +32,7 @@ class SecretsPage extends Component
         $this->modifier = $modifier;
 
         $this->modifier->handler()->onSecretDiscovered($this->player);
+        dd($this->modifier->modifier_data);
     }
 
     // @todo maybe extract this into another class so it doesn't repeat

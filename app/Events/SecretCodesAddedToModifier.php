@@ -4,11 +4,12 @@ namespace App\Events;
 
 use Thunk\Verbs\Event;
 use App\Events\Traits\HasGame;
-use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasModifierConfiguration;
+use App\States\ModifierConfigurationState;
 
 class SecretCodesAddedToModifier extends Event
 {
-    use HasGame, HasModifier;
+    use HasGame, HasModifierConfiguration;
 
     public array $codes;
 
@@ -25,13 +26,15 @@ class SecretCodesAddedToModifier extends Event
         );
     }
 
-    public function applyToModifier(ModifierState $modifier)
+    public function apply(ModifierConfigurationState $state)
     {
-        $modifier->modifier_data['unused_codes'] = $this->codes;
+        $state->modifier_data['unused_codes'] = $this->codes;
     }
 
     public function handle()
     {
-        // You think you're calling shots, you got the wrong number. I love Benjamin Franklin more than his own mother. - Lil Wayne
+        $config = $this->modifierConfiguration();
+        $config->modifier_data = $this->state(ModifierConfigurationState::class)->modifier_data;
+        $config->save();
     }
 }

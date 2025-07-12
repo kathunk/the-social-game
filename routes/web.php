@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\GameComponentListPage;
 use App\Livewire\ManageGameTemplatePage;
 use App\Livewire\ModifierConfigurationPage;
+use App\Http\Controllers\SecretCodeRedirectController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -52,6 +53,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('{game_mode}/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
     Route::get('/games/{game}/secrets/{modifier}', SecretsPage::class)->name('games.secrets');
     Route::get('/games/{game}/modifier-configurations', ModifierConfigurationPage::class)->name('games.modifier-configurations');
+    Route::get('/secret-codes', [SecretCodeRedirectController::class, 'handle'])
+        ->name('secret-codes.shortcut');
 });
 
 require __DIR__.'/auth.php';

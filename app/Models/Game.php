@@ -192,7 +192,7 @@ class Game extends Model
                 ModifierConfigurationCreated::fire(
                     game_id: $this->id,
                     modifier_key: $modifier::key(),
-                    modifier_data: $modifier::defaultDataForPreGameConfiguration(),
+                    modifier_data: $modifier::DEFAULT_CONFIGURATION,
                 );
             });
     }

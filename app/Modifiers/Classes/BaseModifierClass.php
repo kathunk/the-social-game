@@ -101,11 +101,6 @@ abstract class BaseModifierClass
         return [];
     }
 
-    public static function frontendComponentForSetup(User $user): array
-    {
-        return [];
-    }
-
     public function propertiesForLivewire(Player $player): array
     {
         $properties = [];

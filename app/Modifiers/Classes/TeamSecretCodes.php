@@ -19,42 +19,15 @@ class TeamSecretCodes extends BaseModifierClass
 
     const REQUIRES_PRE_GAME_CONFIGURATION = true;
 
+    const DEFAULT_CONFIGURATION = [
+        'unused_codes' => ['1234567890', '0987654321'],
+        'used_codes' => [],
+        'banned_player_ids' => [],
+    ];
+
     public static function key(): string
     {
         return 'team_secret_codes';
-    }
-
-    public static function defaultDataForPreGameConfiguration(): array
-    {
-        return [
-            'codes' => ['1234567890', '0987654321'],
-        ];
-    }
-
-    public function dataArrayForState(): array
-    {
-        return [
-            'unused_codes' => [],
-            'used_codes' => [],
-            'banned_player_ids' => [],
-        ];
-    }
-
-    public static function frontendComponentForSetup(User $user): array
-    {
-        return (new FormBuilder())
-                ->title('Secret codes')
-                ->subtitle('Add secret codes, separated by commas. Each code must be unique and cannot be more than 100 characters. You will not be able to see or change these codes once the game begins.')
-                ->input(
-                    property_name: 'codes',
-                    validation_rules: 'required|array|min:1',
-                    validation_messages: [
-                        'required' => 'You must add at least one code.',
-                        'array' => 'Codes must be separated by commas.',
-                        'min' => 'You must add at least one code.',
-                    ],
-                    size: 'large',
-                )->build();
     }
 
     public function frontendComponentForDedicatedPage(Player $player): array
@@ -62,7 +35,7 @@ class TeamSecretCodes extends BaseModifierClass
         $is_allowed_to_submit = ! collect($this->modifier->modifier_data['banned_player_ids'])->contains($player->id);
 
         $banned_component = $this->form()
-            ->title('Naughty Naughty')
+            ->title('Naughty Naughty...')
             ->subtitle('You submitted an invalid code. You cannot submit codes for the rest of the game.')
             ->build();
 
