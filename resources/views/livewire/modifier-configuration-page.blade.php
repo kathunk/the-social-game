@@ -11,9 +11,12 @@
                 <flux:heading>Secret Codes</flux:heading>
 
                 <flux:textarea wire:model="secretCodes" />
+                <flux:error name="secretCodes" />
 
                 <flux:button variant="primary" wire:click="saveSecretCodes">Save</flux:button>
             </div>
         </flux:card>
     @endif
+
+    <flux:toast />
 </div>

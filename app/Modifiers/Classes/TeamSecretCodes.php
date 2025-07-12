@@ -4,6 +4,7 @@ namespace App\Modifiers\Classes;
 
 use App\Events\PlayerInputSecretCode;
 use App\Models\Player;
+use Thunk\Verbs\Facades\Verbs;
 
 class TeamSecretCodes extends BaseModifierClass
 {
@@ -79,5 +80,9 @@ class TeamSecretCodes extends BaseModifierClass
             points_are_hidden: true,
             team_id: $player->team_id,
         );
+
+        Verbs::commit();
+
+        return redirect('secret-codes');
     }
 }

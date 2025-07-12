@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Events\SecretCodesAddedToModifier;
 use App\Models\Game;
 use App\Modifiers\Classes\TeamSecretCodes;
+use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -61,11 +62,11 @@ class ModifierConfigurationPage extends Component
 
         $validator = validator(['codes' => $codes], [
             'codes' => 'required|array|min:1',
-            'codes.*' => 'required|string|max:100',
+            'codes.*' => 'required|string|max:100|distinct',
         ]);
 
         if ($validator->fails()) {
-            $this->addError('secretCodes', 'Invalid codes format');
+            $this->addError('secretCodes', 'Each code must be unique, and less than 100 characters.');
 
             return;
         }
@@ -75,6 +76,8 @@ class ModifierConfigurationPage extends Component
             modifier_configuration_id: $this->secretCodeConfiguration->id,
             codes: $codes
         );
+
+        Flux::toast(heading: 'Saved', text: 'Secret codes updated', variant: 'success');
     }
 
     public function render()
