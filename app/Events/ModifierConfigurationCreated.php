@@ -2,12 +2,12 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\GameState;
 use App\Events\Traits\HasGame;
 use App\Models\ModifierConfiguration;
+use App\States\GameState;
 use App\States\ModifierConfigurationState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class ModifierConfigurationCreated extends Event
 {

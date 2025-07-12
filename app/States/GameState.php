@@ -104,8 +104,7 @@ class GameState extends State
     public function modifierConfigurations()
     {
         return $this->modifier_configuration_ids
-            ->map(fn (int $modifier_configuration_id) => 
-                ModifierConfigurationState::load($modifier_configuration_id)
+            ->map(fn (int $modifier_configuration_id) => ModifierConfigurationState::load($modifier_configuration_id)
             );
     }
 

@@ -2,15 +2,16 @@
 
 namespace App\Livewire;
 
-use App\Models\Game;
-use Livewire\Component;
-use Livewire\Attributes\Computed;
 use App\Events\SecretCodesAddedToModifier;
+use App\Models\Game;
 use App\Modifiers\Classes\TeamSecretCodes;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class ModifierConfigurationPage extends Component
 {
     public Game $game;
+
     public string $secretCodes = '';
 
     #[Computed]
@@ -25,7 +26,7 @@ class ModifierConfigurationPage extends Component
     public function secretCodeConfiguration()
     {
         return $this->modifierConfigurations
-            ->filter(fn($config) => $config->modifier_key === TeamSecretCodes::key())
+            ->filter(fn ($config) => $config->modifier_key === TeamSecretCodes::key())
             ->first();
     }
 
@@ -56,7 +57,7 @@ class ModifierConfigurationPage extends Component
     public function saveSecretCodes()
     {
         $codes = array_map('trim', explode(',', $this->secretCodes));
-        $codes = array_filter($codes); 
+        $codes = array_filter($codes);
 
         $validator = validator(['codes' => $codes], [
             'codes' => 'required|array|min:1',
@@ -65,6 +66,7 @@ class ModifierConfigurationPage extends Component
 
         if ($validator->fails()) {
             $this->addError('secretCodes', 'Invalid codes format');
+
             return;
         }
 

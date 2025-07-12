@@ -2,8 +2,8 @@
 
 namespace App\Events\Traits;
 
-use App\States\GameState;
 use App\Models\ModifierConfiguration;
+use App\States\GameState;
 use App\States\ModifierConfigurationState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 

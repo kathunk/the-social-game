@@ -2,10 +2,10 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\GameState;
 use App\Events\Traits\HasGame;
-use App\Models\ModifierConfiguration;
+use App\Events\Traits\HasModifierConfiguration;
+use App\States\GameState;
+use Thunk\Verbs\Event;
 
 class ModifierConfigurationDeleted extends Event
 {
@@ -18,6 +18,6 @@ class ModifierConfigurationDeleted extends Event
 
     public function handle()
     {
-        ModifierConfiguration::find($this->modifier_configuration_id)->delete();
+        $this->modifierConfiguration()->delete();
     }
 }

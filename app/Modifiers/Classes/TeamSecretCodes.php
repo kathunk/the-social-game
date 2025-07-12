@@ -2,18 +2,16 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\User;
-use App\Models\Player;
-use App\Support\FormBuilder;
 use App\Events\PlayerInputSecretCode;
+use App\Models\Player;
 
 class TeamSecretCodes extends BaseModifierClass
 {
     const NAME = 'Secret code';
 
-    const DESCRIPTION = "If you find a secret code, input it here to receive 1 hidden point for your team.
+    const DESCRIPTION = 'If you find a secret code, input it here to receive 1 hidden point for your team.
         Spammers beware: if you input an invalid code, or a code that has already been used,
-        you will not be able to input any more codes for the rest of the game.";
+        you will not be able to input any more codes for the rest of the game.';
 
     const TYPE = 'team';
 
@@ -32,6 +30,13 @@ class TeamSecretCodes extends BaseModifierClass
 
     public function frontendComponentForDedicatedPage(Player $player): array
     {
+        if ($player->team_id === null) {
+            return $this->form()
+                ->title('Secret codes')
+                ->subtitle('Join a team to submit secret codes.')
+                ->build();
+        }
+
         $is_allowed_to_submit = ! collect($this->modifier->modifier_data['banned_player_ids'])->contains($player->id);
 
         $banned_component = $this->form()

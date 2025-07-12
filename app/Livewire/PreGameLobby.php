@@ -2,29 +2,28 @@
 
 namespace App\Livewire;
 
-use Flux\Flux;
-use App\Models\Game;
-use App\Models\User;
-use App\Models\Player;
-use Livewire\Component;
-use App\Models\GameMode;
-use App\Events\GameUpdated;
-use Livewire\Attributes\On;
-use App\Models\GameTemplate;
-use Illuminate\Support\Carbon;
-use Thunk\Verbs\Facades\Verbs;
-use App\Models\GameApplication;
-use App\Support\HtmlTransformer;
-use Livewire\Attributes\Computed;
-use App\Events\UserAdmittedToGame;
-use Illuminate\Support\Collection;
-use App\Modifiers\ModifierRegistry;
-use App\Events\UserRejectedFromGame;
 use App\Events\PlayerRemovedFromGame;
-use App\Events\UserPromotedToGameAdmin;
-use Illuminate\Support\Facades\Artisan;
+use App\Events\UserAdmittedToGame;
 use App\Events\UserDemotedFromGameAdmin;
+use App\Events\UserPromotedToGameAdmin;
+use App\Events\UserRejectedFromGame;
+use App\Models\Game;
+use App\Models\GameApplication;
+use App\Models\GameMode;
+use App\Models\GameTemplate;
+use App\Models\Player;
+use App\Models\User;
+use App\Modifiers\ModifierRegistry;
+use App\Support\HtmlTransformer;
+use Flux\Flux;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Validator;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Component;
+use Thunk\Verbs\Facades\Verbs;
 
 class PreGameLobby extends Component
 {

@@ -2,23 +2,23 @@
 
 namespace App\Models;
 
-use App\Events\GameEnded;
-use App\States\GameState;
-use App\Events\GameCreated;
-use App\Events\GameStarted;
-use App\Events\GameUpdated;
-use App\Events\TeamCreated;
-use App\Events\GameCanceled;
-use Illuminate\Support\Carbon;
-use Thunk\Verbs\Facades\Verbs;
-use App\Events\ModifierCreated;
 use App\Events\ChallengeCreated;
 use App\Events\ChallengeStarted;
-use App\Modifiers\ModifierRegistry;
-use Glhd\Bits\Database\HasSnowflakes;
-use Illuminate\Database\Eloquent\Model;
+use App\Events\GameCanceled;
+use App\Events\GameCreated;
+use App\Events\GameEnded;
+use App\Events\GameStarted;
+use App\Events\GameUpdated;
 use App\Events\ModifierConfigurationCreated;
 use App\Events\ModifierConfigurationDeleted;
+use App\Events\ModifierCreated;
+use App\Events\TeamCreated;
+use App\Modifiers\ModifierRegistry;
+use App\States\GameState;
+use Glhd\Bits\Database\HasSnowflakes;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Thunk\Verbs\Facades\Verbs;
 
 class Game extends Model
 {
@@ -173,11 +173,10 @@ class Game extends Model
 
         Verbs::commit();
 
-        $this->modifierConfigurations->each(fn ($mc) => 
-            ModifierConfigurationDeleted::fire(
-                modifier_configuration_id: $mc->id,
-                game_id: $this->id,
-            )
+        $this->modifierConfigurations->each(fn ($mc) => ModifierConfigurationDeleted::fire(
+            modifier_configuration_id: $mc->id,
+            game_id: $this->id,
+        )
         );
 
         $this->fresh()->createModifierConfigurations();

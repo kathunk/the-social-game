@@ -2,10 +2,10 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifierConfiguration;
 use App\States\ModifierConfigurationState;
+use Thunk\Verbs\Event;
 
 class SecretCodesAddedToModifier extends Event
 {
@@ -21,7 +21,7 @@ class SecretCodesAddedToModifier extends Event
         );
 
         $this->assert(
-            collect($this->codes)->every(fn($code) => strlen($code) <= 100),
+            collect($this->codes)->every(fn ($code) => strlen($code) <= 100),
             'Codes cannot be more than 100 characters'
         );
     }

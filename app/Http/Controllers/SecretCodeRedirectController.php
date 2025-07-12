@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Modifiers\Classes\TeamSecretCodes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Modifiers\Classes\TeamSecretCodes;
 
 class SecretCodeRedirectController extends Controller
 {

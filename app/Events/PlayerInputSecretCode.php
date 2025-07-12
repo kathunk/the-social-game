@@ -2,19 +2,19 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
-use App\States\ModifierState;
 use App\Events\Traits\HasGame;
-use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasPlayer;
+use App\States\GameState;
+use App\States\ModifierState;
+use App\States\PlayerState;
+use App\States\TeamState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class PlayerInputSecretCode extends Event
 {
-    use HasPlayer, HasGame, HasModifier;
+    use HasGame, HasModifier, HasPlayer;
 
     #[StateId(TeamState::class)]
     public ?int $team_id;
@@ -62,7 +62,7 @@ class PlayerInputSecretCode extends Event
 
             $point_recipient->addToScoreHistory(
                 $this->point_reward,
-                $this->state(PlayerState::class)->name . ' found a secret code',
+                $this->state(PlayerState::class)->name.' found a secret code',
                 $this->points_are_hidden,
             );
         } else {
@@ -72,6 +72,7 @@ class PlayerInputSecretCode extends Event
 
     public function handle()
     {
-        // Most of yall don't get the picture unless the flash is on. - Lil Wayne
+        $this->game()->teams->each(fn ($team) => $team->updateModelWithStateData());
+        $this->modifier()->updateModelWithStateData();
     }
 }

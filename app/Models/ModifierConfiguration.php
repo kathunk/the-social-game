@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\Game;
-use Glhd\Bits\Database\HasSnowflakes;
-use Illuminate\Database\Eloquent\Model;
 use App\States\ModifierConfigurationState;
+use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class ModifierConfiguration extends Model
 {
