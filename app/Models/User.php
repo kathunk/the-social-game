@@ -15,12 +15,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Laravel\Cashier\Billable;
 use Thunk\Verbs\Facades\Verbs;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasSnowflakes, Notifiable;
+    use Billable, HasFactory, HasSnowflakes, Notifiable;
 
     /**
      * The attributes that are mass assignable.
