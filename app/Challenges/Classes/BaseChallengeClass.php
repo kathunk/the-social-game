@@ -2,6 +2,7 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Dtos\ChallengeData;
 use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 use App\Models\Challenge;
 use App\Models\Player;
@@ -27,6 +28,8 @@ abstract class BaseChallengeClass
     public ?Player $player = null;
 
     public ?PlayerState $player_state = null;
+
+    public ?string $challenge_data_class = null;
 
     public function __construct(
         public ?Challenge $challenge = null,
@@ -67,6 +70,13 @@ abstract class BaseChallengeClass
         ?PlayerState $player_state = null
     ): bool {
         return false;
+    }
+
+    public function prepareChallengeData(GameState $game, ChallengeState $challenge): ?ChallengeData
+    {
+        // Optional override
+
+        return null;
     }
 
     public function onChallengeStarted(GameState $game_state)

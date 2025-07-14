@@ -2,6 +2,7 @@
 
 namespace App\Challenges\Classes;
 
+use App\Challenges\Dtos\TeamBountyData;
 use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 use App\Challenges\Support\Traits\HasTeamSwaps;
 use App\Models\Player;
@@ -19,6 +20,8 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
     const DESCRIPTION = 'Your team has been assigned 3 players from other teams as bounties: {3 players}. For each bounty you can convince to defect and join you, your team gains 25 points. But be careful - other teams are trying to recruit your teammates too!';
 
     const TYPE = 'team';
+
+    public ?string $challenge_data_class = TeamBountyData::class;
 
     public static function key(): string
     {
@@ -40,7 +43,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
     {
         return [
             'swapper_ids' => [],
-            'team_bounties' => $team_bounties ?? [],
+            'team_bounties' => [],
         ];
     }
 
@@ -94,36 +97,9 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
 
     public function onChallengeStarted(GameState $game_state)
     {
-        $marked_as_bounty = [];
-
-        $teams = $game_state->teams();
-
-        // mark 3 random players from each team as bounties
-        foreach ($teams as $team) {
-            $marked_as_bounty[$team->id] = $team->player_ids->shuffle()->take(3)->all();
-        }
-
-        // assign 3 of those bounties to each team
-        $team_bounties = [];
-
-        foreach ($teams as $team) {
-            // Get 3 other random teams
-            $other_team_ids = collect($marked_as_bounty)
-                ->reject(fn ($bounties) => count($bounties) === 0)
-                ->keys()
-                ->reject(fn ($id) => $id === $team->id)
-                ->shuffle()
-                ->take(3);
-
-            // Pick one bounty from each selected other team
-            $bounties = $other_team_ids->map(function ($other_team_id) use ($marked_as_bounty) {
-                return collect($marked_as_bounty[$other_team_id])->random();
-            });
-
-            $team_bounties[$team->id] = $bounties->values()->all();
-        }
-
-        $this->challenge_state->challenge_data['team_bounties'] = $team_bounties;
+        // Empty implementation as this logic has been moved to TeamBountyData::fromGameAndChallenge
+        // The challenge data is now set deterministically during event creation
+        // and applied to challenge_data in ChallengeStarted::applyToChallenge
     }
 
     public function onPlayerJoinedTeam(
