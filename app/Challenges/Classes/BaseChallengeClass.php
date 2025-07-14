@@ -10,6 +10,7 @@ use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
 use App\Support\FormBuilder;
+use App\Support\FrontendComponentProcessor;
 
 abstract class BaseChallengeClass
 {
@@ -29,7 +30,7 @@ abstract class BaseChallengeClass
 
     public function __construct(
         public ?Challenge $challenge = null,
-        public ?ChallengeState $challenge_state = null,
+        public ?ChallengeState $challenge_state = null
     ) {}
 
     public static function fromModel(Challenge $challenge): static
@@ -47,8 +48,12 @@ abstract class BaseChallengeClass
         return new static;
     }
 
-    public function isInvalidForTemplate(array $challenge_keys, array $modifier_keys, string $type, array $team_names)
-    {
+    public function isInvalidForTemplate(
+        array $challenge_keys,
+        array $modifier_keys,
+        string $type,
+        array $team_names
+    ) {
         return false;
     }
 
@@ -57,20 +62,20 @@ abstract class BaseChallengeClass
         return [];
     }
 
-    public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool
-    {
+    public function playerCanSwapTeams(
+        ?Player $player = null,
+        ?PlayerState $player_state = null
+    ): bool {
         return false;
     }
 
-    public function onChallengeStarted(
-        GameState $game_state,
-    ) {
+    public function onChallengeStarted(GameState $game_state)
+    {
         // Optional override
     }
 
-    public function onChallengeEnded(
-        GameState $game_state,
-    ) {
+    public function onChallengeEnded(GameState $game_state)
+    {
         // Optional override
     }
 
@@ -78,7 +83,7 @@ abstract class BaseChallengeClass
         PlayerState $player_state,
         TeamState $team_state,
         GameState $game_state,
-        ?TeamState $previous_team = null,
+        ?TeamState $previous_team = null
     ) {
         // Optional override
     }
@@ -100,37 +105,15 @@ abstract class BaseChallengeClass
 
     public function propertiesForLivewire(Player $player): array
     {
-        $properties = [];
-
-        foreach ($this->frontendComponent($player)['elements'] as $element) {
-            if (isset($element['property_name'])) {
-                $properties[$element['property_name']] = null;
-            }
-        }
-
-        return $properties;
+        return FrontendComponentProcessor::propertiesForLivewire(
+            $this->frontendComponent($player)
+        );
     }
 
     public function validationRulesForLivewire(Player $player): array
     {
-        return collect($this->frontendComponent($player)['elements'])
-            ->filter(fn ($element) => isset($element['property_name'], $element['validation_rules']))
-            ->reduce(function ($carry, $element) {
-                // Remove the round_properties namespace from the property name
-                $property = $element['property_name'];
-
-                $carry['rules'][$property] = $element['validation_rules'];
-
-                if (isset($element['validation_messages'])) {
-                    $carry['messages'] = array_merge(
-                        $carry['messages'] ?? [],
-                        collect($element['validation_messages'])
-                            ->mapWithKeys(fn ($message, $rule) => ["{$property}.{$rule}" => $message])
-                            ->all()
-                    );
-                }
-
-                return $carry;
-            }, ['rules' => [], 'messages' => []]);
+        return FrontendComponentProcessor::validationRulesForLivewire(
+            $this->frontendComponent($player)
+        );
     }
 }

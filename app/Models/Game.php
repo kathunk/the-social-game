@@ -9,8 +9,11 @@ use App\Events\GameCreated;
 use App\Events\GameEnded;
 use App\Events\GameStarted;
 use App\Events\GameUpdated;
+use App\Events\ModifierConfigurationCreated;
+use App\Events\ModifierConfigurationDeleted;
 use App\Events\ModifierCreated;
 use App\Events\TeamCreated;
+use App\Modifiers\ModifierRegistry;
 use App\States\GameState;
 use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Model;
@@ -64,6 +67,11 @@ class Game extends Model
     public function modifiers()
     {
         return $this->hasMany(Modifier::class);
+    }
+
+    public function modifierConfigurations()
+    {
+        return $this->hasMany(ModifierConfiguration::class);
     }
 
     public function currentChallenge()
@@ -123,6 +131,8 @@ class Game extends Model
             $user->admitToGame($game, $user);
         }
 
+        $game->createModifierConfigurations();
+
         return self::find($game_id);
     }
 
@@ -135,6 +145,55 @@ class Game extends Model
         }
 
         return $code;
+    }
+
+    public function updateGame(
+        User $user,
+        GameTemplate $game_template,
+        GameMode $game_mode,
+        bool $is_public = true,
+        bool $requires_admin_approval_to_join = false,
+        array $social_links = [],
+        ?Carbon $starts_at = null,
+        ?Carbon $ends_at = null,
+        ?int $challenge_length_override = null,
+    ) {
+        GameUpdated::fire(
+            game_id: $this->id,
+            user_id: $user->id,
+            game_template_id: $game_template->id,
+            game_mode_id: $game_mode->id,
+            starts_at: $starts_at,
+            ends_at: $ends_at,
+            is_public: $is_public,
+            requires_admin_approval_to_join: $requires_admin_approval_to_join,
+            challenge_length_override: $challenge_length_override,
+            social_links: $social_links,
+        );
+
+        Verbs::commit();
+
+        $this->modifierConfigurations->each(fn ($mc) => ModifierConfigurationDeleted::fire(
+            modifier_configuration_id: $mc->id,
+            game_id: $this->id,
+        )
+        );
+
+        $this->fresh()->createModifierConfigurations();
+    }
+
+    public function createModifierConfigurations()
+    {
+        collect($this->gameTemplate->modifiers)
+            ->map(fn ($modifier) => ModifierRegistry::retrieveFromKey($modifier))
+            ->filter(fn ($modifier) => $modifier::REQUIRES_PRE_GAME_CONFIGURATION)
+            ->each(function ($modifier) {
+                ModifierConfigurationCreated::fire(
+                    game_id: $this->id,
+                    modifier_key: $modifier::key(),
+                    modifier_data: $modifier::DEFAULT_CONFIGURATION,
+                );
+            });
     }
 
     public function start()

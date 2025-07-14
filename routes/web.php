@@ -1,23 +1,25 @@
 <?php
 
-use App\Livewire\Home;
-use Livewire\Volt\Volt;
-use App\Livewire\TeamPage;
-use App\Livewire\Subscribe;
-use App\Livewire\CreateGame;
-use App\Livewire\PlayerPage;
-use App\Livewire\SecretsPage;
-use App\Livewire\PreGameLobby;
-use App\Livewire\GameDashboard;
-use App\Livewire\MarketingPage;
-use App\Http\MissingGameHandler;
-use App\Livewire\GameModesListPage;
-use App\Livewire\ManageGameModePage;
-use Illuminate\Support\Facades\Route;
-use App\Livewire\GameComponentListPage;
-use App\Livewire\ManageGameTemplatePage;
-use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\SecretCodeRedirectController;
+use App\Http\Controllers\StripeWebhookController;
+use App\Http\MissingGameHandler;
+use App\Livewire\CreateGame;
+use App\Livewire\GameComponentListPage;
+use App\Livewire\GameDashboard;
+use App\Livewire\GameModesListPage;
+use App\Livewire\Home;
+use App\Livewire\ManageGameModePage;
+use App\Livewire\ManageGameTemplatePage;
+use App\Livewire\MarketingPage;
+use App\Livewire\ModifierConfigurationPage;
+use App\Livewire\PlayerPage;
+use App\Livewire\PreGameLobby;
+use App\Livewire\SecretsPage;
+use App\Livewire\Subscribe;
+use App\Livewire\TeamPage;
+use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 Route::get('/', function () {
     return view('welcome');
@@ -60,6 +62,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('success', [CheckoutController::class, 'success'])->name('success');
         Route::get('cancel', [CheckoutController::class, 'cancel'])->name('cancel');
     });
+    Route::get('/games/{game}/modifier-configurations', ModifierConfigurationPage::class)->name('games.modifier-configurations');
+    Route::get('/secret-codes', [SecretCodeRedirectController::class, 'handle'])
+        ->name('secret-codes.shortcut');
 });
 
 Route::post('stripe/webhook',[StripeWebhookController::class, 'handleWebhook'])->name('cashier.webhook')

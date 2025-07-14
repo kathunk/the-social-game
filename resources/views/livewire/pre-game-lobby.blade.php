@@ -101,6 +101,11 @@
                         You sure?
                     </flux:button>
                 @endunless
+                @if ($this->modifierConfigurations->count() > 0)
+                    <flux:button icon="wrench" href="{{ route('games.modifier-configurations', ['game' => $this->game]) }}">
+                        Manage modifiers
+                    </flux:button>
+                @endif
                 <flux:button @click="editGameMode = true" icon="pencil">Settings</flux:button>
                 @if ($this->game->status === 'upcoming')
                     <flux:button @click="editTime = true" icon="pencil">Time</flux:button>
