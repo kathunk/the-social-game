@@ -4,24 +4,24 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\States\UserState;
+use App\Events\UserAdmittedToGame;
 use App\Events\UserCreated;
+use App\Events\UserPromotedToGameAdmin;
+use App\Events\UserRejectedFromGame;
+use App\Events\UserRequestedToJoinGame;
+use App\States\UserState;
+use Glhd\Bits\Database\HasSnowflakes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Billable;
 use Thunk\Verbs\Facades\Verbs;
-use App\Events\UserAdmittedToGame;
-use App\Events\UserRejectedFromGame;
-use Glhd\Bits\Database\HasSnowflakes;
-use App\Events\UserPromotedToGameAdmin;
-use App\Events\UserRequestedToJoinGame;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasSnowflakes, Notifiable, Billable;
+    use Billable, HasFactory, HasSnowflakes, Notifiable;
 
     /**
      * The attributes that are mass assignable.

@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\User;
-use Laravel\Cashier\Subscription;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Cashier\Subscription;
 
 uses(RefreshDatabase::class);
 
@@ -27,15 +27,15 @@ test('user can subscribe successfully', function () {
                             'id' => 'si_test123',
                             'price' => [
                                 'id' => 'price_test123',
-                                'product' => 'prod_test123'
+                                'product' => 'prod_test123',
                             ],
-                            'quantity' => 1
-                        ]
-                    ]
+                            'quantity' => 1,
+                        ],
+                    ],
                 ],
-                'metadata' => ['type' => 'default']
-            ]
-        ]
+                'metadata' => ['type' => 'default'],
+            ],
+        ],
     ]);
 
     expect($response->getStatusCode())->toBe(200);
@@ -83,15 +83,15 @@ test('subscription automatically renews after one year', function () {
                             'id' => 'si_test123',
                             'price' => [
                                 'id' => 'price_test123',
-                                'product' => 'prod_test123'
+                                'product' => 'prod_test123',
                             ],
-                            'quantity' => 1
-                        ]
-                    ]
+                            'quantity' => 1,
+                        ],
+                    ],
                 ],
-                'metadata' => ['type' => 'default']
-            ]
-        ]
+                'metadata' => ['type' => 'default'],
+            ],
+        ],
     ]);
 
     expect($response->getStatusCode())->toBe(200);
@@ -116,8 +116,8 @@ test('user can cancel subscription', function () {
                 'id' => 'sub_test123',
                 'customer' => 'cus_test123',
                 'status' => 'canceled',
-            ]
-        ]
+            ],
+        ],
     ]);
 
     expect($response->getStatusCode())->toBe(200);
@@ -152,10 +152,10 @@ test('failed payments are logged for debugging', function () {
                 'last_payment_error' => [
                     'message' => 'Your card was declined.',
                     'type' => 'card_error',
-                    'code' => 'card_declined'
-                ]
-            ]
-        ]
+                    'code' => 'card_declined',
+                ],
+            ],
+        ],
     ]);
 
     // The webhook should be handled (even if it returns 200 for unhandled events)
@@ -173,8 +173,8 @@ test('successful payments are logged', function () {
                 'customer' => 'cus_test123',
                 'subscription' => 'sub_test123',
                 'amount_paid' => 999,
-            ]
-        ]
+            ],
+        ],
     ]);
 
     expect($response->getStatusCode())->toBe(200);
@@ -248,8 +248,8 @@ test('can create customer and checkout with Stripe API', function () {
             'cancel_url' => route('subscribe.cancel'),
             'metadata' => [
                 'test_run' => 'Laracon 2025 API Test',
-                'timestamp' => now()->toISOString()
-            ]
+                'timestamp' => now()->toISOString(),
+            ],
         ]);
 
     expect($checkout)->toBeObject();
