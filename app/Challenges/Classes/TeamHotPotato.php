@@ -34,14 +34,43 @@ class TeamHotPotato extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        $teams = $this->challenge->game->teams->sortByDesc('score')->pluck('id');
+        $teams = $this->challenge->game->teams->sortByDesc('score');
 
-        return $teams->mapWithKeys(fn ($team_id) => [$team_id => [
-            'potato_holder_id' => null,
-            'remaining_player_ids' => [],
-            'all_holder_ids' => [],
-            'status' => 'active',
-        ]])->toArray();
+        return $teams->mapWithKeys(function ($team) {
+            $players = $team->players;
+
+            if ($players->count() === 0) {
+                return [$team->id => [
+                    'potato_holder_id' => null,
+                    'remaining_player_ids' => [],
+                    'all_holder_ids' => [],
+                    'status' => 'forfeited',
+                ]];
+            }
+
+            if ($players->count() === 1) {
+                return [$team->id => [
+                    'potato_holder_id' => $players->first()->id,
+                    'remaining_player_ids' => [],
+                    'all_holder_ids' => [$players->first()->id],
+                    'status' => 'succeeded',
+                ]];
+            }
+
+            $all_player_ids = $players->pluck('id')->toArray();
+            $random_player_id = collect($all_player_ids)->random();
+
+            $potato_holder_id = $random_player_id;
+            $all_holder_ids = [$random_player_id];
+            $remaining_player_ids = array_diff($all_player_ids, [$random_player_id]);
+
+            return [$team->id => [
+                'potato_holder_id' => $potato_holder_id,
+                'remaining_player_ids' => $remaining_player_ids,
+                'all_holder_ids' => $all_holder_ids,
+                'status' => 'active',
+            ]];
+        })->toArray();
     }
 
     public function frontendComponent(Player $player): array
@@ -82,26 +111,6 @@ class TeamHotPotato extends BaseChallengeClass
         $form->when($challenge_forfeited, fn ($form) => $form->subtitle('Challenge forfeited. No players were on the team when the challenge started.'));
 
         return $form->build();
-    }
-
-    public function onChallengeStarted(GameState $game_state)
-    {
-        $challenge_state = $this->challenge_state;
-
-        $game_state->teams()->each(function ($team) use ($challenge_state) {
-            if ($team->player_ids->count() === 0) {
-                $challenge_state->challenge_data[$team->id]['status'] = 'forfeited';
-
-                return;
-            }
-
-            $all_player_ids = $team->players()->pluck('id')->toArray();
-            $random_player_id = collect($all_player_ids)->random();
-
-            $challenge_state->challenge_data[$team->id]['potato_holder_id'] = $random_player_id;
-            $challenge_state->challenge_data[$team->id]['all_holder_ids'][] = $random_player_id;
-            $challenge_state->challenge_data[$team->id]['remaining_player_ids'] = array_diff($all_player_ids, [$random_player_id]);
-        });
     }
 
     public function passThePotato(Player $player, array $params): void

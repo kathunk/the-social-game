@@ -10,7 +10,6 @@ use Thunk\Verbs\Facades\Verbs;
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
-    Verbs::fake();
     Verbs::commitImmediately();
 
     $challenges = [
@@ -103,4 +102,17 @@ it('cannot be used with an odd number of teams', function () {
             team_names: ['Team 1', 'Team 2', 'Team 3'],
         );
     })->toThrow(Exception::class, 'Prisoner\'s Dilemma requires an even number of teams.');
+});
+
+it('can handle a verbs replay', function () {
+    Verbs::commit();
+
+    $challenge_data = $this->game->fresh()->currentChallenge->challenge_data;
+
+    $this->artisan('db:reset-data');
+    $this->artisan('verbs:replay');
+
+    $new_challenge_data = $this->game->fresh()->currentChallenge->challenge_data;
+
+    expect($new_challenge_data)->toBe($challenge_data);
 });

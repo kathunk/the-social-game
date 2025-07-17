@@ -12,7 +12,7 @@ trait HasTeamPairs
 
         $paired_teams = collect();
 
-        $teams = $teams->keys();
+        $teams = $teams->pluck('id');
 
         while ($teams->count() >= 2) {
             [$team1, $team2] = $teams->splice(0, 2);

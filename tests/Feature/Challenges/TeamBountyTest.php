@@ -1,13 +1,11 @@
 <?php
 
-use App\Models\Game;
-use App\Models\Team;
-use App\Models\Player;
-use Thunk\Verbs\Facades\Verbs;
-use Thunk\Verbs\Models\VerbEvent;
-use Illuminate\Support\Facades\Date;
 use App\Challenges\Classes\TeamBounty;
 use App\Challenges\Classes\TeamFiller;
+use App\Models\Player;
+use App\Models\Team;
+use Illuminate\Support\Facades\Date;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 

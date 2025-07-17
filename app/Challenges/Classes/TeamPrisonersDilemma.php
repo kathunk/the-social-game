@@ -39,11 +39,13 @@ class TeamPrisonersDilemma extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        $teams = $this->challenge->game->teams->sortByDesc(fn ($team) => $team->score)->mapWithKeys(fn ($t) => [$t->id => []])->toArray();
+        $teams = $this->challenge->game->teams;
+
+        $paired_teams = $this->pair($teams)->toArray();
 
         return [
-            'team_voters' => $teams,
-            'team_pairs' => $teams,
+            'team_voters' => $teams->mapWithKeys(fn ($team) => [$team->id => []])->toArray(),
+            'team_pairs' => $paired_teams,
         ];
     }
 
@@ -74,21 +76,16 @@ class TeamPrisonersDilemma extends BaseChallengeClass
 
     public function playDirty(Player $player, array $params): void
     {
-        PlayerSubmittedPlayDirty::fire(
-            player_id: $player->id,
-            game_id: $player->game_id,
-            challenge_id: $this->challenge->id,
-            team_id: $player->team_id,
-        );
-    }
-
-    public function onChallengeStarted(GameState $game_state)
-    {
-        $teams = collect($this->challenge_state->challenge_data['team_pairs']);
-
-        $paired_teams = $this->pair($teams)->toArray();
-
-        return $this->challenge_state->challenge_data['team_pairs'] = $paired_teams;
+        try {
+            PlayerSubmittedPlayDirty::fire(
+                player_id: $player->id,
+                game_id: $player->game_id,
+                challenge_id: $this->challenge->id,
+                team_id: $player->team_id,
+            );
+        } catch (\Exception $e) {
+            dd($e);
+        }
     }
 
     public function onChallengeEnded(GameState $game_state)

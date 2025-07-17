@@ -33,7 +33,6 @@ class ChallengeStarted extends Event
     public function applyToGame(GameState $state)
     {
         $state->current_challenge_id = $this->challenge_id;
-        $this->state(ChallengeState::class)->handler()->onChallengeStarted($state);
     }
 
     public function handle(ChallengeState $state)
