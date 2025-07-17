@@ -67,7 +67,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('secret-codes.shortcut');
 });
 
-Route::post('stripe/webhook',[StripeWebhookController::class, 'handleWebhook'])->name('cashier.webhook')
+Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('cashier.webhook')
     ->withoutMiddleware(['web', 'auth']);
 
 require __DIR__.'/auth.php';

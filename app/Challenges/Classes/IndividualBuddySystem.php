@@ -26,10 +26,7 @@ class IndividualBuddySystem extends BaseChallengeClass implements SupportsPeckin
     public function dataArrayForState(): array
     {
         return [
-            'votes' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => [
-                'downvote_player_id' => null,
-                'upvote_player_id' => null,
-            ]])->toArray(),
+            'votes' => [],
         ];
     }
 
@@ -61,6 +58,10 @@ class IndividualBuddySystem extends BaseChallengeClass implements SupportsPeckin
             }
 
             $buddy_id = $votes[$player->id]['upvote_player_id'];
+
+            if (! isset($votes[$buddy_id])) {
+                return;
+            }
 
             $buddy_upvoted_player = $buddy_id && $votes[$buddy_id]['upvote_player_id']
                 ? $votes[$buddy_id]['upvote_player_id'] === $player->id

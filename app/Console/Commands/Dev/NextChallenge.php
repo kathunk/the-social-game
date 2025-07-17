@@ -3,7 +3,6 @@
 namespace App\Console\Commands\Dev;
 
 use App\Events\ChallengeEnded;
-use App\Events\ChallengeStarted;
 use App\Events\GameEnded;
 use App\Models\Game;
 use Illuminate\Console\Command;
@@ -42,10 +41,7 @@ class NextChallenge extends Command
             ->first();
 
         if ($next_challenge !== null) {
-            ChallengeStarted::fire(
-                challenge_id: $next_challenge->id,
-                game_id: $next_challenge->game_id,
-            );
+            $next_challenge->start();
 
             return;
         }

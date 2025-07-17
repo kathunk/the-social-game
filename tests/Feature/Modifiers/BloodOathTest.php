@@ -137,8 +137,9 @@ it('does not allow you to upvote your blood oath partner', function () {
         ->call('callClassAction', 'vote', 'challenge', $challenge->class_key)
         ->assertHasErrors();
 
-    expect($challenge->fresh()->challenge_data['votes'][$player_1->id]['upvote_player_id'])->toBe(null);
-    expect($challenge->fresh()->challenge_data['votes'][$player_1->id]['downvote_player_id'])->toBe(null);
+    $vote_data = $challenge->fresh()->challenge_data['votes'];
+
+    expect(array_key_exists($player_1->id, $vote_data))->toBeFalse();
 });
 
 it('does not allow you to offer an oath to someone you have already upvoted', function () {

@@ -38,9 +38,38 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
 
     public function dataArrayForState(): array
     {
+        $marked_as_bounty = [];
+
+        $teams = $this->challenge->game->teams;
+
+        // mark 3 random players from each team as bounties
+        foreach ($teams as $team) {
+            $marked_as_bounty[$team->id] = $team->players->shuffle()->take(3)->pluck('id')->all();
+        }
+
+        // assign 3 of those bounties to each team
+        $team_bounties = [];
+
+        foreach ($teams as $team) {
+            // Get 3 other random teams
+            $other_team_ids = collect($marked_as_bounty)
+                ->reject(fn ($bounties) => count($bounties) === 0)
+                ->keys()
+                ->reject(fn ($id) => $id === $team->id)
+                ->shuffle()
+                ->take(3);
+
+            // Pick one bounty from each selected other team
+            $bounties = $other_team_ids->map(function ($other_team_id) use ($marked_as_bounty) {
+                return collect($marked_as_bounty[$other_team_id])->random();
+            });
+
+            $team_bounties[$team->id] = $bounties->values()->all();
+        }
+
         return [
             'swapper_ids' => [],
-            'team_bounties' => $team_bounties ?? [],
+            'team_bounties' => $team_bounties,
         ];
     }
 
@@ -90,40 +119,6 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         }
 
         return false;
-    }
-
-    public function onChallengeStarted(GameState $game_state)
-    {
-        $marked_as_bounty = [];
-
-        $teams = $game_state->teams();
-
-        // mark 3 random players from each team as bounties
-        foreach ($teams as $team) {
-            $marked_as_bounty[$team->id] = $team->player_ids->shuffle()->take(3)->all();
-        }
-
-        // assign 3 of those bounties to each team
-        $team_bounties = [];
-
-        foreach ($teams as $team) {
-            // Get 3 other random teams
-            $other_team_ids = collect($marked_as_bounty)
-                ->reject(fn ($bounties) => count($bounties) === 0)
-                ->keys()
-                ->reject(fn ($id) => $id === $team->id)
-                ->shuffle()
-                ->take(3);
-
-            // Pick one bounty from each selected other team
-            $bounties = $other_team_ids->map(function ($other_team_id) use ($marked_as_bounty) {
-                return collect($marked_as_bounty[$other_team_id])->random();
-            });
-
-            $team_bounties[$team->id] = $bounties->values()->all();
-        }
-
-        $this->challenge_state->challenge_data['team_bounties'] = $team_bounties;
     }
 
     public function onPlayerJoinedTeam(

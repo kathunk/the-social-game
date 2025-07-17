@@ -36,11 +36,22 @@ class TeamBrinksmanship extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        return $this->challenge_state->game()
-            ->teams()
-            ->sortByDesc(fn ($team) => $team->score())
-            ->mapWithKeys(fn ($t) => [$t->id => []])
-            ->toArray();
+        $teams = $this->challenge->game->teams;
+
+        $paired_teams = $this->pair($teams);
+
+        $paired_teams = $paired_teams->mapWithKeys(function ($team_id, $ally_team_id) {
+            return [
+                $team_id => [
+                    'code' => $this->generateNuclearCode(),
+                    'ally_team_id' => $ally_team_id,
+                    'has_launched' => false,
+                    'strike_type' => null,
+                ],
+            ];
+        })->toArray();
+
+        return $paired_teams;
     }
 
     private function generateNuclearCode(): string
@@ -117,26 +128,6 @@ class TeamBrinksmanship extends BaseChallengeClass
             strike_type: 'nuke_ally',
             target_code: $params['target_code'],
         );
-    }
-
-    public function onChallengeStarted(GameState $game_state)
-    {
-        $teams = collect($this->challenge_state->challenge_data);
-
-        $paired_teams = $this->pair($teams);
-
-        $paired_teams = $paired_teams->mapWithKeys(function ($team_id, $ally_team_id) {
-            return [
-                $team_id => [
-                    'code' => $this->generateNuclearCode(),
-                    'ally_team_id' => $ally_team_id,
-                    'has_launched' => false,
-                    'strike_type' => null,
-                ],
-            ];
-        })->toArray();
-
-        return $this->challenge_state->challenge_data = $paired_teams;
     }
 
     public function onChallengeEnded(GameState $game_state)

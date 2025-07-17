@@ -13,16 +13,28 @@ class ResetData extends Command
 
     public function handle()
     {
+        $this->info('Nullifying circular foreign keys in users table...');
+        try {
+            DB::table('users')->update([
+                'current_game_id' => null,
+                'current_player_id' => null,
+            ]);
+            $this->info('Circular foreign keys nullified successfully');
+        } catch (\Exception $e) {
+            $this->error('Failed to nullify circular foreign keys: '.$e->getMessage());
+        }
+
         $tables = [
             'memberships',
             'game_admins',
             'game_applications',
             'challenges',
+            'modifiers',
+            'modifier_configurations',
             'players',
             'teams',
             'games',
             'game_templates',
-            'modifiers',
             'game_modes',
         ];
 
@@ -35,12 +47,8 @@ class ResetData extends Command
         foreach ($tables as $table) {
             $this->info("Truncating table: {$table}");
             try {
-                // First try to delete all records
                 DB::table($table)->delete();
-                // Then truncate to reset auto-increment
                 DB::table($table)->truncate();
-
-                // Verify the table is empty
                 $count = DB::table($table)->count();
                 $this->info("Table {$table} truncated. Remaining records: {$count}");
 
@@ -48,6 +56,7 @@ class ResetData extends Command
                     $this->error("WARNING: Table {$table} still has {$count} records after truncate!");
                 }
             } catch (\Exception $e) {
+                dump($e);
                 $this->error("Failed to truncate {$table}: ".$e->getMessage());
             }
         }

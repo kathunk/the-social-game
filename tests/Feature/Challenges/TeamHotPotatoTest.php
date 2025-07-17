@@ -12,7 +12,6 @@ use Thunk\Verbs\Facades\Verbs;
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
-    Verbs::fake();
     Verbs::commitImmediately();
 
     $challenges = [
@@ -192,4 +191,17 @@ it('prevents Hot Potato from going first', function () {
             type: 'individual',
         );
     })->toThrow(Exception::class, 'The following challenges are invalid for this template: Hot Potato cannot go first.');
+});
+
+it('can handle a verbs replay', function () {
+    Verbs::commit();
+
+    $challenge_data = $this->game->fresh()->currentChallenge->challenge_data;
+
+    $this->artisan('db:reset-data');
+    $this->artisan('verbs:replay');
+
+    $new_challenge_data = $this->game->fresh()->currentChallenge->challenge_data;
+
+    expect($new_challenge_data)->toBe($challenge_data);
 });

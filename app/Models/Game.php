@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Events\ChallengeCreated;
-use App\Events\ChallengeStarted;
 use App\Events\GameCanceled;
 use App\Events\GameCreated;
 use App\Events\GameEnded;
@@ -301,7 +300,7 @@ class Game extends Model
 
         $challenge = $this->challenges->sortBy('starts_at')->first();
 
-        ChallengeStarted::fire(challenge_id: $challenge->id, game_id: $this->id);
+        $challenge->start();
 
         Verbs::commit();
 

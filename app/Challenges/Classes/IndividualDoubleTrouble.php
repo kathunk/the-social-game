@@ -27,10 +27,7 @@ class IndividualDoubleTrouble extends BaseChallengeClass implements SupportsPeck
     {
         return [
             'immune_player_ids' => [],
-            'votes' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => [
-                'downvote_player_id' => null,
-                'upvote_player_id' => null,
-            ]])->toArray(),
+            'votes' => [],
         ];
     }
 

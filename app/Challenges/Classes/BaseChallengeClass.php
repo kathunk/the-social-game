@@ -69,11 +69,6 @@ abstract class BaseChallengeClass
         return false;
     }
 
-    public function onChallengeStarted(GameState $game_state)
-    {
-        // Optional override
-    }
-
     public function onChallengeEnded(GameState $game_state)
     {
         // Optional override

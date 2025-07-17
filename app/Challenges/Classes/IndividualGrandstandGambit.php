@@ -26,11 +26,8 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
     public function dataArrayForState(): array
     {
         return [
-            'choices' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => null])->toArray(),
-            'votes' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => [
-                'downvote_player_id' => null,
-                'upvote_player_id' => null,
-            ]])->toArray(),
+            'choices' => [],
+            'votes' => [],
         ];
     }
 
