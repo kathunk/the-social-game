@@ -21,7 +21,7 @@ class StayOnMessage extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        return $this->challenge_state->game()->teams()->mapWithKeys(fn ($t) => [$t->id => []])->toArray();
+        return $this->challenge->game->teams->mapWithKeys(fn ($t) => [$t->id => []])->toArray();
     }
 
     public function frontendComponent(Player $player): array

@@ -39,11 +39,7 @@ class TeamPrisonersDilemma extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        $teams = $this->challenge_state->game()
-            ->teams()
-            ->sortByDesc(fn ($team) => $team?->score())
-            ->mapWithKeys(fn ($t) => [$t->id => []])
-            ->toArray();
+        $teams = $this->challenge->game->teams->sortByDesc(fn ($team) => $team->score)->mapWithKeys(fn ($t) => [$t->id => []])->toArray();
 
         return [
             'team_voters' => $teams,

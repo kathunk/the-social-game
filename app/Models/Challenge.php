@@ -39,9 +39,12 @@ class Challenge extends Model
 
     public function start()
     {
+        $data = $this->handler()->dataArrayForState();
+
         ChallengeStarted::fire(
             challenge_id: $this->id,
-            game_id: $this->game_id
+            game_id: $this->game_id,
+            challenge_data: $data,
         );
     }
 
@@ -49,7 +52,7 @@ class Challenge extends Model
     {
         ChallengeEnded::fire(
             challenge_id: $this->id,
-            game_id: $this->game_id
+            game_id: $this->game_id,
         );
     }
 

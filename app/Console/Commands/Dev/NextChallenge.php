@@ -42,10 +42,7 @@ class NextChallenge extends Command
             ->first();
 
         if ($next_challenge !== null) {
-            ChallengeStarted::fire(
-                challenge_id: $next_challenge->id,
-                game_id: $next_challenge->game_id,
-            );
+            $next_challenge->start();
 
             return;
         }

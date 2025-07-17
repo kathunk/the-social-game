@@ -27,11 +27,8 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
     public function dataArrayForState(): array
     {
         return [
-            'quiz_submissions' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => ['guess_player_id' => null]])->toArray(),
-            'votes' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => [
-                'downvote_player_id' => null,
-                'upvote_player_id' => null,
-            ]])->toArray(),
+            'quiz_submissions' => [],
+            'votes' => [],
             'invisible_player_ids' => [],
         ];
     }

@@ -301,7 +301,7 @@ class Game extends Model
 
         $challenge = $this->challenges->sortBy('starts_at')->first();
 
-        ChallengeStarted::fire(challenge_id: $challenge->id, game_id: $this->id);
+        $challenge->start();
 
         Verbs::commit();
 

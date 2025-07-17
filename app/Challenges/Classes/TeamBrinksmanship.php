@@ -36,11 +36,7 @@ class TeamBrinksmanship extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        return $this->challenge_state->game()
-            ->teams()
-            ->sortByDesc(fn ($team) => $team->score())
-            ->mapWithKeys(fn ($t) => [$t->id => []])
-            ->toArray();
+        return $this->challenge->game->teams->mapWithKeys(fn ($t) => [$t->id => []])->toArray();
     }
 
     private function generateNuclearCode(): string

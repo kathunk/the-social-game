@@ -265,6 +265,14 @@ class FormBuilder
         return $this;
     }
 
+    public function warGameMap(WarGameSpace $space): static
+    {
+        $this->elements[] = [
+            'type' => 'war_game_map',
+            'position' => $space->position,
+        ];
+    }
+
     public function merge(FormBuilder $other): static
     {
         $this->elements = array_merge($this->elements, $other->elements);

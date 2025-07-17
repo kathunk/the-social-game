@@ -14,6 +14,8 @@ class ChallengeStarted extends Event
 {
     use HasActiveGame, HasChallenge;
 
+    public array $challenge_data;
+
     public function validate()
     {
         $this->assert(
@@ -25,7 +27,7 @@ class ChallengeStarted extends Event
     public function applyToChallenge(ChallengeState $challenge)
     {
         $challenge->status = 'active';
-        $challenge->challenge_data = $challenge->handler()->dataArrayForState();
+        $challenge->challenge_data = $this->challenge_data;
     }
 
     public function applyToGame(GameState $state)

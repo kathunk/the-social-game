@@ -26,11 +26,8 @@ class IndividualSpy extends BaseChallengeClass implements SupportsPeckingOrderBa
     public function dataArrayForState(): array
     {
         return [
-            'information_bought' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => null])->toArray(),
-            'votes' => $this->challenge_state->game()->players()->mapWithKeys(fn ($p) => [$p->id => [
-                'downvote_player_id' => null,
-                'upvote_player_id' => null,
-            ]])->toArray(),
+            'information_bought' => [],
+            'votes' => [],
         ];
     }
 

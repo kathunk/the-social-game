@@ -34,7 +34,7 @@ class TeamHotPotato extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        $teams = $this->challenge_state->game()->teams()->sortByDesc('score')->pluck('id');
+        $teams = $this->challenge->game->teams->sortByDesc('score')->pluck('id');
 
         return $teams->mapWithKeys(fn ($team_id) => [$team_id => [
             'potato_holder_id' => null,
