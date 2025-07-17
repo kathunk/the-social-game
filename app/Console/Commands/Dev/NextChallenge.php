@@ -3,7 +3,6 @@
 namespace App\Console\Commands\Dev;
 
 use App\Events\ChallengeEnded;
-use App\Events\ChallengeStarted;
 use App\Events\GameEnded;
 use App\Models\Game;
 use Illuminate\Console\Command;

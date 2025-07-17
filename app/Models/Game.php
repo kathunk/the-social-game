@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Events\ChallengeCreated;
-use App\Events\ChallengeStarted;
 use App\Events\GameCanceled;
 use App\Events\GameCreated;
 use App\Events\GameEnded;
