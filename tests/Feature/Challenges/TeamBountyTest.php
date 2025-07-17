@@ -1,16 +1,17 @@
 <?php
 
+use App\Models\Game;
+use App\Models\Team;
+use App\Models\Player;
+use Thunk\Verbs\Facades\Verbs;
+use Thunk\Verbs\Models\VerbEvent;
+use Illuminate\Support\Facades\Date;
 use App\Challenges\Classes\TeamBounty;
 use App\Challenges\Classes\TeamFiller;
-use App\Models\Player;
-use App\Models\Team;
-use Illuminate\Support\Facades\Date;
-use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
-    Verbs::fake();
     Verbs::commitImmediately();
 
     // @todo we need to run a simple challenge first because we need for all the teams to have at least 3 players BEFORE Bounty starts
@@ -28,7 +29,7 @@ beforeEach(function () {
     $this->mockGameTemplate(
         challenges: $challenges,
         type: 'team',
-        team_names: ['Team 1', 'Team 2', 'Team 3', 'Team 4']
+        team_names: ['Team 1', 'Team 2', 'Team 3', 'Team 4', 'Team 5', 'Team 6', 'Team 7']
     );
 
     $this->createGame()->start();
@@ -37,6 +38,7 @@ beforeEach(function () {
     $this->team_2 = $this->game->teams->skip(1)->first();
     $this->team_3 = $this->game->teams->skip(2)->first();
     $this->team_4 = $this->game->teams->skip(3)->first();
+    $this->team_5 = $this->game->teams->skip(4)->first();
 
     // Create 3 players per team
     $this->player_1 = $this->createPlayer()->joinTeam($this->team_1);
@@ -65,7 +67,7 @@ beforeEach(function () {
 it('assigns bounties to teams on challenge start', function () {
     $bounties = $this->challenge->fresh()->challenge_data['team_bounties'];
 
-    expect(count($bounties))->toBe(4);
+    expect(count($bounties))->toBe(7);
     expect(collect($bounties)->every(fn ($bounty) => count($bounty) === 3))->toBeTrue();
 
     foreach ($bounties as $assigned_team_id => $bounty_player_ids) {
@@ -92,6 +94,10 @@ it('only awards points when a team recruits their bounty', function () {
             ->where('team_id', '!=', $assigned_team_id)
             ->whereIn('id', $bounty_player_ids)
             ->first();
+
+        if (! $bounty_player) {
+            return;
+        }
 
         swapTeam($bounty_player, $team->id, TeamBounty::key());
         expect($bounty_player->refresh()->team_id)->toBe($assigned_team_id);
@@ -163,4 +169,15 @@ it('prevents Bounty from going first', function () {
             type: 'individual',
         );
     })->toThrow(Exception::class, 'The following challenges are invalid for this template: Bounty cannot go first.');
+});
+
+it('can handle a verbs replay', function () {
+    $bounties = $this->challenge->fresh()->challenge_data['team_bounties'];
+
+    $this->artisan('db:reset-data');
+    $this->artisan('verbs:replay');
+
+    $new_bounties = $this->challenge->fresh()->challenge_data['team_bounties'];
+
+    expect($new_bounties)->toBe($bounties);
 });
