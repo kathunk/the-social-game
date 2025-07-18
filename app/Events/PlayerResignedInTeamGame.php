@@ -44,8 +44,6 @@ class PlayerResignedInTeamGame extends Event
         $player->status = 'resigned';
         $player->save();
 
-        $team = Team::find($this->team_id);
-        $team->score = $this->state(TeamState::class)->score();
-        $team->save();
+        $this->team()->updateModelWithStateData();
     }
 }

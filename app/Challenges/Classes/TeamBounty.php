@@ -81,6 +81,10 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
             '{3 players}' => collect($bounties)->map(function ($id) {
                 $player = Player::find($id);
 
+                if ($player->status === 'resigned') {
+                    return $player->name.' (resigned)';
+                }
+
                 if (in_array($player->id, $this->challenge->challenge_data['swapper_ids'])) {
                     return $player->name.' (ineligible: already moved to '.$player->team->name.')';
                 }

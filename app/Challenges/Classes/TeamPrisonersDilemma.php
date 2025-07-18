@@ -76,16 +76,12 @@ class TeamPrisonersDilemma extends BaseChallengeClass
 
     public function playDirty(Player $player, array $params): void
     {
-        try {
-            PlayerSubmittedPlayDirty::fire(
-                player_id: $player->id,
-                game_id: $player->game_id,
-                challenge_id: $this->challenge->id,
-                team_id: $player->team_id,
-            );
-        } catch (\Exception $e) {
-            dd($e);
-        }
+        PlayerSubmittedPlayDirty::fire(
+            player_id: $player->id,
+            game_id: $player->game_id,
+            challenge_id: $this->challenge->id,
+            team_id: $player->team_id,
+        );
     }
 
     public function onChallengeEnded(GameState $game_state)

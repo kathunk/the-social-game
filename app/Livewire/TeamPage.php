@@ -52,6 +52,7 @@ class TeamPage extends Component
     public function mount(Team $team)
     {
         $this->team = $team;
+        // dd($this->team->score, $this->team->hidden_score);
     }
 
     public function render()
