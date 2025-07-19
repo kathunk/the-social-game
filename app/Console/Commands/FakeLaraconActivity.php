@@ -47,8 +47,6 @@ class FakeLaraconActivity extends Command
      */
     public function handle()
     {
-        Verbs::commitImmediately();
-
         $this->game = Game::where('name', 'Laracon 2025')->get()->last();
 
         $this->challenge = $this->game->currentChallenge;
@@ -62,11 +60,13 @@ class FakeLaraconActivity extends Command
         $this->teams = $this->game->teams;
 
         $this->addNewUsersToEveryTeam();
+        Verbs::commit();
         $this->players = $this->game->fresh()->players->where('status', 'active');
 
         $this->resignSomePlayers();
-
+        Verbs::commit();
         $this->players = $this->game->fresh()->players->where('status', 'active');
+
         $this->takeChallengeActions();
     }
 

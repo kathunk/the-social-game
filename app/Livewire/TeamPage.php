@@ -22,7 +22,7 @@ class TeamPage extends Component
     #[Computed]
     public function players()
     {
-        return $this->team->players;
+        return $this->team->players->sortBy('name');
     }
 
     #[Computed]
