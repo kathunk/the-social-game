@@ -2,19 +2,20 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Game;
-use App\Models\User;
-use App\Models\Modifier;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Console\Command;
-use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\FlattenTheCurve;
 use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\StayOnMessage;
-use App\Challenges\Classes\TeamHotPotato;
-use App\Challenges\Classes\FlattenTheCurve;
+use App\Challenges\Classes\TeamBounty;
 use App\Challenges\Classes\TeamBrinksmanship;
-use App\Challenges\Classes\TheGreatRealignment;
+use App\Challenges\Classes\TeamHotPotato;
 use App\Challenges\Classes\TeamPrisonersDilemma;
+use App\Challenges\Classes\TheGreatRealignment;
+use App\Models\Game;
+use App\Models\Modifier;
+use App\Models\User;
+use App\Modifiers\Classes\TeamSecretAlliance;
+use Illuminate\Console\Command;
+use Thunk\Verbs\Facades\Verbs;
 
 class FakeLaraconActivity extends Command
 {
@@ -74,6 +75,7 @@ class FakeLaraconActivity extends Command
     {
         $new_user_count = rand(0, 100);
         $admin = $this->game->admins->first();
+        $secret_alliance_modifier_handler = Modifier::where('class_key', TeamSecretAlliance::key())->first()->handler();
 
         for ($i = 0; $i < $new_user_count; $i++) {
             $user = User::fromTemplate(
@@ -84,8 +86,10 @@ class FakeLaraconActivity extends Command
 
             $user->requestToJoinGame($this->game);
             $user->admitToGame($this->game, $admin);
+            $player = $user->fresh()->currentPlayer;
 
-            $user->fresh()->currentPlayer->joinTeam($this->teams->random());
+            $player->joinTeam($this->teams->random());
+            $secret_alliance_modifier_handler->onSecretDiscovered($player);
         }
     }
 
@@ -131,37 +135,37 @@ class FakeLaraconActivity extends Command
             ->shuffle()
             ->take($number_of_swappers)
             ->each(function ($player) {
-            $new_team = $this->teams->where('id', '!=', $player->team_id)->random();
-            $this->challenge_handler->swapTeams($player, ['team_id' => $new_team->id]);
-        });
+                $new_team = $this->teams->where('id', '!=', $player->team_id)->random();
+                $this->challenge_handler->swapTeams($player, ['team_id' => $new_team->id]);
+            });
     }
 
     public function takeStayOnMessageActions()
     {
-        $number_of_responders = $this->players->count() * 0.7;
+        $number_of_responders = $this->players->count() * 0.9;
 
         $this->players->filter(fn ($p) => $p->team_id !== null)
             ->shuffle()
             ->take($number_of_responders)
             ->each(function ($player) {
-            $message = rand(1, 0) === 1 
-                ? 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' 
-                : fake()->sentence(50);
+                $message = rand(1, 0) === 1
+                    ? 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+                    : fake()->sentence(50);
 
-            $this->challenge_handler->submitString($player, ['string_input' => $message]);
-        });
+                $this->challenge_handler->submitString($player, ['string_input' => $message]);
+            });
     }
 
     public function takeTeamPrisonersDilemmaActions()
     {
-        $number_of_players = $this->players->count() * 0.5;
+        $number_of_players = $this->players->count() * 0.4;
 
         $this->players->filter(fn ($p) => $p->team_id !== null)
             ->shuffle()
             ->take($number_of_players)
             ->each(function ($player) {
-            $this->challenge_handler->playDirty($player, []);
-        });
+                $this->challenge_handler->playDirty($player, []);
+            });
     }
 
     public function takeTeamBountyActions()
@@ -187,9 +191,9 @@ class FakeLaraconActivity extends Command
             ->shuffle()
             ->take($number_of_swappers)
             ->each(function ($player) {
-            $new_team = $this->teams->where('id', '!=', $player->team_id)->random();
-            $this->challenge_handler->swapTeams($player, ['team_id' => $new_team->id]);
-        });
+                $new_team = $this->teams->where('id', '!=', $player->team_id)->random();
+                $this->challenge_handler->swapTeams($player, ['team_id' => $new_team->id]);
+            });
     }
 
     public function takeTeamHotPotatoActions()
@@ -220,8 +224,8 @@ class FakeLaraconActivity extends Command
             ->shuffle()
             ->take($number_of_swappers)
             ->each(function ($player) {
-            $new_team = $this->teams->where('id', '!=', $player->team_id)->random();
-            $this->challenge_handler->swapTeams($player, ['team_id' => $new_team->id]);
-        });
+                $new_team = $this->teams->where('id', '!=', $player->team_id)->random();
+                $this->challenge_handler->swapTeams($player, ['team_id' => $new_team->id]);
+            });
     }
 }

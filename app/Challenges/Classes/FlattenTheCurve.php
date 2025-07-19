@@ -92,7 +92,7 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
         $average_team_size = round($teams->average(fn ($t) => $t->player_ids->count()));
 
         $teams->each(function ($team) use ($average_team_size) {
-            $team->addToScoreHistory(($average_team_size - $team->player_ids->count()) * 5, '📈 Flattened the curve');
+            $team->addToScoreHistory(($average_team_size - $team->player_ids->count()) * 5, '📈 Flattened the curve. Average team size was '.$average_team_size.'. '.$team->name.' size was '.$team->player_ids->count().'.');
         });
     }
 }

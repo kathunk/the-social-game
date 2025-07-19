@@ -73,7 +73,7 @@ class TeamBrinksmanship extends BaseChallengeClass
         return $this->form()
             ->title(self::NAME)
             ->subtitle($description)
-            ->subtitle('Your nuclear code: '.$team_data['code'])
+            ->subtitle('Your code: '.$team_data['code'])
             ->when($team_data['has_launched'], function ($form) use ($team_data, $ally_team) {
                 $strike_message = $team_data['strike_type'] === 'carpet_bomb'
                     ? 'You gave -10 points to all other teams!'

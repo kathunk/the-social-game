@@ -5,7 +5,6 @@ namespace App\Events;
 use App\Events\Traits\HasActiveGame;
 use App\Events\Traits\HasPlayerOnTeam;
 use App\Models\Player;
-use App\Models\Team;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
