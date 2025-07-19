@@ -36,6 +36,7 @@ class ResetData extends Command
             'games',
             'game_templates',
             'game_modes',
+            'verb_snapshots',
         ];
 
         if (DB::connection()->getDriverName() === 'mysql') {

@@ -4,6 +4,12 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Challenges\Classes\FlattenTheCurve;
+use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\TeamBrinksmanship;
+use App\Challenges\Classes\TeamHotPotato;
+use App\Challenges\Classes\TeamPrisonersDilemma;
 use App\Challenges\Classes\TheGreatRealignment;
 use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
@@ -44,16 +50,36 @@ class Laracon2025Seeder extends Seeder
             team_names: ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
             challenges: [
                 [
-                    'challenge_keys' => [TheGreatRealignment::key()],
-                    'duration' => 10000,
+                    'challenge_keys' => [PyramidScheme::key()],
+                    'duration' => 420,
                 ],
                 [
-                    'challenge_keys' => [FlattenTheCurve::key()],
-                    'duration' => 10000,
-                ],
-                [
-                    'challenge_keys' => [FlattenTheCurve::key()],
+                    'challenge_keys' => [StayOnMessage::key()],
                     'duration' => 60,
+                ],
+                [
+                    'challenge_keys' => [TeamPrisonersDilemma::key()],
+                    'duration' => 180,
+                ],
+                [
+                    'challenge_keys' => [TeamBounty::key()],
+                    'duration' => 540,
+                ],
+                [
+                    'challenge_keys' => [FlattenTheCurve::key()],
+                    'duration' => 660,
+                ],
+                [
+                    'challenge_keys' => [TeamHotPotato::key()],
+                    'duration' => 60,
+                ],
+                [
+                    'challenge_keys' => [TeamBrinksmanship::key()],
+                    'duration' => 120,
+                ],
+                [
+                    'challenge_keys' => [TheGreatRealignment::key()],
+                    'duration' => 180,
                 ],
             ],
             modifiers: [TeamResignation::key(), TeamSecretAlliance::key(), TeamSecretCodes::key()],
@@ -94,10 +120,10 @@ class Laracon2025Seeder extends Seeder
             $normie->fresh()->currentPlayer->joinTeam($teams->random());
         }
 
-        $stragglers = $normies->slice(0, 9);
+        // $stragglers = $normies->slice(0, 9);
 
-        foreach ($stragglers as $straggler) {
-            $straggler->requestToJoinGame($game);
-        }
+        // foreach ($stragglers as $straggler) {
+        //     $straggler->requestToJoinGame($game);
+        // }
     }
 }
