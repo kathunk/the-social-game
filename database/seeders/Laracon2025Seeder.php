@@ -3,25 +3,27 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Challenges\Classes\FlattenTheCurve;
-use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\StayOnMessage;
-use App\Challenges\Classes\TeamBounty;
-use App\Challenges\Classes\TeamBrinksmanship;
-use App\Challenges\Classes\TeamHotPotato;
-use App\Challenges\Classes\TeamPrisonersDilemma;
-use App\Challenges\Classes\TheGreatRealignment;
-use App\Events\GameModeAdded;
-use App\Events\GameTemplateAdded;
 use App\Models\Game;
+use App\Models\User;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
-use App\Models\User;
-use App\Modifiers\Classes\TeamResignation;
-use App\Modifiers\Classes\TeamSecretAlliance;
-use App\Modifiers\Classes\TeamSecretCodes;
-use Illuminate\Database\Seeder;
+use App\Events\GameModeAdded;
 use Thunk\Verbs\Facades\Verbs;
+use Illuminate\Database\Seeder;
+use App\Events\GameTemplateAdded;
+use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\TeamWarmUp;
+use App\Modifiers\Classes\TeamRecruiter;
+use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Classes\TeamHotPotato;
+use App\Modifiers\Classes\TeamResignation;
+use App\Modifiers\Classes\TeamSecretCodes;
+use App\Challenges\Classes\FlattenTheCurve;
+use App\Challenges\Classes\TeamBrinksmanship;
+use App\Modifiers\Classes\TeamSecretAlliance;
+use App\Challenges\Classes\TheGreatRealignment;
+use App\Challenges\Classes\TeamPrisonersDilemma;
 
 class Laracon2025Seeder extends Seeder
 {
@@ -50,7 +52,7 @@ class Laracon2025Seeder extends Seeder
             team_names: ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
             challenges: [
                 [
-                    'challenge_keys' => [PyramidScheme::key()],
+                    'challenge_keys' => [TeamWarmUp::key()],
                     'duration' => 420,
                 ],
                 [
@@ -82,7 +84,7 @@ class Laracon2025Seeder extends Seeder
                     'duration' => 180,
                 ],
             ],
-            modifiers: [TeamResignation::key(), TeamSecretAlliance::key(), TeamSecretCodes::key()],
+            modifiers: [TeamRecruiter::key(), TeamResignation::key(), TeamSecretAlliance::key(), TeamSecretCodes::key()],
         )->game_template_id;
 
         Verbs::commit();
