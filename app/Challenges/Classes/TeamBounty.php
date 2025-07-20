@@ -16,7 +16,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
 
     const NAME = 'Bounty';
 
-    const DESCRIPTION = 'Your team has been assigned 3 players from other teams as bounties: {3 players}. For each bounty you can convince to defect and join you, your team gains 25 points. But be careful - other teams are trying to recruit your teammates too!';
+    const DESCRIPTION = 'Your team has been assigned 3 players from other teams as bountie. For each bounty you can convince to defect and join you, your team gains 25 points. But be careful - other teams are trying to recruit your teammates too!';
 
     const TYPE = 'team';
 
@@ -77,33 +77,51 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
     {
         $bounties = $this->challenge->challenge_data['team_bounties'][$player->team_id];
 
-        $description = strtr(self::DESCRIPTION, [
-            '{3 players}' => collect($bounties)->map(function ($id) {
-                $player = Player::find($id);
+        $bounties = collect($bounties)->map(function ($id) use ($player) {
+            $bounty = Player::find($id);
 
-                if ($player->status === 'resigned') {
-                    return $player->name.' (resigned)';
-                }
+            if ($bounty->status === 'resigned') {
+                return [
+                    'target' => $bounty->name,
+                    'status' => '❌ Resigned',
+                ];
+            }
 
-                if (in_array($player->id, $this->challenge->challenge_data['swapper_ids'])) {
-                    return $player->name.' (ineligible: already moved to '.$player->team->name.')';
-                }
+            if ($bounty->team_id === $player->team_id) {
+                return [
+                    'target' => $bounty->name,
+                    'status' => '✅ Successfully recruited!',
+                ];
+            }
 
-                return $player->name.' ('.$player->team->name.')';
-            })->implode(', '),
-        ]);
+            if (in_array($bounty->id, $this->challenge->challenge_data['swapper_ids'])) {
+                return
+                [
+                    'target' => $bounty->name,
+                    'status' => '❌ Already moved to '.$bounty->team->name,
+                ];
+            }
+
+            return [
+                'target' => $bounty->name,
+                'status' => 'Current team: '.$bounty->team->name,
+            ];
+        })->toArray();
 
         if ($this->playerCanSwapTeams(player: $player)) {
             return $this->form()
                 ->title(self::NAME)
-                ->subtitle($description)
+                ->subtitle(self::DESCRIPTION)
+                ->table(headers: ['Target', 'Status'], rows: $bounties)
+                ->divider()
                 ->teamSwap($this->availableTeams($player))
                 ->build();
         }
 
         return $this->form()
             ->title(self::NAME)
-            ->subtitle($description)
+            ->subtitle(self::DESCRIPTION)
+            ->table(headers: ['Target', 'Status'], rows: $bounties)
             ->build();
     }
 
