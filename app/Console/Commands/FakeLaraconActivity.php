@@ -2,14 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Game;
-use App\Models\Modifier;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Console\Command;
 use App\Jobs\AddFakeUserToLaraconGame;
 use App\Jobs\ResignFakePlayerFromLaraconGame;
-use App\Modifiers\Classes\TeamSecretAlliance;
 use App\Jobs\TakeChallengeActionInFakeLaraconGame;
+use App\Models\Game;
+use App\Models\Modifier;
+use App\Modifiers\Classes\TeamSecretAlliance;
+use Illuminate\Console\Command;
+use Thunk\Verbs\Facades\Verbs;
 
 class FakeLaraconActivity extends Command
 {

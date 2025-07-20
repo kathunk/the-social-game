@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Models\Player;
 use App\Models\Modifier;
-use Illuminate\Foundation\Queue\Queueable;
+use App\Models\Player;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
 
 class ResignFakePlayerFromLaraconGame implements ShouldQueue
 {
@@ -14,8 +14,7 @@ class ResignFakePlayerFromLaraconGame implements ShouldQueue
     public function __construct(
         public Player $player,
         public Modifier $resignation_modifier,
-    )
-    {
+    ) {
         //
     }
 

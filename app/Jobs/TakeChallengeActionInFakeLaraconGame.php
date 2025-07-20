@@ -2,26 +2,27 @@
 
 namespace App\Jobs;
 
+use App\Challenges\Classes\FlattenTheCurve;
+use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\TeamBrinksmanship;
+use App\Challenges\Classes\TeamHotPotato;
+use App\Challenges\Classes\TeamPrisonersDilemma;
+use App\Challenges\Classes\TeamWarmUp;
+use App\Challenges\Classes\TheGreatRealignment;
+use App\Models\Challenge;
 use App\Models\Game;
 use App\Models\Player;
-use App\Models\Challenge;
-use Illuminate\Support\Str;
-use App\Challenges\Classes\TeamBounty;
-use App\Challenges\Classes\TeamWarmUp;
-use App\Challenges\Classes\StayOnMessage;
-use App\Challenges\Classes\TeamHotPotato;
-use Illuminate\Foundation\Queue\Queueable;
-use App\Challenges\Classes\FlattenTheCurve;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Challenges\Classes\TeamBrinksmanship;
-use App\Challenges\Classes\TheGreatRealignment;
-use App\Challenges\Classes\TeamPrisonersDilemma;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Str;
 
 class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
 {
     use Queueable;
 
     public $teams;
+
     public $challenge_handler;
 
     public function __construct(
@@ -38,14 +39,12 @@ class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
         match ($this->challenge->class_key) {
             TeamWarmUp::key() => $this->takeTeamWarmUpActions(),
             StayOnMessage::key() => $this->takeStayOnMessageActions(),
-            TeamPrisonersDilemma::key()
-                => $this->takeTeamPrisonersDilemmaActions(),
+            TeamPrisonersDilemma::key() => $this->takeTeamPrisonersDilemmaActions(),
             TeamBounty::key() => $this->takeTeamBountyActions(),
             FlattenTheCurve::key() => $this->takeFlattenTheCurveActions(),
             TeamHotPotato::key() => $this->takeTeamHotPotatoActions(),
             TeamBrinksmanship::key() => $this->takeTeamBrinksmanshipActions(),
-            TheGreatRealignment::key()
-                => $this->takeTheGreatRealignmentActions(),
+            TheGreatRealignment::key() => $this->takeTheGreatRealignmentActions(),
             default => null,
         };
     }
@@ -57,10 +56,10 @@ class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
         }
 
         $new_team = $this->teams
-            ->where("id", "!=", $this->player->team_id)
+            ->where('id', '!=', $this->player->team_id)
             ->random();
         $this->challenge_handler->swapTeams($this->player, [
-            "team_id" => $new_team->id,
+            'team_id' => $new_team->id,
         ]);
     }
 
@@ -71,11 +70,11 @@ class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
         }
 
         $message = rand(1, 10) > 3
-                ? "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                ? 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
                 : Str::random(50);
 
         $this->challenge_handler->submitString($this->player, [
-            "string_input" => $message,
+            'string_input' => $message,
         ]);
     }
 
@@ -90,19 +89,19 @@ class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
 
     public function takeTeamBountyActions()
     {
-        $bounty_data = $this->challenge->challenge_data["team_bounties"];
+        $bounty_data = $this->challenge->challenge_data['team_bounties'];
 
         $bounty_player_ids = collect($bounty_data)->flatten()->all();
 
-        if (!in_array($this->player->id, $bounty_player_ids)) {
+        if (! in_array($this->player->id, $bounty_player_ids)) {
             return;
         }
 
         $new_team = $this->teams
-            ->where("id", "!=", $this->player->team_id)
+            ->where('id', '!=', $this->player->team_id)
             ->random();
         $this->challenge_handler->swapTeams($this->player, [
-            "team_id" => $new_team->id,
+            'team_id' => $new_team->id,
         ]);
     }
 
@@ -113,10 +112,10 @@ class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
         }
 
         $new_team = $this->teams
-            ->where("id", "!=", $this->player->team_id)
+            ->where('id', '!=', $this->player->team_id)
             ->random();
         $this->challenge_handler->swapTeams($this->player, [
-            "team_id" => $new_team->id,
+            'team_id' => $new_team->id,
         ]);
     }
 
@@ -124,7 +123,7 @@ class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
     {
         $potato_holder =
             $this->challenge->challenge_data[$this->player->team_id][
-                "potato_holder_id"
+                'potato_holder_id'
             ];
 
         if ($potato_holder !== $this->player->id) {
@@ -133,13 +132,13 @@ class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
 
         $remaining_player_ids =
             $this->challenge->challenge_data[$this->player->team_id][
-                "remaining_player_ids"
+                'remaining_player_ids'
             ];
 
         $recipient_player_id = collect($remaining_player_ids)->random();
 
         $this->challenge_handler->passThePotato($this->player, [
-            "recipient_player_id" => $recipient_player_id,
+            'recipient_player_id' => $recipient_player_id,
         ]);
     }
 
@@ -147,7 +146,7 @@ class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
     {
         $has_taken_action =
             $this->challenge->challenge_data[$this->player->team_id][
-                "has_launched"
+                'has_launched'
             ];
 
         if ($has_taken_action) {
@@ -156,17 +155,17 @@ class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
 
         $ally_team_id =
             $this->challenge->challenge_data[$this->player->team_id][
-                "ally_team_id"
+                'ally_team_id'
             ];
-        $code = $this->challenge->challenge_data[$ally_team_id]["code"];
+        $code = $this->challenge->challenge_data[$ally_team_id]['code'];
 
         if (rand(0, 1) === 1) {
             $this->challenge_handler->nukeAlly($this->player, [
-                "target_code" => $code,
+                'target_code' => $code,
             ]);
         } else {
             $this->challenge_handler->carpetBomb($this->player, [
-                "target_code" => $code,
+                'target_code' => $code,
             ]);
         }
     }
@@ -178,10 +177,10 @@ class TakeChallengeActionInFakeLaraconGame implements ShouldQueue
         }
 
         $new_team = $this->teams
-            ->where("id", "!=", $this->player->team_id)
+            ->where('id', '!=', $this->player->team_id)
             ->random();
         $this->challenge_handler->swapTeams($this->player, [
-            "team_id" => $new_team->id,
+            'team_id' => $new_team->id,
         ]);
     }
 }

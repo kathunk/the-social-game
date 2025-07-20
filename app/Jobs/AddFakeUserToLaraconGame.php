@@ -3,11 +3,11 @@
 namespace App\Jobs;
 
 use App\Models\Game;
+use App\Models\Modifier;
 use App\Models\Team;
 use App\Models\User;
-use App\Models\Modifier;
-use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
 
 class AddFakeUserToLaraconGame implements ShouldQueue
 {
@@ -18,8 +18,7 @@ class AddFakeUserToLaraconGame implements ShouldQueue
         public User $admin,
         public Game $game,
         public Modifier $secret_alliance_modifier,
-    )
-    {
+    ) {
         //
     }
 
