@@ -16,7 +16,7 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
 
     const NAME = 'The Great Realignment';
 
-    const DESCRIPTION = 'You may swap teams once during this challenge. If you leave your team, you will take your portion of the team\'s points with you. Currently you carry {points} points and {hidden_points} hidden points. However, the scoreboard will be hidden for this entire challenge.';
+    const DESCRIPTION = 'You may swap teams once during this challenge. If you leave your team, you will take your portion of the team\'s points with you. Currently you carry {points} points and {hidden_points} hidden points. However, the scoreboard will not update until the end of the challenge.';
 
     const TYPE = 'team';
 
