@@ -56,7 +56,6 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
 
         $scoreboard = collect($this->challenge->challenge_data['previous_scoreboard'])
             ->sortByDesc('Score')
-            ->values()
             ->toArray();
 
         if ($this->playerCanSwapTeams(player: $player)) {
@@ -66,7 +65,7 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
                 ->teamSwap(teams: $this->availableTeams($player))
                 ->divider()
                 ->title('Scoreboard as of the start of this challenge:')
-                ->table(headers: ['Name', 'Players', 'Score'], rows: $scoreboard)
+                ->table(headers: ['Name', 'Score', 'Players'], rows: $scoreboard)
                 ->build();
         }
 

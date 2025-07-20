@@ -25,7 +25,7 @@
                     <flux:button variant="primary" wire:click="joinTeam">Join</flux:button>
                 </div>
             @else
-                <flux:heading>You are on team {{ $this->current_team->name }}</flux:heading>
+                <flux:heading>You are on team <flux:link :href="route('teams.show', [$this->game, $this->current_team])" variant="primary">{{ $this->current_team->name }}</flux:link></flux:heading>
             @endif
         </flux:card>
     @endif

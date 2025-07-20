@@ -2,17 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Challenges\Classes\FlattenTheCurve;
-use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\StayOnMessage;
-use App\Challenges\Classes\TeamBounty;
-use App\Challenges\Classes\TeamBrinksmanship;
-use App\Challenges\Classes\TeamHotPotato;
-use App\Challenges\Classes\TeamPrisonersDilemma;
-use App\Challenges\Classes\TheGreatRealignment;
+use App\Jobs\AddFakeUserToLaraconGame;
+use App\Jobs\ResignFakePlayerFromLaraconGame;
+use App\Jobs\TakeChallengeActionInFakeLaraconGame;
 use App\Models\Game;
 use App\Models\Modifier;
-use App\Models\User;
 use App\Modifiers\Classes\TeamSecretAlliance;
 use Illuminate\Console\Command;
 use Thunk\Verbs\Facades\Verbs;
@@ -68,28 +62,28 @@ class FakeLaraconActivity extends Command
         Verbs::commit();
         $this->players = $this->game->fresh()->players->where('status', 'active');
 
-        $this->takeChallengeActions();
+        $this->players->each(function ($player) {
+            TakeChallengeActionInFakeLaraconGame::dispatch(
+                player: $player,
+                challenge: $this->challenge,
+                game: $this->game,
+            );
+        });
     }
 
     public function addNewUsersToEveryTeam()
     {
         $new_user_count = rand(0, 100);
         $admin = $this->game->admins->first();
-        $secret_alliance_modifier_handler = Modifier::where('class_key', TeamSecretAlliance::key())->first()->handler();
+        $secret_alliance_modifier = Modifier::where('class_key', TeamSecretAlliance::key())->first();
 
         for ($i = 0; $i < $new_user_count; $i++) {
-            $user = User::fromTemplate(
-                name: fake()->name(),
-                email: fake()->email(),
-                encrypted_password: bcrypt('password'),
+            AddFakeUserToLaraconGame::dispatch(
+                team: $this->teams->random(),
+                admin: $admin,
+                game: $this->game,
+                secret_alliance_modifier: $secret_alliance_modifier,
             );
-
-            $user->requestToJoinGame($this->game);
-            $user->admitToGame($this->game, $admin);
-            $player = $user->fresh()->currentPlayer;
-
-            $player->joinTeam($this->teams->random());
-            $secret_alliance_modifier_handler->onSecretDiscovered($player);
         }
     }
 
@@ -98,134 +92,18 @@ class FakeLaraconActivity extends Command
         $players_to_resign = $this->players->count() * 0.1;
 
         $resignation_modifier = Modifier::where('class_key', 'team_resignation')->first();
-        $handler = $resignation_modifier->handler();
 
         $this->players->shuffle()
             ->reject(fn ($p) => $p->name === 'John Rudolph Drexler')
             ->filter(fn ($p) => $p->team_id !== null)
             ->take($players_to_resign)
-            ->each(function ($player) use ($handler) {
-                $points = rand(0, 1) === 0 ? -3 : 3;
-                $handler->resign($player, ['points' => $points]);
+            ->each(function ($player) use ($resignation_modifier) {
+                ResignFakePlayerFromLaraconGame::dispatch(
+                    player: $player,
+                    resignation_modifier: $resignation_modifier,
+                );
             });
     }
 
-    // @todo add secret codes and secret alliances
-
-    public function takeChallengeActions()
-    {
-        return match ($this->challenge->class_key) {
-            PyramidScheme::key() => $this->takePyramidSchemeActions(),
-            StayOnMessage::key() => $this->takeStayOnMessageActions(),
-            TeamPrisonersDilemma::key() => $this->takeTeamPrisonersDilemmaActions(),
-            TeamBounty::key() => $this->takeTeamBountyActions(),
-            FlattenTheCurve::key() => $this->takeFlattenTheCurveActions(),
-            TeamHotPotato::key() => $this->takeTeamHotPotatoActions(),
-            TeamBrinksmanship::key() => $this->takeTeamBrinksmanshipActions(),
-            TheGreatRealignment::key() => $this->takeTheGreatRealignmentActions(),
-            default => null,
-        };
-    }
-
-    public function takePyramidSchemeActions()
-    {
-        $number_of_swappers = $this->players->count() * 0.4;
-
-        $this->players->filter(fn ($p) => $p->team_id !== null)
-            ->shuffle()
-            ->take($number_of_swappers)
-            ->each(function ($player) {
-                $new_team = $this->teams->where('id', '!=', $player->team_id)->random();
-                $this->challenge_handler->swapTeams($player, ['team_id' => $new_team->id]);
-            });
-    }
-
-    public function takeStayOnMessageActions()
-    {
-        $number_of_responders = $this->players->count() * 0.9;
-
-        $this->players->filter(fn ($p) => $p->team_id !== null)
-            ->shuffle()
-            ->take($number_of_responders)
-            ->each(function ($player) {
-                $message = rand(1, 0) === 1
-                    ? 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-                    : fake()->sentence(50);
-
-                $this->challenge_handler->submitString($player, ['string_input' => $message]);
-            });
-    }
-
-    public function takeTeamPrisonersDilemmaActions()
-    {
-        $number_of_players = $this->players->count() * 0.4;
-
-        $this->players->filter(fn ($p) => $p->team_id !== null)
-            ->shuffle()
-            ->take($number_of_players)
-            ->each(function ($player) {
-                $this->challenge_handler->playDirty($player, []);
-            });
-    }
-
-    public function takeTeamBountyActions()
-    {
-        $bounty_data = $this->challenge->challenge_data['team_bounties'];
-
-        $bounty_player_ids = collect($bounty_data)->flatten()->all();
-
-        $players = $this->players->filter(fn ($p) => $p->team_id !== null)
-            ->whereIn('id', $bounty_player_ids);
-
-        $players->each(function ($player) {
-            $new_team = $this->teams->where('id', '!=', $player->team_id)->random();
-            $this->challenge_handler->swapTeams($player, ['team_id' => $new_team->id]);
-        });
-    }
-
-    public function takeFlattenTheCurveActions()
-    {
-        $number_of_swappers = $this->players->count() * 0.4;
-
-        $this->players->filter(fn ($p) => $p->team_id !== null)
-            ->shuffle()
-            ->take($number_of_swappers)
-            ->each(function ($player) {
-                $new_team = $this->teams->where('id', '!=', $player->team_id)->random();
-                $this->challenge_handler->swapTeams($player, ['team_id' => $new_team->id]);
-            });
-    }
-
-    public function takeTeamHotPotatoActions()
-    {
-        // @todo this is a pain
-    }
-
-    public function takeTeamBrinksmanshipActions()
-    {
-        $this->teams->each(function ($team) {
-            $player = $team->players->random();
-            $ally_team_id = $this->challenge->challenge_data[$team->id]['ally_team_id'];
-            $code = $this->challenge->challenge_data[$ally_team_id]['code'];
-
-            if (rand(1, 0) === 1) {
-                $this->challenge_handler->nukeAlly($player, ['target_code' => $code]);
-            } else {
-                $this->challenge_handler->carpetBomb($player, ['target_code' => $code]);
-            }
-        });
-    }
-
-    public function takeTheGreatRealignmentActions()
-    {
-        $number_of_swappers = $this->players->count() * 0.4;
-
-        $this->players->filter(fn ($p) => $p->team_id !== null)
-            ->shuffle()
-            ->take($number_of_swappers)
-            ->each(function ($player) {
-                $new_team = $this->teams->where('id', '!=', $player->team_id)->random();
-                $this->challenge_handler->swapTeams($player, ['team_id' => $new_team->id]);
-            });
-    }
+    // @todo add secret codes
 }
