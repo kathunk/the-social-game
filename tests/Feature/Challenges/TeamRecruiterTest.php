@@ -52,16 +52,16 @@ it('runs the Team Recruiter modifier', function () {
     joinTeam($player_2, $team_2->id);
     joinTeam($player_3, $team_2->id);
 
-    expect($team->fresh()->score)->toBe(2);
-    expect($team_2->fresh()->score)->toBe(4);
+    expect($team->fresh()->score)->toBe(1);
+    expect($team_2->fresh()->score)->toBe(2);
     expect($team_3->fresh()->score)->toBe(0);
 
     // player changes team, but score is not affected
     swapTeam($player_1->fresh(), $team_3->id, TeamWarmUp::key())
         ->assertHasNoErrors();
 
-    expect($team->fresh()->score)->toBe(2);
-    expect($team_2->fresh()->score)->toBe(4);
+    expect($team->fresh()->score)->toBe(1);
+    expect($team_2->fresh()->score)->toBe(2);
     expect($team_3->fresh()->score)->toBe(0);
 });
 

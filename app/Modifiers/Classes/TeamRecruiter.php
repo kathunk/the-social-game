@@ -12,7 +12,7 @@ class TeamRecruiter extends BaseModifierClass
 {
     const NAME = 'Pyramid Scheme';
 
-    const DESCRIPTION = 'When a new player joins your team, the team will receive 2 points.';
+    const DESCRIPTION = 'When a new player joins your team, the team will receive 1 point.';
 
     const TYPE = 'team';
 
@@ -40,6 +40,6 @@ class TeamRecruiter extends BaseModifierClass
             return;
         }
 
-        $team_state->addToScoreHistory(2, '🔺 '.$player_state->name.' joined the game');
+        $team_state->addToScoreHistory(1, '🔺 '.$player_state->name.' joined the game');
     }
 }
