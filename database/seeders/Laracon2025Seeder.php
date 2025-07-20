@@ -6,6 +6,7 @@ namespace Database\Seeders;
 use App\Models\Game;
 use App\Models\User;
 use App\Models\GameMode;
+use App\Models\Modifier;
 use App\Models\GameTemplate;
 use App\Events\GameModeAdded;
 use Thunk\Verbs\Facades\Verbs;
@@ -13,6 +14,7 @@ use Illuminate\Database\Seeder;
 use App\Events\GameTemplateAdded;
 use App\Challenges\Classes\TeamBounty;
 use App\Challenges\Classes\TeamWarmUp;
+use App\Jobs\AddFakeUserToLaraconGame;
 use App\Modifiers\Classes\TeamRecruiter;
 use App\Challenges\Classes\PyramidScheme;
 use App\Challenges\Classes\StayOnMessage;
@@ -112,22 +114,15 @@ class Laracon2025Seeder extends Seeder
             $admin->admitToGame($game, $john);
         }
 
-        $normies = User::where('is_super_admin', false)->get();
+        $secret_alliance_modifier = Modifier::where('class_key', TeamSecretAlliance::key())->first();
 
-        $accepted_normies = $normies->slice(10);
-
-        $teams = $game->teams;
-
-        foreach ($accepted_normies as $normie) {
-            $normie->requestToJoinGame($game);
-            $normie->admitToGame($game, $john);
-            $normie->fresh()->currentPlayer->joinTeam($teams->random());
+        for ($i = 0; $i < 100; $i++) {
+            AddFakeUserToLaraconGame::dispatch(
+                team: $game->teams->random(),
+                admin: $admin,
+                game: $game,
+                secret_alliance_modifier: $secret_alliance_modifier,
+            );
         }
-
-        // $stragglers = $normies->slice(0, 9);
-
-        // foreach ($stragglers as $straggler) {
-        //     $straggler->requestToJoinGame($game);
-        // }
     }
 }
