@@ -16,7 +16,6 @@ use App\Livewire\ModifierConfigurationPage;
 use App\Livewire\PlayerPage;
 use App\Livewire\PreGameLobby;
 use App\Livewire\SecretsPage;
-use App\Livewire\Subscribe;
 use App\Livewire\TeamPage;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
@@ -57,8 +56,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/games/{game}/secrets/{modifier}', SecretsPage::class)->name('games.secrets');
 
     Route::prefix('subscribe')->name('subscribe.')->group(function () {
-        Route::get('/', Subscribe::class)->name('index');
-
         Route::get('success', [CheckoutController::class, 'success'])->name('success');
         Route::get('cancel', [CheckoutController::class, 'cancel'])->name('cancel');
     });

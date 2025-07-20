@@ -14,6 +14,12 @@ class Subscribe extends Component
     {
         $user = auth()->user();
 
+        if (! $user) {
+            return redirect()
+                ->route('login')
+                ->with('error', 'You must be logged in to subscribe.');
+        }
+
         try {
             $checkout = $user
                 ->newSubscription('default', config('services.stripe.price_id'))

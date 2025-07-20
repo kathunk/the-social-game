@@ -1,27 +1,12 @@
-<div class="flex flex-col gap-4">
-    <flux:card>
-        <flux:heading size="lg" level="1">Subscribe</flux:heading>
-        <flux:subheading>Get full access to create new games with our yearly subscription.</flux:subheading>
-
-        <flux:separator class="my-4" />
-
-        <div class="flex justify-between p-4">
-            <div class="self-center rounded-lg">
-                <div>
-                    <flux:heading class="text-zinc-300 font-thin" level="2">Yearly Subscription</flux:heading>
-                    <flux:text class="text-white text-xl font-bold">$9.99</flux:heading>
-                </div>
-            </div>
-
-            <div class="flex self-end items-center gap-2">
-                <div class="text-right">
-                    <flux:text class="text-xs">Automatic renewal</flux:text>
-                    <flux:text class="text-xs">Cancel anytime</flux:text>
-                </div>
-                <flux:button variant="primary" wire:click="checkout">
-                    Subscribe
-                </flux:button>
-            </div>
-        </div>
-    </flux:card>
+<div>
+    <button
+        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg group-hover:animate-pulse"
+        wire:click="checkout"
+        wire:loading.attr="disabled"
+    >
+        <span class="text-base">Subscribe Now</span>
+        <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+        </svg>
+    </button>
 </div>

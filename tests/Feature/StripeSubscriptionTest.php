@@ -1,8 +1,10 @@
 <?php
 
+use App\Livewire\Subscribe;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Cashier\Subscription;
+use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
@@ -181,15 +183,22 @@ test('successful payments are logged', function () {
 });
 
 // E2E Tests
-test('user can access subscription page', function () {
+test('user can access marketing-page', function () {
     $this->actingAs($this->user)
-        ->get('/subscribe')
+        ->get('/marketing-page')
         ->assertOk()
-        ->assertSee('Yearly Subscription')
-        ->assertSee('$9.99')
-        ->assertSee('Automatic renewal')
-        ->assertSee('Cancel anytime')
-        ->assertSee('Subscribe');
+        ->assertSee('Host games')
+        ->assertSee('$19.99')
+        ->assertSee('Subscribe Now');
+});
+
+test('user must be logged in to subscribe', function () {
+    $response = $this->get('/marketing-page');
+
+    Livewire::test(Subscribe::class)
+        ->call('checkout')
+        ->assertRedirect(route('login'))
+        ->assertSessionHas('error', 'You must be logged in to subscribe.');
 });
 
 test('user sees success page after successful subscription', function () {
@@ -214,7 +223,7 @@ test('try again button redirects to subscription page', function () {
     $response = $this->actingAs($this->user)
         ->get('/subscribe/cancel');
 
-    $response->assertSee(route('subscribe.index'), false);
+    $response->assertSee(route('marketing-page'), false);
 });
 
 test('go to dashboard button redirects to dashboard', function () {
