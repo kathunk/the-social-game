@@ -37,6 +37,11 @@ class Challenge extends Model
         return $this->belongsTo(Game::class);
     }
 
+    public function next()
+    {
+        return $this->game->challenges()->where('starts_at', '>', $this->starts_at)->first();
+    }
+
     public function start()
     {
         $data = $this->handler()->dataArrayForState();

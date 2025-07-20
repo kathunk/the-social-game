@@ -161,10 +161,11 @@ class FormBuilder
         return $this;
     }
 
-    public function table(array $rows): static
+    public function table(array $headers, array $rows): static
     {
         $this->elements[] = [
             'type' => 'table',
+            'headers' => $headers,
             'rows' => $rows,
         ];
 

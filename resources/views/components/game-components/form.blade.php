@@ -38,7 +38,24 @@
                     <flux:separator class="my-4" />
                     @break
                 @case('table')
-                    <flux:table :rows="$element['rows']" />
+                    <flux:table>
+                        <flux:table.columns>
+                            @foreach ($element['headers'] as $header)
+                                <flux:table.column>{{ $header }}</flux:table.column>
+                            @endforeach
+                        </flux:table.columns>
+                        {{-- @dd($element['rows']) --}}
+
+                        <flux:table.rows>
+                            @foreach ($element['rows'] as $row)
+                                <flux:table.row>
+                                    @foreach ($row as $cell)
+                                        <flux:table.cell>{{ $cell }}</flux:table.cell>
+                                    @endforeach
+                                </flux:table.row>
+                            @endforeach
+                        </flux:table.rows>
+                    </flux:table>
                     @break
                 @case('input')
                     @if ($element['size'] === 'large')

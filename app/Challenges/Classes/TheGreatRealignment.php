@@ -16,7 +16,7 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
 
     const NAME = 'The Great Realignment';
 
-    const DESCRIPTION = 'You may swap teams once during this challenge. If you leave your team, you will take your portion of the team\'s points with you. Currently you carry {points} points (hidden points are not included). However, the scoreboard will be hidden for this entire challenge.';
+    const DESCRIPTION = 'You may swap teams once during this challenge. If you leave your team, you will take your portion of the team\'s points with you. Currently you carry {points} points and {hidden_points} hidden points. However, the scoreboard will be hidden for this entire challenge.';
 
     const TYPE = 'team';
 
@@ -29,29 +29,53 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
 
     public function dataArrayForState(): array
     {
-        return ['swapper_ids' => []];
+        $previous_scoreboard = $this->challenge->game->teams
+            ->sortByDesc('score')
+            ->map(fn ($team) => [
+                'Name' => $team->name,
+                'Players' => $team->players->count(),
+                'Score' => $team->score,
+            ])
+            ->toArray();
+
+        return ['swapper_ids' => [], 'previous_scoreboard' => $previous_scoreboard];
     }
 
     public function frontendComponent(Player $player): array
     {
-        $team_score = $player->team->score;
-        $points = $team_score / $player->team->players->count();
+        $team = $player->team;
+        $team_score = $team->score;
+        $points = (int) round($team_score / $team->players->count());
+        $total_hidden_points = $team->hidden_score - $team_score;
+        $hidden_points = (int) round($total_hidden_points / $team->players->count());
 
         $description = strtr(self::DESCRIPTION, [
-            '{points}' => round($points),
+            '{points}' => $points,
+            '{hidden_points}' => $hidden_points,
         ]);
+
+        $scoreboard = collect($this->challenge->challenge_data['previous_scoreboard'])
+            ->sortByDesc('Score')
+            ->values()
+            ->toArray();
 
         if ($this->playerCanSwapTeams(player: $player)) {
             return $this->form()
                 ->title(self::NAME)
                 ->subtitle($description)
                 ->teamSwap(teams: $this->availableTeams($player))
+                ->divider()
+                ->title('Scoreboard as of the start of this challenge:')
+                ->table(headers: ['Name', 'Players', 'Score'], rows: $scoreboard)
                 ->build();
         }
 
         return $this->form()
             ->title(self::NAME)
             ->subtitle("You've made your choice. Good luck!")
+            ->divider()
+            ->title('Scoreboard as of the start of this challenge:')
+            ->table(headers: ['Name', 'Players', 'Score'], rows: $scoreboard)
             ->build();
     }
 
@@ -75,9 +99,16 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
         $previous_team_score = $previous_team->score();
         $player_count = max(1, $previous_team->player_ids->count());
         $points = round($previous_team_score / $player_count);
+        $total_hidden_points = $previous_team->score(include_hidden: true) - $previous_team_score;
+        $hidden_points = round($total_hidden_points / $player_count);
 
         $team_state->addToScoreHistory($points, '👋 '.$player_state->name.' joined during the Great Realignment');
         $previous_team->addToScoreHistory(-$points, '👻 '.$player_state->name.' left during the Great Realignment');
+
+        if ($hidden_points !== 0) {
+            $team_state->addToScoreHistory($hidden_points, '👋 '.$player_state->name.' joined during the Great Realignment', is_hidden: true);
+            $previous_team->addToScoreHistory(-$hidden_points, '👻 '.$player_state->name.' left during the Great Realignment', is_hidden: true);
+        }
     }
 
     public function playerCanSwapTeams(?Player $player = null, ?PlayerState $player_state = null): bool
