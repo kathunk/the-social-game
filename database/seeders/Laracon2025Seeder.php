@@ -27,8 +27,6 @@ class Laracon2025Seeder extends Seeder
 {
     public function run(): void
     {
-        Verbs::commitImmediately();
-
         $mode_id = GameModeAdded::fire(
             name: 'Laracon 2025',
             description: 'A team game for the Laravel Conference 2025.',
@@ -39,6 +37,8 @@ class Laracon2025Seeder extends Seeder
             is_public: true,
             players_can_join_late: true,
         )->game_mode_id;
+
+        Verbs::commit();
 
         $mode = GameMode::find($mode_id);
 
@@ -84,6 +84,8 @@ class Laracon2025Seeder extends Seeder
             ],
             modifiers: [TeamResignation::key(), TeamSecretAlliance::key(), TeamSecretCodes::key()],
         )->game_template_id;
+
+        Verbs::commit();
 
         $template = GameTemplate::find($template_id);
 
