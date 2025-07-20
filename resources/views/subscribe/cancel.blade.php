@@ -13,7 +13,7 @@
             @endif
 
             <div class="mt-4 flex justify-end">
-                <flux:button variant="primary" href="{{ route('subscribe.index') }}">
+                <flux:button variant="primary" href="{{ route('marketing-page') }}">
                     Try Again
                 </flux:button>
             </div>
