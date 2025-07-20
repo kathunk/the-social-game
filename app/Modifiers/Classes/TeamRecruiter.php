@@ -24,8 +24,8 @@ class TeamRecruiter extends BaseModifierClass
     public function frontendComponent(Player $player): array
     {
         return $this->form()
-            ->title('Team Recruiter')
-            ->subtitle('When a new player joins your team, the team will receive 2 points.')
+            ->title(self::NAME)
+            ->subtitle(self::DESCRIPTION)
             ->build();
     }
 
