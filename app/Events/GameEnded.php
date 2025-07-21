@@ -11,23 +11,17 @@ class GameEnded extends Event
 {
     use HasActiveGame;
 
-    public function validate()
-    {
-        $this->assert(
-            $this->state(GameState::class)->current_challenge_id === null,
-            'Game has a current challenge',
-        );
-    }
-
     public function applyToGame(GameState $game)
     {
         $game->status = 'ended';
+        $game->current_challenge_id = null;
     }
 
     public function handle()
     {
         $game = Game::find($this->game_id);
         $game->status = 'ended';
+        $game->current_challenge_id = null;
         $game->save();
     }
 }
