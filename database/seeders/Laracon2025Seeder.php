@@ -115,9 +115,11 @@ class Laracon2025Seeder extends Seeder
 
         $secret_alliance_modifier = Modifier::where('class_key', TeamSecretAlliance::key())->first();
 
+        $teams = $game->teams;
+
         for ($i = 0; $i < 100; $i++) {
-            AddFakeUserToLaraconGame::dispatch(
-                team: $game->teams->random(),
+            AddFakeUserToLaraconGame::dispatchSync(
+                team: $teams->random(),
                 admin: $admin,
                 game: $game,
                 secret_alliance_modifier: $secret_alliance_modifier,

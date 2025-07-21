@@ -17,7 +17,6 @@ class ChallengeEnded extends Event
     public function applyToGame(GameState $state)
     {
         $this->state(ChallengeState::class)->handler()->onChallengeEnded($state);
-        $state->current_challenge_id = null;
 
         $state->modifiers()->each(fn ($modifier) => $modifier->handler()->onChallengeEnded($state)
         );
@@ -31,7 +30,6 @@ class ChallengeEnded extends Event
     public function handle()
     {
         $game = Game::find($this->game_id);
-        $game->current_challenge_id = null;
         $game->save();
 
         $type = $game->gameTemplate->type;

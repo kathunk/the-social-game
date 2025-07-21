@@ -32,7 +32,7 @@
     @if ($this->game->status !== 'ended')
         <livewire:next-challenge-button />
     @endif
-    @if ($this->challenge_component && $this->player->status === 'active')
+    @if ($this->challenge_component && $this->player->status === 'active' && $this->game->status === 'active')
         <x-game-components.form :form="$this->challenge_component" type="challenge" class_key="{{ $this->challenge->class_key }}" />
     @endif
     <flux:error name="error" />
