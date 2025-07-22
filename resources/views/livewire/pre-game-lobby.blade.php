@@ -101,7 +101,7 @@
                         You sure?
                     </flux:button>
                 @endunless
-                @if ($this->modifierConfigurations->count() > 0)
+                @if ($this->modifierConfigurations->count() > 0 && $this->game->status === 'upcoming')
                     <flux:button icon="wrench" href="{{ route('games.modifier-configurations', ['game' => $this->game]) }}">
                         Manage modifiers
                     </flux:button>
