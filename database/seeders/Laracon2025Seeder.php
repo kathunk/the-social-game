@@ -53,20 +53,16 @@ class Laracon2025Seeder extends Seeder
             team_names: ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
             challenges: [
                 [
-                    'challenge_keys' => [FlattenTheCurve::key()],
-                    'duration' => 4,
-                ],
-                [
                     'challenge_keys' => [TeamWarmUp::key()],
                     'duration' => 420,
                 ],
                 [
                     'challenge_keys' => [StayOnMessage::key()],
-                    'duration' => 60,
+                    'duration' => 120,
                 ],
                 [
                     'challenge_keys' => [TeamPrisonersDilemma::key()],
-                    'duration' => 180,
+                    'duration' => 120,
                 ],
                 [
                     'challenge_keys' => [TeamBounty::key()],
@@ -74,11 +70,11 @@ class Laracon2025Seeder extends Seeder
                 ],
                 [
                     'challenge_keys' => [TheGreatRealignment::key()],
-                    'duration' => 180,
+                    'duration' => 660,
                 ],
                 [
                     'challenge_keys' => [TeamHotPotato::key()],
-                    'duration' => 60,
+                    'duration' => 120,
                 ],
                 [
                     'challenge_keys' => [TeamBrinksmanship::key()],
@@ -86,7 +82,7 @@ class Laracon2025Seeder extends Seeder
                 ],
                 [
                     'challenge_keys' => [FlattenTheCurve::key()],
-                    'duration' => 660,
+                    'duration' => 120,
                 ],
             ],
             modifiers: [TeamRecruiter::key(), TeamResignation::key(), TeamSecretAlliance::key(), TeamSecretCodes::key()],
