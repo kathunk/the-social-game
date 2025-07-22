@@ -53,6 +53,10 @@ class Laracon2025Seeder extends Seeder
             team_names: ['Laravel', 'PHP', 'JavaScript', 'Vue', 'React', 'Node', 'Python', 'Ruby', 'Go', 'Elixir'],
             challenges: [
                 [
+                    'challenge_keys' => [FlattenTheCurve::key()],
+                    'duration' => 4,
+                ],
+                [
                     'challenge_keys' => [TeamWarmUp::key()],
                     'duration' => 420,
                 ],
@@ -69,8 +73,8 @@ class Laracon2025Seeder extends Seeder
                     'duration' => 540,
                 ],
                 [
-                    'challenge_keys' => [FlattenTheCurve::key()],
-                    'duration' => 660,
+                    'challenge_keys' => [TheGreatRealignment::key()],
+                    'duration' => 180,
                 ],
                 [
                     'challenge_keys' => [TeamHotPotato::key()],
@@ -81,8 +85,8 @@ class Laracon2025Seeder extends Seeder
                     'duration' => 120,
                 ],
                 [
-                    'challenge_keys' => [TheGreatRealignment::key()],
-                    'duration' => 180,
+                    'challenge_keys' => [FlattenTheCurve::key()],
+                    'duration' => 660,
                 ],
             ],
             modifiers: [TeamRecruiter::key(), TeamResignation::key(), TeamSecretAlliance::key(), TeamSecretCodes::key()],
@@ -101,7 +105,9 @@ class Laracon2025Seeder extends Seeder
             user: $john,
             is_public: true,
             requires_admin_approval_to_join: true,
-        )->start();
+        );
+
+        $game->start();
 
         $admins = User::where('is_super_admin', true)->where('email', '!=', 'john@thunk.dev')->get();
 

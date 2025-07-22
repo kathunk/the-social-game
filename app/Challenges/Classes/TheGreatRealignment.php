@@ -14,7 +14,7 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
 {
     use HasTeamSwaps;
 
-    const NAME = 'The Great Realignment';
+    const NAME = 'Shifting Alliances';
 
     const DESCRIPTION = 'You may swap teams once during this challenge. If you leave your team, you will take your portion of the team\'s points with you. Currently you carry {points} points and {hidden_points} hidden points. However, the scoreboard will not update until the end of the challenge.';
 
