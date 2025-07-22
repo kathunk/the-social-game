@@ -3,23 +3,25 @@
 namespace App\Challenges\Classes;
 
 use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
-use App\Challenges\Support\Traits\HasTeamSwaps;
+use App\Events\PlayerJoinedTeam;
 use App\Models\Player;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Thunk\Verbs\Facades\Verbs;
 
 class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
 {
-    use HasTeamSwaps;
-
-    const NAME = 'Flatten the Curve';
+    const NAME = 'Tick tick boom';
 
     const DESCRIPTION = 'At the end of this challenge, every team will get: 
-        ({average team size} - {size of team}) * 5. 
+        ({average team size} - {size of team}) * 10. 
         Average team size: {average}. {team} size: {team_size}.
-        {team} is on track to score {score} points.';
+        {team} is on track to score {score} points.
+        You may swap teams once during this challenge.
+        However, at some unspecified time during this challenge, you will no longer be able to swap teams.';
 
     const TYPE = 'team';
 
@@ -30,7 +32,13 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
 
     public function dataArrayForState(): array
     {
-        return ['swapper_ids' => []];
+        $start_time = $this->challenge->starts_at;
+        $end_time = $this->challenge->ends_at;
+        $duration = -$end_time->copy()->diffInSeconds($start_time->copy());
+        $half = $duration / 2;
+        $random_stop_time = $start_time->copy()->addSeconds($half + rand(0, $half));
+
+        return ['swapper_ids' => [], 'stop_time' => $random_stop_time];
     }
 
     public function frontendComponent(Player $player): array
@@ -46,12 +54,19 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
             '{team}' => $player->team->name,
         ]);
 
+        $player_has_swapped = in_array($player->id, $this->challenge->challenge_data['swapper_ids']);
+        $time_is_up = Carbon::parse($this->challenge->challenge_data['stop_time'])->isPast();
+
         return $this->form()
             ->title(self::NAME)
             ->subtitle($description)
             ->when(
-                $this->playerCanSwapTeams(player: $player),
+                ! $player_has_swapped && ! $time_is_up,
                 fn ($form) => $form->teamSwap(teams: $this->availableTeams($player))
+            )
+            ->when(
+                $time_is_up,
+                fn ($form) => $form->title('Team swapping is now locked. Good luck!')
             )
             ->build();
     }
@@ -72,6 +87,28 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
         }
 
         return false;
+    }
+
+    public function swapTeams(Player $player, array $params)
+    {
+        if (! $this instanceof SupportsTeamSwaps) {
+            throw new \RuntimeException('Challenge class must implement SupportsTeamSwaps interface');
+        }
+
+        if (Carbon::parse($this->challenge->challenge_data['stop_time'])->isPast()) {
+            throw new \Exception('Team swapping is locked');
+        }
+
+        PlayerJoinedTeam::fire(
+            player_id: $player->id,
+            team_id: (int) $params['team_id'],
+            game_id: $player->game_id,
+            previous_team_id: $player->team_id,
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function onPlayerJoinedTeam(

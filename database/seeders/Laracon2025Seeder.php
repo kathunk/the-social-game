@@ -58,31 +58,31 @@ class Laracon2025Seeder extends Seeder
                 ],
                 [
                     'challenge_keys' => [StayOnMessage::key()],
-                    'duration' => 60,
+                    'duration' => 120,
                 ],
                 [
                     'challenge_keys' => [TeamPrisonersDilemma::key()],
-                    'duration' => 180,
+                    'duration' => 120,
                 ],
                 [
                     'challenge_keys' => [TeamBounty::key()],
                     'duration' => 540,
                 ],
                 [
-                    'challenge_keys' => [FlattenTheCurve::key()],
+                    'challenge_keys' => [TheGreatRealignment::key()],
                     'duration' => 660,
                 ],
                 [
                     'challenge_keys' => [TeamHotPotato::key()],
-                    'duration' => 60,
+                    'duration' => 120,
                 ],
                 [
                     'challenge_keys' => [TeamBrinksmanship::key()],
                     'duration' => 120,
                 ],
                 [
-                    'challenge_keys' => [TheGreatRealignment::key()],
-                    'duration' => 180,
+                    'challenge_keys' => [FlattenTheCurve::key()],
+                    'duration' => 120,
                 ],
             ],
             modifiers: [TeamRecruiter::key(), TeamResignation::key(), TeamSecretAlliance::key(), TeamSecretCodes::key()],
@@ -101,7 +101,9 @@ class Laracon2025Seeder extends Seeder
             user: $john,
             is_public: true,
             requires_admin_approval_to_join: true,
-        )->start();
+        );
+
+        $game->start();
 
         $admins = User::where('is_super_admin', true)->where('email', '!=', 'john@thunk.dev')->get();
 
