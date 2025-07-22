@@ -20,7 +20,8 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
         ({average team size} - {size of team}) * 10. 
         Average team size: {average}. {team} size: {team_size}.
         {team} is on track to score {score} points.
-        At some unspecified time during this challenge, you will no longer be able to swap teams.';
+        You may swap teams once during this challenge.
+        However, at some unspecified time during this challenge, you will no longer be able to swap teams.';
 
     const TYPE = 'team';
 
