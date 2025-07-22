@@ -16,7 +16,7 @@ class TeamBrinksmanship extends BaseChallengeClass
 
     const DESCRIPTION = "{your_team} has a secret code that is only useful to your ally team: {ally_team}. They have a code that you can use.
         When you put in your ally's code, you'll have the option to either:
-        Give -10 points to all teams other than you and your ally, or betray your ally and give them -50 points.";
+        Give -5 points to all teams other than you and your ally, or betray your ally and give them -40 points.";
 
     const TYPE = 'team';
 
@@ -76,8 +76,8 @@ class TeamBrinksmanship extends BaseChallengeClass
             ->subtitle('Your code: '.$team_data['code'])
             ->when($team_data['has_launched'], function ($form) use ($team_data, $ally_team) {
                 $strike_message = $team_data['strike_type'] === 'carpet_bomb'
-                    ? 'You gave -10 points to all other teams!'
-                    : "You betrayed {$ally_team->name} and gave them -50 points!";
+                    ? 'You gave -5 points to all other teams!'
+                    : "You betrayed {$ally_team->name} and gave them -40 points!";
 
                 return $form->subtitle($strike_message);
             })
@@ -92,12 +92,12 @@ class TeamBrinksmanship extends BaseChallengeClass
             )
                 ->buttonGroup()
                 ->button(
-                    label: 'Give -10 points to all other teams',
+                    label: 'Give -5 points to all other teams',
                     action: 'carpetBomb',
                     properties_to_validate: ['target_code'],
                 )
                 ->button(
-                    label: 'Betray your ally and give them -50 points',
+                    label: 'Betray your ally and give them -40 points',
                     action: 'nukeAlly',
                     properties_to_validate: ['target_code'],
                 )
@@ -148,7 +148,7 @@ class TeamBrinksmanship extends BaseChallengeClass
                 foreach ($teams as $other_team) {
                     if ($other_team->id !== $team_id && $other_team->id !== $ally_team_id) {
                         $other_team->addToScoreHistory(
-                            -10,
+                            -5,
                             '👊 Attacked by '.TeamState::load($team_id)->name
                         );
                     }
@@ -159,7 +159,7 @@ class TeamBrinksmanship extends BaseChallengeClass
                 $team = TeamState::load($team_id);
 
                 $ally_team->addToScoreHistory(
-                    -50,
+                    -40,
                     '🗡️ Betrayed by '.$team->name
                 );
             }
