@@ -403,10 +403,12 @@ class PreGameLobby extends Component
             ];
         }
 
-        $this->validate($rules, [
-            'game_start_timecode.required' => 'Scheduled start time is required',
-            'game_start_timecode.after' => 'Scheduled start must be in the future',
-        ]);
+        if ($this->game->status === 'upcoming') {
+            $this->validate($rules, [
+                'game_start_timecode.required' => 'Scheduled start time is required',
+                'game_start_timecode.after' => 'Scheduled start must be in the future',
+            ]);
+        }
 
         $url_input = $this->social_link_url;
 

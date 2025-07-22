@@ -69,8 +69,9 @@
             </div>
 
             @if ($this->game->social_links && $this->game->social_links[0])
-                <flux:heading class="mt-4">Game chat</flux:heading>
-                <flux:button variant="primary" href="{{ $this->game->social_links[0] }}" target="_blank" class="mt-2">Join game chat</flux:button>
+                <div class="mt-4 flex">
+                    <flux:button href="{{ $this->game->social_links[0] }}" target="_blank">Join game chat</flux:button>
+                </div>
             @endif
         </flux:card>
     @endif
