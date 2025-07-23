@@ -34,8 +34,8 @@ class TeamWarmUp extends BaseChallengeClass implements SupportsTeamSwaps
     {
         $can_swap = $this->playerCanSwapTeams(player: $player);
 
-        $description = $can_swap 
-            ? self::DESCRIPTION 
+        $description = $can_swap
+            ? self::DESCRIPTION
             : 'Get comfortable. Recruit some more players to your team.';
 
         return $this->form()
