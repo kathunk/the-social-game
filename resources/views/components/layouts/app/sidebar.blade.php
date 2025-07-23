@@ -3,13 +3,13 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-zinc-50 dark:bg-zinc-800">
+    <body class="min-h-screen bg-light-orange">
         @php
             $user = auth()->user();
         @endphp
 
         @if ($user)
-            <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+            <flux:sidebar sticky stashable class="border-r border-zinc-200 dark:border-zinc-700 bg-white">
 
             <div class="flex items-center">
                 <x-brand class="pl-1" />
@@ -43,7 +43,7 @@
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
                                 <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
                                     <span
-                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
+                                        class="flex h-full w-full items-center justify-center rounded-lg text-black dark:text-white"
                                     >
                                         {{ $user?->initials() }}
                                     </span>
