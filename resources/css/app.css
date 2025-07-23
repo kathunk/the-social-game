@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import '../../vendor/livewire/flux/dist/flux.css';
+@import "tailwindcss";
+@import "../../vendor/livewire/flux/dist/flux.css";
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -9,12 +9,19 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Fredoka', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-fredoka-one: 'Fredoka One', cursive;
+    --font-sans:
+        "Fredoka", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-fredoka-one: "Fredoka One", cursive;
 
     --color-accent: var(--color-blue-600);
     --color-accent-content: var(--color-blue-500);
     --color-accent-foreground: var(--color-blue-50);
+
+    --color-pale: #ecebf4;
+    --color-bold-orange: #dc7d47;
+    --color-light-orange: #ffe6d8;
+    --color-test-red: #ff0000;
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -66,7 +73,6 @@ div:has(> [data-flux-table]) {
 }
 
 /* Hide the label for team selection but keeps it for validation */
-.join-team-select
-    [data-flux-label] {
-        @apply hidden ;
-    }
+.join-team-select [data-flux-label] {
+    @apply hidden;
+}
