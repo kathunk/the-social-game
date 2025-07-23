@@ -9,13 +9,11 @@
                 $activated_challenges = $challenges->where('status', 'active')->count() + $challenges->where('status', 'ended')->count();
                 $total_challenges = $challenges->count();
             @endphp
-            <div class="flex space-x-2 items-baseline">
-                <flux:text class="flex items-baseline gap-1">
-                    Challenge
-                    ({{ $activated_challenges }} of {{ $total_challenges }})
-                    <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
-                </flux:text>
-            </div>
+            <flux:text class="flex flex-wrap items-baseline gap-1">
+                <span>Challenge</span>
+                <span>({{ $activated_challenges }} of {{ $total_challenges }})</span>
+                <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
+            </flux:text>
         @endif
         @foreach ($form['elements'] as $element)
             @switch($element['type'])
