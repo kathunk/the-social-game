@@ -11,8 +11,9 @@
         @if ($user)
             <flux:sidebar sticky stashable class="border-r border-zinc-200 dark:border-zinc-700 bg-white">
 
-            <div class="flex items-center">
-                <x-brand class="pl-1" />
+            <div class="flex items-center justify-between lg:justify-center">
+                <div class="flex-1 lg:hidden"></div>
+                <x-icons.little-logo class="pl-1" />
                 <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
             </div>
 
