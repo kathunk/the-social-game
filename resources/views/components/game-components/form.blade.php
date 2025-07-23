@@ -23,7 +23,7 @@
                     <x-forms.heading size="xl">{{ $element['text'] }}</x-forms.heading>
                     @break
                 @case('subtitle')
-                    <flux:subheading>{{ $element['text'] }}</flux:subheading>
+                    <x-forms.subheading class="text-md text-black">{{ $element['text'] }}</x-forms.subheading>
                     @break
                 @case('image')
                     <img src="{{ $element['url'] }}" alt="{{ $element['alt'] }}" class="w-full h-auto rounded-lg my-4" />
