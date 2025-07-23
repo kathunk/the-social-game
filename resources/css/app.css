@@ -10,6 +10,7 @@
 
 @theme {
     --font-sans: 'Fredoka', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-fredoka-one: 'Fredoka One', cursive;
 
     --color-accent: var(--color-blue-600);
     --color-accent-content: var(--color-blue-500);

@@ -10,12 +10,9 @@
                 $total_challenges = $challenges->count();
             @endphp
             <div class="flex space-x-2 items-baseline">
-                <flux:heading size="lg">Challenge</flux:heading>
-                <flux:text class="text-sm">
+                <flux:text class="flex items-baseline gap-1">
+                    Challenge
                     ({{ $activated_challenges }} of {{ $total_challenges }})
-                </flux:text>
-
-                <flux:text variant="subtle" class="flex items-baseline">
                     <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
                 </flux:text>
             </div>
@@ -23,7 +20,7 @@
         @foreach ($form['elements'] as $element)
             @switch($element['type'])
                 @case('title')
-                    <flux:heading>{{ $element['text'] }}</flux:heading>
+                    <x-forms.heading size="xl">{{ $element['text'] }}</x-forms.heading>
                     @break
                 @case('subtitle')
                     <flux:subheading>{{ $element['text'] }}</flux:subheading>
