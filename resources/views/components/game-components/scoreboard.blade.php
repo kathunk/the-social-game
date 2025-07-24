@@ -4,8 +4,8 @@
     <x-card>
         <x-forms.heading class="!text-lg">Scoreboard</x-forms.heading>
 
-        <flux:table class="**:!text-xs **:!font-semibold">
-            <flux:table.columns>
+        <flux:table class="**:!text-xs **:!font-semibold *:!border-0">
+            <flux:table.columns class="**:!pb-0">
                 <flux:table.column>
                     @if ($type === 'team')
                         TEAM
