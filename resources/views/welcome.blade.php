@@ -1,7 +1,27 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
-        @include('partials.head')
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        
+        <x-meta-tags 
+            title="The Social Game™"
+            description="Play The Social Game."
+            url="{{ route('dashboard') }}"
+        />
+
+        {{-- Debug info --}}
+        <!-- Debug: Image URL = {{ asset('images/OG.png') }} -->
+        <!-- Debug: Current URL = {{ request()->url() }} -->
+        <!-- Debug: Route URL = {{ route('dashboard') }} -->
+
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=fredoka:400,500,600" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="relative min-h-screen bg-bold-orange text-pale">
         <!-- Header positioned absolutely at the top -->

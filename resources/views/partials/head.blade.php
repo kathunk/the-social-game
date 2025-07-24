@@ -1,7 +1,16 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>{{ $title ?? config('app.name') }}</title>
+{{-- Meta tags for link previews --}}
+@if(isset($metaTags))
+    <x-meta-tags :title="$metaTags['title']" :description="$metaTags['description']" :url="$metaTags['url']" />
+@elseif(isset($title))
+    <x-meta-tags 
+        :title="$title"
+        description="Play The Social Game."
+        :url="request()->url()"
+    />
+@endif
 
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=fredoka:400,500,600" rel="stylesheet" />
