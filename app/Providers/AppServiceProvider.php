@@ -2,24 +2,21 @@
 
 namespace App\Providers;
 
+use App\Observers\SubscriptionObserver;
 use App\Rules\NuclearCode;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Subscription;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         NuclearCode::register();
+        Subscription::observe(SubscriptionObserver::class);
     }
 }
