@@ -18,10 +18,10 @@
         @foreach ($form['elements'] as $element)
             @switch($element['type'])
                 @case('title')
-                    <x-forms.heading class="!text-lg mt-0.5">{{ $element['text'] }}</x-forms.heading>
+                    <x-forms.heading class="!text-lg">{{ $element['text'] }}</x-forms.heading>
                     @break
                 @case('subtitle')
-                    <x-forms.subheading class="text-black mt-0.5">{{ $element['text'] }}</x-forms.subheading>
+                    <x-forms.subheading class="text-black">{{ $element['text'] }}</x-forms.subheading>
                     @break
                 @case('image')
                     <img src="{{ $element['url'] }}" alt="{{ $element['alt'] }}" class="w-full h-auto rounded-lg my-4" />
@@ -93,6 +93,7 @@
                         wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
                         variant="listbox"
                         :searchable="$element['searchable']"
+                        class="-mt-0.5"
                     >
                     @isset($element['placeholder'])
                         <flux:select.option value="" selected class="placeholder">{{ $element['placeholder'] }}</flux:select.option>
