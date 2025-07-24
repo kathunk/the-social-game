@@ -2,21 +2,21 @@
 
 <div>
     <flux:card>
-        <flux:heading size="lg">Scoreboard</flux:heading>
+        <x-forms.heading size="xl">Scoreboard</x-forms.heading>
 
         <flux:table>
             <flux:table.columns>
                 <flux:table.column>
                     @if ($type === 'team')
-                        Team
+                        TEAM
                     @else
-                        Players
+                        PLAYERS
                     @endif
                 </flux:table.column>
                 @if ($type === 'team')
-                    <flux:table.column>Players</flux:table.column>
+                    <flux:table.column>PLAYERS</flux:table.column>
                 @endif
-                <flux:table.column>Score</flux:table.column>
+                <flux:table.column>SCORE</flux:table.column>
             </flux:table.columns>
 
             <flux:table.rows>
@@ -24,11 +24,14 @@
                     @foreach ($teams as $team)
                         <flux:table.row>
                             <flux:table.cell>
-                                <flux:link :variant="((string) $team->id === (string) $this->player->team_id) ? 'filled' : 'ghost'" size="sm" class="p-0 whitespace-normal break-words" :href="route('teams.show', [$team->game_id, $team->id])">
-                                    {{ $team->name }}
-                                    @if ((string) $team->id === (string) $this->player->team_id)
-                                        (your team)
-                                    @endif
+                                <flux:link :variant="((string) $team->id === (string) $this->player->team_id) ? 'filled' : 'ghost'" class="p-0 whitespace-normal break-words" :href="route('teams.show', [$team->game_id, $team->id])">
+                                    <div class="flex items-center gap-2">
+                                        {{ $team->name }}
+                                        @if ((string) $team->id === (string) $this->player->team_id)
+                                            <flux:icon variant="solid" name="user" class="size-4" />
+                                        @endif
+                                        <flux:icon variant="solid" name="chevron-right" class="size-4" />
+                                    </div>
                                 </flux:link>
                             </flux:table.cell>
                             <flux:table.cell>
