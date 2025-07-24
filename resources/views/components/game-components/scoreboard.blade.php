@@ -30,7 +30,6 @@
                                         @if ((string) $team->id === (string) $this->player->team_id)
                                             <flux:icon variant="solid" name="user" class="size-4" />
                                         @endif
-                                        <flux:icon variant="solid" name="chevron-right" class="size-4" />
                                     </div>
                                 </flux:link>
                             </flux:table.cell>
