@@ -1,6 +1,6 @@
 @props(['games', 'status'])
 
-<flux:card>
+<x-card>
     <x-forms.heading size="xl" class="mb-4">
         {{ ucfirst($status) }} games
     </x-forms.heading>
@@ -75,4 +75,4 @@
             </div>
         @endforeach
     </div>
-</flux:card>
+</x-card>

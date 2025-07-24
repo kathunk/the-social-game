@@ -3,11 +3,11 @@
         Back to dashboard
     </flux:link>
 
-    <flux:card>
+    <x-card>
         <flux:heading size="lg">{{ $player->name }}</flux:heading>
-    </flux:card>
+    </x-card>
 
-    <flux:card>
+    <x-card>
         <flux:heading size="lg">
             @if ($this->game->status === 'ended')
                 <div class="flex items-center gap-2">
@@ -31,7 +31,7 @@
                 </div>
             @endif
         </flux:heading>
-        
+
         @if (count($this->scoreHistoryEntries) > 0)
             <flux:table>
                 <flux:table.columns>
@@ -73,5 +73,5 @@
         @else
             <flux:subheading>No score history yet</flux:subheading>
         @endif
-    </flux:card>
+    </x-card>
 </div>

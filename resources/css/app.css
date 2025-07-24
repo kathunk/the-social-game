@@ -14,13 +14,14 @@
         "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-fredoka-one: "Fredoka One", cursive;
 
-    --color-accent: var(--color-blue-600);
-    --color-accent-content: var(--color-blue-500);
+    --color-accent: #016FBC;
+    --color-accent-content: #016FBC;
     --color-accent-foreground: var(--color-blue-50);
 
     --color-pale: #ecebf4;
     --color-bold-orange: #dc7d47;
-    --color-light-orange: #ffe6d8;
+    --color-light-orange: #FFF5F2;
+    --color-medium-orange: #FFE4DC;
     --color-test-red: #ff0000;
 
     --color-zinc-50: #fafafa;

@@ -1,7 +1,7 @@
 @props(['teams', 'players', 'type'])
 
 <div>
-    <flux:card>
+    <x-card>
         <x-forms.heading size="xl">Scoreboard</x-forms.heading>
 
         <flux:table>
@@ -39,8 +39,8 @@
                             <flux:table.cell>
                                 @if ($this->game->status === 'ended')
                                     <div class="flex items-center gap-2">
-                                        {{ $team->hidden_score }} 
-                                        @if ($team->hidden_score !== $team->score)    
+                                        {{ $team->hidden_score }}
+                                        @if ($team->hidden_score !== $team->score)
                                             <flux:text class="text-purple-500 dark:text-purple-300">
                                                 ({{ $team->hidden_score - $team->score }} hidden)
                                             </flux:text>
@@ -76,7 +76,7 @@
                             <flux:table.cell>
                                 @if ($this->game->status === 'ended')
                                     <div class="flex items-center gap-2">
-                                        {{ $player->hidden_score }} 
+                                        {{ $player->hidden_score }}
                                         @if ($player->hidden_score > $player->score)
                                             <flux:text class="text-purple-500 dark:text-purple-300">
                                                 ({{ $player->hidden_score - $player->score }} hidden)
@@ -106,7 +106,7 @@
                     @php
                         $modifier_data = $this->game->modifiers()->where('class_key', App\Modifiers\Classes\BloodOaths::key())->first()->modifier_data;
                         $pair_ids = collect($modifier_data['pairs']);
-                        $loan_wolves = $players->reject(fn($player) => 
+                        $loan_wolves = $players->reject(fn($player) =>
                             $pair_ids->has($player->id) || $pair_ids->contains($player->id)
                         );
 
@@ -120,7 +120,7 @@
                             $player_1 = $players->firstWhere('id', $pair);
                             $player_2 = $players->firstWhere('id', $key);
 
-                            $pair_accounted_for = $rows->filter(fn($row) => 
+                            $pair_accounted_for = $rows->filter(fn($row) =>
                                 collect($row['players'])->contains(fn($p) => $p->id === $player_1->id || $p->id === $player_2->id)
                             )->count() > 0;
 
@@ -158,7 +158,7 @@
                             </flux:table.cell>
                             <flux:table.cell>
                                 <div class="flex items-center gap-2">
-                                    {{ $row['final_score'] }} 
+                                    {{ $row['final_score'] }}
                                     @if ($row['hidden_points'] > 0)
                                         <flux:text class="text-purple-500 dark:text-purple-300">
                                             ({{ $row['hidden_points'] }} hidden)
@@ -171,5 +171,5 @@
                 @endif
             </flux:table.rows>
         </flux:table>
-    </flux:card>
+    </x-card>
 </div>

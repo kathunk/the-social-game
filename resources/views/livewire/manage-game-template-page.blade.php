@@ -5,7 +5,7 @@
         </flux:link>
     </div>
 
-    <flux:card>
+    <x-card>
         <div class="flex flex-col gap-6">
             <flux:heading>Template for <flux:link :href="route('game-modes.show', $this->game_mode->id)">{{ $this->game_mode->name }}</flux:link></flux:heading>
             <flux:input wire:model="name" label="Name" />
@@ -109,7 +109,7 @@
 
             <flux:button variant="primary" wire:click="saveTemplate">Save</flux:button>
         </div>
-    </flux:card>
+    </x-card>
 
     @if ($this->game_template !== null)
         <div class="mt-4 flex flex-row space-x-4 justify-end">
@@ -184,4 +184,3 @@
         </div>
     </flux:modal>
 </div>
-

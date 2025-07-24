@@ -1,6 +1,6 @@
 <x-layouts.app>
     <div class="flex flex-col gap-4">
-        <flux:card>
+        <x-card>
             @if($error === 'payment_error')
                 <flux:heading class="text-red-600 dark:text-red-400">Payment Error</flux:heading>
                 <flux:subheading>{{ $message }}</flux:subheading>
@@ -17,6 +17,6 @@
                     Try Again
                 </flux:button>
             </div>
-        </flux:card>
+        </x-card>
     </div>
 </x-layouts.app>
