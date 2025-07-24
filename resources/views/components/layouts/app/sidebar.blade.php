@@ -2,15 +2,6 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
-        
-        {{-- Add default meta tags for all app pages --}}
-        @if(!isset($metaTags))
-            <x-meta-tags 
-                title="{{ $title ?? config('app.name') }}"
-                description="Play The Social Game."
-                url="{{ request()->url() }}"
-            />
-        @endif
     </head>
     <body class="min-h-screen bg-light-orange">
         @php

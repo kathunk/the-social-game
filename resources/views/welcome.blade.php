@@ -3,17 +3,15 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        
-        <x-meta-tags 
+
+        <x-meta-tags
             title="The Social Game™"
             description="Play The Social Game."
-            url="{{ route('dashboard') }}"
+            url="{{ request()->url() }}"
         />
 
         {{-- Debug info --}}
-        <!-- Debug: Image URL = {{ asset('images/OG.png') }} -->
-        <!-- Debug: Current URL = {{ request()->url() }} -->
-        <!-- Debug: Route URL = {{ route('dashboard') }} -->
+
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=fredoka:400,500,600" rel="stylesheet" />
