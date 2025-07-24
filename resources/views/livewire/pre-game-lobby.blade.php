@@ -12,18 +12,18 @@
     @endif
 
     @if (! $this->user)
-        <flux:card>
+        <x-card>
             <flux:heading class="text-center mx-auto">Login to join the game</flux:heading>
 
             <flux:button.group class="flex justify-center mt-2">
                 <flux:button variant="primary" href="{{ route('register', ['game' => $this->game->id]) }}">Register</flux:button>
                 <flux:button href="{{ route('login', ['game' => $this->game->id]) }}">Login</flux:button>
             </flux:button.group>
-        </flux:card>
+        </x-card>
     @endif
 
     @if ($this->user && ! $this->player && $this->is_joinable)
-        <flux:card class="flex justify-center">
+        <x-card class="flex justify-center">
             @if (! $this->application)
                 <flux:button variant="primary" wire:click="joinGame" class="w-full">
                     @if($this->requires_admin_approval_to_join)
@@ -41,7 +41,7 @@
             @if ($this->application?->status === 'pending')
                 <flux:heading>Waiting for an admin to approve your application.</flux:heading>
             @endif
-        </flux:card>
+        </x-card>
     @endif
 
     @if ($this->application?->status === 'accepted' && $this->game->status !== 'upcoming')
@@ -50,14 +50,14 @@
         </flux:button>
     @endif
 
-    <flux:card>
+    <x-card>
         <div class="flex flex-col gap-2">
             {!! $this->description !!}
         </div>
-    </flux:card>
+    </x-card>
 
     @if ($this->game->status !== 'ended')
-        <flux:card x-data="{showQr: false}">
+        <x-card x-data="{showQr: false}">
             <flux:heading class="mb-2">Invite your friends</flux:heading>
             <div class="flex gap-2">
                 <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
@@ -73,7 +73,7 @@
                     <flux:button href="{{ $this->game->social_links[0] }}" target="_blank">Join game chat</flux:button>
                 </div>
             @endif
-        </flux:card>
+        </x-card>
     @endif
 
     @if ($this->hasTooManyPlayers)
@@ -85,7 +85,7 @@
     @endif
 
     @if ($this->is_game_admin)
-        <flux:card x-data="{editGameMode: false, editTime: false, addBots: false}">
+        <x-card x-data="{editGameMode: false, editTime: false, addBots: false}">
             <flux:heading class="mb-4">Game Settings</flux:heading>
             <div x-show="!editGameMode && !editTime && !addBots" class="flex gap-2 flex-wrap" x-data="{startGame: false}">
                 @unless ($this->hasTooManyPlayers || $this->hasTooFewPlayers || $this->game->status !== 'upcoming')
@@ -234,11 +234,11 @@
                     <flux:button variant="subtle" @click="addBots = false">Cancel</flux:button>
                 </div>
             </div>
-        </flux:card>
+        </x-card>
     @endif
 
     @if ($this->is_game_admin && $this->game->requires_admin_approval_to_join && $this->game->status !== 'ended')
-        <flux:card>
+        <x-card>
             <flux:heading class="mb-4">Pending Players</flux:heading>
 
             <flux:select wire:model="selected_application_id" variant="listbox" searchable placeholder="Choose player...">
@@ -255,10 +255,10 @@
                 <flux:button variant="primary" wire:click="approveUser">Approve</flux:button>
                 <flux:button variant="danger" wire:click="rejectUser">Reject</flux:button>
             </div>
-        </flux:card>
+        </x-card>
     @endif
 
-    <flux:card>
+    <x-card>
         <flux:table>
             <flux:table.columns>
                 <flux:table.column>Players</flux:table.column>
@@ -348,7 +348,7 @@
                 @endforeach
             </flux:table.rows>
         </flux:table>
-    </flux:card>
+    </x-card>
 
     <flux:toast />
 </div>

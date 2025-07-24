@@ -8,11 +8,11 @@
             <flux:tab name="score">Score</flux:tab>
             <flux:tab name="members">Members</flux:tab>
         </flux:tabs>
-    
+
         <flux:tab.panel name="members">
-            <flux:card>
+            <x-card>
                 <flux:heading size="lg">{{ $team->name }}</flux:heading>
-                
+
                 @if ($this->players->count() > 0)
                     <flux:table>
                         <flux:table.columns>
@@ -34,11 +34,11 @@
                 @else
                     <flux:subheading>No players yet</flux:subheading>
                 @endif
-            </flux:card>
+            </x-card>
         </flux:tab.panel>
 
         <flux:tab.panel name="score">
-            <flux:card>
+            <x-card>
                 <flux:heading size="lg">
                     @if ($this->game->status === 'ended')
                         <div class="flex items-center gap-2">
@@ -56,7 +56,7 @@
                         </div>
                     @endif
                 </flux:heading>
-                
+
                 @if (count($this->scoreHistoryEntries) > 0)
                     <flux:table>
                         <flux:table.columns>
@@ -98,7 +98,7 @@
                 @else
                     <flux:subheading>No score history yet</flux:subheading>
                 @endif
-            </flux:card>
+            </x-card>
         </flux:tab.panel>
     </flux:tab.group>
 </div>

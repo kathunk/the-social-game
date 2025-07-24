@@ -6,7 +6,7 @@
     </div>
 
     @if ($this->secretCodeConfiguration)
-        <flux:card>
+        <x-card>
             <div class="flex flex-col gap-4">
                 <flux:heading>Secret Codes</flux:heading>
 
@@ -15,7 +15,7 @@
 
                 <flux:button variant="primary" wire:click="saveSecretCodes">Save</flux:button>
             </div>
-        </flux:card>
+        </x-card>
     @endif
 
     <flux:toast />

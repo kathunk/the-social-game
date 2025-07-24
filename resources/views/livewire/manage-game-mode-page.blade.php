@@ -5,7 +5,7 @@
         </flux:link>
     </div>
 
-    <flux:card>
+    <x-card>
         <div class="flex flex-col gap-6">
             <flux:input wire:model="name" label="Name" />
             <flux:textarea wire:model="description" label="Description" />
@@ -34,10 +34,10 @@
 
             <flux:button variant="primary" wire:click="saveGameMode">Save</flux:button>
         </div>
-    </flux:card>
+    </x-card>
 
     @if ($this->game_mode)
-        <flux:card class="mt-4">
+        <x-card class="mt-4">
             <div class="flex flex-row justify-between items-center mb-4">
                 <flux:heading size="lg">Templates</flux:heading>
                 <flux:link :href="route('game-templates.create', ['game_mode' => $this->game_mode->id])">
@@ -64,7 +64,7 @@
             @else
                 <flux:callout variant="warning" icon="exclamation-circle" heading="This mode is not playable until it has at least one template." />
             @endif
-        </flux:card>
+        </x-card>
     @endif
 
     @if ($this->game_mode !== null)
@@ -92,4 +92,3 @@
 
     <flux:toast />
 </div>
-

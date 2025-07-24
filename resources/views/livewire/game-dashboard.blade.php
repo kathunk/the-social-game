@@ -4,13 +4,13 @@
     @endif
 
     @if ($this->postGameMessage)
-        <flux:card>
+        <x-card>
             {!! $this->postGameMessage !!}
-        </flux:card>
+        </x-card>
     @endif
 
     @if ($this->template->type === 'team' && $this->player->status === 'active' && $this->game->status === 'active')
-        <flux:card>
+        <x-card>
             @if (! $this->current_team)
                 <flux:heading>Join a team</flux:heading>
                 <span class="join-team-select">
@@ -27,7 +27,7 @@
             @else
                 <flux:heading>You are on team <flux:link :href="route('teams.show', [$this->game, $this->current_team])" variant="primary">{{ $this->current_team->name }}</flux:link></flux:heading>
             @endif
-        </flux:card>
+        </x-card>
     @endif
     @if ($this->game->status !== 'ended')
         <livewire:next-challenge-button />
@@ -44,14 +44,14 @@
     @if ($this->showScoreboard)
         <x-game-components.scoreboard :teams="$this->teams" :players="$this->players->filter(fn ($p) => $p->status === 'active')" :type="$this->template->scoreboard_type" />
     @else
-        <flux:card>
+        <x-card>
             <flux:heading>Scoreboard</flux:heading>
             <flux:subheading>The scoreboard is hidden for this challenge.</flux:subheading>
-        </flux:card>
+        </x-card>
     @endif
     @if ($this->game->status === 'active')
         @if ($this->template->players_can_join_late || $this->socialLink)
-            <flux:card x-data="{showQr: false}">
+            <x-card x-data="{showQr: false}">
                 @if ($this->template->players_can_join_late)
                     <flux:heading class="mb-2">Invite your friends</flux:heading>
                     <div class="flex gap-2">
@@ -69,16 +69,16 @@
                         <flux:button href="{{ $this->game->social_links[0] }}" target="_blank">Join game chat</flux:button>
                     </div>
                 @endif
-            </flux:card>
+            </x-card>
         @endif
     @endif
 
     @if ($this->footerMessage)
-        <flux:card>
+        <x-card>
             {!! $this->footerMessage !!}
-        </flux:card>
+        </x-card>
     @endif
-    
+
 
     <flux:modal name="qr-code">
         <div class="flex justify-center p-6">

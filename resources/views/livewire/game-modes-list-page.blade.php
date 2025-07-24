@@ -1,5 +1,5 @@
 <div>
-    <flux:card>
+    <x-card>
         <div class="flex flex-row justify-between items-center mb-4">
             <flux:heading size="lg" class="mb-4">Manage Game Modes</flux:heading>
             <flux:link :href="route('game-modes.create')">
@@ -105,5 +105,5 @@
                 </flux:table>
             </flux:tab.panel>
         </flux:tab.group>
-    </flux:card>
+    </x-card>
 </div>

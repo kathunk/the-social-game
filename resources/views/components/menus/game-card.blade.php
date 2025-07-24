@@ -1,71 +1,78 @@
 @props(['games', 'status'])
 
-<flux:card>
-    <flux:table>
-        <flux:table.columns>
-            <flux:table.column>{{ ucfirst($status) }} Games</flux:table.column>
-        </flux:table.columns>
+<x-card>
+    <x-forms.heading size="xl" class="mb-4">
+        {{ ucfirst($status) }} games
+    </x-forms.heading>
 
-        <flux:table.rows>
-            @foreach ($games as $game)
-                <flux:table.row>
-                    <flux:table.cell class="align-top">
-                        <div class="flex flex-col space-y-2">
-                            <div class="flex flex-col">
-                                <div class="flex justify-between" x-data="{ show_confirmation: false }">
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <flux:link wire:click="goToGame('{{ $game->id }}')">
-                                            {{ $game->name }}
-                                        </flux:link>
-                                        <flux:text variant="subtle" class="text-xs">{{ $game->starts_at?->diffForHumans() }}</flux:text>
-                                    </div>
-                                    @if ($game->status === 'upcoming')
-                                        @if ($this->user->isGameAdmin($game))
-                                            <flux:button
-                                                icon="trash"
-                                                variant="ghost"
-                                                size="sm"
-                                                @click="show_confirmation = true"
-                                                x-show="!show_confirmation"
-                                            />
-                                            <flux:button
-                                                icon="trash"
-                                                variant="danger"
-                                                size="sm"
-                                                wire:click="cancelGame('{{ $game->id }}')"
-                                                x-show="show_confirmation"
-                                            >
-                                                Cancel game
-                                            </flux:button>
-                                        @else ($this->user->isGameAdmin($game))
-                                            <flux:button
-                                                icon="trash"
-                                                variant="ghost"
-                                                size="sm"
-                                                @click="show_confirmation = true"
-                                                x-show="!show_confirmation"
-                                            />
-                                            <flux:button
-                                                icon="trash"
-                                                variant="danger"
-                                                size="sm"
-                                                wire:click="abandonGame('{{ $game->id }}')"
-                                                x-show="show_confirmation"
-                                            >
-                                                Abandon game
-                                            </flux:button>
-                                        @endif
-                                    @endif
-                                </div>
-                                <flux:text class="mt-2 whitespace-normal break-words text-xs">
-                                    {{ $game->players->take(12)->pluck('name')->join(', ') }}
-                                    {{ $game->players->count() > 12 ? '...' : '' }}
-                                </flux:text>
-                            </div>
+    <div class="flex flex-col space-y-5">
+        @foreach ($games as $game)
+            <div class="flex flex-col">
+                <div class="flex flex-col">
+                    <div class="flex justify-between" x-data="{ show_confirmation: false }">
+                        <div class="flex flex-wrap items-center gap-1 text-blue-500">
+                            <flux:link variant="ghost" wire:click="goToGame('{{ $game->id }}')">
+                                {{ $game->name }}
+                            </flux:link>
+                            <flux:icon size="sm" name="chevron-right" />
                         </div>
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforeach
-        </flux:table.rows>
-    </flux:table>
-</flux:card>
+                        <div class="flex items-center">
+                            <div class="flex items-center space-x-2">
+                                <flux:text>{{ $game->players->count() }}</flux:text>
+                                <flux:icon variant="solid" name="user" class="size-4" />
+                                <flux:separator vertical />
+                            </div>
+                            @if ($game->status === 'active')
+                                <div class="pl-2">
+                                    <flux:text variant="subtle" class="text-sm">{{ $game->starts_at?->diffForHumans() }}</flux:text>
+                                </div>
+                            @endif
+
+                            @if ($game->status === 'upcoming')
+                                @if ($this->user->isGameAdmin($game))
+                                    <div class="pl-1">
+                                        <flux:button
+                                            icon="trash"
+                                            variant="ghost"
+                                            size="xs"
+                                            @click="show_confirmation = true"
+                                            x-show="!show_confirmation"
+                                        />
+                                        <flux:button
+                                        icon="trash"
+                                        variant="danger"
+                                        size="xs"
+                                        wire:click="cancelGame('{{ $game->id }}')"
+                                        x-show="show_confirmation"
+                                        >
+                                            Cancel game
+                                        </flux:button>
+                                    </div>
+                                @else ($this->user->isGameAdmin($game))
+                                    <div class="pl-1">
+                                        <flux:button
+                                            icon="trash"
+                                            variant="ghost"
+                                            size="xs"
+                                            @click="show_confirmation = true"
+                                            x-show="!show_confirmation"
+                                        />
+                                        <flux:button
+                                            icon="trash"
+                                            variant="danger"
+                                            size="xs"
+                                            wire:click="abandonGame('{{ $game->id }}')"
+                                            x-show="show_confirmation"
+                                        >
+                                            Abandon game
+                                        </flux:button>
+                                    </div>
+                                @endif
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+</x-card>

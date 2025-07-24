@@ -1,38 +1,33 @@
 @props(['form', 'type' => null, 'class_key'])
 
 @if (isset($form['elements']))
-<flux:card>
-    <div class="flex flex-col space-y-4">
+<x-card>
+    <div class="flex flex-col space-y-1">
         @if ($type === 'challenge')
             @php
                 $challenges = $this->game->challenges;
                 $activated_challenges = $challenges->where('status', 'active')->count() + $challenges->where('status', 'ended')->count();
                 $total_challenges = $challenges->count();
             @endphp
-            <div class="flex space-x-2 items-baseline">
-                <flux:heading size="lg">Challenge</flux:heading>
-                <flux:text class="text-sm">
-                    ({{ $activated_challenges }} of {{ $total_challenges }})
-                </flux:text>
-
-                <flux:text variant="subtle" class="flex items-baseline">
-                    <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
-                </flux:text>
-            </div>
+            <flux:text class="flex flex-wrap items-baseline gap-1 text-faded-gray text-tiny font-medium">
+                <span>CHALLENGE</span>
+                <span>({{ $activated_challenges }} of {{ $total_challenges }})</span>
+                <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
+            </flux:text>
         @endif
         @foreach ($form['elements'] as $element)
             @switch($element['type'])
                 @case('title')
-                    <flux:heading>{{ $element['text'] }}</flux:heading>
+                    <x-forms.heading class="!text-lg">{{ $element['text'] }}</x-forms.heading>
                     @break
                 @case('subtitle')
-                    <flux:subheading>{{ $element['text'] }}</flux:subheading>
+                    <x-forms.subheading class="text-black">{{ $element['text'] }}</x-forms.subheading>
                     @break
                 @case('image')
                     <img src="{{ $element['url'] }}" alt="{{ $element['alt'] }}" class="w-full h-auto rounded-lg my-4" />
                     @break
                 @case('message')
-                    <flux:text class="mt-1">{{ $element['text'] }}</flux:text>
+                    <flux:text class="mt-1 text-xs">{{ $element['text'] }}</flux:text>
                     @break
                 @case('divider')
                     <flux:separator class="my-4" />
@@ -89,12 +84,16 @@
                     </div>
                     @break
                 @case('select')
+                <flux:field>
+                    <div class="*:!text-faded-gray *:!text-xxs">
+                        <flux:label>{{ $element['label'] }}</flux:label>
+                    </div>
                     <flux:select
                         wire:key="select-{{ $class_key }}-{{ $element['property_name'] }}"
-                        label="{{ $element['label'] }}"
                         wire:model="round_properties.{{ $class_key }}.{{ $element['property_name']}}"
                         variant="listbox"
                         :searchable="$element['searchable']"
+                        class="-mt-0.5"
                     >
                     @isset($element['placeholder'])
                         <flux:select.option value="" selected class="placeholder">{{ $element['placeholder'] }}</flux:select.option>
@@ -103,9 +102,10 @@
                             <flux:select.option wire:key="select-option-{{ $class_key }}-{{ $element['property_name'] }}-{{ $key }}" value="{{ $key }}">{{ $value }}</flux:select.option>
                         @endforeach
                     </flux:select>
+                </flux:field>
                     @break
             @endswitch
         @endforeach
     </div>
-</flux:card>
+</x-card>
 @endif

@@ -1,6 +1,6 @@
 <x-layouts.app>
     <div class="flex flex-col gap-4">
-        <flux:card>
+        <x-card>
             <flux:heading class="text-green-600">Subscription Successful!</flux:heading>
             <flux:subheading>Thank you for subscribing to <span class="text-md font-semibold">The Social Game</span>.</flux:subheading>
 
@@ -9,6 +9,6 @@
                     Go to Dashboard
                 </flux:button>
             </div>
-        </flux:card>
+        </x-card>
     </div>
 </x-layouts.app>
