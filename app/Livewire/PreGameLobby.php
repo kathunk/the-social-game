@@ -479,12 +479,6 @@ class PreGameLobby extends Component
         return redirect()->route('dashboard');
     }
 
-    #[On('echo-private:games.{game.id},GameUpdatedForReverb')]
-    public function refreshGame()
-    {
-        return redirect()->route('pre-game-lobby', ['game' => $this->game]);
-    }
-
     public function fillGameWithBots()
     {
         $available = User::where('email', 'like', 'bot%@bot.bot')->count();
