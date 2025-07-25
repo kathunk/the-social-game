@@ -14,6 +14,7 @@ use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Billable;
 use Thunk\Verbs\Facades\Verbs;
@@ -209,7 +210,14 @@ class User extends Authenticatable
 
     public function getGravatarAttribute(): string
     {
-        return 'https://www.gravatar.com/avatar/'.md5(strtolower(trim($this->email)));
+        // Return gravatar with 404 fallback for frontend handling
+        return 'https://www.gravatar.com/avatar/'.md5(strtolower(trim($this->email))).'?d=404&s=200';
+    }
+
+    public function getDefaultAvatarUrlAttribute(): string
+    {
+        // Local default avatar for frontend fallback
+        return url('/build/images/default-avatar.png');
     }
 
     public function getHasActiveGameAttribute(): bool

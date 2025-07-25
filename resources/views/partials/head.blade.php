@@ -3,7 +3,7 @@
 
 <title>{{ $title ?? config('app.name') }}</title>
 
-<x-meta-tags 
+<x-meta-tags
     :title="$title"
     description="Play The Social Game."
     :url="request()->url()"
@@ -18,10 +18,8 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 <script>
-    // Set default appearance to dark mode if no preference has been set yet
-    if (!localStorage.getItem('flux:appearance')) {
-        localStorage.setItem('flux:appearance', 'dark');
-    }
+    // Force light mode everywhere
+    localStorage.setItem('flux.appearance', 'light');
 </script>
 
 @fluxAppearance
