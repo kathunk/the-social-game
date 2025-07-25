@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Cashier\Subscription;
 use Livewire\Livewire;
+use Thunk\Verbs\Facades\Verbs;
 use Thunk\Verbs\Models\VerbEvent;
 
 uses(RefreshDatabase::class);
@@ -62,6 +63,21 @@ test('subscribed user has active subscription status', function () {
     expect($this->user->subscribed('wrong-type'))->toBeFalse();
 });
 
+test('membership is created when subscription is created', function () {
+    $this->user->subscriptions()->create([
+        'type' => 'default',
+        'stripe_id' => 'sub_test123',
+        'stripe_status' => 'active',
+    ]);
+
+    Verbs::commit();
+
+    $this->user->refresh();
+
+    expect($this->user->memberships)->toHaveCount(1);
+    expect($this->user->is_member)->toBeTrue();
+});
+
 test('subscription automatically renews after one year', function () {
     // Create initial subscription
     $subscription = $this->user->subscriptions()->create([
@@ -112,6 +128,8 @@ test('user can cancel subscription', function () {
         'quantity' => 1,
     ]);
 
+    Verbs::commit();
+
     // Simulate cancellation webhook
     $response = $this->postJson('/stripe/webhook', [
         'type' => 'customer.subscription.deleted',
@@ -127,6 +145,13 @@ test('user can cancel subscription', function () {
     expect($response->getStatusCode())->toBe(200);
     expect($this->user->fresh()->subscribed())->toBeFalse();
     expect($subscription->fresh()->canceled())->toBeTrue();
+
+    Verbs::commit();
+
+    $this->user->refresh();
+
+    expect($this->user->memberships)->toHaveCount(1);
+    expect($this->user->fresh()->is_member)->toBeFalse();
 });
 
 test('cancelled subscription does not charge user', function () {

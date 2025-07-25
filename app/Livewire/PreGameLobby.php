@@ -21,7 +21,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
 use Livewire\Component;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -477,12 +476,6 @@ class PreGameLobby extends Component
         Verbs::commit();
 
         return redirect()->route('dashboard');
-    }
-
-    #[On('echo-private:games.{game.id},GameUpdatedForReverb')]
-    public function refreshGame()
-    {
-        return redirect()->route('pre-game-lobby', ['game' => $this->game]);
     }
 
     public function fillGameWithBots()
