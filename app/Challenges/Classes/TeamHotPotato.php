@@ -106,7 +106,7 @@ class TeamHotPotato extends BaseChallengeClass
 
         $form->when($challenge_failed, fn ($form) => $form->subtitle('Sorry folks, try again next time.'));
 
-        $form->when($challenge_succeeded, fn ($form) => $form->subtitle('You did it!'));
+        $form->when($challenge_succeeded, fn ($form) => $form->title('🥳 You did it!'));
 
         $form->when($challenge_forfeited, fn ($form) => $form->subtitle('Challenge forfeited. No players were on the team when the challenge started.'));
 
