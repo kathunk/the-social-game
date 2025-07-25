@@ -16,7 +16,7 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
 
     const NAME = 'Bounty';
 
-    const DESCRIPTION = 'Your team has been assigned 3 players from other teams as bountie. For each bounty you can convince to defect and join you, your team gains 25 points. But be careful - other teams are trying to recruit your teammates too!';
+    const DESCRIPTION = 'Your team has been assigned players from other teams as bounties. For each bounty you can convince to defect and join you, your team gains 25 points. But be careful - other teams are trying to recruit your teammates too!';
 
     const TYPE = 'team';
 
