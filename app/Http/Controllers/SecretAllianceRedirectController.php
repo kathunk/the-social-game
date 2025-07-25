@@ -13,7 +13,7 @@ class SecretAllianceRedirectController extends Controller
         $user = Auth::user();
         $game = $user->currentGame;
 
-        if (! $game) {
+        if (! $game || $game->status !== 'active') {
             return redirect()->route('dashboard')->with('error', 'No current game found.');
         }
 
