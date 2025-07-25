@@ -20,9 +20,7 @@
                             <div class="flex items-center space-x-2">
                                 <flux:text>{{ $game->players->count() }}</flux:text>
                                 <flux:icon variant="solid" name="user" class="size-4" />
-                                @unless ($game->status === 'ended')
-                                    <flux:separator vertical />
-                                @endunless
+                                <flux:separator vertical />
                             </div>
                             @if ($game->status !== 'upcoming')
                                 <div class="pl-2">
