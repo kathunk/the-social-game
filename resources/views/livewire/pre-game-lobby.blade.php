@@ -168,17 +168,16 @@
                 @endif
 
                 <div class="flex flex-col space-y-2 mt-4">
+                    <flux:checkbox label="Requires your approval to join" wire:model="requires_admin_approval_to_join" />
+                </div>
+
+                <div class="flex flex-col space-y-2 mt-4">
                     <flux:heading size="sm">Chat Link</flux:heading>
-                    <flux:text>Tell players where game chat will be held. Discord, Slack, Telegram all work well.</flux:text>
                     <flux:input.group>
                         <flux:input.group.prefix>https://</flux:input.group.prefix>
                         <flux:input wire:model="social_link_url" placeholder="discord.gg/your-server" />
                     </flux:input.group>
                     <flux:error name="social_link_url" />
-                </div>
-
-                <div class="flex flex-col gap-2 mt-4">
-                    <flux:checkbox label="Requires your approval to join" wire:model="requires_admin_approval_to_join" />
                 </div>
 
                 <div class="flex justify-end mt-4 gap-2" x-data="{cancelGame: false}">
@@ -190,6 +189,7 @@
             </div>
 
             <div x-show="editTime">
+                {{--
                 <div class="flex flex-col gap-2">
                     <flux:switch label="Scheduled start time" @click="has_scheduled_start = !has_scheduled_start" x-bind:checked="has_scheduled_start" />
                     <div x-show="has_scheduled_start">
@@ -202,6 +202,7 @@
                         />
                     </div>
                 </div>
+                --}}
 
                 <div class="flex flex-col gap-2 mb-4" x-data="{use_challenge_length_override: $wire.entangle('use_challenge_length_override')}">
                     <flux:field variant="inline" class="mt-4">
