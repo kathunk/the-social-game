@@ -60,8 +60,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('cancel', [CheckoutController::class, 'cancel'])->name('cancel');
     });
     Route::get('/games/{game}/modifier-configurations', ModifierConfigurationPage::class)->name('games.modifier-configurations');
-    Route::get('/secret-codes', [SecretCodeRedirectController::class, 'handle'])
-        ->name('secret-codes.shortcut');
+    Route::get('/secret-code', [SecretCodeRedirectController::class, 'handle'])
+        ->name('secret-code.shortcut');
 });
 
 Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('cashier.webhook')
