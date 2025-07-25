@@ -83,6 +83,6 @@ class TeamSecretCodes extends BaseModifierClass
 
         Verbs::commit();
 
-        return redirect('secret-codes');
+        return redirect('secret-code');
     }
 }
