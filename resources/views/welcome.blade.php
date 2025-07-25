@@ -54,10 +54,10 @@
         </header>
 
         <!-- Main content centered -->
-        <div class="flex items-center justify-center min-h-screen p-6 lg:p-8">
+        <div class="flex items-center justify-center min-h-screen p-6 lg:p-8 ">
             <div class="flex flex-col items-center w-full max-w-4xl">
                 <div class="flex flex-col items-center justify-center w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
-                    <div class="w-full max-w-xs sm:max-w-sm mx-auto">
+                    <div class="w-full max-w-xs sm:max-w-sm mx-auto mt-16">
                         <x-icons.big-logo class="w-full h-auto" />
                     </div>
                     <div class="w-screen lg:w-full -ml-6 lg:ml-0 -mr-6 lg:mr-0">
