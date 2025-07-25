@@ -22,7 +22,7 @@
                                 <flux:icon variant="solid" name="user" class="size-4" />
                                 <flux:separator vertical />
                             </div>
-                            @if ($game->status === 'active')
+                            @if ($game->status !== 'upcoming')
                                 <div class="pl-2">
                                     <flux:text variant="subtle" class="text-sm">{{ $game->starts_at?->diffForHumans() }}</flux:text>
                                 </div>
