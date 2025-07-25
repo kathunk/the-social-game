@@ -14,7 +14,6 @@ use Glhd\Bits\Database\HasSnowflakes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Billable;
 use Thunk\Verbs\Facades\Verbs;

@@ -43,13 +43,14 @@ class FakeLaraconActivity extends Command
     public function handle()
     {
         $game_id = $this->argument('game_id');
-        
+
         $this->game = Game::findOrFail($game_id);
 
         $this->challenge = $this->game->currentChallenge;
 
         if ($this->challenge === null) {
             $this->error('No active challenge found for this game.');
+
             return;
         }
 
