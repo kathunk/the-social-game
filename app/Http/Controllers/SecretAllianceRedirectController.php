@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Modifiers\Classes\TeamSecretCodes;
+use App\Modifiers\Classes\TeamSecretAlliance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class SecretCodeRedirectController extends Controller
+class SecretAllianceRedirectController extends Controller
 {
     public function handle(Request $request)
     {
@@ -18,7 +18,7 @@ class SecretCodeRedirectController extends Controller
         }
 
         $modifier = $game->modifiers
-            ->firstWhere('class_key', TeamSecretCodes::key());
+            ->firstWhere('class_key', TeamSecretAlliance::key());
 
         if ($modifier) {
             return redirect()->route('games.secrets', [
@@ -27,6 +27,6 @@ class SecretCodeRedirectController extends Controller
             ]);
         }
 
-        return redirect()->route('dashboard')->with('error', 'No secret codes available for your game.');
+        return redirect()->route('dashboard')->with('error', 'No secret alliances available for your game.');
     }
 }

@@ -1,11 +1,13 @@
 <?php
 
+use App\Events\StripeWebhookRequested;
 use App\Livewire\Subscribe;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Cashier\Subscription;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
+use Thunk\Verbs\Models\VerbEvent;
 
 uses(RefreshDatabase::class);
 
@@ -191,20 +193,41 @@ test('failed payments are logged for debugging', function () {
     // This could be done by checking the log files or a database log table
 });
 
-test('successful payments are logged', function () {
-    $response = $this->postJson('/stripe/webhook', [
-        'type' => 'invoice.payment_succeeded',
+test('stripe webhook events are captured by verbs', function () {
+    $webhookPayload = [
+        'type' => 'customer.subscription.created',
         'data' => [
             'object' => [
-                'id' => 'in_test123',
+                'id' => 'sub_test123',
                 'customer' => 'cus_test123',
-                'subscription' => 'sub_test123',
-                'amount_paid' => 999,
+                'status' => 'active',
+                'items' => [
+                    'data' => [
+                        [
+                            'id' => 'si_test123',
+                            'price' => [
+                                'id' => 'price_test123',
+                                'product' => 'prod_test123',
+                            ],
+                            'quantity' => 1,
+                        ],
+                    ],
+                ],
+                'metadata' => ['type' => 'default'],
             ],
         ],
-    ]);
+    ];
+
+    $response = $this->postJson('/stripe/webhook', $webhookPayload);
 
     expect($response->getStatusCode())->toBe(200);
+
+    $events = VerbEvent::where('type', StripeWebhookRequested::class)->get();
+
+    expect($events)->toHaveCount(1);
+
+    $eventData = $events->first()->data;
+    expect($eventData['payload'])->toBe($webhookPayload);
 });
 
 // E2E Tests

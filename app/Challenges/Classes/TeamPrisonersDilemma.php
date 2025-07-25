@@ -17,8 +17,8 @@ class TeamPrisonersDilemma extends BaseChallengeClass
 
     const DESCRIPTION = '{player_team} (your team) is in a showdown with {paired_team}.
         If 50% of your team votes to play dirty, you will.
-        If both teams play dirty, {player_team} will each get -20 points.
-        If neither plays dirty, {player_team} will get +20 points.
+        If both teams play dirty, each team will get -20 points.
+        If neither plays dirty, each team will get +20 points.
         If {player_team} plays dirty and {paired_team} does not, {player_team} will get +50 points.';
 
     const TYPE = 'team';

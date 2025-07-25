@@ -28,25 +28,29 @@ class FakeLaraconActivity extends Command
      *
      * @var string
      */
-    protected $signature = 'app:fake-laracon-activity';
+    protected $signature = 'app:fake-laracon-activity {game_id}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Do lots of fake activity for the Laracon US 2025 event';
+    protected $description = 'Do lots of fake activity for a Laracon game';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $this->game = Game::where('name', 'Laracon 2025')->get()->last();
+        $game_id = $this->argument('game_id');
+
+        $this->game = Game::findOrFail($game_id);
 
         $this->challenge = $this->game->currentChallenge;
 
         if ($this->challenge === null) {
+            $this->error('No active challenge found for this game.');
+
             return;
         }
 

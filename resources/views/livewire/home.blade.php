@@ -7,14 +7,9 @@
         <x-menus.game-card :games="$this->games->filter(fn ($game) => $game->status === 'upcoming')" status="upcoming" />
     @endif
 
+    <flux:button variant="primary" :href="route('create-game')" icon="plus" class="w-full">New Game</flux:button>
+
     @if ($this->games->filter(fn ($game) => $game->status === 'ended')->count() > 0)
         <x-menus.game-card :games="$this->games->filter(fn ($game) => $game->status === 'ended')" status="ended" />
-    @endif
-
-    @if ($this->games->count() === 0)
-        <x-card class="flex flex-col items-center justify-center">
-            <flux:heading>No games found</flux:heading>
-            <flux:button variant="primary" :href="route('create-game')" class="mt-4">New Game</flux:button>
-        </x-card>
     @endif
 </div>

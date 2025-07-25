@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\LaraconRedirectController;
+use App\Http\Controllers\SecretAllianceRedirectController;
 use App\Http\Controllers\SecretCodeRedirectController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\MissingGameHandler;
@@ -23,6 +25,9 @@ use Livewire\Volt\Volt;
 Route::get('/', function () {
     return view('welcome');
 })->name('dashboard');
+
+Route::get('/laracon', [LaraconRedirectController::class, 'handle'])
+    ->name('laracon.shortcut');
 
 Route::missing(new MissingGameHandler)->group(function () {
     Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
@@ -60,8 +65,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('cancel', [CheckoutController::class, 'cancel'])->name('cancel');
     });
     Route::get('/games/{game}/modifier-configurations', ModifierConfigurationPage::class)->name('games.modifier-configurations');
-    Route::get('/secret-codes', [SecretCodeRedirectController::class, 'handle'])
-        ->name('secret-codes.shortcut');
+    Route::get('/secret-code', [SecretCodeRedirectController::class, 'handle'])
+        ->name('secret-code.shortcut');
+    Route::get('/secret-ally', [SecretAllianceRedirectController::class, 'handle'])
+        ->name('secret-ally.shortcut');
 });
 
 Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('cashier.webhook')

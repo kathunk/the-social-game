@@ -11,7 +11,7 @@
                 <div class="flex flex-col">
                     <div class="flex justify-between" x-data="{ show_confirmation: false }">
                         <div class="flex flex-wrap items-center gap-1 text-blue-500">
-                            <flux:link variant="ghost" wire:click="goToGame('{{ $game->id }}')">
+                            <flux:link variant="ghost" wire:click="goToGame('{{ $game->id }}')" class="cursor-pointer">
                                 {{ $game->name }}
                             </flux:link>
                             <flux:icon size="sm" name="chevron-right" />
@@ -24,7 +24,7 @@
                                     <flux:separator vertical />
                                 @endunless
                             </div>
-                            @if ($game->status === 'active')
+                            @if ($game->status !== 'upcoming')
                                 <div class="pl-2">
                                     <flux:text variant="subtle" class="text-sm">{{ $game->starts_at?->diffForHumans() }}</flux:text>
                                 </div>
