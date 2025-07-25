@@ -157,7 +157,7 @@
                     </div>
 
                     <!-- CTA Button -->
-                    <a href="mailto:john@thunk.dev?subject=Custom%20Game%20Event%20Inquiry&body=Hi!%20I'm%20interested%20in%20a%20custom%20game%20for%20my%20event.%20Here%20are%20some%20details:%0A%0AEvent%20Type:%20%0AExpected%20Attendees:%20%0ADate:%20%0ALocation:%20%0A%0APlease%20let%20me%20know%20how%20we%20can%20make%20this%20amazing!"
+                    <a href="mailto:john@thunk.dev?subject=Custom%20Game%20Event%20Inquiry&body=Hi!%20I'm%20interested%20in%20a%20custom%20game%20for%20my%20event.%20Here%20are%20some%20details:%0A%0AEvent%20Type:%20%0AExpected%20Attendees:%20%0ADate:%20%0ALocation:"
                        class="block w-full text-center bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg group-hover:animate-pulse">
                         <span class="text-base">Contact Us</span>
                         <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
