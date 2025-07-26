@@ -18,6 +18,7 @@ trait MorningRoutineFormElements
                 'required' => 'Must select a room',
                 'in' => 'Must select a valid room',
             ],
+            searchable: false,
         )
             ->buttonGroup()
             ->button(

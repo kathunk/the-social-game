@@ -77,12 +77,13 @@ class MorningRoutineChallenge extends BaseChallengeClass
             return true;
         }
 
-        return $this->progress($player)[$current_room] !== null;
+        return $this->progress($player)[$current_room] === null;
     }
 
     public function progress(Player $player): array
     {
-        return $this->challenge->game->modifiers->firstWhere('class_key', MorningRoutineProgress::key())->modifier_data[$player->id];
+        return $this->challenge->game->modifiers->firstWhere('class_key', MorningRoutineProgress::key())
+            ->modifier_data[$player->id];
     }
 
     public function move(Player $player, array $params)
@@ -113,6 +114,6 @@ class MorningRoutineChallenge extends BaseChallengeClass
                 ->toArray();
         }
 
-        return ['Hallway'];
+        return ['Hallway' => 'Hallway'];
     }
 }
