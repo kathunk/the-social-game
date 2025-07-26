@@ -39,7 +39,7 @@ class ModifierCreated extends Event
 
     public function handle()
     {
-        $mod = Modifier::create([
+        Modifier::create([
             'id' => $this->modifier_id,
             'game_id' => $this->game_id,
             'class_key' => $this->class_key,

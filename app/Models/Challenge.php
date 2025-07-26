@@ -42,6 +42,11 @@ class Challenge extends Model
         return $this->game->challenges()->where('starts_at', '>', $this->starts_at)->first();
     }
 
+    public function previous()
+    {
+        return $this->game->challenges()->where('starts_at', '<', $this->starts_at)->orderBy('starts_at', 'desc')->first();
+    }
+
     public function start()
     {
         $data = $this->handler()->dataArrayForState();
