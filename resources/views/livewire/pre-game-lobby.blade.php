@@ -15,10 +15,10 @@
         <x-card>
             <flux:heading class="text-center mx-auto">Login to join the game</flux:heading>
 
-            <x-button.group class="flex justify-center mt-2">
+            <flux:button.group class="flex justify-center mt-2">
                 <x-button variant="primary" href="{{ route('register', ['game' => $this->game->id]) }}">Register</x-button>
                 <x-button href="{{ route('login', ['game' => $this->game->id]) }}">Login</x-button>
-            </x-button.group>
+            </flux:button.group>
         </x-card>
     @endif
 
