@@ -41,6 +41,9 @@
                 <flux:table.rows>
                     @foreach ($this->scoreHistoryEntries as $entry)
                         <flux:table.row>
+                            <flux:table.cell class="flex items-start !px-0">
+                                {{ $entry['icon'] ?? '🐛' }}
+                            </flux:table.cell>
                             <flux:table.cell>
                                 <div class="flex flex-col">
                                     @if ($entry['is_hidden'])
