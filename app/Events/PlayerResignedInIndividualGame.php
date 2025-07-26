@@ -64,20 +64,38 @@ class PlayerResignedInIndividualGame extends Event
         $hidden_points_beneficiary = PlayerState::load($this->hidden_points_beneficiary_id);
 
         if ($this->points !== 0) {
-            $points_beneficiary->addToScoreHistory($this->points, '🎁 Inherited points from '.$this->state(PlayerState::class)->name);
+            $points_beneficiary->addToScoreHistory(
+                icon: '🎁',
+                points: $this->points,
+                description: 'Inherited points from '.$this->state(PlayerState::class)->name,
+            );
         }
 
         if ($this->hidden_points !== 0) {
-            $hidden_points_beneficiary->addToScoreHistory($this->hidden_points, '🎁 Inherited hidden points from '.$this->state(PlayerState::class)->name, true);
+            $hidden_points_beneficiary->addToScoreHistory(
+                icon: '🎁',
+                points: $this->hidden_points,
+                description: 'Inherited hidden points from '.$this->state(PlayerState::class)->name,
+                is_hidden: true,
+            );
         }
     }
 
     public function applyToPlayer(PlayerState $player)
     {
-        $player->addToScoreHistory(-$this->points, '👻 '.$this->state(PlayerState::class)->name.' resigned');
+        $player->addToScoreHistory(
+            icon: '👻',
+            points: -$this->points,
+            description: $this->state(PlayerState::class)->name.' resigned',
+        );
 
         if ($this->hidden_points !== 0) {
-            $player->addToScoreHistory(-$this->hidden_points, '👻 '.$this->state(PlayerState::class)->name.' resigned', true);
+            $player->addToScoreHistory(
+                icon: '👻',
+                points: -$this->hidden_points,
+                description: $this->state(PlayerState::class)->name.' resigned',
+                is_hidden: true,
+            );
         }
     }
 

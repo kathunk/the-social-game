@@ -148,8 +148,9 @@ class TeamBrinksmanship extends BaseChallengeClass
                 foreach ($teams as $other_team) {
                     if ($other_team->id !== $team_id && $other_team->id !== $ally_team_id) {
                         $other_team->addToScoreHistory(
-                            -5,
-                            '👊 Attacked by '.TeamState::load($team_id)->name
+                            icon: '👊',
+                            points: -5,
+                            description: 'Attacked by '.TeamState::load($team_id)->name,
                         );
                     }
                 }
@@ -159,8 +160,9 @@ class TeamBrinksmanship extends BaseChallengeClass
                 $team = TeamState::load($team_id);
 
                 $ally_team->addToScoreHistory(
-                    -40,
-                    '🗡️ Betrayed by '.$team->name
+                    icon: '🗡️',
+                    points: -40,
+                    description: 'Betrayed by '.$team->name,
                 );
             }
         }

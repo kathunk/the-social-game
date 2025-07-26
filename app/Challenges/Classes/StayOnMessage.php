@@ -86,9 +86,17 @@ class StayOnMessage extends BaseChallengeClass
             $points = (($count / $member_count) - 0.5) * 100;
 
             if ($points >= 0) {
-                $team->addToScoreHistory((int) round($points, 0), '💬 Stayed on message. '.$count.' of '.$member_count.' players submitted the same message.');
+                $team->addToScoreHistory(
+                    icon: '💬',
+                    points: (int) round($points, 0),
+                    description: 'Stayed on message. '.$count.' of '.$member_count.' players submitted the same message.',
+                );
             } else {
-                $team->addToScoreHistory((int) round($points, 0), '💬 Failed to stay on message. '.$count.' of '.$member_count.' players submitted the same message.');
+                $team->addToScoreHistory(
+                    icon: '💬',
+                    points: (int) round($points, 0),
+                    description: 'Failed to stay on message. '.$count.' of '.$member_count.' players submitted the same message.',
+                );
             }
         });
     }

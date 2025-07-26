@@ -107,13 +107,21 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
                 ->count();
 
             if ($upvotes_received > 0) {
-                $player->addToScoreHistory($upvotes_received, '👍 Received upvotes');
+                $player->addToScoreHistory(
+                    icon: '👍',
+                    points: $upvotes_received,
+                    description: 'Received upvotes',
+                );
             }
 
             $did_not_make_choice = ! isset($choices[$player->id]) || $choices[$player->id] === null;
 
             if ($did_not_make_choice && $downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received, '👎 Received '.($downvotes_received === 1 ? 'downvote' : 'downvotes'));
+                $player->addToScoreHistory(
+                    icon: '👎',
+                    points: -$downvotes_received,
+                    description: 'Received '.($downvotes_received === 1 ? 'downvote' : 'downvotes'),
+                );
             }
 
             if ($did_not_make_choice) {
@@ -121,15 +129,28 @@ class IndividualChooseSafetyOrDanger extends BaseChallengeClass implements Suppo
             }
 
             if ($choices[$player->id] === 'danger' && $downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received * 2, '👎 Received '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing danger');
+                $player->addToScoreHistory(
+                    icon: '👎',
+                    points: -$downvotes_received * 2,
+                    description: 'Received '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing danger',
+                );
             }
 
             if ($choices[$player->id] === 'danger') {
-                $player->addToScoreHistory(2, '☠️ Chose danger', true);
+                $player->addToScoreHistory(
+                    icon: '☠️',
+                    points: 2,
+                    description: 'Chose danger',
+                    is_hidden: true,
+                );
             }
 
             if ($choices[$player->id] === 'safety' && $downvotes_received > 0) {
-                $player->addToScoreHistory(0, '☺️ Blocked '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing safety');
+                $player->addToScoreHistory(
+                    icon: '☺️',
+                    points: 0,
+                    description: 'Blocked '.$downvotes_received.' '.($downvotes_received === 1 ? 'downvote' : 'downvotes').' after choosing safety',
+                );
             }
         });
     }

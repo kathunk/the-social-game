@@ -106,9 +106,19 @@ class IndividualLowScoreQuiz extends BaseChallengeClass implements SupportsPecki
             }
 
             if ($loser_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' would be at the bottom of the scoreboard', true);
+                $player->addToScoreHistory(
+                    icon: '🤔',
+                    points: 1,
+                    description: 'Correctly guessed that '.Player::find($guess_id)->name.' would be at the bottom of the scoreboard',
+                    is_hidden: true,
+                );
             } else {
-                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' would be at the bottom of the scoreboard', true);
+                $player->addToScoreHistory(
+                    icon: '🤔',
+                    points: 0,
+                    description: 'Incorrectly guessed that '.Player::find($guess_id)->name.' would be at the bottom of the scoreboard',
+                    is_hidden: true,
+                );
             }
         });
     }

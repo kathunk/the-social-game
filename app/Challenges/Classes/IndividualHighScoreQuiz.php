@@ -110,9 +110,19 @@ class IndividualHighScoreQuiz extends BaseChallengeClass implements SupportsPeck
             }
 
             if ($leader_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' will be at the top of the scoreboard', true);
+                $player->addToScoreHistory(
+                    icon: '🤔',
+                    points: 1,
+                    description: 'Correctly guessed that '.Player::find($guess_id)->name.' will be at the top of the scoreboard',
+                    is_hidden: true,
+                );
             } else {
-                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' will be at the top of the scoreboard', true);
+                $player->addToScoreHistory(
+                    icon: '🤔',
+                    points: 0,
+                    description: 'Incorrectly guessed that '.Player::find($guess_id)->name.' will be at the top of the scoreboard',
+                    is_hidden: true,
+                );
             }
         });
     }

@@ -101,12 +101,12 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
         $total_hidden_points = $previous_team->score(include_hidden: true) - $previous_team_score;
         $hidden_points = (int) round($total_hidden_points / $player_count);
 
-        $team_state->addToScoreHistory($points, '👋 '.$player_state->name.' joined during the Great Realignment');
-        $previous_team->addToScoreHistory(-$points, '👻 '.$player_state->name.' left during the Great Realignment');
+        $team_state->addToScoreHistory('👋', $points, $player_state->name.' joined during the Great Realignment');
+        $previous_team->addToScoreHistory('👻', -$points, $player_state->name.' left during the Great Realignment');
 
         if ($hidden_points !== 0) {
-            $team_state->addToScoreHistory($hidden_points, '👋 '.$player_state->name.' joined during the Great Realignment', is_hidden: true);
-            $previous_team->addToScoreHistory(-$hidden_points, '👻 '.$player_state->name.' left during the Great Realignment', is_hidden: true);
+            $team_state->addToScoreHistory('👋', $hidden_points, $player_state->name.' joined during the Great Realignment', is_hidden: true);
+            $previous_team->addToScoreHistory('👻', -$hidden_points, $player_state->name.' left during the Great Realignment', is_hidden: true);
         }
     }
 

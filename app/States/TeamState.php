@@ -21,9 +21,10 @@ class TeamState extends State
         $this->player_ids = collect();
     }
 
-    public function addToScoreHistory(int $points, string $description, bool $is_hidden = false)
+    public function addToScoreHistory(string $icon,int $points, string $description, bool $is_hidden = false)
     {
         $this->score_history[] = [
+            'icon' => $icon,
             'description' => $description,
             'timestamp' => now(),
             'points' => $points,
