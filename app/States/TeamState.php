@@ -25,9 +25,9 @@ class TeamState extends State
     {
         $this->score_history[] = [
             'icon' => $icon,
+            'points' => $points,
             'description' => $description,
             'timestamp' => now(),
-            'points' => $points,
             'is_hidden' => $is_hidden,
         ];
     }
