@@ -72,14 +72,14 @@
                 @case('button_group')
                     <div class="flex flex-wrap gap-2 mt-4 justify-end">
                         @foreach ($element['buttons'] as $btn)
-                            <flux:button
+                            <x-button
                                 wire:loading.attr="disabled"
                                 wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"
                                 variant="primary"
                                 wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}', {{ json_encode($form) }})"
                             >
                                 {{ $btn['label'] }}
-                            </flux:button>
+                            </x-button>
                         @endforeach
                     </div>
                     @break

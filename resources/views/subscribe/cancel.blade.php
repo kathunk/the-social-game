@@ -13,9 +13,9 @@
             @endif
 
             <div class="mt-4 flex justify-end">
-                <flux:button variant="primary" href="{{ route('marketing-page') }}">
+                <x-button variant="primary" href="{{ route('marketing-page') }}">
                     Try Again
-                </flux:button>
+                </x-button>
             </div>
         </x-card>
     </div>

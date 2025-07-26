@@ -32,7 +32,7 @@
                 <flux:radio value="team" label="Team" />
             </flux:radio.group>
 
-            <flux:button variant="primary" wire:click="saveGameMode">Save</flux:button>
+            <x-button variant="primary" wire:click="saveGameMode">Save</x-button>
         </div>
     </x-card>
 
@@ -41,7 +41,7 @@
             <div class="flex flex-row justify-between items-center mb-4">
                 <flux:heading size="lg">Templates</flux:heading>
                 <flux:link :href="route('game-templates.create', ['game_mode' => $this->game_mode->id])">
-                    <flux:button variant="filled" icon="plus">New</flux:button>
+                    <x-button variant="filled" icon="plus">New</x-button>
                 </flux:link>
             </div>
 
@@ -70,10 +70,10 @@
     @if ($this->game_mode !== null)
         <div class="mt-4 flex flex-row space-x-4 justify-end">
             @if ($this->game_mode->is_archived)
-                <flux:button variant="filled" wire:click="unarchiveGameMode">Unarchive</flux:button>
+                <x-button variant="filled" wire:click="unarchiveGameMode">Unarchive</x-button>
             @else
                 <flux:modal.trigger name="archive-game-mode">
-                    <flux:button variant="filled">Archive</flux:button>
+                    <x-button variant="filled">Archive</x-button>
                 </flux:modal.trigger>
             @endif
         </div>
@@ -85,7 +85,7 @@
                 <flux:heading size="lg">Archive this game mode</flux:heading>
                 <flux:text class="mt-2">Are you sure you want to archive this game mode?</flux:text>
             </div>
-            <flux:button variant="danger" wire:click="archiveGameMode">Archive</flux:button>
+            <x-button variant="danger" wire:click="archiveGameMode">Archive</x-button>
         </div>
     </flux:modal>
 

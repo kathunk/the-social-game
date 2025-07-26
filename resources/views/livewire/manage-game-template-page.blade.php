@@ -32,7 +32,7 @@
                             No modifiers selected
                         @endif
                     </flux:text>
-                    <flux:button size="xs" icon="pencil" variant="subtle" @click="editingModifiers = true"></flux:button>
+                    <x-button size="xs" icon="pencil" variant="subtle" @click="editingModifiers = true"></x-button>
                 </div>
                 <div x-show="editingModifiers">
                     <flux:select variant="listbox" multiple searchable wire:model="modifiers">
@@ -40,7 +40,7 @@
                             <flux:select.option value="{{ $modifier::key() }}">{{ $modifier::NAME }}</flux:select.option>
                         @endforeach
                     </flux:select>
-                    <flux:button size="xs" icon="check" class="mt-2 w-full" variant="filled" @click="editingModifiers = false" wire:click="saveTemplate">done editing</flux:button>
+                    <x-button size="xs" icon="check" class="mt-2 w-full" variant="filled" @click="editingModifiers = false" wire:click="saveTemplate">done editing</x-button>
                 </div>
             </div>
 
@@ -73,7 +73,7 @@
                                 <template x-if="!editing">
                                     <div class="flex flex-row space-x-2 items-center">
                                         <flux:text class="whitespace-normal break-words">{{ collect($challenge['challenge_keys'])->map(fn($key) => App\Challenges\ChallengeRegistry::retrieveFromKey($key)::NAME)->join(', ') }}</flux:text>
-                                        <flux:button size="xs" icon="pencil" variant="subtle" @click="editing = true"></flux:button>
+                                        <x-button size="xs" icon="pencil" variant="subtle" @click="editing = true"></x-button>
                                     </div>
                                 </template>
 
@@ -84,7 +84,7 @@
                                                 <flux:select.option value="{{ $challenge::key() }}">{{ $challenge::NAME }}</flux:select.option>
                                             @endforeach
                                         </flux:select>
-                                        <flux:button size="xs" icon="check" variant="filled" @click="editing = false" wire:click="saveTemplate">done editing</flux:button>
+                                        <x-button size="xs" icon="check" variant="filled" @click="editing = false" wire:click="saveTemplate">done editing</x-button>
                                     </div>
                                 </template>
                             </flux:table.cell>
@@ -92,13 +92,13 @@
                                 <flux:input wire:model="challenges.{{ $i }}.duration"/>
                             </flux:table.cell>
                             <flux:table.cell>
-                                <flux:button size="xs" icon="trash" variant="subtle" wire:click="removeChallenge({{ $i }})"></flux:button>
+                                <x-button size="xs" icon="trash" variant="subtle" wire:click="removeChallenge({{ $i }})"></x-button>
                             </flux:table.cell>
                         </flux:table.row>
                     @endforeach
                     <flux:table.row>
                         <flux:table.cell>
-                            <flux:button variant="filled" size="sm" icon="plus" wire:click="addChallenge">Add Challenge</flux:button>
+                            <x-button variant="filled" size="sm" icon="plus" wire:click="addChallenge">Add Challenge</x-button>
                         </flux:table.cell>
                     </flux:table.row>
                 </flux:table.rows>
@@ -107,18 +107,18 @@
             <flux:error name="challenges" />
             <flux:error name="error" />
 
-            <flux:button variant="primary" wire:click="saveTemplate">Save</flux:button>
+            <x-button variant="primary" wire:click="saveTemplate">Save</x-button>
         </div>
     </x-card>
 
     @if ($this->game_template !== null)
         <div class="mt-4 flex flex-row space-x-4 justify-end">
-            <flux:button variant="filled" wire:click="duplicateTemplate">Create duplicate</flux:button>
+            <x-button variant="filled" wire:click="duplicateTemplate">Create duplicate</x-button>
             @if ($this->game_template->is_archived)
-                <flux:button variant="filled" wire:click="unarchiveTemplate">Unarchive</flux:button>
+                <x-button variant="filled" wire:click="unarchiveTemplate">Unarchive</x-button>
             @else
                 <flux:modal.trigger name="archive-template">
-                    <flux:button variant="filled">Archive</flux:button>
+                    <x-button variant="filled">Archive</x-button>
                 </flux:modal.trigger>
             @endif
         </div>
@@ -180,7 +180,7 @@
                 <flux:heading size="lg">Archive this template</flux:heading>
                 <flux:text class="mt-2">Are you sure you want to archive this template? This cannot be undone.</flux:text>
             </div>
-            <flux:button variant="danger" wire:click="archiveTemplate">Archive</flux:button>
+            <x-button variant="danger" wire:click="archiveTemplate">Archive</x-button>
         </div>
     </flux:modal>
 </div>

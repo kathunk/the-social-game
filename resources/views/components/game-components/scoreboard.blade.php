@@ -24,11 +24,11 @@
                     @foreach ($teams as $team)
                         <flux:table.row>
                             <flux:table.cell>
-                                <flux:link :variant="((string) $team->id === (string) $this->player->team_id) ? 'filled' : 'ghost'" class="p-0 whitespace-normal break-words" :href="route('teams.show', [$team->game_id, $team->id])">
+                                <flux:link variant="ghost" class="p-0 whitespace-normal break-words" :href="route('teams.show', [$team->game_id, $team->id])">
                                     <div class="flex items-center gap-2">
                                         {{ $team->name }}
                                         @if ((string) $team->id === (string) $this->player->team_id)
-                                            <flux:icon variant="outline" name="user" class="size-2.5" />
+                                            <flux:icon variant="outline" name="user" class="size-2.5 text-light-blue stroke-3" />
                                         @endif
                                     </div>
                                 </flux:link>
