@@ -10,7 +10,7 @@
             <div class="flex flex-col">
                 <div class="flex flex-col">
                     <div class="flex items-center justify-between" x-data="{ show_confirmation: false }">
-                        <div class="text-blue-500 text-xs">
+                        <div class="text-blue-500 text-xs md:text-sm">
                             <flux:link variant="ghost" wire:click="goToGame('{{ $game->id }}')" class="cursor-pointer">
                                 <div class="flex flex-wrap items-center gap-1">
                                     <div>{{ $game->name }}</div>
@@ -20,7 +20,7 @@
                         </div>
                         <div class="flex items-center">
                             <div class="flex flex-col">
-                                <div class="flex items-center space-x-1 *:!text-faded-gray *:!text-xxs">
+                                <div class="flex items-center space-x-1 *:!text-faded-gray *:!text-xxs md:*:!text-xs">
                                     <flux:icon variant="solid" name="user" class="size-2.5" />
                                     <flux:text>{{ $game->players->count() }}</flux:text>
                                     <flux:separator vertical />
