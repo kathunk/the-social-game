@@ -9,7 +9,7 @@
                 $activated_challenges = $challenges->where('status', 'active')->count() + $challenges->where('status', 'ended')->count();
                 $total_challenges = $challenges->count();
             @endphp
-            <flux:text class="flex flex-wrap items-baseline gap-1 text-faded-gray text-tiny font-medium">
+            <flux:text class="flex flex-wrap items-baseline gap-1 text-faded-gray text-tiny md:text-xss font-medium">
                 <span>CHALLENGE</span>
                 <span>({{ $activated_challenges }} of {{ $total_challenges }})</span>
                 <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
