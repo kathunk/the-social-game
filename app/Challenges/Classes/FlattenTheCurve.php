@@ -66,7 +66,7 @@ class FlattenTheCurve extends BaseChallengeClass implements SupportsTeamSwaps
             )
             ->when(
                 $time_is_up,
-                fn ($form) => $form->title('Team swapping is now locked. Good luck!')
+                fn ($form) => $form->subtitle('🔒 Team swapping is now locked.')
             )
             ->build();
     }

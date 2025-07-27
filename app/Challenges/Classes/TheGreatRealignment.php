@@ -71,7 +71,7 @@ class TheGreatRealignment extends BaseChallengeClass implements SupportsTeamSwap
 
         return $this->form()
             ->title(self::NAME)
-            ->subtitle("You've made your choice. Good luck!")
+            ->subtitle("🤝 You've made your choice.")
             ->divider()
             ->title('Scoreboard as of the start of this challenge:')
             ->table(headers: ['Name', 'Players', 'Score'], rows: $scoreboard)

@@ -111,7 +111,7 @@ it('selects a reasonable stop time', function () {
     Date::setTestNow($last_second);
 
     Livewire::actingAs($player_1->user)->test(GameDashboard::class, ['game' => $this->game])
-        ->assertSee('Team swapping is now locked. Good luck!')
+        ->assertSee('Team swapping is now locked.')
         ->set('selected_team_id', $team_2->id)
         ->call('joinTeam', 'challenge', FlattenTheCurve::key())
         ->assertHasErrors();
