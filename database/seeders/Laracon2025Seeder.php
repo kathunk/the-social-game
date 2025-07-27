@@ -3,28 +3,29 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Challenges\Classes\FlattenTheCurve;
-use App\Challenges\Classes\StayOnMessage;
-use App\Challenges\Classes\TeamBounty;
-use App\Challenges\Classes\TeamBrinksmanship;
-use App\Challenges\Classes\TeamHotPotato;
-use App\Challenges\Classes\TeamPrisonersDilemma;
-use App\Challenges\Classes\TeamWarmUp;
-use App\Challenges\Classes\TheGreatRealignment;
-use App\Events\GameModeAdded;
-use App\Events\GameTemplateAdded;
-use App\Jobs\AddFakeUserToLaraconGame;
 use App\Models\Game;
-use App\Models\GameMode;
-use App\Models\GameTemplate;
-use App\Models\Modifier;
 use App\Models\User;
-use App\Modifiers\Classes\TeamRecruiter;
-use App\Modifiers\Classes\TeamResignation;
-use App\Modifiers\Classes\TeamSecretAlliance;
-use App\Modifiers\Classes\TeamSecretCodes;
-use Illuminate\Database\Seeder;
+use App\Models\GameMode;
+use App\Models\Modifier;
+use App\Models\GameTemplate;
+use App\Events\GameModeAdded;
 use Thunk\Verbs\Facades\Verbs;
+use Illuminate\Database\Seeder;
+use App\Events\GameTemplateAdded;
+use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\TeamWarmUp;
+use App\Jobs\AddFakeUserToLaraconGame;
+use App\Modifiers\Classes\TeamRecruiter;
+use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Classes\TeamHotPotato;
+use App\Modifiers\Classes\TeamResignation;
+use App\Modifiers\Classes\TeamSecretCodes;
+use App\Challenges\Classes\FlattenTheCurve;
+use App\Challenges\Classes\TeamBrinksmanship;
+use App\Modifiers\Classes\TeamSecretAlliance;
+use App\Challenges\Classes\TheGreatRealignment;
+use App\Challenges\Classes\TeamPrisonersDilemma;
+use App\Challenges\Classes\TeamPopularityContest;
 
 class Laracon2025Seeder extends Seeder
 {
@@ -58,30 +59,42 @@ class Laracon2025Seeder extends Seeder
                 ],
                 [
                     'challenge_keys' => [StayOnMessage::key()],
+                    // 12pm - 2pm
                     'duration' => 120,
                 ],
                 [
                     'challenge_keys' => [TeamPrisonersDilemma::key()],
+                    // 2pm - 4pm
                     'duration' => 120,
                 ],
                 [
                     'challenge_keys' => [TeamBounty::key()],
+                    // 4pm - 12am
                     'duration' => 540,
                 ],
                 [
                     'challenge_keys' => [TheGreatRealignment::key()],
+                    // 12am - 10am
                     'duration' => 660,
                 ],
                 [
-                    'challenge_keys' => [TeamHotPotato::key()],
+                    'challenge_keys' => [TeamBrinksmanship::key()],
+                    // 10am - 12pm
                     'duration' => 120,
                 ],
                 [
-                    'challenge_keys' => [TeamBrinksmanship::key()],
+                    'challenge_keys' => [TeamHotPotato::key()],
+                    // 12pm - 1pm
                     'duration' => 120,
                 ],
                 [
                     'challenge_keys' => [FlattenTheCurve::key()],
+                    // 1pm - 3pm
+                    'duration' => 120,
+                ],
+                [
+                    'challenge_keys' => [TeamPopularityContest::key()],
+                    // 3pm - 5pm
                     'duration' => 120,
                 ],
             ],
