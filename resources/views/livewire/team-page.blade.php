@@ -74,15 +74,11 @@
                 </div>
 
                 @if (count($this->scoreHistoryEntries) > 0)
-                    <flux:table class="*:!border-0 mt-2">
+                    <flux:table class="*:!border-0">
                         <flux:table.columns class="**:!pb-0">
-                            <flux:table.column></flux:table.column>
-                            <flux:table.column>
-                                <div class="text-faded-gray text-tiny md:text-xxs font-bold -ml-6.5">
-                                    EVENT TIMELINE
-                                </div>
-                            </flux:table.column>
-                            <flux:table.column></flux:table.column>
+                            <div class="text-faded-gray text-tiny md:text-xxs font-bold -mb-1 mt-2.5">
+                                EVENT TIMELINE
+                            </div>
                         </flux:table.columns>
                         <flux:table.rows>
                             @foreach ($this->scoreHistoryEntries as $entry)
@@ -91,7 +87,7 @@
                                         {{ $entry['icon'] ?? '🐛' }}
                                     </flux:table.cell>
                                     <flux:table.cell>
-                                        <div class="flex flex-col">
+                                        <div class="flex flex-col -ml-2">
                                             @if ($entry['is_hidden'])
                                                 <flux:heading class="text-sm whitespace-normal break-words text-purple-500 dark:text-purple-300">{{ $entry['description'] }}</flux:heading>
                                             @elseif ($entry['points'] > -1)
@@ -99,7 +95,7 @@
                                             @else
                                                 <flux:heading class="text-sm whitespace-normal break-words text-red-500">{{ $entry['description'] }}</flux:heading>
                                             @endif
-                                            <flux:text class="text-xs mt-2">{{ Carbon\Carbon::parse($entry['timestamp'])->diffForHumans() }}</flux:text>
+                                            <flux:text class="text-xs mt-2 text-faded-gray">{{ Carbon\Carbon::parse($entry['timestamp'])->diffForHumans() }}</flux:text>
                                         </div>
                                     </flux:table.cell>
                                     <flux:table.cell class="flex items-start">
