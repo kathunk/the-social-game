@@ -88,8 +88,8 @@
         <x-card x-data="{editGameMode: false, editTime: false, addBots: false}">
             <flux:heading class="mb-4">Game Settings</flux:heading>
             <div x-show="!editGameMode && !editTime && !addBots" class="flex gap-2 flex-wrap" x-data="{startGame: false}">
-                @unless ($this->hasTooManyPlayers || $this->hasTooFewPlayers || $this->game->status !== 'upcoming')
-                    <x-button variant="primary" icon="rocket-launch" @click="startGame = true" x-show="!startGame" :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers">
+                @unless ($this->hasTooManyPlayers || $this->hasTooFewPlayers || $this->game->status !== 'upcoming' || $this->is_starting_game)
+                    <x-button variant="primary" icon="rocket-launch" @click="startGame = true" x-show="!startGame" :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers || $this->is_starting_game">
                         Start Game Now
                     </x-button>
                     <x-button
@@ -98,9 +98,13 @@
                         wire:click="startGame"
                         icon="rocket-launch"
                         x-show="startGame"
-                        :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers"
+                        :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers || $this->is_starting_game"
                     >
-                        You sure?
+                        @if($this->is_starting_game)
+                            Starting...
+                        @else
+                            You sure?
+                        @endif
                     </x-button>
                 @endunless
                 @if ($this->modifierConfigurations->count() > 0 && $this->game->status === 'upcoming')
