@@ -197,6 +197,10 @@ class Game extends Model
 
     public function start()
     {
+        if ($this->status !== 'upcoming') {
+            return;
+        }
+
         if (! $this->starts_at) {
             $duration = GameTemplate::find($this->game_template_id)->total_duration;
             $ends_at = Carbon::parse(now())->addMinutes($duration);

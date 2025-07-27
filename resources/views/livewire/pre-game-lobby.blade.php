@@ -93,6 +93,7 @@
                         Start Game Now
                     </x-button>
                     <x-button
+                        wire:loading.attr="disabled"
                         variant="primary"
                         wire:click="startGame"
                         icon="rocket-launch"
