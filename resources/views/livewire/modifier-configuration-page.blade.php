@@ -13,7 +13,7 @@
                 <flux:textarea wire:model="secretCodes" />
                 <flux:error name="secretCodes" />
 
-                <flux:button variant="primary" wire:click="saveSecretCodes">Save</flux:button>
+                <x-button variant="primary" wire:click="saveSecretCodes">Save</x-button>
             </div>
         </x-card>
     @endif

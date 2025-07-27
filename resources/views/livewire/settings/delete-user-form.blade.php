@@ -29,9 +29,9 @@ new class extends Component {
     </div>
 
     <flux:modal.trigger name="confirm-user-deletion">
-        <flux:button variant="danger" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
+        <x-button variant="danger" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
             {{ __('Delete account') }}
-        </flux:button>
+        </x-button>
     </flux:modal.trigger>
 
     <flux:modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable class="max-w-lg">
@@ -48,10 +48,10 @@ new class extends Component {
 
             <div class="flex justify-end space-x-2 rtl:space-x-reverse">
                 <flux:modal.close>
-                    <flux:button variant="filled">{{ __('Cancel') }}</flux:button>
+                    <x-button variant="filled">{{ __('Cancel') }}</x-button>
                 </flux:modal.close>
 
-                <flux:button variant="danger" type="submit">{{ __('Delete account') }}</flux:button>
+                <x-button variant="danger" type="submit">{{ __('Delete account') }}</x-button>
             </div>
         </form>
     </flux:modal>

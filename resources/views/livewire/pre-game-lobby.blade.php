@@ -16,8 +16,8 @@
             <flux:heading class="text-center mx-auto">Login to join the game</flux:heading>
 
             <flux:button.group class="flex justify-center mt-2">
-                <flux:button variant="primary" href="{{ route('register', ['game' => $this->game->id]) }}">Register</flux:button>
-                <flux:button href="{{ route('login', ['game' => $this->game->id]) }}">Login</flux:button>
+                <x-button variant="primary" href="{{ route('register', ['game' => $this->game->id]) }}">Register</x-button>
+                <x-button href="{{ route('login', ['game' => $this->game->id]) }}">Login</x-button>
             </flux:button.group>
         </x-card>
     @endif
@@ -25,13 +25,13 @@
     @if ($this->user && ! $this->player && $this->is_joinable)
         <x-card class="flex justify-center">
             @if (! $this->application)
-                <flux:button variant="primary" wire:click="joinGame" class="w-full">
+                <x-button variant="primary" wire:click="joinGame" class="w-full">
                     @if($this->requires_admin_approval_to_join)
                         Request to join
                     @else
                         Join
                     @endif
-                </flux:button>
+                </x-button>
             @endif
 
             @if ($this->application?->status === 'rejected')
@@ -45,9 +45,9 @@
     @endif
 
     @if ($this->application?->status === 'accepted' && $this->game->status !== 'upcoming')
-        <flux:button variant="primary" href="{{ route('game-dashboard', ['game' => $this->game]) }}">
+        <x-button variant="primary" href="{{ route('game-dashboard', ['game' => $this->game]) }}">
             Go to game
-        </flux:button>
+        </x-button>
     @endif
 
     <x-card>
@@ -61,7 +61,7 @@
             <flux:heading class="mb-2">Invite your friends</flux:heading>
             <div class="flex gap-2">
                 <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
-                <flux:button variant="filled" @click="showQr = ! showQr">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
+                <x-button variant="filled" @click="showQr = ! showQr">Show QR <x-icons.qr class="w-4 h-4" /></x-button>
             </div>
 
             <div x-show="showQr" class="mt-2">
@@ -70,7 +70,7 @@
 
             @if ($this->game->social_links && $this->game->social_links[0])
                 <div class="mt-4 flex">
-                    <flux:button href="{{ $this->game->social_links[0] }}" target="_blank">Join game chat</flux:button>
+                    <x-button href="{{ $this->game->social_links[0] }}" target="_blank">Join game chat</x-button>
                 </div>
             @endif
         </x-card>
@@ -89,10 +89,10 @@
             <flux:heading class="mb-4">Game Settings</flux:heading>
             <div x-show="!editGameMode && !editTime && !addBots" class="flex gap-2 flex-wrap" x-data="{startGame: false}">
                 @unless ($this->hasTooManyPlayers || $this->hasTooFewPlayers || $this->game->status !== 'upcoming')
-                    <flux:button variant="primary" icon="rocket-launch" @click="startGame = true" x-show="!startGame" :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers">
+                    <x-button variant="primary" icon="rocket-launch" @click="startGame = true" x-show="!startGame" :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers">
                         Start Game Now
-                    </flux:button>
-                    <flux:button
+                    </x-button>
+                    <x-button
                         variant="primary"
                         wire:click="startGame"
                         icon="rocket-launch"
@@ -100,27 +100,27 @@
                         :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers"
                     >
                         You sure?
-                    </flux:button>
+                    </x-button>
                 @endunless
                 @if ($this->modifierConfigurations->count() > 0 && $this->game->status === 'upcoming')
-                    <flux:button icon="wrench" href="{{ route('games.modifier-configurations', ['game' => $this->game]) }}">
+                    <x-button icon="wrench" href="{{ route('games.modifier-configurations', ['game' => $this->game]) }}">
                         Manage modifiers
-                    </flux:button>
+                    </x-button>
                 @endif
-                <flux:button @click="editGameMode = true" icon="pencil">Settings</flux:button>
+                <x-button @click="editGameMode = true" icon="pencil">Settings</x-button>
                 @if ($this->game->status === 'upcoming')
-                    <flux:button @click="editTime = true" icon="pencil">Time</flux:button>
+                    <x-button @click="editTime = true" icon="pencil">Time</x-button>
                 @endif
                 @if ($this->user->is_super_admin && $this->is_joinable)
-                    <flux:button @click="addBots = true">Add Bots</flux:button>
+                    <x-button @click="addBots = true">Add Bots</x-button>
                 @endif
                 @if ($this->game->status === 'upcoming')
                     <div x-data="{cancelGame: false}">
                         <div x-show="cancelGame">
-                            <flux:button variant="danger" wire:click="cancelGame">Seriously cancel?</flux:button>
+                            <x-button variant="danger" wire:click="cancelGame">Seriously cancel?</x-button>
                         </div>
                         <div x-show="!cancelGame">
-                            <flux:button variant="subtle" icon="trash" @click="cancelGame = true">Cancel Game</flux:button>
+                            <x-button variant="subtle" icon="trash" @click="cancelGame = true">Cancel Game</x-button>
                         </div>
                     </div>
                 @endif
@@ -182,8 +182,8 @@
 
                 <div class="flex justify-end mt-4 gap-2" x-data="{cancelGame: false}">
                     <div class="flex justify-end mt-4 gap-2">
-                        <flux:button variant="ghost" @click="editGameMode = false">Close without saving</flux:button>
-                        <flux:button variant="primary" wire:click="updateGameSettings">Update</flux:button>
+                        <x-button variant="ghost" @click="editGameMode = false">Close without saving</x-button>
+                        <x-button variant="primary" wire:click="updateGameSettings">Update</x-button>
                     </div>
                 </div>
             </div>
@@ -223,16 +223,16 @@
                     </div>
                 </div>
                 <div class="flex justify-end mt-4 gap-2">
-                    <flux:button variant="ghost" @click="editTime = false">Close without saving</flux:button>
-                    <flux:button variant="primary" wire:click="updateGameSettings">Update</flux:button>
+                    <x-button variant="ghost" @click="editTime = false">Close without saving</x-button>
+                    <x-button variant="primary" wire:click="updateGameSettings">Update</x-button>
                 </div>
             </div>
 
             <div x-show="addBots">
                 <div class="mt-4 flex gap-2 items-end">
                     <flux:input wire:model="bots_to_add" label="Add bots" min="0" />
-                    <flux:button variant="primary" wire:click="fillGameWithBots()">Fill game with bots</flux:button>
-                    <flux:button variant="subtle" @click="addBots = false">Cancel</flux:button>
+                    <x-button variant="primary" wire:click="fillGameWithBots()">Fill game with bots</x-button>
+                    <x-button variant="subtle" @click="addBots = false">Cancel</x-button>
                 </div>
             </div>
         </x-card>
@@ -253,8 +253,8 @@
                 @endforeach
             </flux:select>
             <div class="flex justify-end mt-4 gap-2">
-                <flux:button variant="primary" wire:click="approveUser">Approve</flux:button>
-                <flux:button variant="danger" wire:click="rejectUser">Reject</flux:button>
+                <x-button variant="primary" wire:click="approveUser">Approve</x-button>
+                <x-button variant="danger" wire:click="rejectUser">Reject</x-button>
             </div>
         </x-card>
     @endif
@@ -291,23 +291,23 @@
                                 )
                                     <div class="flex gap-1" x-data="{showConfirmation: false}">
                                         <div x-show="showConfirmation">
-                                            <flux:button
+                                            <x-button
                                                 variant="danger"
                                                 size="sm"
                                                 wire:click="removePlayer('{{ $player->id }}')"
                                             >
                                                 Seriously?
-                                            </flux:button>
+                                            </x-button>
                                         </div>
                                         <div x-show="!showConfirmation">
-                                            <flux:button
+                                            <x-button
                                                 variant="subtle"
                                                 size="sm"
                                                 icon="x-circle"
                                                 @click="showConfirmation = true"
                                             >
                                                 Remove
-                                            </flux:button>
+                                            </x-button>
                                         </div>
                                     </div>
                                 @endif
@@ -319,12 +319,12 @@
                                     $this->game->status !== 'ended'
                                 )
                                     <div class="flex gap-1">
-                                        <flux:button variant="subtle" size="sm" wire:click="promoteToAdmin('{{ $player->id }}')">
+                                        <x-button variant="subtle" size="sm" wire:click="promoteToAdmin('{{ $player->id }}')">
                                             <div class="flex items-center gap-2">
                                                 <x-icons.crown class="w-4 h-4" />
                                                 Promote
                                             </div>
-                                        </flux:button>
+                                        </x-button>
                                     </div>
                                 @endif
 
@@ -335,12 +335,12 @@
                                     $this->game->status !== 'ended'
                                 )
                                     <div class="flex gap-1">
-                                        <flux:button variant="subtle" size="sm" wire:click="demoteFromAdmin('{{ $player->id }}')">
+                                        <x-button variant="subtle" size="sm" wire:click="demoteFromAdmin('{{ $player->id }}')">
                                             <div class="flex items-center gap-2">
                                                 <x-icons.crown-slash class="w-4 h-4" />
                                                 Demote
                                             </div>
-                                        </flux:button>
+                                        </x-button>
                                     </div>
                                 @endif
                             </div>
