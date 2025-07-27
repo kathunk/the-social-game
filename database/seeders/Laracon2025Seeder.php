@@ -55,7 +55,8 @@ class Laracon2025Seeder extends Seeder
             challenges: [
                 [
                     'challenge_keys' => [TeamWarmUp::key()],
-                    'duration' => 420,
+                    // 9am (the day before) - 12pm
+                    'duration' => 1620,
                 ],
                 [
                     'challenge_keys' => [StayOnMessage::key()],
@@ -70,12 +71,12 @@ class Laracon2025Seeder extends Seeder
                 [
                     'challenge_keys' => [TeamBounty::key()],
                     // 4pm - 12am
-                    'duration' => 540,
+                    'duration' => 480,
                 ],
                 [
                     'challenge_keys' => [TheGreatRealignment::key()],
                     // 12am - 10am
-                    'duration' => 660,
+                    'duration' => 600,
                 ],
                 [
                     'challenge_keys' => [TeamBrinksmanship::key()],
@@ -85,7 +86,7 @@ class Laracon2025Seeder extends Seeder
                 [
                     'challenge_keys' => [TeamHotPotato::key()],
                     // 12pm - 1pm
-                    'duration' => 120,
+                    'duration' => 60,
                 ],
                 [
                     'challenge_keys' => [FlattenTheCurve::key()],
