@@ -15,11 +15,11 @@ class TeamSecretAlliance extends BaseModifierClass
 {
     const NAME = 'Star crossed allies';
 
-    const DESCRIPTION = "You have been randomly assigned a secret alliance with {player_name}. 
-        They were on {ally_team_name} when you were assigned. 
-        If at any point, you and {player_name} join a new team together, 
-        that team will receive 5 hidden points that will not be revealed until the end of the game. 
-        Note that this will not take effect if either of you simply joins the other's current team. 
+    const DESCRIPTION = "You have been randomly assigned a secret alliance with {player_name}.
+        They were on {ally_team_name} when you were assigned.
+        If at any point, you and {player_name} join a new team together,
+        that team will receive 5 hidden points that will not be revealed until the end of the game.
+        Note that this will not take effect if either of you simply joins the other's current team.
         You must both join a new team together.";
 
     const TYPE = 'team';
@@ -189,7 +189,12 @@ class TeamSecretAlliance extends BaseModifierClass
             return;
         }
 
-        $team_state->addToScoreHistory(5, '🤝 '.$player_state->name.' and '.$ally->name.' were secret allies', true);
+        $team_state->addToScoreHistory(
+            icon: '🤝',
+            points: 5,
+            description: $player_state->name.' and '.$ally->name.' were secret allies',
+            is_hidden: true,
+        );
 
         $modifier_state->modifier_data['pairs'] = collect($modifier_state->modifier_data['pairs'])
             ->map(function ($pair) use ($player_state) {

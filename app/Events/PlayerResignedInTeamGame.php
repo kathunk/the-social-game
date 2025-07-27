@@ -33,7 +33,11 @@ class PlayerResignedInTeamGame extends Event
     public function applyToTeam(TeamState $team)
     {
         $team->player_ids = $team->player_ids->reject(fn (int $player_id) => $player_id === $this->player_id);
-        $team->addToScoreHistory($this->points, '👻 '.$this->state(PlayerState::class)->name.' resigned');
+        $team->addToScoreHistory(
+            icon: '👻',
+            points: $this->points,
+            description: $this->state(PlayerState::class)->name.' resigned',
+        );
     }
 
     public function handle()

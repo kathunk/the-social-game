@@ -92,7 +92,11 @@ class IndividualStealTheBacon extends BaseChallengeClass implements SupportsPeck
             }
 
             if ($choices[$player->id] === 'steal') {
-                $player->addToScoreHistory(-($number_of_stealers - ceil($player_count / 2)), '🥓 Stole the Bacon');
+                $player->addToScoreHistory(
+                    icon: '🥓',
+                    points: -($number_of_stealers - ceil($player_count / 2)),
+                    description: 'Stole the Bacon',
+                );
             }
         });
     }

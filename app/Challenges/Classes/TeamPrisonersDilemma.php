@@ -129,22 +129,38 @@ class TeamPrisonersDilemma extends BaseChallengeClass
                 $containsTeamId
                 && $containsPairedTeamId
             ) {
-                $team->addToScoreHistory(-20, '😩 '.$team_name.' and '.$paired_team_name.' both played dirty');
+                $team->addToScoreHistory(
+                    icon: '😩',
+                    points: -20,
+                    description: $team_name.' and '.$paired_team_name.' both played dirty',
+                );
             } elseif (
                 $containsTeamId
                 && ! $containsPairedTeamId
             ) {
-                $team->addToScoreHistory(50, '😈 '.$team_name.' played dirty and '.$paired_team_name.' did not');
+                $team->addToScoreHistory(
+                    icon: '😈',
+                    points: 50,
+                    description: $team_name.' played dirty and '.$paired_team_name.' did not',
+                );
             } elseif (
                 ! $containsTeamId
                 && ! $containsPairedTeamId
             ) {
-                $team->addToScoreHistory(20, '😇 Neither '.$team_name.' nor '.$paired_team_name.' played dirty');
+                $team->addToScoreHistory(
+                    icon: '😇',
+                    points: 20,
+                    description: 'Neither '.$team_name.' nor '.$paired_team_name.' played dirty',
+                );
             } elseif (
                 ! $containsTeamId
                 && $containsPairedTeamId
             ) {
-                $team->addToScoreHistory(0, '😩 '.$team_name.' was nice, but '.$paired_team_name.' played dirty');
+                $team->addToScoreHistory(
+                    icon: '😩',
+                    points: 0,
+                    description: $team_name.' was nice, but '.$paired_team_name.' played dirty',
+                );
             }
         }
     }

@@ -49,13 +49,21 @@ class PlayerPassedPotato extends Event
         $team_data = $this->state(ChallengeState::class)->challenge_data[$team->id];
 
         if ($team_data['status'] === 'succeeded') {
-            $team->addToScoreHistory(50, '🥔 Completed the hot potato challenge.');
+            $team->addToScoreHistory(
+                icon: '🥔',
+                points: 50,
+                description: 'Completed the hot potato challenge.',
+            );
         }
 
         if ($team_data['status'] === 'failed') {
             $player = PlayerState::load($this->recipient_id);
 
-            $team->addToScoreHistory(-50, "🥔 Failed the hot potato challenge. $player->name held the potato twice.");
+            $team->addToScoreHistory(
+                icon: '🥔',
+                points: -50,
+                description: "Failed the hot potato challenge. $player->name held the potato twice.",
+            );
         }
     }
 

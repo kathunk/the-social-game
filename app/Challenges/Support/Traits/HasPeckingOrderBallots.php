@@ -60,11 +60,19 @@ trait HasPeckingOrderBallots
                 ->count();
 
             if ($upvotes_received > 0) {
-                $player->addToScoreHistory($upvotes_received, '👍 Received upvotes');
+                $player->addToScoreHistory(
+                    icon: '👍',
+                    points: $upvotes_received,
+                    description: 'Received upvotes',
+                );
             }
 
             if ($downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received, '👎 Received downvotes');
+                $player->addToScoreHistory(
+                    icon: '👎',
+                    points: -$downvotes_received,
+                    description: 'Received downvotes',
+                );
             }
         });
     }

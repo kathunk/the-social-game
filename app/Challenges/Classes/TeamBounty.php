@@ -158,7 +158,11 @@ class TeamBounty extends BaseChallengeClass implements SupportsTeamSwaps
         $team_bounties = $this->challenge_state->challenge_data['team_bounties'][$team_state->id] ?? [];
 
         if (in_array($player_state->id, $team_bounties)) {
-            $team_state->addToScoreHistory(25, "💰 Recruited {$player_state->name} during the Bounty challenge");
+            $team_state->addToScoreHistory(
+                icon: '💰',
+                points: 25,
+                description: "Recruited {$player_state->name} during the Bounty challenge",
+            );
         }
     }
 }

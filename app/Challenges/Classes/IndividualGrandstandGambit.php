@@ -80,12 +80,21 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
 
         $players->each(function ($player) use ($choices) {
             if (! isset($choices[$player->id]) || $choices[$player->id] === null) {
-                $player->addToScoreHistory(1, '🫥 Did not take Grandstand Gambit', true);
+                $player->addToScoreHistory(
+                    icon: '🫥',
+                    points: 1,
+                    description: 'Did not take Grandstand Gambit',
+                    is_hidden: true,
+                );
 
                 return;
             }
 
-            $player->addToScoreHistory(5, '📈 Grandstand Gambit');
+            $player->addToScoreHistory(
+                icon: '📈',
+                points: 5,
+                description: 'Grandstand Gambit',
+            );
         });
 
         $highest_score = $players->max(fn ($p) => $p->score());
@@ -98,7 +107,11 @@ class IndividualGrandstandGambit extends BaseChallengeClass implements SupportsP
             }
 
             if ($choices[$player->id] !== null && $leader_ids->contains($player->id)) {
-                $player->addToScoreHistory(-$player->score(), '😩 Grandstand Gambit too close to the sun');
+                $player->addToScoreHistory(
+                    icon: '😩',
+                    points: -$player->score(),
+                    description: 'Grandstand Gambit too close to the sun',
+                );
             }
         });
     }

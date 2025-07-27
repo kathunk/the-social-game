@@ -40,6 +40,10 @@ class TeamRecruiter extends BaseModifierClass
             return;
         }
 
-        $team_state->addToScoreHistory(1, '🔺 '.$player_state->name.' joined the game');
+        $team_state->addToScoreHistory(
+            icon: '🔺',
+            points: 1,
+            description: $player_state->name.' joined the game',
+        );
     }
 }

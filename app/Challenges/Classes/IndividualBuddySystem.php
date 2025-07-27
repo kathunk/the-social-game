@@ -68,9 +68,19 @@ class IndividualBuddySystem extends BaseChallengeClass implements SupportsPeckin
                 : false;
 
             if ($buddy_upvoted_player) {
-                $player->addToScoreHistory(1, '🤝 Found a buddy: '.PlayerState::load($buddy_id)->name, true);
+                $player->addToScoreHistory(
+                    icon: '🤝',
+                    points: 1,
+                    description: 'Found a buddy: '.PlayerState::load($buddy_id)->name,
+                    is_hidden: true,
+                );
             } else {
-                $player->addToScoreHistory(0, '😔 Did not find a buddy', true);
+                $player->addToScoreHistory(
+                    icon: '😔',
+                    points: 0,
+                    description: 'Did not find a buddy',
+                    is_hidden: true,
+                );
             }
         });
     }

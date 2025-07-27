@@ -110,9 +110,19 @@ class IndividualLargestIncreaseQuiz extends BaseChallengeClass implements Suppor
             }
 
             if ($largest_increase_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' will have the largest score increase', true);
+                $player->addToScoreHistory(
+                    icon: '🤔',
+                    points: 1,
+                    description: 'Correctly guessed that '.Player::find($guess_id)->name.' will have the largest score increase',
+                    is_hidden: true,
+                );
             } else {
-                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' will have the largest score increase', true);
+                $player->addToScoreHistory(
+                    icon: '🤔',
+                    points: 0,
+                    description: 'Incorrectly guessed that '.Player::find($guess_id)->name.' will have the largest score increase',
+                    is_hidden: true,
+                );
             }
         });
     }

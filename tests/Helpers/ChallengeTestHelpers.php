@@ -35,7 +35,12 @@ class TeamScoreIncremented extends Event
 
     public function applyToTeam(TeamState $team)
     {
-        $team->addToScoreHistory($this->points, 'score_incremented', $this->is_hidden);
+        $team->addToScoreHistory(
+            icon: '📊',
+            points: $this->points,
+            description: 'score_incremented',
+            is_hidden: $this->is_hidden,
+        );
     }
 
     public function handle(TeamState $state)
@@ -57,7 +62,12 @@ class PlayerScoreIncremented extends Event
 
     public function applyToPlayer(PlayerState $player)
     {
-        $player->addToScoreHistory($this->points, 'score_incremented', $this->is_hidden);
+        $player->addToScoreHistory(
+            icon: '📊',
+            points: $this->points,
+            description: 'score_incremented',
+            is_hidden: $this->is_hidden,
+        );
     }
 
     public function handle(PlayerState $state)

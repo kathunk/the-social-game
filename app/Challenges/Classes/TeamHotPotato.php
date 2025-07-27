@@ -10,7 +10,7 @@ class TeamHotPotato extends BaseChallengeClass
 {
     const NAME = 'Hot Potato';
 
-    const DESCRIPTION = 'One player on your team has the hot potato, and can pass it to any teammate. 
+    const DESCRIPTION = 'One player on your team has the hot potato, and can pass it to any teammate.
         Your team will receive (% of teammates who held the potato - 50%) * 100 points.
         If any player holds it twice the challenge will end, and your team will receive -50 points.';
 
@@ -137,7 +137,11 @@ class TeamHotPotato extends BaseChallengeClass
             $percentage = $held / $total;
             $points = ($percentage - 0.5) * 100;
 
-            $team->addToScoreHistory(round($points), "🥔 Completed the Hot Potato challenge. $held of $total players held the potato.");
+            $team->addToScoreHistory(
+                icon: '🥔',
+                points: round($points),
+                description: "Completed the Hot Potato challenge. $held of $total players held the potato.",
+            );
         });
     }
 }

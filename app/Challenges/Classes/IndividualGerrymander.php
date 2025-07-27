@@ -155,15 +155,17 @@ class IndividualGerrymander extends BaseChallengeClass implements SupportsPeckin
 
             if ($upvotes_received > 0) {
                 $player->addToScoreHistory(
-                    $upvotes_received * 2,
-                    '👍 Received doubled upvotes'
+                    icon: '👍',
+                    points: $upvotes_received * 2,
+                    description: 'Received doubled upvotes',
                 );
             }
 
             if ($downvotes_received > 0) {
                 $player->addToScoreHistory(
-                    -$downvotes_received * 2,
-                    '👎 Received doubled downvotes'
+                    icon: '👎',
+                    points: -$downvotes_received * 2,
+                    description: 'Received doubled downvotes',
                 );
             }
         });

@@ -117,11 +117,19 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
             }
 
             if ($upvotes_received > 0) {
-                $player->addToScoreHistory($upvotes_received, '👍 Received upvotes');
+                $player->addToScoreHistory(
+                    icon: '👍',
+                    points: $upvotes_received,
+                    description: 'Received upvotes',
+                );
             }
 
             if ($downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received, '👎 Received downvotes');
+                $player->addToScoreHistory(
+                    icon: '👎',
+                    points: -$downvotes_received,
+                    description: 'Received downvotes',
+                );
             }
         });
 
@@ -132,11 +140,19 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
 
         $game_state->players()->each(function ($player) use ($leader_ids, $loser_ids, $point_reward) {
             if ($leader_ids->contains($player->id)) {
-                $player->addToScoreHistory(-$point_reward, '👇 First Shall Be Last');
+                $player->addToScoreHistory(
+                    icon: '👇',
+                    points: -$point_reward,
+                    description: 'First Shall Be Last',
+                );
             }
 
             if ($loser_ids->contains($player->id)) {
-                $player->addToScoreHistory($point_reward, '👆 Last Shall Be First');
+                $player->addToScoreHistory(
+                    icon: '👆',
+                    points: $point_reward,
+                    description: 'Last Shall Be First',
+                );
             }
         });
     }
