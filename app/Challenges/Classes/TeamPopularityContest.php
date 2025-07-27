@@ -71,8 +71,8 @@ class TeamPopularityContest extends BaseChallengeClass
             challenge_id: $this->challenge->id,
             game_id: $player->game->id,
             player_id: $player->id,
-            downvote_team_id: $params['downvote_team_id'],
-            upvote_team_id: $params['upvote_team_id'],
+            downvote_team_id: (int) $params['downvote_team_id'],
+            upvote_team_id: (int) $params['upvote_team_id'],
         );
     }
 
