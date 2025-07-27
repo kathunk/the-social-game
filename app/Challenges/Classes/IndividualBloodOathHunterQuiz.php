@@ -180,33 +180,37 @@ class IndividualBloodOathHunterQuiz extends BaseChallengeClass implements Suppor
 
             if ($guessed_players_are_in_blood_oath) {
                 $player->addToScoreHistory(
-                    1,
-                    '🤔 Correctly guessed that '.
+                    icon: '🤔',
+                    points: 1,
+                    description: 'Correctly guessed that '.
                         $guessed_player_1->name.
                         ' and '.
                         $guessed_player_2->name.
                         ' are in a blood oath',
-                    true
+                    is_hidden: true,
                 );
                 $guessed_player_1->addToScoreHistory(
-                    -1,
-                    '🎯 '.$player->name.' guessed that you are in a blood oath',
-                    true
+                    icon: '🎯',
+                    points: -1,
+                    description: $player->name.' guessed that you are in a blood oath',
+                    is_hidden: true,
                 );
                 $guessed_player_2->addToScoreHistory(
-                    -1,
-                    '🎯 '.$player->name.' guessed that you are in a blood oath',
-                    true
+                    icon: '🎯',
+                    points: -1,
+                    description: $player->name.' guessed that you are in a blood oath',
+                    is_hidden: true,
                 );
             } else {
                 $player->addToScoreHistory(
-                    0,
-                    '🤔 Incorrectly guessed that '.
+                    icon: '🤔',
+                    points: 0,
+                    description: 'Incorrectly guessed that '.
                         $guessed_player_1->name.
                         ' and '.
                         $guessed_player_2->name.
                         ' are in a blood oath',
-                    true
+                    is_hidden: true,
                 );
             }
         });

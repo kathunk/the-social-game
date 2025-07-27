@@ -115,19 +115,39 @@ class IndividualChooseHopeOrFear extends BaseChallengeClass implements SupportsP
             $score_change = $upvotes_received - $downvotes_received;
 
             if ($choices[$player->id] === 'hope' && $score_change > 0) {
-                $player->addToScoreHistory(1, '🤞 Chose hope', true);
+                $player->addToScoreHistory(
+                    icon: '🤞',
+                    points: 1,
+                    description: 'Chose hope',
+                    is_hidden: true,
+                );
             }
 
             if ($choices[$player->id] === 'hope' && $score_change <= 0) {
-                $player->addToScoreHistory(0, '🤞 Chose hope but score did not increase', true);
+                $player->addToScoreHistory(
+                    icon: '🤞',
+                    points: 0,
+                    description: 'Chose hope but score did not increase',
+                    is_hidden: true,
+                );
             }
 
             if ($choices[$player->id] === 'fear' && $score_change < 0) {
-                $player->addToScoreHistory(1, '😱 Chose fear', true);
+                $player->addToScoreHistory(
+                    icon: '😱',
+                    points: 1,
+                    description: 'Chose fear',
+                    is_hidden: true,
+                );
             }
 
             if ($choices[$player->id] === 'fear' && $score_change >= 0) {
-                $player->addToScoreHistory(0, '😱 Chose fear but score did not decrease', true);
+                $player->addToScoreHistory(
+                    icon: '😱',
+                    points: 0,
+                    description: 'Chose fear but score did not decrease',
+                    is_hidden: true,
+                );
             }
         });
     }

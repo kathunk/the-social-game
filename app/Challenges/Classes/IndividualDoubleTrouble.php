@@ -90,15 +90,27 @@ class IndividualDoubleTrouble extends BaseChallengeClass implements SupportsPeck
                 ->count();
 
             if ($upvotes_received > 0) {
-                $player->addToScoreHistory($upvotes_received * 2, '👍 Received doubled upvotes');
+                $player->addToScoreHistory(
+                    icon: '👍',
+                    points: $upvotes_received * 2,
+                    description: 'Received doubled upvotes',
+                );
             }
 
             if ($immune_player_ids->contains($player->id) && $downvotes_received > 0) {
-                $player->addToScoreHistory(0, '🛡️ Blocked '.$downvotes_received * 2 .' downvotes');
+                $player->addToScoreHistory(
+                    icon: '🛡️',
+                    points: 0,
+                    description: 'Blocked '.$downvotes_received * 2 .' downvotes',
+                );
             }
 
             if (! $immune_player_ids->contains($player->id) && $downvotes_received > 0) {
-                $player->addToScoreHistory(-$downvotes_received * 2, '👎 Received doubled downvotes');
+                $player->addToScoreHistory(
+                    icon: '👎',
+                    points: -$downvotes_received * 2,
+                    description: 'Received doubled downvotes',
+                );
             }
         });
     }

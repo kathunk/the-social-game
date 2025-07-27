@@ -24,11 +24,21 @@ class PlayerSpiedOpponents extends Event
     public function applyToPlayer(PlayerState $player)
     {
         if ($this->hidden_score_cost > 0) {
-            $player->addToScoreHistory(-$this->hidden_score_cost, $this->ui_message, true);
+            $player->addToScoreHistory(
+                icon: '👁️',
+                points: -$this->hidden_score_cost,
+                description: $this->ui_message,
+                is_hidden: true,
+            );
         }
 
         if ($this->score_cost > 0) {
-            $player->addToScoreHistory(-$this->score_cost, $this->ui_message, false);
+            $player->addToScoreHistory(
+                icon: '👁️',
+                points: -$this->score_cost,
+                description: $this->ui_message,
+                is_hidden: false,
+            );
         }
     }
 

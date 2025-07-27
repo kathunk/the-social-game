@@ -3,7 +3,7 @@
         <div class="flex flex-row justify-between items-center mb-4">
             <flux:heading size="lg" class="mb-4">Manage Game Modes</flux:heading>
             <flux:link :href="route('game-modes.create')">
-                <flux:button variant="filled" icon="plus">New</flux:button>
+                <x-button variant="filled" icon="plus">New</x-button>
             </flux:link>
         </div>
 
@@ -97,7 +97,7 @@
                                     </div>
                                 </flux:table.cell>
                                 <flux:table.cell>
-                                    <flux:button variant="filled" wire:click="unarchiveMode('{{ $m->id }}')">Unarchive</flux:button>
+                                    <x-button variant="filled" wire:click="unarchiveMode('{{ $m->id }}')">Unarchive</x-button>
                                 </flux:table.cell>
                             </flux:table.row>
                         @endforeach

@@ -24,7 +24,6 @@ jobs:
         with:
           php-version: 8.4
           tools: composer:v2
-          coverage: xdebug
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -51,4 +50,4 @@ jobs:
         run: npm run build
 
       - name: Run Tests
-        run: ./vendor/bin/pest
+        run: php ./vendor/bin/pest --parallel

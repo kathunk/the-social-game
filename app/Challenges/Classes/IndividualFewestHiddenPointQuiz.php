@@ -122,13 +122,23 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
             $player_is_invisible = in_array($player->id, $invisible_player_ids);
 
             if ($upvotes_received > 0) {
-                $text = $player_is_invisible ? '👍 Received hidden upvotes' : '👍 Received upvotes';
-                $player->addToScoreHistory($upvotes_received, $text, $player_is_invisible);
+                $text = $player_is_invisible ? 'Received hidden upvotes' : 'Received upvotes';
+                $player->addToScoreHistory(
+                    icon: '👍',
+                    points: $upvotes_received,
+                    description: $text,
+                    is_hidden: $player_is_invisible,
+                );
             }
 
             if ($downvotes_received > 0) {
-                $text = $player_is_invisible ? '👎 Received hidden downvotes' : '👎 Received downvotes';
-                $player->addToScoreHistory(-$downvotes_received, $text, $player_is_invisible);
+                $text = $player_is_invisible ? 'Received hidden downvotes' : 'Received downvotes';
+                $player->addToScoreHistory(
+                    icon: '👎',
+                    points: -$downvotes_received,
+                    description: $text,
+                    is_hidden: $player_is_invisible,
+                );
             }
         });
 
@@ -151,9 +161,19 @@ class IndividualFewestHiddenPointQuiz extends BaseChallengeClass implements Supp
             }
 
             if ($fewest_hidden_points_ids->contains($guess_id)) {
-                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' will have the fewest hidden points', true);
+                $player->addToScoreHistory(
+                    icon: '🤔',
+                    points: 1,
+                    description: 'Correctly guessed that '.Player::find($guess_id)->name.' will have the fewest hidden points',
+                    is_hidden: true,
+                );
             } else {
-                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' will have the fewest hidden points', true);
+                $player->addToScoreHistory(
+                    icon: '🤔',
+                    points: 0,
+                    description: 'Incorrectly guessed that '.Player::find($guess_id)->name.' will have the fewest hidden points',
+                    is_hidden: true,
+                );
             }
         });
     }

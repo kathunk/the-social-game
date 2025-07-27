@@ -38,7 +38,7 @@
             </div>
         </div>
         <div class="flex justify-end">
-            <flux:button variant="primary" wire:click="createGame" class="mt-4">Create Game</flux:button>
+            <x-button variant="primary" wire:click="createGame" class="mt-4">Create Game</x-button>
         </div>
     </x-card>
 </div>

@@ -52,6 +52,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
             :placeholder="__('Password')"
         />
 
-        <flux:button variant="primary" type="submit" class="w-full">{{ __('Confirm') }}</flux:button>
+        <x-button variant="primary" type="submit" class="w-full">{{ __('Confirm') }}</x-button>
     </form>
 </div>

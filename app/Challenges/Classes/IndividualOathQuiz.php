@@ -150,19 +150,49 @@ class IndividualOathQuiz extends BaseChallengeClass implements SupportsPeckingOr
 
             if ($guessed_oath_type === 'blood_oath') {
                 if ($guessed_player_is_in_blood_oath) {
-                    $player->addToScoreHistory(1, '🤔 Correctly guessed that '.$guessed_player->name.' is in a blood oath', true);
-                    $guessed_player->addToScoreHistory(-1, '🎯 '.$player->name.' guessed that you are in a blood oath', true);
+                    $player->addToScoreHistory(
+                        icon: '🤔',
+                        points: 1,
+                        description: 'Correctly guessed that '.$guessed_player->name.' is in a blood oath',
+                        is_hidden: true,
+                    );
+                    $guessed_player->addToScoreHistory(
+                        icon: '🎯',
+                        points: -1,
+                        description: $player->name.' guessed that you are in a blood oath',
+                        is_hidden: true,
+                    );
                 } else {
-                    $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.$guessed_player->name.' is in a blood oath', true);
+                    $player->addToScoreHistory(
+                        icon: '🤔',
+                        points: 0,
+                        description: 'Incorrectly guessed that '.$guessed_player->name.' is in a blood oath',
+                        is_hidden: true,
+                    );
                 }
             }
 
             if ($guessed_oath_type === 'oath_of_solitude') {
                 if ($guessed_player_is_in_solitude) {
-                    $player->addToScoreHistory(1, '🤔 Correctly guessed that '.$guessed_player->name.' is in an oath of solitude', true);
-                    $guessed_player->addToScoreHistory(-1, '🎯 '.$player->name.' guessed that you are in an oath of solitude', true);
+                    $player->addToScoreHistory(
+                        icon: '🤔',
+                        points: 1,
+                        description: 'Correctly guessed that '.$guessed_player->name.' is in an oath of solitude',
+                        is_hidden: true,
+                    );
+                    $guessed_player->addToScoreHistory(
+                        icon: '🎯',
+                        points: -1,
+                        description: $player->name.' guessed that you are in an oath of solitude',
+                        is_hidden: true,
+                    );
                 } else {
-                    $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.$guessed_player->name.' is in an oath of solitude', true);
+                    $player->addToScoreHistory(
+                        icon: '🤔',
+                        points: 0,
+                        description: 'Incorrectly guessed that '.$guessed_player->name.' is in an oath of solitude',
+                        is_hidden: true,
+                    );
                 }
             }
         });

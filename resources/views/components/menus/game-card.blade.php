@@ -1,7 +1,7 @@
 @props(['games', 'status'])
 
 <x-card>
-    <x-forms.heading size="xl" class="mb-4">
+    <x-forms.heading class="!text-lg mb-4">
         {{ ucfirst($status) }} games
     </x-forms.heading>
 
@@ -9,36 +9,38 @@
         @foreach ($games as $game)
             <div class="flex flex-col">
                 <div class="flex flex-col">
-                    <div class="flex justify-between" x-data="{ show_confirmation: false }">
-                        <div class="flex flex-wrap items-center gap-1 text-blue-500">
+                    <div class="flex items-center justify-between" x-data="{ show_confirmation: false }">
+                        <div class="text-blue-500 text-xs md:text-sm">
                             <flux:link variant="ghost" wire:click="goToGame('{{ $game->id }}')" class="cursor-pointer">
-                                {{ $game->name }}
+                                <div class="flex flex-wrap items-center gap-1">
+                                    <div>{{ $game->name }}</div>
+                                    <flux:icon class="size-3 stroke-2" name="chevron-right" />
+                                </div>
                             </flux:link>
-                            <flux:icon size="sm" name="chevron-right" />
                         </div>
                         <div class="flex items-center">
-                            <div class="flex items-center space-x-2">
-                                <flux:text>{{ $game->players->count() }}</flux:text>
-                                <flux:icon variant="solid" name="user" class="size-4" />
-                                <flux:separator vertical />
-                            </div>
-                            @if ($game->status !== 'upcoming')
-                                <div class="pl-2">
-                                    <flux:text variant="subtle" class="text-sm">{{ $game->starts_at?->diffForHumans() }}</flux:text>
+                            <div class="flex flex-col">
+                                <div class="flex items-center space-x-1 *:!text-faded-gray *:!text-xxs md:*:!text-xs">
+                                    <flux:icon variant="solid" name="user" class="size-2.5" />
+                                    <flux:text>{{ $game->players->count() }}</flux:text>
+                                    <flux:separator vertical />
+                                    @if ($game->status !== 'upcoming')
+                                        <flux:text>{{ $game->starts_at?->diffForHumans() }}</flux:text>
+                                    @endif
                                 </div>
-                            @endif
+                            </div>
 
                             @if ($game->status === 'upcoming')
                                 @if ($this->user->isGameAdmin($game))
                                     <div class="pl-1">
-                                        <flux:button
+                                        <x-button
                                             icon="trash"
                                             variant="ghost"
                                             size="xs"
                                             @click="show_confirmation = true"
                                             x-show="!show_confirmation"
                                         />
-                                        <flux:button
+                                        <x-button
                                         icon="trash"
                                         variant="danger"
                                         size="xs"
@@ -46,18 +48,18 @@
                                         x-show="show_confirmation"
                                         >
                                             Cancel game
-                                        </flux:button>
+                                        </x-button>
                                     </div>
                                 @else ($this->user->isGameAdmin($game))
                                     <div class="pl-1">
-                                        <flux:button
+                                        <x-button
                                             icon="trash"
                                             variant="ghost"
                                             size="xs"
                                             @click="show_confirmation = true"
                                             x-show="!show_confirmation"
                                         />
-                                        <flux:button
+                                        <x-button
                                             icon="trash"
                                             variant="danger"
                                             size="xs"
@@ -65,7 +67,7 @@
                                             x-show="show_confirmation"
                                         >
                                             Abandon game
-                                        </flux:button>
+                                        </x-button>
                                     </div>
                                 @endif
                             @endif

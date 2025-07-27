@@ -47,11 +47,20 @@ class PlayerGaveReferralBonus extends Event
         $beneficiary = PlayerState::load($this->beneficiary_id);
 
         if ($this->hidden_points > 0) {
-            $beneficiary->addToScoreHistory($this->hidden_points, '🎁 Referral bonus from '.$this->state(PlayerState::class)->name, true);
+            $beneficiary->addToScoreHistory(
+                icon: '🎁',
+                points: $this->hidden_points,
+                description: 'Referral bonus from '.$this->state(PlayerState::class)->name,
+                is_hidden: true,
+            );
         }
 
         if ($this->points > 0) {
-            $beneficiary->addToScoreHistory($this->points, '🎁 Referral bonus from '.$this->state(PlayerState::class)->name);
+            $beneficiary->addToScoreHistory(
+                icon: '🎁',
+                points: $this->points,
+                description: 'Referral bonus from '.$this->state(PlayerState::class)->name,
+            );
         }
     }
 

@@ -14,9 +14,12 @@
         "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-fredoka-one: "Fredoka One", cursive;
 
+    --color-dark-blue: #016fbc;
+    --color-light-blue: #2C7FFF;
+
     --color-accent: #016fbc;
     --color-accent-content: #016fbc;
-    --color-accent-foreground: var(--color-blue-50);
+    --color-accent-foreground: #FFFFFF;
 
     --color-pale: #ecebf4;
     --color-bold-orange: #dc7d47;
@@ -24,6 +27,7 @@
     --color-medium-orange: #ffe4dc;
     --color-test-red: #ff0000;
     --color-faded-gray: #8c8c8c;
+    --color-dark-cyan: #037D40;
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -67,7 +71,10 @@
     @apply !mb-0 !leading-tight;
 }
 
-:focus {
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
     @apply rounded-md outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-white dark:ring-offset-zinc-900;
 }
 

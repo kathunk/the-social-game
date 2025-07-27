@@ -54,6 +54,8 @@ class PreGameLobby extends Component
 
     public string $social_link_url = '';
 
+    public bool $is_starting_game = false;
+
     #[Computed]
     public function user()
     {
@@ -158,7 +160,7 @@ class PreGameLobby extends Component
     public function description()
     {
         return (new HtmlTransformer(
-            $this->game->gameMode->pre_game_lobby_message
+            $this->game->gameMode->pre_game_lobby_message,
         ))->formatted();
     }
 
@@ -199,8 +201,9 @@ class PreGameLobby extends Component
     #[Computed]
     public function modifierConfigurations()
     {
-        return $this->game->modifierConfigurations
-            ->map(fn ($mc) => ModifierRegistry::retrieveFromKey($mc->modifier_key));
+        return $this->game->modifierConfigurations->map(
+            fn ($mc) => ModifierRegistry::retrieveFromKey($mc->modifier_key),
+        );
     }
 
     public function mount(Game $game)
@@ -222,7 +225,7 @@ class PreGameLobby extends Component
         $this->social_link_url = preg_replace(
             "/^https?:\/\//",
             '',
-            $game->social_links[0] ?? ''
+            $game->social_links[0] ?? '',
         );
 
         if ($this->application) {
@@ -264,8 +267,8 @@ class PreGameLobby extends Component
             admin_id: $this->user->id,
             application_id: $player->user->gameApplications->firstWhere(
                 'game_id',
-                $this->game->id
-            )->id
+                $this->game->id,
+            )->id,
         );
 
         Verbs::commit();
@@ -274,7 +277,7 @@ class PreGameLobby extends Component
         Flux::toast(
             variant: 'success',
             heading: 'User removed',
-            text: $player->user->name.' has been removed from the game.'
+            text: $player->user->name.' has been removed from the game.',
         );
     }
 
@@ -285,7 +288,7 @@ class PreGameLobby extends Component
         UserPromotedToGameAdmin::fire(
             user_id: $player->user_id,
             game_id: $this->game->id,
-            admin_id: $this->user->id
+            admin_id: $this->user->id,
         );
 
         Verbs::commit();
@@ -294,7 +297,7 @@ class PreGameLobby extends Component
         Flux::toast(
             variant: 'success',
             heading: 'User promoted',
-            text: $player->user->name.' has been promoted to admin.'
+            text: $player->user->name.' has been promoted to admin.',
         );
     }
 
@@ -305,7 +308,7 @@ class PreGameLobby extends Component
         UserDemotedFromGameAdmin::fire(
             user_id: $player->user_id,
             game_id: $this->game->id,
-            admin_id: $this->user->id
+            admin_id: $this->user->id,
         );
 
         Verbs::commit();
@@ -314,7 +317,7 @@ class PreGameLobby extends Component
         Flux::toast(
             variant: 'success',
             heading: 'User demoted',
-            text: $player->user->name.' has been demoted from admin.'
+            text: $player->user->name.' has been demoted from admin.',
         );
     }
 
@@ -326,14 +329,14 @@ class PreGameLobby extends Component
 
         $application = $this->newApplications->firstWhere(
             'id',
-            (int) $this->selected_application_id
+            (int) $this->selected_application_id,
         );
 
         UserAdmittedToGame::fire(
             user_id: (int) $application->user_id,
             admin_id: $this->user->id,
             game_id: $this->game->id,
-            application_id: $application->id
+            application_id: $application->id,
         );
 
         $this->selected_application_id = '';
@@ -342,7 +345,7 @@ class PreGameLobby extends Component
         Flux::toast(
             variant: 'success',
             heading: 'User approved',
-            text: 'The user has been approved to join the game.'
+            text: 'The user has been approved to join the game.',
         );
     }
 
@@ -354,14 +357,14 @@ class PreGameLobby extends Component
 
         $application = $this->newApplications->firstWhere(
             'id',
-            (int) $this->selected_application_id
+            (int) $this->selected_application_id,
         );
 
         UserRejectedFromGame::fire(
             user_id: (int) $application->user_id,
             admin_id: $this->user->id,
             game_id: $this->game->id,
-            application_id: $application->id
+            application_id: $application->id,
         );
 
         $this->selected_application_id = '';
@@ -370,7 +373,7 @@ class PreGameLobby extends Component
         Flux::toast(
             variant: 'success',
             heading: 'User rejected',
-            text: 'The user has been rejected from the game.'
+            text: 'The user has been rejected from the game.',
         );
     }
 
@@ -384,7 +387,7 @@ class PreGameLobby extends Component
                 ->contains($this->game_template_id)
         ) {
             $this->game_template_id = (string) $mode->selectTemplateForUser(
-                $this->user
+                $this->user,
             )->id;
         }
 
@@ -421,7 +424,7 @@ class PreGameLobby extends Component
 
             Validator::make(
                 ['url' => $url_input],
-                ['url' => 'url']
+                ['url' => 'url'],
             )->validate();
         }
 
@@ -452,7 +455,7 @@ class PreGameLobby extends Component
             ends_at: $ends_at,
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
             challenge_length_override: $this->challenge_length_override,
-            social_links: ! empty($url_input) ? [$url_input] : []
+            social_links: ! empty($url_input) ? [$url_input] : [],
         );
 
         Verbs::commit();
@@ -462,6 +465,13 @@ class PreGameLobby extends Component
 
     public function startGame()
     {
+        // Prevent double-clicking
+        if ($this->is_starting_game) {
+            return;
+        }
+
+        $this->is_starting_game = true;
+
         $this->game->fresh()->start();
 
         Verbs::commit();
@@ -499,7 +509,7 @@ class PreGameLobby extends Component
             Flux::toast(
                 variant: 'error',
                 heading: 'Error',
-                text: 'Error filling game with bots: '.$e->getMessage()
+                text: 'Error filling game with bots: '.$e->getMessage(),
             );
         }
 

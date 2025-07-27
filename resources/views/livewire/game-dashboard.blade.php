@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-4">
     @if ($this->is_game_admin && $this->game->status !== 'ended')
-        <flux:button icon="cog" :href="route('pre-game-lobby', $this->game)" variant="filled">Manage game</flux:button>
+        <x-button icon="cog" :href="route('pre-game-lobby', $this->game)" variant="filled">Manage game</x-button>
     @endif
 
     @if ($this->postGameMessage)
@@ -12,9 +12,9 @@
     @if ($this->template->type === 'team' && $this->player->status === 'active' && $this->game->status === 'active')
         <x-card>
             @if (! $this->current_team)
-                <flux:heading>Join a team</flux:heading>
+                <flux:heading class="!text-faded-gray !text-xxs font-semibold">Join a team</flux:heading>
                 <span class="join-team-select">
-                    <flux:select label="Select a team" class="[&>[data-flux-label]]:!sr-only mt-4" wire:model="selected_team_id">
+                    <flux:select label="Select a team" class="[&>[data-flux-label]]:!sr-only mt-2" wire:model="selected_team_id">
                     <flux:select.option value="" selected class="placeholder">Select a team</flux:select.option>
                         @foreach ($this->teams as $team)
                             <flux:select.option :value="(string) $team->id">{{ $team->name }}</flux:select.option>
@@ -22,10 +22,10 @@
                     </flux:select>
                 </span>
                 <div class="mt-4 flex justify-end">
-                    <flux:button variant="primary" wire:click="joinTeam">Join</flux:button>
+                    <x-button variant="primary" wire:click="joinTeam">Join</x-button>
                 </div>
             @else
-                <flux:heading>You are on team <flux:link :href="route('teams.show', [$this->game, $this->current_team])" variant="primary">{{ $this->current_team->name }}</flux:link></flux:heading>
+                <flux:heading>You are on team <flux:link :href="route('teams.show', [$this->game, $this->current_team])" variant="ghost">{{ $this->current_team->name }}</flux:link></flux:heading>
             @endif
         </x-card>
     @endif
@@ -56,7 +56,7 @@
                     <flux:heading class="mb-2">Invite your friends</flux:heading>
                     <div class="flex gap-2">
                         <flux:input icon="link" value="{{ $this->game->url }}" readonly copyable />
-                        <flux:button variant="filled" @click="showQr = ! showQr">Show QR <x-icons.qr class="w-4 h-4" /></flux:button>
+                        <x-button variant="filled" @click="showQr = ! showQr">Show QR <x-icons.qr class="w-4 h-4" /></x-button>
                     </div>
 
                     <div x-show="showQr" class="mt-2">
@@ -66,7 +66,7 @@
 
                 @if ($this->socialLink)
                     <div class="mt-4 flex">
-                        <flux:button href="{{ $this->game->social_links[0] }}" target="_blank">Join game chat</flux:button>
+                        <x-button href="{{ $this->game->social_links[0] }}" target="_blank">Join game chat</x-button>
                     </div>
                 @endif
             </x-card>

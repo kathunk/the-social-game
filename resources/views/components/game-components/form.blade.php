@@ -9,7 +9,7 @@
                 $activated_challenges = $challenges->where('status', 'active')->count() + $challenges->where('status', 'ended')->count();
                 $total_challenges = $challenges->count();
             @endphp
-            <flux:text class="flex flex-wrap items-baseline gap-1 text-faded-gray text-tiny font-medium">
+            <flux:text class="flex flex-wrap items-baseline gap-1 text-faded-gray text-tiny md:text-xxs font-medium">
                 <span>CHALLENGE</span>
                 <span>({{ $activated_challenges }} of {{ $total_challenges }})</span>
                 <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
@@ -72,20 +72,20 @@
                 @case('button_group')
                     <div class="flex flex-wrap gap-2 mt-4 justify-end">
                         @foreach ($element['buttons'] as $btn)
-                            <flux:button
+                            <x-button
                                 wire:loading.attr="disabled"
                                 wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"
                                 variant="primary"
                                 wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}', {{ json_encode($form) }})"
                             >
                                 {{ $btn['label'] }}
-                            </flux:button>
+                            </x-button>
                         @endforeach
                     </div>
                     @break
                 @case('select')
                 <flux:field>
-                    <div class="*:!text-faded-gray *:!text-xxs">
+                    <div class="*:!text-faded-gray *:!text-xxs md:*:!text-xs">
                         <flux:label>{{ $element['label'] }}</flux:label>
                     </div>
                     <flux:select

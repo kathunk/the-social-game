@@ -112,7 +112,9 @@ class Game extends Model
             team_names: $template->team_names,
             challenges: $template->challenges,
             starts_at: $starts_at,
-            ends_at: $starts_at ? $starts_at->copy()->addMinutes($template->totalDuration) : null,
+            ends_at: $starts_at
+                ? $starts_at->copy()->addMinutes($template->totalDuration)
+                : null,
             code: self::uniqueGameCode(),
             challenge_length_override: $challenge_length_override,
             social_links: $social_links,
@@ -172,10 +174,11 @@ class Game extends Model
 
         Verbs::commit();
 
-        $this->modifierConfigurations->each(fn ($mc) => ModifierConfigurationDeleted::fire(
-            modifier_configuration_id: $mc->id,
-            game_id: $this->id,
-        )
+        $this->modifierConfigurations->each(
+            fn ($mc) => ModifierConfigurationDeleted::fire(
+                modifier_configuration_id: $mc->id,
+                game_id: $this->id,
+            ),
         );
 
         $this->fresh()->createModifierConfigurations();
@@ -185,7 +188,9 @@ class Game extends Model
     {
         collect($this->gameTemplate->modifiers)
             ->map(fn ($modifier) => ModifierRegistry::retrieveFromKey($modifier))
-            ->filter(fn ($modifier) => $modifier::REQUIRES_PRE_GAME_CONFIGURATION)
+            ->filter(
+                fn ($modifier) => $modifier::REQUIRES_PRE_GAME_CONFIGURATION,
+            )
             ->each(function ($modifier) {
                 ModifierConfigurationCreated::fire(
                     game_id: $this->id,
@@ -197,8 +202,13 @@ class Game extends Model
 
     public function start()
     {
+        if ($this->status !== 'upcoming') {
+            return;
+        }
+
         if (! $this->starts_at) {
-            $duration = GameTemplate::find($this->game_template_id)->total_duration;
+            $duration = GameTemplate::find($this->game_template_id)
+                ->total_duration;
             $ends_at = Carbon::parse(now())->addMinutes($duration);
 
             GameUpdated::fire(
@@ -216,11 +226,10 @@ class Game extends Model
             Verbs::commit();
         }
 
-        foreach ($this->gameTemplate->team_names as $team_name) {
-            TeamCreated::fire(
-                game_id: $this->id,
-                name: $team_name,
-            );
+        if ($this->fresh()->teams->count() === 0) {
+            foreach ($this->gameTemplate->team_names as $team_name) {
+                TeamCreated::fire(game_id: $this->id, name: $team_name);
+            }
         }
 
         $challenges = $this->gameTemplate->challenges;
@@ -237,14 +246,19 @@ class Game extends Model
         $mapped_challenges = [];
 
         foreach ($challenges as $challenge) {
-            $available = array_values(array_diff($challenge['challenge_keys'], $used_challenge_keys));
+            $available = array_values(
+                array_diff($challenge['challenge_keys'], $used_challenge_keys),
+            );
 
             // If there's at least one key that hasn't been used, pick one at random
             if (! empty($available)) {
                 $chosen_key = $available[array_rand($available)];
             } else {
                 // Fall back to a random key from the original list
-                $chosen_key = $challenge['challenge_keys'][array_rand($challenge['challenge_keys'])];
+                $chosen_key =
+                    $challenge['challenge_keys'][
+                        array_rand($challenge['challenge_keys'])
+                    ];
             }
 
             $used_challenge_keys[] = $chosen_key;
@@ -257,7 +271,10 @@ class Game extends Model
 
         $next_challenge_starts_at = $this->fresh()->starts_at->copy();
 
-        $challenges_with_times = collect($mapped_challenges)->reduce(function ($carry, $challenge) use ($next_challenge_starts_at) {
+        $challenges_with_times = collect($mapped_challenges)->reduce(function (
+            $carry,
+            $challenge,
+        ) use ($next_challenge_starts_at) {
             if (empty($carry)) {
                 $starts_at = $next_challenge_starts_at;
             } else {
@@ -276,20 +293,21 @@ class Game extends Model
             return $carry;
         }, []);
 
-        foreach ($challenges_with_times as $challenge) {
-            ChallengeCreated::fire(
-                game_id: $this->id,
-                starts_at: $challenge['starts_at'],
-                ends_at: $challenge['ends_at'],
-                class_key: $challenge['class_key'],
-            );
+        if ($this->fresh()->challenges->count() === 0) {
+            foreach ($challenges_with_times as $challenge) {
+                ChallengeCreated::fire(
+                    game_id: $this->id,
+                    starts_at: $challenge['starts_at'],
+                    ends_at: $challenge['ends_at'],
+                    class_key: $challenge['class_key'],
+                );
+            }
         }
 
-        foreach ($this->gameTemplate->modifiers as $modifier) {
-            ModifierCreated::fire(
-                game_id: $this->id,
-                class_key: $modifier,
-            );
+        if ($this->fresh()->modifiers->count() === 0) {
+            foreach ($this->gameTemplate->modifiers as $modifier) {
+                ModifierCreated::fire(game_id: $this->id, class_key: $modifier);
+            }
         }
 
         Verbs::commit();
@@ -298,7 +316,7 @@ class Game extends Model
 
         Verbs::commit();
 
-        $challenge = $this->challenges->sortBy('starts_at')->first();
+        $challenge = $this->fresh()->challenges->sortBy('starts_at')->first();
 
         $challenge->start();
 
@@ -343,10 +361,7 @@ class Game extends Model
 
     public function cancel(User $admin)
     {
-        GameCanceled::fire(
-            game_id: $this->id,
-            admin_id: $admin->id,
-        );
+        GameCanceled::fire(game_id: $this->id, admin_id: $admin->id);
     }
 
     public function getTotalDurationAttribute(): int

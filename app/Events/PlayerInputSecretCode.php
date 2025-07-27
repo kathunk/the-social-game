@@ -61,9 +61,10 @@ class PlayerInputSecretCode extends Event
             $point_recipient = $this->game_type === 'team' ? $this->state(TeamState::class) : $this->state(PlayerState::class);
 
             $point_recipient->addToScoreHistory(
-                $this->point_reward,
-                $this->state(PlayerState::class)->name.' found a secret code',
-                $this->points_are_hidden,
+                icon: '🤫',
+                points: $this->point_reward,
+                description: $this->state(PlayerState::class)->name.' found a secret code',
+                is_hidden: $this->points_are_hidden,
             );
         } else {
             $modifier->modifier_data['banned_player_ids'] = array_merge($modifier->modifier_data['banned_player_ids'], [$this->player_id]);

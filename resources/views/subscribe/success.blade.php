@@ -5,9 +5,9 @@
             <flux:subheading>Thank you for subscribing to <span class="text-md font-semibold">The Social Game</span>.</flux:subheading>
 
             <div class="mt-4 flex justify-end">
-                <flux:button variant="primary" :href="route('dashboard')">
+                <x-button variant="primary" :href="route('dashboard')">
                     Go to Dashboard
-                </flux:button>
+                </x-button>
             </div>
         </x-card>
     </div>

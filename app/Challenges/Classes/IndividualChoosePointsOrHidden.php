@@ -122,9 +122,18 @@ class IndividualChoosePointsOrHidden extends BaseChallengeClass implements Suppo
             }
 
             if ($choices[$player->id] === 'points') {
-                $player->addToScoreHistory($points_per_player, '📈 Chose points');
+                $player->addToScoreHistory(
+                    icon: '📈',
+                    points: $points_per_player,
+                    description: 'Chose points',
+                );
             } else {
-                $player->addToScoreHistory($hidden_points_per_player, '📈 Chose hidden points', true);
+                $player->addToScoreHistory(
+                    icon: '📈',
+                    points: $hidden_points_per_player,
+                    description: 'Chose hidden points',
+                    is_hidden: true,
+                );
             }
         });
     }

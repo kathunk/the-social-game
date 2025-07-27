@@ -115,9 +115,19 @@ class IndividualMostTotalVotesQuiz extends BaseChallengeClass implements Support
             }
 
             if (in_array($guess_id, $players_with_most_votes)) {
-                $player->addToScoreHistory(1, '🤔 Correctly guessed that '.Player::find($guess_id)->name.' will receive the most votes', true);
+                $player->addToScoreHistory(
+                    icon: '🤔',
+                    points: 1,
+                    description: 'Correctly guessed that '.Player::find($guess_id)->name.' will receive the most votes',
+                    is_hidden: true,
+                );
             } else {
-                $player->addToScoreHistory(0, '🤔 Incorrectly guessed that '.Player::find($guess_id)->name.' will receive the most votes', true);
+                $player->addToScoreHistory(
+                    icon: '🤔',
+                    points: 0,
+                    description: 'Incorrectly guessed that '.Player::find($guess_id)->name.' will receive the most votes',
+                    is_hidden: true,
+                );
             }
         });
     }

@@ -52,8 +52,8 @@ new class extends Component {
         }
 
         if ($this->subscribed_to_newsletter !== $user->subscribed_to_newsletter) {
-            $this->subscribed_to_newsletter 
-                ? UserSubscribedToNewsletter::fire(user_id: $user->id) 
+            $this->subscribed_to_newsletter
+                ? UserSubscribedToNewsletter::fire(user_id: $user->id)
                 : UserUnsubscribedFromNewsletter::fire(user_id: $user->id);
         }
 
@@ -125,7 +125,7 @@ new class extends Component {
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>
+                    <x-button variant="primary" type="submit" class="w-full">{{ __('Save') }}</x-button>
                 </div>
 
                 <x-action-message class="me-3" on="profile-updated">

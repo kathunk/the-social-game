@@ -36,12 +36,13 @@ class PlayerState extends State
         return TeamState::load($this->team_id);
     }
 
-    public function addToScoreHistory(int $points, string $description, bool $is_hidden = false)
+    public function addToScoreHistory(string $icon, int $points, string $description, bool $is_hidden = false)
     {
         $this->score_history[] = [
+            'icon' => $icon,
+            'points' => $points,
             'description' => $description,
             'timestamp' => now(),
-            'points' => $points,
             'is_hidden' => $is_hidden,
         ];
     }
