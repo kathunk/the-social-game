@@ -104,7 +104,7 @@ class TeamHotPotato extends BaseChallengeClass
                 ->endGroup()
             );
 
-        $form->when($challenge_failed, fn ($form) => $form->subtitle('Sorry folks, try again next time.'));
+        $form->when($challenge_failed, fn ($form) => $form->subtitle('😩 Sorry folks, try again next time.'));
 
         $form->when($challenge_succeeded, fn ($form) => $form->subtitle('🥳 You did it!'));
 
