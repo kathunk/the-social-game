@@ -76,13 +76,13 @@
                 @if (count($this->scoreHistoryEntries) > 0)
                     <flux:table class="*:!border-0 mt-2">
                         <flux:table.columns class="**:!pb-0">
+                            <flux:table.column></flux:table.column>
                             <flux:table.column>
-                                <div class="text-faded-gray text-tiny md:text-xxs font-bold">
+                                <div class="text-faded-gray text-tiny md:text-xxs font-bold -ml-6.5">
                                     EVENT TIMELINE
                                 </div>
                             </flux:table.column>
-                            <flux:table.column>
-                            </flux:table.column>
+                            <flux:table.column></flux:table.column>
                         </flux:table.columns>
                         <flux:table.rows>
                             @foreach ($this->scoreHistoryEntries as $entry)
@@ -99,7 +99,7 @@
                                             @else
                                                 <flux:heading class="text-sm whitespace-normal break-words text-red-500">{{ $entry['description'] }}</flux:heading>
                                             @endif
-                                            <flux:text class="ml-4 text-xs">{{ Carbon\Carbon::parse($entry['timestamp'])->diffForHumans() }}</flux:text>
+                                            <flux:text class="text-xs mt-2">{{ Carbon\Carbon::parse($entry['timestamp'])->diffForHumans() }}</flux:text>
                                         </div>
                                     </flux:table.cell>
                                     <flux:table.cell class="flex items-start">
