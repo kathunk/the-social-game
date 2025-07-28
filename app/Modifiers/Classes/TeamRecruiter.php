@@ -12,7 +12,7 @@ class TeamRecruiter extends BaseModifierClass
 {
     const NAME = 'Pyramid Scheme';
 
-    const DESCRIPTION = 'When a new player joins your team, the team will receive 1 point.';
+    const DESCRIPTION = 'When a new player joins the game, the team will receive 1 point (does not apply to existing players moving between teams).';
 
     const TYPE = 'team';
 
