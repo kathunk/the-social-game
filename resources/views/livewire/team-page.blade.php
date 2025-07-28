@@ -73,55 +73,7 @@
                     @endif
                 </div>
 
-                @if (count($this->scoreHistoryEntries) > 0)
-                    <flux:table class="*:!border-0 mt-2">
-                        <flux:table.columns class="**:!pb-0">
-                            <flux:table.column>
-                                <div class="text-faded-gray text-tiny md:text-xxs font-bold">
-                                    EVENT TIMELINE
-                                </div>
-                            </flux:table.column>
-                            <flux:table.column>
-                            </flux:table.column>
-                        </flux:table.columns>
-                        <flux:table.rows>
-                            @foreach ($this->scoreHistoryEntries as $entry)
-                                <flux:table.row>
-                                    <flux:table.cell class="flex items-start !px-0">
-                                        {{ $entry['icon'] ?? '🐛' }}
-                                    </flux:table.cell>
-                                    <flux:table.cell>
-                                        <div class="flex flex-col">
-                                            @if ($entry['is_hidden'])
-                                                <flux:heading class="text-sm whitespace-normal break-words text-purple-500 dark:text-purple-300">{{ $entry['description'] }}</flux:heading>
-                                            @elseif ($entry['points'] > -1)
-                                                <flux:heading class="text-sm whitespace-normal break-words text-dark-cyan">{{ $entry['description'] }}</flux:heading>
-                                            @else
-                                                <flux:heading class="text-sm whitespace-normal break-words text-red-500">{{ $entry['description'] }}</flux:heading>
-                                            @endif
-                                            <flux:text class="ml-4 text-xs">{{ Carbon\Carbon::parse($entry['timestamp'])->diffForHumans() }}</flux:text>
-                                        </div>
-                                    </flux:table.cell>
-                                    <flux:table.cell class="flex items-start">
-                                        <div>
-                                            @if ($entry['is_hidden'])
-                                                <flux:heading size="sm" class="text-purple-500 dark:text-purple-300">
-                                                    {{ $entry['points'] > 0 ? '+' : '' }}{{ $entry['points'] }}
-                                                </flux:heading>
-                                            @elseif ($entry['points'] > -1)
-                                                <flux:heading size="sm" class="text-dark-cyan">+{{ $entry['points'] }}</flux:heading>
-                                            @else
-                                                <flux:heading size="sm" class="text-red-500">{{ $entry['points'] }}</flux:heading>
-                                            @endif
-                                        </div>
-                                    </flux:table.cell>
-                                </flux:table.row>
-                            @endforeach
-                        </flux:table.rows>
-                    </flux:table>
-                @else
-                    <flux:subheading>No score history yet</flux:subheading>
-                @endif
+                <x-event-timeline :scoreHistoryEntries="$this->scoreHistoryEntries" />
             </x-card>
         </flux:tab.panel>
     </flux:tab.group>
