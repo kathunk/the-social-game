@@ -44,5 +44,5 @@
         </flux:table.rows>
     </flux:table>
 @else
-    <flux:subheading>No score history yet</flux:subheading>
+    <flux:subheading class="mt-2">No score history yet</flux:subheading>
 @endif
