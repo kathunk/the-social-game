@@ -80,7 +80,7 @@ class TeamHotPotato extends BaseChallengeClass
 
         $challenge_data = $this->challenge->challenge_data[$player->team_id];
 
-        $has_potato = $challenge_data['potato_holder_id'] === $player->id;
+        $has_potato = $challenge_data['potato_holder_id'] === $player->id && $challenge_data['status'] === 'active';
         $challenge_failed = $challenge_data['status'] === 'failed';
         $challenge_succeeded = $challenge_data['status'] === 'succeeded';
         $challenge_forfeited = $challenge_data['status'] === 'forfeited';
