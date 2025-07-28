@@ -71,9 +71,16 @@
                     @foreach ($players as $player)
                         <flux:table.row>
                             <flux:table.cell>
-                                <flux:link :variant="((string) $player->id === (string) $this->player->id) ? 'filled' : 'ghost'" size="sm" class="p-0 whitespace-normal break-words" :href="route('players.show', [$player->game_id, $player->id])">
-                                    {{ $player->name }}
-                                </flux:link>
+                                <div class="w-fit p-0 whitespace-normal break-words">
+                                    <flux:link variant="ghost" :href="route('players.show', [$player->game_id, $player->id])">
+                                        <div class="flex items-center gap-2">
+                                            {{ $player->name }}
+                                            @if ((string) $player->id === (string) $this->player->id)
+                                                <flux:icon variant="outline" name="user" class="size-2.5 text-light-blue stroke-3" />
+                                            @endif
+                                        </div>
+                                    </flux:link>
+                                </div>
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if ($this->game->status === 'ended')
