@@ -32,22 +32,7 @@ class MorningRoutineChallenge extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        if ($this->challenge->previous()) {
-            $previous_data = $this->challenge->previous()->challenge_data;
-
-            return [
-                'rooms' => $previous_data['rooms'],
-                'has_moved' => [],
-            ];
-        }
-
         return [
-            'rooms' => [
-                'Bathroom' => null,
-                'Kitchen' => null,
-                'Laundry' => null,
-                'Study' => null,
-            ],
             'has_moved' => [],
         ];
     }
@@ -64,7 +49,7 @@ class MorningRoutineChallenge extends BaseChallengeClass
 
     public function canMove(Player $player): bool
     {
-        $empty_rooms = collect($this->challenge->challenge_data['rooms'])->filter(fn ($room) => $room === null)->keys();
+        $empty_rooms = collect($this->progress($player)['rooms'])->filter(fn ($room) => $room === null)->keys();
 
         return ! in_array($player->id, $this->challenge->challenge_data['has_moved']) && $empty_rooms->isNotEmpty();
     }
@@ -77,13 +62,24 @@ class MorningRoutineChallenge extends BaseChallengeClass
             return true;
         }
 
-        return $this->progress($player)[$current_room] === null;
+        return $this->progress($player)['players'][$player->id]['items'][$current_room] === null;
+    }
+
+    // am I just essentially putting stuff that belongs in gameState onto a catchall modifier?
+    public function blackboard(): array
+    {
+        return $this->challenge->game->modifiers->firstWhere('class_key', MorningRoutineProgress::key())
+            ->modifier_data;
+    }
+
+    public function rooms(): array 
+    {
+        return $this->challenge->game
     }
 
     public function progress(Player $player): array
     {
-        return $this->challenge->game->modifiers->firstWhere('class_key', MorningRoutineProgress::key())
-            ->modifier_data[$player->id];
+
     }
 
     public function move(Player $player, array $params)

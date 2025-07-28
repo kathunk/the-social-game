@@ -32,14 +32,26 @@ class MorningRoutineProgress extends BaseModifierClass
 
     public function dataArrayForState(): array
     {
-        return $this->modifier_state->game()->player_ids->mapWithKeys(fn ($player_id) => [
-            $player_id => [
+        $data = [
+            'rooms' => [
                 'Kitchen' => null,
                 'Bathroom' => null,
                 'Laundry' => null,
                 'Study' => null,
-            ]
-        ])->toArray();
+            ],
+            'players' => $this->modifier_state->game()->player_ids->mapWithKeys(fn ($player_id) => [
+                $player_id => [
+                    'items' => [
+                        'Kitchen' => null,
+                        'Bathroom' => null,
+                        'Laundry' => null,
+                        'Study' => null,
+                    ],
+                ],
+            ])->toArray(),
+        ];
+
+        return $data;
     }
 
     public function frontendComponent(Player $player): array
