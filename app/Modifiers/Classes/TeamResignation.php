@@ -44,6 +44,7 @@ class TeamResignation extends BaseModifierClass
             )
             ->buttonGroup()
             ->button(
+                danger: true,
                 label: 'Resign',
                 action: 'resign',
                 properties_to_validate: ['points'],

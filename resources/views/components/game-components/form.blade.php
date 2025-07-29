@@ -70,16 +70,31 @@
                     @endif
                     @break
                 @case('button_group')
-                    <div class="flex flex-wrap gap-2 mt-4 justify-end">
+                    <div class="flex flex-wrap gap-2 mt-4 justify-end" x-data="{confirmation: false}">
                         @foreach ($element['buttons'] as $btn)
-                            <x-button
-                                wire:loading.attr="disabled"
-                                wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"
-                                variant="primary"
-                                wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}', {{ json_encode($form) }})"
-                            >
-                                {{ $btn['label'] }}
-                            </x-button>
+                            @if($btn['danger'])
+                                <x-button @click="confirmation = true" x-show="!confirmation" variant="danger">
+                                    {{ $btn['label'] }}
+                                </x-button>
+                                <x-button
+                                    x-show="confirmation"
+                                    wire:loading.attr="disabled"
+                                    wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"
+                                    variant="danger"
+                                    wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}', {{ json_encode($form) }})"
+                                >
+                                    Are you sure?
+                                </x-button>
+                            @else
+                                <x-button
+                                    wire:loading.attr="disabled"
+                                    wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"
+                                    variant="primary"
+                                    wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}', {{ json_encode($form) }})"
+                                >
+                                    {{ $btn['label'] }}
+                                </x-button>
+                            @endif
                         @endforeach
                     </div>
                     @break
