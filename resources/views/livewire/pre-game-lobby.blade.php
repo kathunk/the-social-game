@@ -25,7 +25,7 @@
     @if ($this->user && ! $this->player && $this->is_joinable)
         <x-card class="flex justify-center">
             @if (! $this->application)
-                <x-button variant="primary" wire:click="joinGame" class="w-full">
+                <x-button variant="primary" wire:click="joinGame" wire:target="joinGame" class="w-full">
                     @if($this->requires_admin_approval_to_join)
                         Request to join
                     @else
@@ -96,6 +96,7 @@
                         wire:loading.attr="disabled"
                         variant="primary"
                         wire:click="startGame"
+                        wire:target="startGame"
                         icon="rocket-launch"
                         x-show="startGame"
                         :disabled="$this->hasTooManyPlayers || $this->hasTooFewPlayers || $this->is_starting_game"
@@ -122,7 +123,7 @@
                 @if ($this->game->status === 'upcoming')
                     <div x-data="{cancelGame: false}">
                         <div x-show="cancelGame">
-                            <x-button variant="danger" wire:click="cancelGame">Seriously cancel?</x-button>
+                            <x-button variant="danger" wire:click="cancelGame" wire:target="cancelGame">Seriously cancel?</x-button>
                         </div>
                         <div x-show="!cancelGame">
                             <x-button variant="subtle" icon="trash" @click="cancelGame = true">Cancel Game</x-button>
@@ -188,7 +189,7 @@
                 <div class="flex justify-end mt-4 gap-2" x-data="{cancelGame: false}">
                     <div class="flex justify-end mt-4 gap-2">
                         <x-button variant="ghost" @click="editGameMode = false">Close without saving</x-button>
-                        <x-button variant="primary" wire:click="updateGameSettings">Update</x-button>
+                        <x-button variant="primary" wire:click="updateGameSettings" wire:target="updateGameSettings">Update</x-button>
                     </div>
                 </div>
             </div>
@@ -229,14 +230,14 @@
                 </div>
                 <div class="flex justify-end mt-4 gap-2">
                     <x-button variant="ghost" @click="editTime = false">Close without saving</x-button>
-                    <x-button variant="primary" wire:click="updateGameSettings">Update</x-button>
+                    <x-button variant="primary" wire:click="updateGameSettings" wire:target="updateGameSettings">Update</x-button>
                 </div>
             </div>
 
             <div x-show="addBots">
                 <div class="mt-4 flex gap-2 items-end">
                     <flux:input wire:model="bots_to_add" label="Add bots" min="0" />
-                    <x-button variant="primary" wire:click="fillGameWithBots()">Fill game with bots</x-button>
+                    <x-button variant="primary" wire:click="fillGameWithBots()" wire:target="fillGameWithBots">Fill game with bots</x-button>
                     <x-button variant="subtle" @click="addBots = false">Cancel</x-button>
                 </div>
             </div>
@@ -258,8 +259,8 @@
                 @endforeach
             </flux:select>
             <div class="flex justify-end mt-4 gap-2">
-                <x-button variant="primary" wire:click="approveUser">Approve</x-button>
-                <x-button variant="danger" wire:click="rejectUser">Reject</x-button>
+                <x-button variant="primary" wire:click="approveUser" wire:target="approveUser">Approve</x-button>
+                <x-button variant="danger" wire:click="rejectUser" wire:target="rejectUser">Reject</x-button>
             </div>
         </x-card>
     @endif
@@ -300,6 +301,7 @@
                                                 variant="danger"
                                                 size="sm"
                                                 wire:click="removePlayer('{{ $player->id }}')"
+                                                wire:target="removePlayer"
                                             >
                                                 Seriously?
                                             </x-button>
@@ -340,7 +342,7 @@
                                     $this->game->status !== 'ended'
                                 )
                                     <div class="flex gap-1">
-                                        <x-button variant="subtle" size="sm" wire:click="demoteFromAdmin('{{ $player->id }}')">
+                                        <x-button variant="subtle" size="sm" wire:click="demoteFromAdmin('{{ $player->id }}')" wire:target="demoteFromAdmin">
                                             <div class="flex items-center gap-2">
                                                 <x-icons.crown-slash class="w-4 h-4" />
                                                 Demote
