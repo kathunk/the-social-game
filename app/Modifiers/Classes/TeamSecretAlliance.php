@@ -68,6 +68,13 @@ class TeamSecretAlliance extends BaseModifierClass
                 ->build();
         }
 
+        if ($ally->status === 'resigned') {
+            return $this->form()
+                ->title(static::NAME)
+                ->subtitle('Sadly, your ally resigned from the game. It was not meant to be.')
+                ->build();
+        }
+
         $description = strtr(self::DESCRIPTION, [
             '{player_name}' => $ally?->name,
             '{ally_team_name}' => $ally?->team->name,
