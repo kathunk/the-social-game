@@ -49,7 +49,7 @@ class MorningRoutineChallenge extends BaseChallengeClass
 
     public function canMove(Player $player): bool
     {
-        $empty_rooms = collect($this->progress($player)['rooms'])->filter(fn ($room) => $room === null)->keys();
+        $empty_rooms = collect($this->rooms())->filter(fn ($room) => $room === null)->keys();
 
         return ! in_array($player->id, $this->challenge->challenge_data['has_moved']) && $empty_rooms->isNotEmpty();
     }
@@ -74,10 +74,11 @@ class MorningRoutineChallenge extends BaseChallengeClass
 
     public function rooms(): array 
     {
-        return $this->challenge->game
+        return $this->challenge->game->modifiers->firstWhere('class_key', MorningRoutineProgress::key())
+            ->modifier_data['rooms'];
     }
 
-    public function progress(Player $player): array
+    public function progress(Player $player)
     {
 
     }
@@ -94,9 +95,7 @@ class MorningRoutineChallenge extends BaseChallengeClass
 
     public function currentRoom(Player $player): string
     {
-        $room = collect($this->challenge->challenge_data['rooms'])->filter(fn ($room) => $room === $player->id)->keys()->first();
-
-        return $room ?? 'Hallway';
+        return $this->rooms()[$player->id] ?? 'Hallway';
     }
 
     public function availableRooms(Player $player): array
