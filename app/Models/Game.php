@@ -209,7 +209,10 @@ class Game extends Model
         if (! $this->starts_at) {
             $duration = GameTemplate::find($this->game_template_id)
                 ->total_duration;
-            $ends_at = Carbon::parse(now())->addMinutes($duration);
+
+            $ends_at = $duration > 0
+                ? Carbon::parse(now())->addMinutes($duration)
+                : null;
 
             GameUpdated::fire(
                 game_id: $this->id,
@@ -282,7 +285,9 @@ class Game extends Model
                 $starts_at = $last_challenge['ends_at'];
             }
 
-            $ends_at = $starts_at->copy()->addMinutes($challenge['duration']);
+            $ends_at = $challenge['duration'] > 0
+                ? $starts_at->copy()->addMinutes($challenge['duration'])
+                : null;
 
             $carry[] = [
                 'starts_at' => $starts_at,

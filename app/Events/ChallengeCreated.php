@@ -19,9 +19,9 @@ class ChallengeCreated extends Event
 
     public string $class_key;
 
-    public Carbon $starts_at;
+    public ?Carbon $starts_at = null;
 
-    public Carbon $ends_at;
+    public ?Carbon $ends_at = null;
 
     public function applyToChallenge(ChallengeState $challenge)
     {

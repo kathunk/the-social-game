@@ -87,11 +87,6 @@ class GameTemplateAdded extends Event
                 collect($challenge['challenge_keys'])->isNotEmpty(),
                 'Challenge keys are required.'
             );
-
-            $this->assert(
-                $challenge['duration'] > 0,
-                'Challenge duration must be greater than 0.'
-            );
         });
     }
 

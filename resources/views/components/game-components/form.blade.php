@@ -12,7 +12,9 @@
             <flux:text class="flex flex-wrap items-baseline gap-1 text-faded-gray text-tiny md:text-xxs font-medium">
                 <span>CHALLENGE</span>
                 <span>({{ $activated_challenges }} of {{ $total_challenges }})</span>
-                <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
+                @if ($this->challenge->ends_at)
+                    <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
+                @endif
             </flux:text>
         @endif
         @foreach ($form['elements'] as $element)

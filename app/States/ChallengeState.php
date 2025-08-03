@@ -15,9 +15,9 @@ class ChallengeState extends State
 
     public string $status;
 
-    public Carbon $starts_at;
+    public ?Carbon $starts_at = null;
 
-    public Carbon $ends_at;
+    public ?Carbon $ends_at = null;
 
     public bool $allows_turncoat;
 
