@@ -183,6 +183,29 @@
         </div>
     </div>
 
+    <div class="flex items-center justify-center mb-12 px-4">
+        <div class="w-full max-w-2xl mx-auto space-y-4">
+            <div class="relative w-full" style="padding-bottom: 177.78%;">
+                <iframe 
+                    src="https://www.instagram.com/p/C_tU-L1PSzv/embed" 
+                    frameborder="0" 
+                    scrolling="no" 
+                    allowtransparency="true"
+                    class="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg">
+                </iframe>
+            </div>
+            <div class="relative w-full" style="padding-bottom: 177.78%;">
+                <iframe 
+                    src="https://www.instagram.com/p/DNBjKMDuHhB/embed" 
+                    frameborder="0" 
+                    scrolling="no" 
+                    allowtransparency="true"
+                    class="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
     <style>
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
