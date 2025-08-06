@@ -8,17 +8,18 @@ use Thunk\Verbs\Facades\Verbs;
 use App\Events\TierListSubmitted;
 use App\Modifiers\Classes\TierListModifier;
 
-class TierListConstructionPhase extends BaseChallengeClass
+class TierListGuessSpecificPlayer extends BaseChallengeClass
 {
-    const NAME = 'Build your tier lists';
+    const NAME = 'Mix and match';
 
-    const DESCRIPTION = 'Add a submission for each tier in each category below.';
+    const DESCRIPTION = 'Below are 5 items submitted by {player_name}. But the items are mixed up from different categories. 
+        Put them in the tiers that {player_name} originally intended.';
 
     const TYPE = 'individual';
 
     public static function key(): string
     {
-        return 'tier_list_construction_phase';
+        return 'tier_list_guess_specific_player';
     }
 
     public function isInvalidForTemplate(
@@ -36,24 +37,29 @@ class TierListConstructionPhase extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        // @todo prioritize categories that have been used less often
-        // $previously_played_categories = $this->game->players
+        $player_ids = $this->challenge->game->players->pluck('id')->shuffle()->toArray();
+        $assignments = [];
+        
+        for ($i = 0; $i < count($player_ids); $i++) {
+            $current_player = $player_ids[$i];
+            $next_player = $player_ids[($i + 1) % count($player_ids)];
+            $assignments[$current_player] = $next_player;
+        }
 
-        $categories = collect([
-            'candy',
-            'city',
-            'fictional_character',
-            'movie',
-            'school_subject',
-            'tv_show',
-        ])
-        ->shuffle()
-        ->take(3)
-        ->toArray();
+        $player_ids->map(function ($player_id) use ($assignments) {
+            $submissions_from_assigned_player = $this->submissionsForPlayer($assignments[$player_id]);
+
+            $category_0_clues = collect($submissions_from_assigned_player)->filter(fn($submission) => $submission['category'] === 'candy')->pluck('value')->toArray();
+
+            $clues = collect($submissions_from_assigned_player)->map(fn($submission) => [
+                'category' => $submission['category'],
+                'tier' => $submission['tier'],
+            ]);
+        });
 
         return [
-            'categories' => $categories,
             'has_submitted' => [],
+            'assignments' => $assignments,
         ];
     }
 
@@ -119,6 +125,13 @@ class TierListConstructionPhase extends BaseChallengeClass
     public function modifier()
     {
         return $this->challenge->game->modifiers->firstWhere('class_key', TierListModifier::key());
+    }
+
+    public function submissionsForPlayer(int $player_id): array
+    {
+        return collect($this->modifier()->modifier_data['submissions'])
+            ->filter(fn($submission) => $submission['player_id'] === $player_id)
+            ->toArray();
     }
 
     public function categoriesSubmitted(Player $player): array
