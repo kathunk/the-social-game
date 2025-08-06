@@ -72,5 +72,8 @@
                 @endif
             </div>
         </div>
+        <div class="max-w-xl mx-auto">
+            <x-marketing-component />
+        </div>
     </body>
 </html>
