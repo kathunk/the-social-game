@@ -3,6 +3,7 @@
 namespace App\Challenges\Classes;
 
 use App\Models\Player;
+use App\States\GameState;
 use Illuminate\Support\Str;
 use Thunk\Verbs\Facades\Verbs;
 use App\Events\TierListSubmitted;
@@ -137,8 +138,7 @@ class TierListConstructionPhase extends BaseChallengeClass
                 'value' => $entry,
                 'category' => Str::before($key, '-'),
                 'tier' => Str::afterLast($key, '-'),
-                'player_id' => $player->id,
-                'used' => false,
+                'player_id' => $player->id, 
             ]
         )
         ->values()
@@ -155,9 +155,128 @@ class TierListConstructionPhase extends BaseChallengeClass
         Verbs::commit();
         
         if (count($this->challenge->fresh()->challenge_data['has_submitted']) === $player->game->players->count()) {
-            $this->challenge->fresh()->end();
+            // @todo uncomment this after testing. 
+            // $this->challenge->fresh()->end();
         }
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function onChallengeEnded(GameState $game_state)
+    {
+        $players = $game_state->players();
+        $categories = $this->challenge_state->challenge_data['categories'];
+        $modifier = $game_state->modifiers()->firstWhere('class_key', TierListModifier::key());
+        $submissions = $modifier->modifier_data['submissions'];
+        $answer_keys = $modifier->modifier_data['answer_keys'];
+
+        $categories_used = collect($categories)->mapWithKeys(fn($category) => [$category => 0])->toArray();
+        
+        // assign opponents and categories
+        foreach ($players as $player) {
+            $random_least_used_category = collect($categories)
+                ->shuffle()
+                ->sortBy(fn($category) => $categories_used[$category])
+                ->first();
+            $categories_used[$random_least_used_category]++;
+            $answer_keys['single_category'][$player->id]['category'] = $random_least_used_category;
+
+            // Round 1
+            $available_round_1 = collect($players)
+            ->filter(fn($p) => $p->id !== $player->id)
+            ->shuffle()
+            ->first();
+
+            $answer_keys['single_opponent_round_1'][$player->id]['opponent'] = $available_round_1->name;
+
+            // Round 2 - must not be self or round 1 opponent
+            $available_round_2 = collect($players)
+            ->filter(fn($p) =>
+                $p->id !== $player->id &&
+                $p->name !== $answer_keys['single_opponent_round_1'][$player->id]['opponent']
+            )
+            ->shuffle()
+            ->first();
+
+            // this should never happen, it's for debugging
+            if (!$available_round_2) {
+            throw new \Exception("Not enough unique opponents for player {$player->name}");
+            }
+
+            $answer_keys['single_opponent_round_2'][$player->id]['opponent'] = $available_round_2->name;
+        }
+
+        foreach ($players->reverse() as $player) {
+            $round_3_need_item_distributed = 0;
+            $opponents = $players->filter(fn($p) => $p->id !== $player->id)->values(); 
+            $player_submissions = collect($submissions)->filter(function($submission) use ($player) {
+                if (!isset($submission['player_id'])) {
+                    dd($submission);
+                }
+                return $submission['player_id'] === $player->id;
+            });
+            $player_tiers_used = [];
+        
+            $opponent_index = 0;
+        
+            while ($round_3_need_item_distributed < 5) {
+                $opponent = $opponents[$opponent_index % $opponents->count()];
+                $opponent_index++;
+        
+                $opponent_answer_key = $answer_keys['single_category'][$opponent->id];
+                $opponent_category = $opponent_answer_key['category'];
+        
+                $opponent_round_3_empty_slots = collect($opponent_answer_key)
+                    ->except(['category']) // skip the category key
+                    ->filter(fn($tier) => $tier === null)
+                    ->keys();
+        
+                if ($opponent_round_3_empty_slots->isEmpty()) {
+                    continue;
+                }
+
+                $viable_submission = $player_submissions
+                    ->filter(fn($submission) =>
+                        $submission['category'] === $opponent_category &&
+                        $opponent_round_3_empty_slots->contains($submission['tier']) &&
+                        !in_array($submission['tier'], $player_tiers_used)
+                    )
+                    ->first();
+
+                if ($viable_submission === null) {
+                    continue;
+                }
+        
+                $answer_keys['single_category'][$opponent->id][$viable_submission['tier']] = $viable_submission;
+                $player_tiers_used[] = $viable_submission['tier'];
+                $round_3_need_item_distributed++;
+
+                $submissions = collect($submissions)->reject(function($submission) use ($player, $opponent_category, $viable_submission) { 
+                    return $submission['player_id'] === $player->id 
+                        && $submission['tier'] === $viable_submission['tier']
+                        && $submission['category'] === $opponent_category;
+                })->toArray();
+            }
+        }
+
+        // this is for debugging
+        if (count($submissions) !== $players->count() * 10) {
+            throw new \Exception('There are ' . count($submissions) . ' submissions remaining, but there should be ' . $players->count() * 10);
+        }
+        $players->each(function($player) use ($submissions) {
+            $all_submissions = collect($submissions)->filter(fn($submission) => $submission['player_id'] === $player->id);
+            $a_tiers = $all_submissions->filter(fn($submission) => $submission['tier'] === 'A')->count();
+            $b_tiers = $all_submissions->filter(fn($submission) => $submission['tier'] === 'B')->count();
+            $c_tiers = $all_submissions->filter(fn($submission) => $submission['tier'] === 'C')->count();
+            $d_tiers = $all_submissions->filter(fn($submission) => $submission['tier'] === 'D')->count();
+            $f_tiers = $all_submissions->filter(fn($submission) => $submission['tier'] === 'F')->count();
+
+            if ($a_tiers !== 2 || $b_tiers !== 2 || $c_tiers !== 2 || $d_tiers !== 2 || $f_tiers !== 2) {
+                throw new \Exception('Player ' . $player->name . ' has ' . $a_tiers . ' A tiers, ' . $b_tiers . ' B tiers, ' . $c_tiers . ' C tiers, ' . $d_tiers . ' D tiers, and ' . $f_tiers . ' F tiers');
+            }
+        });
+				
+        $game_state->modifiers()->firstWhere('class_key', TierListModifier::key())->modifier_data['answer_keys'] = $answer_keys;
+        $game_state->modifiers()->firstWhere('class_key', TierListModifier::key())->modifier_data['submissions'] = $submissions;
     }
 }
