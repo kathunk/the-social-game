@@ -133,6 +133,7 @@ class TierListConstructionPhase extends BaseChallengeClass
 
     public function submitTierList(Player $player, array $params)
     {
+        dd('submitTierList');
         $mapped = collect($params)->map(fn($entry, $key) =>
             [
                 'value' => $entry,
@@ -156,7 +157,7 @@ class TierListConstructionPhase extends BaseChallengeClass
         
         if (count($this->challenge->fresh()->challenge_data['has_submitted']) === $player->game->players->count()) {
             // @todo uncomment this after testing. 
-            // $this->challenge->fresh()->end();
+            $this->challenge->fresh()->end();
         }
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);

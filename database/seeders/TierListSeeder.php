@@ -4,28 +4,17 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Challenges\Classes\IndividualChoosePointsOrHidden;
-use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
-use App\Challenges\Classes\IndividualDoubleTrouble;
-use App\Challenges\Classes\IndividualEquilibrium;
-use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
-use App\Challenges\Classes\IndividualFirstShallBeLast;
-use App\Challenges\Classes\IndividualGerrymander;
-use App\Challenges\Classes\IndividualHighScoreQuiz;
-use App\Challenges\Classes\IndividualHighTrustEnvironment;
-use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
-use App\Challenges\Classes\IndividualSpy;
-use App\Challenges\Classes\TierListConstructionPhase;
-use App\Events\GameModeAdded;
-use App\Events\GameTemplateAdded;
 use App\Models\Game;
+use App\Models\User;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
-use App\Models\User;
-use App\Modifiers\Classes\Alms;
-use App\Modifiers\Classes\TierListModifier;
-use Illuminate\Database\Seeder;
+use App\Events\GameModeAdded;
 use Thunk\Verbs\Facades\Verbs;
+use Illuminate\Database\Seeder;
+use App\Events\GameTemplateAdded;
+use App\Challenges\Classes\TierListGuess;
+use App\Modifiers\Classes\TierListModifier;
+use App\Challenges\Classes\TierListConstructionPhase;
 
 class TierListSeeder extends Seeder
 {
@@ -59,6 +48,24 @@ class TierListSeeder extends Seeder
                     ],
                     'duration' => null,
                 ],
+                [
+                    'challenge_keys' => [
+                        TierListGuess::key(),
+                    ],
+                    'duration' => null,
+                ],
+                [
+                    'challenge_keys' => [
+                        TierListGuess::key(),
+                    ],
+                    'duration' => null,
+                ],
+                [
+                    'challenge_keys' => [
+                        TierListGuess::key(),
+                    ],
+                    'duration' => null,
+                ],
             ],
             modifiers: [TierListModifier::key()],
             players_can_join_late: false,
@@ -85,5 +92,29 @@ class TierListSeeder extends Seeder
         }
 
         $game->start();
+
+        $this->simulateFirstRound($game);
+    }
+
+    private function simulateFirstRound(Game $game)
+    {
+        $construction_challenge = $game->challenges->first();
+        $categories = $construction_challenge->challenge_data['categories'];
+
+        $game->players->each(function ($player) use ($game, $categories, $construction_challenge) {
+            foreach ($categories as $category) {
+                $submissions = [
+                    $category . '-A' => $player->name . '-' . $category . '-A',
+                    $category . '-B' => $player->name . '-' . $category . '-B',
+                    $category . '-C' => $player->name . '-' . $category . '-C',
+                    $category . '-D' => $player->name . '-' . $category . '-D',
+                    $category . '-F' => $player->name . '-' . $category . '-F',
+                ];
+
+                $construction_challenge->handler()->submitTierList($player, $submissions);
+            }
+        });
+
+        dd($construction_challenge->fresh()->challenge_data);
     }
 }

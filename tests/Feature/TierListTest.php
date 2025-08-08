@@ -32,13 +32,13 @@ beforeEach(function () {
     $this->player_1 = $this->createPlayer();
     $this->player_2 = $this->createPlayer();
     $this->player_3 = $this->createPlayer();
-    // $this->player_4 = $this->createPlayer();
-    // $this->player_5 = $this->createPlayer();
-    // $this->player_6 = $this->createPlayer();
-    // $this->player_7 = $this->createPlayer();
-    // $this->player_8 = $this->createPlayer();
-    // $this->player_9 = $this->createPlayer();
-    // $this->player_10 = $this->createPlayer();
+    $this->player_4 = $this->createPlayer();
+    $this->player_5 = $this->createPlayer();
+    $this->player_6 = $this->createPlayer();
+    $this->player_7 = $this->createPlayer();
+    $this->player_8 = $this->createPlayer();
+    $this->player_9 = $this->createPlayer();
+    $this->player_10 = $this->createPlayer();
 
     $this->game->start();
 
