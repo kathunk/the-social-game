@@ -3,9 +3,6 @@
 namespace App\Challenges\Classes;
 
 use App\Models\Player;
-use Illuminate\Support\Str;
-use Thunk\Verbs\Facades\Verbs;
-use App\Events\TierListSubmitted;
 use App\Modifiers\Classes\TierListModifier;
 
 class TierListGuess extends BaseChallengeClass
@@ -38,9 +35,15 @@ class TierListGuess extends BaseChallengeClass
     {
         $all_rounds = $this->challenge->game->challenges;
         $current_round_number = $all_rounds->search($this->challenge) + 1;
-        $all_assignment_data = collect($this->modifier()->modifier_data['answer_keys']);
-        $current_assignment_data = $all_assignment_data->skip($current_round_number -1)->first();
-        $type = collect($all_assignment_data)->keys()->skip($current_round_number -1)->first();
+
+        $target_round_array_key = match ($current_round_number) {
+            1 => 'single_opponent_round_1',
+            2 => 'single_opponent_round_2',
+            3 => 'single_category',
+        };
+
+        $current_assignment_data = $this->modifier()->modifier_data['answer_keys'][$target_round_array_key];
+        $type = array_key_exists('opponent', collect($current_assignment_data)->first()) ? 'opponent' : 'category';
 
         return [
             'has_submitted' => [],
@@ -55,15 +58,19 @@ class TierListGuess extends BaseChallengeClass
         $type = $this->challenge->challenge_data['type'];
         $has_submitted = in_array($player->id, $this->challenge->challenge_data['has_submitted']);
 
+        $help_text = match ($type) {
+            'opponent' => 'Below are 5 items submitted by '.$answers['opponent'].', in no particular order. Drag and drop the items from best to worst. When you are done, click submit.',
+            'category' => 'Below are 5 items submitted for '.$answers['category'].', in no particular order. Drag and drop the items from best to worst. When you are done, click submit.',
+        };
+
         return $this->form()
             ->title(self::NAME)
-            ->subtitle('Drag and drop the items from best to worst. When you are done, click submit.')
-            ->when($has_submitted, fn($form) => $form->title('Show results...'))
-            ->when(!$has_submitted, fn($form) => 
-                $form->tierListGuess($answers, $type)
-                    ->buttonGroup()
-                    ->button('Submit', 'submitTierList')
-                    ->endGroup()
+            ->subtitle($help_text)
+            ->when($has_submitted, fn ($form) => $form->title('Show results...'))
+            ->when(! $has_submitted, fn ($form) => $form->tierListGuess($answers, $type)
+                ->buttonGroup()
+                ->button('Submit', 'submitTierList')
+                ->endGroup()
             )
             ->build();
     }
@@ -73,50 +80,9 @@ class TierListGuess extends BaseChallengeClass
         return $this->challenge->game->modifiers->firstWhere('class_key', TierListModifier::key());
     }
 
-    public function submissionsForPlayer(int $player_id): array
-    {
-        return collect($this->modifier()->modifier_data['submissions'])
-            ->filter(fn($submission) => $submission['player_id'] === $player_id)
-            ->toArray();
-    }
-
-    public function categoriesSubmitted(Player $player): array
-    {
-        return collect($this->modifier()->modifier_data['submissions'])
-            ->filter(fn($submission) => $submission['player_id'] === $player->id)
-            ->pluck('category')
-            ->unique()
-            ->toArray();
-    }
-
     public function submitTierList(Player $player, array $params)
     {
         dd($params);
-        $mapped = collect($params)->map(fn($entry, $key) =>
-            [
-                'value' => $entry,
-                'category' => Str::before($key, '-'),
-                'tier' => Str::afterLast($key, '-'),
-                'player_id' => $player->id,
-                'used' => false,
-            ]
-        )
-        ->values()
-        ->toArray();
-
-        TierListSubmitted::fire(
-            player_id: $player->id,
-            challenge_id: $this->challenge->id,
-            modifier_id: $this->modifier()->id,
-            game_id: $this->challenge->game_id,
-            submissions: $mapped,
-        );
-
-        Verbs::commit();
-        
-        if (count($this->challenge->fresh()->challenge_data['has_submitted']) === $player->game->players->count()) {
-            $this->challenge->fresh()->end();
-        }
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }

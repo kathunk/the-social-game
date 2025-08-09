@@ -4,17 +4,17 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\TierListConstructionPhase;
+use App\Challenges\Classes\TierListGuess;
+use App\Events\GameModeAdded;
+use App\Events\GameTemplateAdded;
 use App\Models\Game;
-use App\Models\User;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
-use App\Events\GameModeAdded;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Database\Seeder;
-use App\Events\GameTemplateAdded;
-use App\Challenges\Classes\TierListGuess;
+use App\Models\User;
 use App\Modifiers\Classes\TierListModifier;
-use App\Challenges\Classes\TierListConstructionPhase;
+use Illuminate\Database\Seeder;
+use Thunk\Verbs\Facades\Verbs;
 
 class TierListSeeder extends Seeder
 {
@@ -25,7 +25,7 @@ class TierListSeeder extends Seeder
         $mode_id = GameModeAdded::fire(
             name: 'Tier List',
             description: 'Rank stuff',
-            pre_game_lobby_message: "<h1>Rank stuff</h1><p>Rank stuff</p>",
+            pre_game_lobby_message: '<h1>Rank stuff</h1><p>Rank stuff</p>',
             type: 'individual',
             min_players: 2,
             max_players: 10,
@@ -101,14 +101,14 @@ class TierListSeeder extends Seeder
         $construction_challenge = $game->challenges->first();
         $categories = $construction_challenge->challenge_data['categories'];
 
-        $game->players->each(function ($player) use ($game, $categories, $construction_challenge) {
+        $game->players->each(function ($player) use ($categories, $construction_challenge) {
             foreach ($categories as $category) {
                 $submissions = [
-                    $category . '-A' => $player->name . '-' . $category . '-A',
-                    $category . '-B' => $player->name . '-' . $category . '-B',
-                    $category . '-C' => $player->name . '-' . $category . '-C',
-                    $category . '-D' => $player->name . '-' . $category . '-D',
-                    $category . '-F' => $player->name . '-' . $category . '-F',
+                    $category.'-A' => $player->name.'-'.$category.'-A',
+                    $category.'-B' => $player->name.'-'.$category.'-B',
+                    $category.'-C' => $player->name.'-'.$category.'-C',
+                    $category.'-D' => $player->name.'-'.$category.'-D',
+                    $category.'-F' => $player->name.'-'.$category.'-F',
                 ];
 
                 $construction_challenge->handler()->submitTierList($player, $submissions);

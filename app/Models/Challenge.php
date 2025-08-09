@@ -40,7 +40,7 @@ class Challenge extends Model
     public function next()
     {
         $challenges = $this->game->challenges;
-    
+
         return $challenges
             ->skipUntil(fn ($c) => $c->is($this))
             ->skip(1)

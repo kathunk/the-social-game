@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\Game;
-use Livewire\Livewire;
-use App\Models\Challenge;
-use Thunk\Verbs\Facades\Verbs;
-use App\Livewire\GameDashboard;
-use App\Challenges\Classes\TierListGuess;
-use App\Modifiers\Classes\TierListModifier;
 use App\Challenges\Classes\TierListConstructionPhase;
+use App\Challenges\Classes\TierListGuess;
+use App\Livewire\GameDashboard;
+use App\Models\Challenge;
+use App\Models\Game;
+use App\Modifiers\Classes\TierListModifier;
+use Livewire\Livewire;
+use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -72,10 +72,10 @@ it('requires 5 submissions per player per category', function () {
 
     Livewire::actingAs($this->player_1->fresh()->user)
         ->test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('round_properties.' . $key . '.' . $category . '-A', 'Candy A')
-        ->set('round_properties.' . $key . '.' . $category . '-B', 'Candy B')
-        ->set('round_properties.' . $key . '.' . $category . '-C', 'Candy C')
-        ->set('round_properties.' . $key . '.' . $category . '-D', 'Candy D')
+        ->set('round_properties.'.$key.'.'.$category.'-A', 'Candy A')
+        ->set('round_properties.'.$key.'.'.$category.'-B', 'Candy B')
+        ->set('round_properties.'.$key.'.'.$category.'-C', 'Candy C')
+        ->set('round_properties.'.$key.'.'.$category.'-D', 'Candy D')
         // fail to include F tier
         // ->set('round_properties.' . $key . '.' . $category . '-F', 'Candy F')
         ->call('callClassAction', 'submitTierList', 'challenge', $key)
@@ -90,11 +90,11 @@ it('does not allow two identical submissions per player per category', function 
 
     Livewire::actingAs($this->player_1->fresh()->user)
         ->test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->set('round_properties.' . $key . '.' . $category . '-A', 'Candy A')
-        ->set('round_properties.' . $key . '.' . $category . '-B', 'Candy B')
-        ->set('round_properties.' . $key . '.' . $category . '-C', 'Candy C')
-        ->set('round_properties.' . $key . '.' . $category . '-D', 'Candy F')
-        ->set('round_properties.' . $key . '.' . $category . '-F', 'Candy F')
+        ->set('round_properties.'.$key.'.'.$category.'-A', 'Candy A')
+        ->set('round_properties.'.$key.'.'.$category.'-B', 'Candy B')
+        ->set('round_properties.'.$key.'.'.$category.'-C', 'Candy C')
+        ->set('round_properties.'.$key.'.'.$category.'-D', 'Candy F')
+        ->set('round_properties.'.$key.'.'.$category.'-F', 'Candy F')
         ->call('callClassAction', 'submitTierList', 'challenge', $key)
         ->assertHasErrors();
 
@@ -126,32 +126,32 @@ function submitTierLists(Game $game, Challenge $construction_challenge)
     $game->players->each(function ($player) use ($game, $key, $category_0, $category_1, $category_2) {
         Livewire::actingAs($player->fresh()->user)
             ->test(GameDashboard::class, ['game' => $game->fresh()])
-            ->set('round_properties.' . $key . '.' . $category_0 . '-A', $player->name . '-' . $category_0 . '-A')
-            ->set('round_properties.' . $key . '.' . $category_0 . '-B', $player->name . '-' . $category_0 . '-B')
-            ->set('round_properties.' . $key . '.' . $category_0 . '-C', $player->name . '-' . $category_0 . '-C')
-            ->set('round_properties.' . $key . '.' . $category_0 . '-D', $player->name . '-' . $category_0 . '-D')
-            ->set('round_properties.' . $key . '.' . $category_0 . '-F', $player->name . '-' . $category_0 . '-F')
+            ->set('round_properties.'.$key.'.'.$category_0.'-A', $player->name.'-'.$category_0.'-A')
+            ->set('round_properties.'.$key.'.'.$category_0.'-B', $player->name.'-'.$category_0.'-B')
+            ->set('round_properties.'.$key.'.'.$category_0.'-C', $player->name.'-'.$category_0.'-C')
+            ->set('round_properties.'.$key.'.'.$category_0.'-D', $player->name.'-'.$category_0.'-D')
+            ->set('round_properties.'.$key.'.'.$category_0.'-F', $player->name.'-'.$category_0.'-F')
             ->call('callClassAction', 'submitTierList', 'challenge', $key);
-            // ->assertHasNoErrors();
+        // ->assertHasNoErrors();
 
         Livewire::actingAs($player->fresh()->user)
             ->test(GameDashboard::class, ['game' => $game->fresh()])
-            ->set('round_properties.' . $key . '.' . $category_1 . '-A', $player->name . '-' . $category_1 . '-A')
-            ->set('round_properties.' . $key . '.' . $category_1 . '-B', $player->name . '-' . $category_1 . '-B')
-            ->set('round_properties.' . $key . '.' . $category_1 . '-C', $player->name . '-' . $category_1 . '-C')
-            ->set('round_properties.' . $key . '.' . $category_1 . '-D', $player->name . '-' . $category_1 . '-D')
-            ->set('round_properties.' . $key . '.' . $category_1 . '-F', $player->name . '-' . $category_1 . '-F')
+            ->set('round_properties.'.$key.'.'.$category_1.'-A', $player->name.'-'.$category_1.'-A')
+            ->set('round_properties.'.$key.'.'.$category_1.'-B', $player->name.'-'.$category_1.'-B')
+            ->set('round_properties.'.$key.'.'.$category_1.'-C', $player->name.'-'.$category_1.'-C')
+            ->set('round_properties.'.$key.'.'.$category_1.'-D', $player->name.'-'.$category_1.'-D')
+            ->set('round_properties.'.$key.'.'.$category_1.'-F', $player->name.'-'.$category_1.'-F')
             ->call('callClassAction', 'submitTierList', 'challenge', $key);
-            // ->assertHasNoErrors();
+        // ->assertHasNoErrors();
 
         Livewire::actingAs($player->fresh()->user)
             ->test(GameDashboard::class, ['game' => $game->fresh()])
-            ->set('round_properties.' . $key . '.' . $category_2 . '-A', $player->name . '-' . $category_2 . '-A')
-            ->set('round_properties.' . $key . '.' . $category_2 . '-B', $player->name . '-' . $category_2 . '-B')
-            ->set('round_properties.' . $key . '.' . $category_2 . '-C', $player->name . '-' . $category_2 . '-C')
-            ->set('round_properties.' . $key . '.' . $category_2 . '-D', $player->name . '-' . $category_2 . '-D')
-            ->set('round_properties.' . $key . '.' . $category_2 . '-F', $player->name . '-' . $category_2 . '-F')
+            ->set('round_properties.'.$key.'.'.$category_2.'-A', $player->name.'-'.$category_2.'-A')
+            ->set('round_properties.'.$key.'.'.$category_2.'-B', $player->name.'-'.$category_2.'-B')
+            ->set('round_properties.'.$key.'.'.$category_2.'-C', $player->name.'-'.$category_2.'-C')
+            ->set('round_properties.'.$key.'.'.$category_2.'-D', $player->name.'-'.$category_2.'-D')
+            ->set('round_properties.'.$key.'.'.$category_2.'-F', $player->name.'-'.$category_2.'-F')
             ->call('callClassAction', 'submitTierList', 'challenge', $key);
-            // ->assertHasNoErrors();
+        // ->assertHasNoErrors();
     });
 }

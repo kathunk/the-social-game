@@ -55,6 +55,6 @@ class ChallengeEnded extends Event
         $challenge->save();
         $challenge->updateModelWithStateData();
 
-        $game->modifiers->each(fn($mod) => $mod->updateModelWithStateData());
+        $game->modifiers->each(fn ($mod) => $mod->updateModelWithStateData());
     }
 }

@@ -21,4 +21,4 @@ return new class extends Migration
             $table->dateTime('ends_at')->nullable(false)->change();
         });
     }
-}; 
+};

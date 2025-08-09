@@ -2,17 +2,17 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\ModifierState;
-use App\Events\Traits\HasGame;
-use App\States\ChallengeState;
-use App\Events\Traits\HasPlayer;
-use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasChallenge;
+use App\Events\Traits\HasGame;
+use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasPlayer;
+use App\States\ChallengeState;
+use App\States\ModifierState;
+use Thunk\Verbs\Event;
 
 class TierListSubmitted extends Event
 {
-    use HasPlayer, HasGame, HasChallenge, HasModifier;
+    use HasChallenge, HasGame, HasModifier, HasPlayer;
 
     public array $submissions;
 
@@ -25,8 +25,7 @@ class TierListSubmitted extends Event
 
         $this->assert(
             collect($this->state(ModifierState::class)->modifier_data['submissions'])
-                ->filter(fn($submission) => 
-                    $submission['player_id'] === $this->player_id &&
+                ->filter(fn ($submission) => $submission['player_id'] === $this->player_id &&
                     $submission['category'] === $this->submissions[0]['category']
                 )
                 ->isEmpty(),
@@ -38,14 +37,14 @@ class TierListSubmitted extends Event
     {
         $modifier->modifier_data['submissions'] = [
             ...$modifier->modifier_data['submissions'],
-            ...$this->submissions
+            ...$this->submissions,
         ];
     }
 
     public function applyToChallenge(ChallengeState $challenge)
     {
         $player_submissions = collect($this->state(ModifierState::class)->modifier_data['submissions'])
-            ->filter(fn($submission) => $submission['player_id'] === $this->player_id);
+            ->filter(fn ($submission) => $submission['player_id'] === $this->player_id);
 
         if ($player_submissions->count() === 15) {
             $challenge->challenge_data['has_submitted'][] = $this->player_id;
