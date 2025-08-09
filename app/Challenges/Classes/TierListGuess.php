@@ -38,21 +38,33 @@ class TierListGuess extends BaseChallengeClass
     {
         $all_rounds = $this->challenge->game->challenges;
         $current_round_number = $all_rounds->search($this->challenge) + 1;
-        $all_assignment_data = $this->modifier()->modifier_data['answer_keys'];
-        dd("dataArrayForState", $this->challenge->fresh()->game->fresh()->modifiers->fresh()->first()->modifier_data['answer_keys']);
-        $current_assignment_data = $all_assignment_data[$current_round_number];
+        $all_assignment_data = collect($this->modifier()->modifier_data['answer_keys']);
+        $current_assignment_data = $all_assignment_data->skip($current_round_number -1)->first();
+        $type = collect($all_assignment_data)->keys()->skip($current_round_number -1)->first();
 
         return [
             'has_submitted' => [],
             'assignments' => $current_assignment_data,
+            'type' => $type,
         ];
     }
 
     public function frontendComponent(Player $player): array
     {
-        dd($this->challenge->challenge_data);
+        $answers = $this->challenge->challenge_data['assignments'][$player->id];
+        $type = $this->challenge->challenge_data['type'];
+        $has_submitted = in_array($player->id, $this->challenge->challenge_data['has_submitted']);
+
         return $this->form()
             ->title(self::NAME)
+            ->subtitle('Drag and drop the items from best to worst. When you are done, click submit.')
+            ->when($has_submitted, fn($form) => $form->title('Show results...'))
+            ->when(!$has_submitted, fn($form) => 
+                $form->tierListGuess($answers, $type)
+                    ->buttonGroup()
+                    ->button('Submit', 'submitTierList')
+                    ->endGroup()
+            )
             ->build();
     }
 
@@ -79,6 +91,7 @@ class TierListGuess extends BaseChallengeClass
 
     public function submitTierList(Player $player, array $params)
     {
+        dd($params);
         $mapped = collect($params)->map(fn($entry, $key) =>
             [
                 'value' => $entry,

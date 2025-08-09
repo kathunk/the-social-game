@@ -5,6 +5,7 @@ use Livewire\Livewire;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
 use App\Livewire\GameDashboard;
+use App\Challenges\Classes\TierListGuess;
 use App\Modifiers\Classes\TierListModifier;
 use App\Challenges\Classes\TierListConstructionPhase;
 
@@ -16,6 +17,18 @@ beforeEach(function () {
     $challenges = [
         [
             'challenge_keys' => [TierListConstructionPhase::key()],
+            'duration' => null,
+        ],
+        [
+            'challenge_keys' => [TierListGuess::key()],
+            'duration' => null,
+        ],
+        [
+            'challenge_keys' => [TierListGuess::key()],
+            'duration' => null,
+        ],
+        [
+            'challenge_keys' => [TierListGuess::key()],
             'duration' => null,
         ],
     ];

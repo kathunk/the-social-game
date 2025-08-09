@@ -148,8 +148,8 @@ class TierListConstructionPhase extends BaseChallengeClass
         Verbs::commit();
         
         if (count($this->challenge->fresh()->challenge_data['has_submitted']) === $player->game->players->count()) {
-            // @todo uncomment this after testing. 
             $this->challenge->fresh()->end();
+            $this->challenge->next()->start();
         }
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
@@ -186,52 +186,33 @@ class TierListConstructionPhase extends BaseChallengeClass
         }
 
         // Round 3 - distribute submissions to opponents
-        foreach ($players->reverse() as $player) {
-            $round_3_need_item_distributed = 0;
-            $opponents = $players->filter(fn($p) => $p->id !== $player->id)->values(); 
-            $player_submissions = collect($submissions)->filter(function($submission) use ($player) {
-                return $submission['player_id'] === $player->id;
-            })->shuffle();
-            $player_tiers_used = [];
-        
-            $opponent_index = 0;
-        
-            while ($round_3_need_item_distributed < 5) {
-                $opponent = $opponents[$opponent_index % $opponents->count()];
-                $opponent_index++;
-        
-                $opponent_answer_key = $answer_keys['single_category'][$opponent->id];
-                $opponent_category = $opponent_answer_key['category'];
-        
-                $opponent_round_3_empty_slots = collect($opponent_answer_key)
-                    ->except(['category']) 
-                    ->filter(fn($tier) => $tier === null)
-                    ->keys();
-        
-                if ($opponent_round_3_empty_slots->isEmpty()) {
-                    continue;
+        // Assign per-tier using a derangement across players to guarantee feasibility
+        foreach (['A','B','C','D','F'] as $tier) {
+            // Map each sender to a different receiver (no self) for this tier
+            $mapping = $this->generatePlayerAssignedOpponents($playerIds);
+
+            foreach ($mapping as $senderId => $receiverId) {
+                $receiver_category = $answer_keys['single_category'][$receiverId]['category'];
+
+                $viable = collect($submissions)->first(function ($s) use ($senderId, $receiver_category, $tier) {
+                    return $s['player_id'] === $senderId
+                        && $s['category'] === $receiver_category
+                        && $s['tier'] === $tier;
+                });
+
+                if (!$viable) {
+                    throw new \RuntimeException(
+                        "Round 3 allocation error: missing {$tier} for {$receiver_category} from sender {$playerNames[$senderId]}"
+                    );
                 }
 
-                $viable_submission = $player_submissions
-                    ->filter(fn($submission) =>
-                        $submission['category'] === $opponent_category &&
-                        $opponent_round_3_empty_slots->contains($submission['tier']) &&
-                        !in_array($submission['tier'], $player_tiers_used)
-                    )
-                    ->first();
+                // Assign and remove from pool
+                $answer_keys['single_category'][$receiverId][$tier] = $viable;
 
-                if ($viable_submission === null) {
-                    continue;
-                }
-        
-                $answer_keys['single_category'][$opponent->id][$viable_submission['tier']] = $viable_submission;
-                $player_tiers_used[] = $viable_submission['tier'];
-                $round_3_need_item_distributed++;
-
-                $submissions = collect($submissions)->reject(function($submission) use ($player, $opponent_category, $viable_submission) { 
-                    return $submission['player_id'] === $player->id 
-                        && $submission['tier'] === $viable_submission['tier']
-                        && $submission['category'] === $opponent_category;
+                $submissions = collect($submissions)->reject(function ($s) use ($senderId, $receiver_category, $tier) {
+                    return $s['player_id'] === $senderId
+                        && $s['category'] === $receiver_category
+                        && $s['tier'] === $tier;
                 })->toArray();
             }
         }

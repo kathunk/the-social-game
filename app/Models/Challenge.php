@@ -39,7 +39,12 @@ class Challenge extends Model
 
     public function next()
     {
-        return $this->game->challenges()->where('starts_at', '>', $this->starts_at)->first();
+        $challenges = $this->game->challenges;
+    
+        return $challenges
+            ->skipUntil(fn ($c) => $c->is($this))
+            ->skip(1)
+            ->first();
     }
 
     public function start()

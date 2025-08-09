@@ -106,6 +106,9 @@
                     </flux:select>
                 </flux:field>
                     @break
+                @case('tier_list_guess')
+                    <x-game-components.custom-form-elements.guess-tiers :element="$element" />
+                    @break
             @endswitch
         @endforeach
     </div>
