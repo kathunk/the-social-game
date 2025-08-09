@@ -40,17 +40,10 @@ class TierListConstructionPhase extends BaseChallengeClass
         // @todo prioritize categories that have been used less often
         // $previously_played_categories = $this->game->players
 
-        $categories = collect([
-            'candy',
-            'city',
-            'fictional_character',
-            'movie',
-            'school_subject',
-            'tv_show',
-        ])
-        ->shuffle()
-        ->take(3)
-        ->toArray();
+        $categories = collect(['beverage', 'candy', 'chain_restaurant', 'chore', 'city', 'color', 'feeling', 'fictional_character', 'game', 'genre', 'greeting', 'guilty_pleasure', 'historical_figure', 'holiday', 'kitchen_utensil', 'life_skill', 'mammal', 'month', 'movie', 'musical_artist', 'musical_instrument', 'school_subject', 'smell', 'sound', 'sport', 'superpower', 'texture', 'tv_show', 'vegetable', 'weapon'])
+            ->shuffle()
+            ->take(3)
+            ->toArray();
 
         return [
             'categories' => $categories,
@@ -133,7 +126,6 @@ class TierListConstructionPhase extends BaseChallengeClass
 
     public function submitTierList(Player $player, array $params)
     {
-        dd('submitTierList');
         $mapped = collect($params)->map(fn($entry, $key) =>
             [
                 'value' => $entry,
@@ -183,19 +175,15 @@ class TierListConstructionPhase extends BaseChallengeClass
                 ->first();
             $categories_used[$random_least_used_category]++;
             $answer_keys['single_category'][$player->id]['category'] = $random_least_used_category;
+        }
 
-            // Round 1 assignments (e.g., A → B, B → C, C → A)
-            $round1 = $this->generatePlayerAssignedOpponents($playerIds);
+        $round1 = $this->generatePlayerAssignedOpponents($playerIds);
+        $round2 = $this->generatePlayerAssignedOpponents($playerIds, $round1);
 
-            // Round 2 assignments with no repeated pairs
-            $round2 = $this->generatePlayerAssignedOpponents($playerIds, $round1);
-
-            // Assign the opponents
-            foreach ($playerIds as $id) {
-                $answer_keys['single_opponent_round_1'][$id]['opponent'] = $playerNames[$round1[$id]];
-                $answer_keys['single_opponent_round_2'][$id]['opponent'] = $playerNames[$round2[$id]];
-            }
-        }            
+        foreach ($playerIds as $id) {
+            $answer_keys['single_opponent_round_1'][$id]['opponent'] = $playerNames[$round1[$id]];
+            $answer_keys['single_opponent_round_2'][$id]['opponent'] = $playerNames[$round2[$id]];
+        }
 
         // Round 3 - distribute submissions to opponents
         foreach ($players->reverse() as $player) {
@@ -252,6 +240,8 @@ class TierListConstructionPhase extends BaseChallengeClass
         if (count($submissions) !== $players->count() * 10) {
             throw new \Exception('There are ' . count($submissions) . ' submissions remaining, but there should be ' . $players->count() * 10);
         }
+
+        // this is for debugging
         $players->each(function($player) use ($submissions) {
             $all_submissions = collect($submissions)->filter(fn($submission) => $submission['player_id'] === $player->id);
             $a_tiers = $all_submissions->filter(fn($submission) => $submission['tier'] === 'A')->count();
@@ -265,47 +255,68 @@ class TierListConstructionPhase extends BaseChallengeClass
             }
         });
 
-        // rounds 1 and 2 - distribute submissions to opponents
+        $round1 = $this->generatePlayerAssignedOpponents($playerIds);
+        $round2 = $this->generatePlayerAssignedOpponents($playerIds, $round1);
+
+        $round1_inverse = [];
+        $round2_inverse = [];
+        foreach ($round1 as $guesser => $opponent) {
+            $round1_inverse[$opponent] = $guesser;
+        }
+        foreach ($round2 as $guesser => $opponent) {
+            $round2_inverse[$opponent] = $guesser;
+        }
+
+        foreach ($playerIds as $id) {
+            $answer_keys['single_opponent_round_1'][$id]['opponent'] = $playerNames[$round1[$id]];
+            $answer_keys['single_opponent_round_2'][$id]['opponent'] = $playerNames[$round2[$id]];
+        }
+
+        // rounds 1 and 2 - distribute submissions to assigned opponents deterministically
         foreach ($players as $player) {
-            // @todo what in the hell why are the names sometimes wrong.
-            $buddy_1_name = $answer_keys['single_opponent_round_1'][$player->id]['opponent'];
-            $buddy_1_id = $players->firstWhere('name', $buddy_1_name)->id;
-            $buddy_2_name = $answer_keys['single_opponent_round_2'][$player->id]['opponent'];
-            $buddy_2_id = $players->firstWhere('name', $buddy_2_name)->id;
+            $receiver_1_id = $round1_inverse[$player->id];
+            $receiver_2_id = $round2_inverse[$player->id];
 
-            $player_submissions = collect($submissions)
-                ->shuffle()
+            // Group remaining submissions by tier for this player
+            $player_submissions_by_tier = collect($submissions)
                 ->filter(fn($submission) => $submission['player_id'] === $player->id)
-                ->sortBy(fn($submission) => $submission['tier']);
+                ->shuffle()
+                ->groupBy('tier');
 
-            foreach($player_submissions as $submission) {
-                $opponent_1_empty_slots = collect($answer_keys['single_opponent_round_1'][$buddy_1_id])->filter(fn($slot) => $slot === null)->count();
-                $opponent_2_empty_slots = collect($answer_keys['single_opponent_round_2'][$buddy_2_id])->filter(fn($slot) => $slot === null)->count();
+            foreach (['A','B','C','D','F'] as $tier) {
+                $items = $player_submissions_by_tier->get($tier, collect())->values();
 
-                if ($opponent_1_empty_slots === $opponent_2_empty_slots) {
-                    $answer_keys['single_opponent_round_1'][$buddy_1_id][$submission['tier']] = $submission;
-                } else {
-                    $answer_keys['single_opponent_round_2'][$buddy_2_id][$submission['tier']] = $submission;
+                if ($items->count() !== 2) {
+                    throw new \Exception("Player {$player->name} has {$items->count()} '{$tier}' tiers remaining, expected 2");
                 }
 
-                $submissions = collect($submissions)->reject(fn($sub) =>
-                    $sub['player_id'] === $player->id 
-                    && $sub['tier'] === $submission['tier']
-                    && $sub['category'] === $submission['category']
-                )
-                ->toArray();
+                // First goes to the player assigned to guess this player in round 1, second in round 2
+                $answer_keys['single_opponent_round_1'][$receiver_1_id][$tier] = $items[0];
+                $answer_keys['single_opponent_round_2'][$receiver_2_id][$tier] = $items[1];
+
+                // Remove them from the pool
+                foreach ([$items[0], $items[1]] as $used) {
+                    $submissions = collect($submissions)
+                        ->reject(fn($sub) =>
+                            $sub['player_id'] === $player->id
+                            && $sub['tier'] === $used['tier']
+                            && $sub['category'] === $used['category']
+                        )
+                        ->toArray();
+                }
             }
 
-            $submissions = collect($submissions)->reject(function($submission) use ($player) {
-                return $submission['player_id'] === $player->id;
-            })->toArray();
+            // Defensive cleanup; should already be empty for this player
+            $submissions = collect($submissions)
+                ->reject(fn($submission) => $submission['player_id'] === $player->id)
+                ->toArray();
         }
 
         // this is for debugging
         if (count($submissions) !== 0) {
             throw new \Exception('There are ' . count($submissions) . ' submissions remaining, but there should be 0');
         }
-				
+                    
         $game_state->modifiers()->firstWhere('class_key', TierListModifier::key())->modifier_data['answer_keys'] = $answer_keys;
     }
 

@@ -18,7 +18,6 @@ class TierListSubmitted extends Event
 
     public function validate()
     {
-        dd('validate');
         $this->assert(
             collect($this->submissions)->count() === collect($this->submissions)->unique('value')->count(),
             'Submissions must each be unique'

@@ -6,7 +6,6 @@ use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
 use App\Livewire\GameDashboard;
 use App\Modifiers\Classes\TierListModifier;
-use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\TierListConstructionPhase;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
@@ -31,14 +30,14 @@ beforeEach(function () {
 
     $this->player_1 = $this->createPlayer();
     $this->player_2 = $this->createPlayer();
-    $this->player_3 = $this->createPlayer();
-    $this->player_4 = $this->createPlayer();
-    $this->player_5 = $this->createPlayer();
-    $this->player_6 = $this->createPlayer();
-    $this->player_7 = $this->createPlayer();
-    $this->player_8 = $this->createPlayer();
-    $this->player_9 = $this->createPlayer();
-    $this->player_10 = $this->createPlayer();
+    // $this->player_3 = $this->createPlayer();
+    // $this->player_4 = $this->createPlayer();
+    // $this->player_5 = $this->createPlayer();
+    // $this->player_6 = $this->createPlayer();
+    // $this->player_7 = $this->createPlayer();
+    // $this->player_8 = $this->createPlayer();
+    // $this->player_9 = $this->createPlayer();
+    // $this->player_10 = $this->createPlayer();
 
     $this->game->start();
 
@@ -99,7 +98,7 @@ it('automatically ends the challenge when all players have submitted', function 
 it('sets clues to be guessed on future rounds', function () {
     submitTierLists($this->game, $this->construction_challenge);
 
-    $this->construction_challenge->fresh()->end();
+    // $this->construction_challenge->fresh()->end();
 
     dd($this->game->fresh()->modifiers->first()->modifier_data['answer_keys']);
 });

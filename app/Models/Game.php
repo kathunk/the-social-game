@@ -321,7 +321,7 @@ class Game extends Model
 
         Verbs::commit();
 
-        $challenge = $this->fresh()->challenges->sortBy('starts_at')->first();
+        $challenge = $this->fresh()->challenges->first();
 
         $challenge->start();
 

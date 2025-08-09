@@ -39,7 +39,7 @@ class TierListGuess extends BaseChallengeClass
         $all_rounds = $this->challenge->game->challenges;
         $current_round_number = $all_rounds->search($this->challenge) + 1;
         $all_assignment_data = $this->modifier()->modifier_data['answer_keys'];
-        dd('tier list guess dataArrayForState');
+        dd("dataArrayForState", $this->challenge->fresh()->game->fresh()->modifiers->fresh()->first()->modifier_data['answer_keys']);
         $current_assignment_data = $all_assignment_data[$current_round_number];
 
         return [

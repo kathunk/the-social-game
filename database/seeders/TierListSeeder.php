@@ -114,7 +114,5 @@ class TierListSeeder extends Seeder
                 $construction_challenge->handler()->submitTierList($player, $submissions);
             }
         });
-
-        dd($construction_challenge->fresh()->challenge_data);
     }
 }
