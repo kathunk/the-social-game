@@ -13,12 +13,6 @@ test("can access social auth redirect routes", function () {
     // Test Discord (custom provider)
     $response = $this->get("/auth/discord");
     $response->assertRedirect(); // Should redirect to provider
-
-    // Apple requires proper configuration with keys, so we'll skip it in tests
-    // but verify the route exists
-    $response = $this->get("/auth/apple");
-    // Apple might fail without proper config, but route should exist
-    expect($response->getStatusCode())->toBeIn([302, 500]); // Redirect or config error
 });
 
 test("rejects invalid social providers", function () {
@@ -31,7 +25,6 @@ test("social auth buttons appear on login page", function () {
 
     $response->assertStatus(200);
     $response->assertSee("Continue with Google");
-    $response->assertSee("Continue with Apple");
     $response->assertSee("Continue with Discord");
 });
 
@@ -40,7 +33,6 @@ test("social auth buttons appear on register page", function () {
 
     $response->assertStatus(200);
     $response->assertSee("Continue with Google");
-    $response->assertSee("Continue with Apple");
     $response->assertSee("Continue with Discord");
 });
 

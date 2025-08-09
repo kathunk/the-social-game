@@ -82,11 +82,17 @@ class User extends Authenticatable
         string $name,
         string $email,
         string $encrypted_password,
+        ?string $provider_id = null,
+        ?string $provider_name = null,
+        ?string $avatar = null,
     ) {
         return UserCreated::commit(
             name: $name,
             email: $email,
             encrypted_password: $encrypted_password,
+            provider_id: $provider_id,
+            provider_name: $provider_name,
+            avatar: $avatar,
         );
     }
 

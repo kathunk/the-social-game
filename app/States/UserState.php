@@ -27,6 +27,12 @@ class UserState extends State
 
     public bool $is_super_admin;
 
+    public ?string $provider_id;
+
+    public ?string $provider_name;
+
+    public ?string $avatar;
+
     public function __construct()
     {
         $this->player_ids = collect();

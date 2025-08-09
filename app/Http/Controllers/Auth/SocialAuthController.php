@@ -73,19 +73,15 @@ class SocialAuthController extends Controller
                     explode("@", $socialUser->getEmail())[0],
                     email: $socialUser->getEmail(),
                     encrypted_password: bcrypt(Str::random(32)), // Random password since they'll use social login
+                    provider_id: $socialUser->getId(),
+                    provider_name: $provider,
+                    avatar: $socialUser->getAvatar(),
+                    email_verified_at: now()
                 )->user_id;
 
                 Verbs::commit();
 
                 $user = User::query()->find($user_id);
-
-                // Update with social provider info
-                $user->update([
-                    "provider_id" => $socialUser->getId(),
-                    "provider_name" => $provider,
-                    "avatar" => $socialUser->getAvatar(),
-                    "email_verified_at" => now(), // Social accounts are considered verified
-                ]);
 
                 event(new Registered($user));
 
