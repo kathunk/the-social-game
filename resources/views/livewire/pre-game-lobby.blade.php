@@ -19,6 +19,10 @@
                 <x-button variant="primary" href="{{ route('register', ['game' => $this->game->id]) }}">Register</x-button>
                 <x-button href="{{ route('login', ['game' => $this->game->id]) }}">Login</x-button>
             </flux:button.group>
+
+            <div class="mt-4">
+                <x-social-login-buttons :game="$this->game->id" />
+            </div>
         </x-card>
     @endif
 

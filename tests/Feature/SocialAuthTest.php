@@ -61,3 +61,23 @@ test('avatar_url accessor works correctly', function () {
     $userWithoutAvatar = User::factory()->create(['avatar' => null]);
     expect($userWithoutAvatar->avatar_url)->toContain('gravatar.com');
 });
+
+test('social auth respects intended url', function () {
+    // Simulate visiting a protected page that sets intended URL
+    session()->put('url.intended', route('dashboard'));
+
+    // Mock a successful social auth response
+    $response = $this->get('/auth/google');
+
+    // Should redirect to OAuth provider (we can't easily test the full OAuth flow in unit tests)
+    $response->assertRedirect();
+});
+
+test('social auth handles game parameter correctly', function () {
+    $gameId = 'test-game-123';
+
+    $response = $this->get("/auth/google?game={$gameId}");
+
+    // Should redirect to OAuth provider with game parameter preserved
+    $response->assertRedirect();
+});

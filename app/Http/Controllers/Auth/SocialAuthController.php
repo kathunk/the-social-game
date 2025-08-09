@@ -76,7 +76,6 @@ class SocialAuthController extends Controller
                     provider_id: $socialUser->getId(),
                     provider_name: $provider,
                     avatar: $socialUser->getAvatar(),
-                    email_verified_at: now()
                 )->user_id;
 
                 Verbs::commit();
@@ -92,10 +91,21 @@ class SocialAuthController extends Controller
 
         Auth::login($user, true);
 
-        // Handle game redirect if present
+        // Handle game redirect if present (similar to regular auth flow)
         $game = $request->query('game');
         if ($game) {
             return redirect()->route('pre-game-lobby', ['game' => $game]);
+        }
+
+        // Use Laravel's intended URL system like regular auth
+        // Check for games URLs and redirect to dashboard instead (matches login.blade.php logic)
+        if (
+            session()->has('url.intended') &&
+            str_contains(session()->get('url.intended'), '/games/')
+        ) {
+            session()->forget('url.intended');
+
+            return redirect()->route('dashboard');
         }
 
         return redirect()->intended(route('dashboard'));
