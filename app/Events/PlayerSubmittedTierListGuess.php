@@ -25,6 +25,7 @@ class PlayerSubmittedTierListGuess extends Event
             $guessed_tier = $guess['guessed_tier'];
             $correct_tier = $guess['actual_tier'];
             $original_submission = $this->answer_key[$guess['actual_tier']];
+            $opponent = $opponents->firstWhere('id', $original_submission['player_id']);
 
             $map = ['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'f' => 4];
             $distance = abs($map[strtolower($guessed_tier)] - $map[strtolower($correct_tier)]);
@@ -38,16 +39,19 @@ class PlayerSubmittedTierListGuess extends Event
                 default => '😩',
             };
 
-            $opponent_name = $opponents->firstWhere('id', $original_submission['player_id'])->name;
+            $opponent_name = $opponent->name;
             $original_submission_value = $original_submission['value'];
 
             $player_score_description = "Guessed that $original_submission_value was $guessed_tier-tier (submitted by $opponent_name at $correct_tier-tier)";
             $player->addToScoreHistory($emoji, $points, $player_score_description);
+
+            $opponent_score_description = "$player->name guessed that $original_submission_value was $correct_tier-tier (you ranked it as $guessed_tier-tier)";
+            $opponent->addToScoreHistory($emoji, floor($points * 0.5), $opponent_score_description);
         }
     }
 
     public function handle()
     {
-        $this->player()->updateModelWithStateData();
+        $this->game()->players->each(fn ($player) => $player->updateModelWithStateData());
     }
 }
