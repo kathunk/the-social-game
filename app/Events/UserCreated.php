@@ -19,11 +19,20 @@ class UserCreated extends Event
 
     public string $encrypted_password;
 
+    public ?string $provider_id = null;
+
+    public ?string $provider_name = null;
+
+    public ?string $avatar = null;
+
     public function applyToUser(UserState $user)
     {
         $user->name = $this->name;
         $user->email = $this->email;
         $user->encrypted_password = $this->encrypted_password;
+        $user->provider_id = $this->provider_id ?? null;
+        $user->provider_name = $this->provider_name ?? null;
+        $user->avatar = $this->avatar ?? null;
         $user->status = 'pending';
     }
 
@@ -35,6 +44,9 @@ class UserCreated extends Event
                 'name' => $this->name,
                 'email' => $this->email,
                 'password' => $this->encrypted_password,
+                'provider_id' => $this->provider_id ?? null,
+                'provider_name' => $this->provider_name ?? null,
+                'avatar' => $this->avatar ?? null,
             ]);
         });
 
