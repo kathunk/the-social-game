@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Events\UserCreated;
 use App\Events\UserSubscribedToNewsletter;
+use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,30 +39,30 @@ class SocialAuthController extends Controller
             $socialUser = Socialite::driver($provider)->user();
         } catch (\Exception $e) {
             return redirect()
-                ->route("login")
+                ->route('login')
                 ->withErrors([
-                    "social" => "Authentication failed. Please try again.",
+                    'social' => 'Authentication failed. Please try again.',
                 ]);
         }
 
         // Find existing user by provider or email
         $user = User::query()
-            ->where("provider_id", $socialUser->getId())
-            ->where("provider_name", $provider)
+            ->where('provider_id', $socialUser->getId())
+            ->where('provider_name', $provider)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             // Check if user exists with same email
             $existingUser = User::query()
-                ->where("email", $socialUser->getEmail())
+                ->where('email', $socialUser->getEmail())
                 ->first();
 
             if ($existingUser) {
                 // Link social account to existing user
                 $existingUser->update([
-                    "provider_id" => $socialUser->getId(),
-                    "provider_name" => $provider,
-                    "avatar" => $socialUser->getAvatar(),
+                    'provider_id' => $socialUser->getId(),
+                    'provider_name' => $provider,
+                    'avatar' => $socialUser->getAvatar(),
                 ]);
                 $user = $existingUser;
             } else {
@@ -70,7 +70,7 @@ class SocialAuthController extends Controller
                 $user_id = UserCreated::fire(
                     name: $socialUser->getName() ?:
                     $socialUser->getNickname() ?:
-                    explode("@", $socialUser->getEmail())[0],
+                    explode('@', $socialUser->getEmail())[0],
                     email: $socialUser->getEmail(),
                     encrypted_password: bcrypt(Str::random(32)), // Random password since they'll use social login
                     provider_id: $socialUser->getId(),
@@ -93,12 +93,12 @@ class SocialAuthController extends Controller
         Auth::login($user, true);
 
         // Handle game redirect if present
-        $game = $request->query("game");
+        $game = $request->query('game');
         if ($game) {
-            return redirect()->route("pre-game-lobby", ["game" => $game]);
+            return redirect()->route('pre-game-lobby', ['game' => $game]);
         }
 
-        return redirect()->intended(route("dashboard"));
+        return redirect()->intended(route('dashboard'));
     }
 
     /**
@@ -106,9 +106,9 @@ class SocialAuthController extends Controller
      */
     protected function validateProvider(string $provider): void
     {
-        $allowedProviders = ["google", "apple", "discord"];
+        $allowedProviders = ['google', 'apple', 'discord'];
 
-        if (!in_array($provider, $allowedProviders)) {
+        if (! in_array($provider, $allowedProviders)) {
             abort(404);
         }
     }

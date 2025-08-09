@@ -29,18 +29,18 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        "id",
-        "name",
-        "email",
-        "password",
-        "provider_id",
-        "provider_name",
-        "avatar",
-        "status",
-        "current_game_id",
-        "current_player_id",
-        "is_super_admin",
-        "subscribed_to_newsletter",
+        'id',
+        'name',
+        'email',
+        'password',
+        'provider_id',
+        'provider_name',
+        'avatar',
+        'status',
+        'current_game_id',
+        'current_player_id',
+        'is_super_admin',
+        'subscribed_to_newsletter',
     ];
 
     /**
@@ -48,10 +48,10 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $hidden = ["password", "remember_token"];
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
-        "is_super_admin" => "boolean",
+        'is_super_admin' => 'boolean',
     ];
 
     /**
@@ -62,8 +62,8 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            "email_verified_at" => "datetime",
-            "password" => "hashed",
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
         ];
     }
 
@@ -73,9 +73,9 @@ class User extends Authenticatable
     public function initials(): string
     {
         return Str::of($this->name)
-            ->explode(" ")
-            ->map(fn(string $name) => Str::of($name)->substr(0, 1))
-            ->implode("");
+            ->explode(' ')
+            ->map(fn (string $name) => Str::of($name)->substr(0, 1))
+            ->implode('');
     }
 
     public static function fromTemplate(
@@ -111,10 +111,10 @@ class User extends Authenticatable
         return $this->hasManyThrough(
             Game::class,
             Player::class,
-            "user_id", // Foreign key on players table
-            "id", // Local key on games table
-            "id", // Local key on users table
-            "game_id", // Foreign key on players table
+            'user_id', // Foreign key on players table
+            'id', // Local key on games table
+            'id', // Local key on users table
+            'game_id', // Foreign key on players table
         );
     }
 
@@ -125,17 +125,17 @@ class User extends Authenticatable
 
     public function adminGames()
     {
-        return $this->belongsToMany(Game::class, "game_admins");
+        return $this->belongsToMany(Game::class, 'game_admins');
     }
 
     public function currentGame()
     {
-        return $this->belongsTo(Game::class, "current_game_id");
+        return $this->belongsTo(Game::class, 'current_game_id');
     }
 
     public function currentPlayer()
     {
-        return $this->belongsTo(Player::class, "current_player_id");
+        return $this->belongsTo(Player::class, 'current_player_id');
     }
 
     public function memberships()
@@ -146,13 +146,13 @@ class User extends Authenticatable
     public function getIsMemberAttribute(): bool
     {
         return $this->memberships
-            ->filter(fn($m) => $m->isActive())
+            ->filter(fn ($m) => $m->isActive())
             ->isNotEmpty();
     }
 
     public function isGameAdmin(Game $game): bool
     {
-        return $game->admins->pluck("id")->contains($this->id);
+        return $game->admins->pluck('id')->contains($this->id);
     }
 
     public function promoteToGameAdmin(Game $game, User $admin)
@@ -182,12 +182,12 @@ class User extends Authenticatable
     public function admitToGame(Game $game, ?User $admin = null)
     {
         $application = $this->gameApplications->firstWhere(
-            "game_id",
+            'game_id',
             $game->id,
         );
 
-        if (!$application) {
-            throw new \Exception("User has not applied to this game");
+        if (! $application) {
+            throw new \Exception('User has not applied to this game');
         }
 
         return UserAdmittedToGame::commit(
@@ -201,12 +201,12 @@ class User extends Authenticatable
     public function rejectFromGame(Game $game, User $admin)
     {
         $application = $this->gameApplications->firstWhere(
-            "game_id",
+            'game_id',
             $game->id,
         );
 
-        if (!$application) {
-            throw new \Exception("User has not applied to this game");
+        if (! $application) {
+            throw new \Exception('User has not applied to this game');
         }
 
         UserRejectedFromGame::fire(
@@ -235,19 +235,19 @@ class User extends Authenticatable
     public function getGravatarAttribute(): string
     {
         // Return gravatar with 404 fallback for frontend handling
-        return "https://www.gravatar.com/avatar/" .
-            md5(strtolower(trim($this->email))) .
-            "?d=404&s=200";
+        return 'https://www.gravatar.com/avatar/'.
+            md5(strtolower(trim($this->email))).
+            '?d=404&s=200';
     }
 
     public function getDefaultAvatarUrlAttribute(): string
     {
         // Local default avatar for frontend fallback
-        return url("/build/images/default-avatar.png");
+        return url('/build/images/default-avatar.png');
     }
 
     public function getHasActiveGameAttribute(): bool
     {
-        return $this->games->where("status", "active")->isNotEmpty();
+        return $this->games->where('status', 'active')->isNotEmpty();
     }
 }
