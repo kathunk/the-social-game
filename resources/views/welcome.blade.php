@@ -75,7 +75,7 @@
         <div class="max-w-xl mx-auto">
             <x-marketing-component />
 
-            <section class="mt-8 text-xs opacity-80 leading-relaxed">
+            <section class="m-8 text-xs opacity-80 leading-relaxed">
                 <h2 class="font-semibold tracking-wide uppercase text-[11px] mb-2">Privacy Policy</h2>
                 <p>
                     We collect only the information needed to create your account and run the game. We do not sell your data.
