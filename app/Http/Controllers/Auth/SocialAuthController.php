@@ -20,10 +20,19 @@ class SocialAuthController extends Controller
      */
     public function redirectToProvider(
         string $provider,
+        Request $request,
     ): \Illuminate\Http\RedirectResponse {
         $this->validateProvider($provider);
 
-        return Socialite::driver($provider)->redirect();
+        $socialiteDriver = Socialite::driver($provider);
+
+        // Preserve game parameter through OAuth state
+        if ($request->has('game')) {
+            // Store game parameter in session instead of state
+            session()->put('social_auth_game', $request->get('game'));
+        }
+
+        return $socialiteDriver->redirect();
     }
 
     /**
@@ -91,8 +100,14 @@ class SocialAuthController extends Controller
 
         Auth::login($user, true);
 
-        // Handle game redirect if present (similar to regular auth flow)
-        $game = $request->query('game');
+        // Extract game parameter from session
+        $game = session()->pull('social_auth_game');
+
+        // Also check query parameter as fallback (for direct URLs)
+        if (! $game) {
+            $game = $request->query('game');
+        }
+
         if ($game) {
             return redirect()->route('pre-game-lobby', ['game' => $game]);
         }

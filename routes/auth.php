@@ -45,3 +45,17 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::post('logout', App\Livewire\Actions\Logout::class)->name('logout');
+
+// Debug route for testing social auth flow
+Route::get('debug/social-auth', function () {
+    return response()->json([
+        'session_data' => [
+            'social_auth_game' => session('social_auth_game'),
+            'intended_url' => session('url.intended'),
+        ],
+        'request_data' => [
+            'query_params' => request()->query(),
+            'full_url' => request()->fullUrl(),
+        ],
+    ]);
+})->name('debug.social-auth');
