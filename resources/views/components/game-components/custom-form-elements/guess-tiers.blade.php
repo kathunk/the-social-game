@@ -6,15 +6,22 @@
   x-data="{
     path: 'round_properties.{{ App\Challenges\Classes\TierListGuess::key() }}.{{ $element['property_name'] }}',
     order: [],
-    getOrder() {
-      return Array.from(this.$refs.list.querySelectorAll('[data-value]'))
-        .map((el) => ({ key: el.dataset.key, value: el.dataset.value }))
-    },
-    letterFor(key) {
-      const idx = this.order.findIndex(i => i.key == key)
-      const n = idx >= 0 ? idx : 0
+    letterAt(n) {
       const code = 65 + n + (n >= 4 ? 1 : 0) // skip 'E'
       return String.fromCharCode(code)
+    },
+    getOrder() {
+      return Array.from(this.$refs.list.querySelectorAll('[data-value]'))
+        .map((el, i) => ({
+          actual_tier: el.dataset.key,
+          guessed_tier: this.letterAt(i),
+          value: el.dataset.value,
+        }))
+    },
+    letterFor(key) {
+      const idx = this.order.findIndex(i => i.actual_tier == key)
+      const n = idx >= 0 ? idx : 0
+      return this.letterAt(n)
     },
     sync() {
       this.order = this.getOrder()

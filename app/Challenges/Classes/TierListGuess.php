@@ -4,6 +4,7 @@ namespace App\Challenges\Classes;
 
 use App\Models\Player;
 use App\Modifiers\Classes\TierListModifier;
+use App\Events\PlayerSubmittedTierListGuess;
 
 class TierListGuess extends BaseChallengeClass
 {
@@ -33,6 +34,18 @@ class TierListGuess extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
+        $answer_keys = $this->answerKeysForRound();
+        $type = array_key_exists('opponent', collect($answer_keys)->first()) ? 'opponent' : 'category';
+
+        return [
+            'has_submitted' => [],
+            'assignments' => $this->answerKeysForRound(),
+            'type' => $type,
+        ];
+    }
+
+    public function answerKeysForRound(): array
+    {
         $all_rounds = $this->challenge->game->challenges;
         $current_round_number = $all_rounds->search($this->challenge) + 1;
 
@@ -42,14 +55,7 @@ class TierListGuess extends BaseChallengeClass
             3 => 'single_category',
         };
 
-        $current_assignment_data = $this->modifier()->modifier_data['answer_keys'][$target_round_array_key];
-        $type = array_key_exists('opponent', collect($current_assignment_data)->first()) ? 'opponent' : 'category';
-
-        return [
-            'has_submitted' => [],
-            'assignments' => $current_assignment_data,
-            'type' => $type,
-        ];
+        return $this->modifier()->modifier_data['answer_keys'][$target_round_array_key];
     }
 
     public function frontendComponent(Player $player): array
@@ -82,7 +88,14 @@ class TierListGuess extends BaseChallengeClass
 
     public function submitTierList(Player $player, array $params)
     {
-        dd($params);
+        PlayerSubmittedTierListGuess::fire(
+            player_id: $player->id,
+            game_id: $player->game_id,
+            challenge_id: $this->challenge->id,
+            modifier_id: $this->modifier()->id,
+            answer_key: $this->answerKeysForRound()[$player->id],
+            guesses: $params['guesses_array'],
+        );
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
