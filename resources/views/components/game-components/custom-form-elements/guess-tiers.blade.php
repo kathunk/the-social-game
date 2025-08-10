@@ -36,7 +36,7 @@
         x-sort:item
         data-key="{{ $key['tier'] }}"
         data-value="{{ $key['value'] }}"
-        class="w-full p-3 text-sm flex flex-row justify-between items-center"
+        class="w-full p-3 text-sm flex flex-row justify-between items-center cursor-grab active:cursor-grabbing"
       >
         <div class="flex flex-row gap-2 items-center">
             <flux:badge size="sm" x-text="letterFor($el.closest('li').dataset.key)"></flux:badge>
@@ -46,7 +46,7 @@
             @if($element['type'] === 'opponent')
                 from {{ App\Models\Player::find($key['player_id'])->name }}
             @else
-                {{ Str::title($key['category']) }}
+                {{ Str::replace('_', ' ', Str::title($key['category'])) }}
             @endif
         </flux:badge>
       </li>

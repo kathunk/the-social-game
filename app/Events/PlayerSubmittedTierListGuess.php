@@ -2,20 +2,26 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\PlayerState;
-use App\Events\Traits\HasGame;
-use App\Events\Traits\HasPlayer;
-use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasChallenge;
+use App\Events\Traits\HasGame;
+use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasPlayer;
+use App\States\ChallengeState;
+use App\States\PlayerState;
+use Thunk\Verbs\Event;
 
 class PlayerSubmittedTierListGuess extends Event
 {
-    use HasPlayer, HasGame, HasChallenge, HasModifier;
+    use HasChallenge, HasGame, HasModifier, HasPlayer;
 
     public array $answer_key;
 
     public array $guesses;
+
+    public function applyToChallenge(ChallengeState $challenge)
+    {
+        $challenge->challenge_data['has_submitted'][] = $this->player_id;
+    }
 
     public function applyToPlayer(PlayerState $player)
     {
@@ -31,8 +37,8 @@ class PlayerSubmittedTierListGuess extends Event
             $distance = abs($map[strtolower($guessed_tier)] - $map[strtolower($correct_tier)]);
 
             $points = 2 - $distance;
-            
-            $emoji = match($distance) {
+
+            $emoji = match ($distance) {
                 0 => '🥳',
                 1 => '🧐',
                 2 => '😥',
@@ -52,6 +58,7 @@ class PlayerSubmittedTierListGuess extends Event
 
     public function handle()
     {
+        $this->challenge()->updateModelWithStateData();
         $this->game()->players->each(fn ($player) => $player->updateModelWithStateData());
     }
 }

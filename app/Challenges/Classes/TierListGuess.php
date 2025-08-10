@@ -2,9 +2,11 @@
 
 namespace App\Challenges\Classes;
 
+use App\Events\PlayerReadiedUp;
+use App\Events\PlayerSubmittedTierListGuess;
 use App\Models\Player;
 use App\Modifiers\Classes\TierListModifier;
-use App\Events\PlayerSubmittedTierListGuess;
+use Thunk\Verbs\Facades\Verbs;
 
 class TierListGuess extends BaseChallengeClass
 {
@@ -39,6 +41,7 @@ class TierListGuess extends BaseChallengeClass
 
         return [
             'has_submitted' => [],
+            'has_readied_up' => [],
             'assignments' => $this->answerKeysForRound(),
             'type' => $type,
         ];
@@ -63,20 +66,32 @@ class TierListGuess extends BaseChallengeClass
         $answers = $this->challenge->challenge_data['assignments'][$player->id];
         $type = $this->challenge->challenge_data['type'];
         $has_submitted = in_array($player->id, $this->challenge->challenge_data['has_submitted']);
+        $all_players_have_submitted = count($this->challenge->challenge_data['has_submitted']) === $this->challenge->game->players->count();
 
         $help_text = match ($type) {
-            'opponent' => 'Below are 5 items submitted by '.$answers['opponent'].', in no particular order. Drag and drop the items from best to worst. When you are done, click submit.',
-            'category' => 'Below are 5 items submitted for '.$answers['category'].', in no particular order. Drag and drop the items from best to worst. When you are done, click submit.',
+            'opponent' => 'Below are 5 items submitted by '.$answers['opponent'].', in no particular order. Drag and drop the items from best to worst.',
+            'category' => 'Below are 5 items submitted for '.$answers['category'].', in no particular order. Drag and drop the items from best to worst.',
         };
 
         return $this->form()
             ->title(self::NAME)
-            ->subtitle($help_text)
-            ->when($has_submitted, fn ($form) => $form->title('Show results...'))
-            ->when(! $has_submitted, fn ($form) => $form->tierListGuess($answers, $type)
+            ->when(! $has_submitted, fn ($form) => $form
+                ->subtitle($help_text)
+                ->tierListGuess($answers, $type)
                 ->buttonGroup()
                 ->button('Submit', 'submitTierList')
                 ->endGroup()
+            )
+            ->when($has_submitted, fn ($form) => $form
+                ->when(! $all_players_have_submitted, fn ($form) => $form
+                    ->subtitle('Waiting for everyone to submit...')
+                )
+                ->poll(5000)
+                ->when($all_players_have_submitted, fn ($form) => $form
+                    ->buttonGroup()
+                    ->button('Continue', 'readyUp')
+                    ->endGroup()
+                )
             )
             ->build();
     }
@@ -96,6 +111,31 @@ class TierListGuess extends BaseChallengeClass
             answer_key: $this->answerKeysForRound()[$player->id],
             guesses: $params['guesses_array'],
         );
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function allPlayersHaveReadiedUp(): bool
+    {
+        return count($this->challenge->fresh()->challenge_data['has_readied_up']) === $this->challenge->game->players->count();
+    }
+
+    public function readyUp(Player $player, array $params)
+    {
+        PlayerReadiedUp::fire(
+            player_id: $player->id,
+            game_id: $player->game_id,
+            challenge_id: $this->challenge->id,
+        );
+
+        Verbs::commit();
+
+        if ($this->allPlayersHaveReadiedUp()) {
+            $this->challenge->fresh()->end();
+            $this->challenge->next()
+                ? $this->challenge->next()->start()
+                : $this->challenge->game->end();
+        }
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }

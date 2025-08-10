@@ -2,7 +2,11 @@
 
 @if (isset($form['elements']))
 <x-card>
-    <div class="flex flex-col space-y-1">
+    @if (isset($form['poll_interval']))
+        <div wire:poll.{{ $form['poll_interval'] }}ms="refreshChallenge" class="flex flex-col space-y-1">
+    @else
+        <div class="flex flex-col space-y-1">
+    @endif
         @if ($type === 'challenge')
             @php
                 $challenges = $this->game->challenges;
