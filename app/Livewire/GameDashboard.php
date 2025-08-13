@@ -212,7 +212,14 @@ class GameDashboard extends Component
     #[On('challenge-complete')]
     public function refreshChallenge()
     {
-        $this->initializeProperties();
+        // @todo this is a hack to refresh the challenge, but it's not the best way to do it
+        return redirect()->route('game-dashboard', ['game' => $this->game]);
+
+        // unset($this->challenge);
+        // unset($this->challenge_handler);
+        // unset($this->challenge_component);
+
+        // $this->initializeProperties();
     }
 
     public function joinTeam()

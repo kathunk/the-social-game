@@ -31,8 +31,8 @@ class PlayerSubmittedTierListGuess extends Event
 
         foreach ($this->results() as $result) {
             $opponent = $opponents->firstWhere('id', $result['opponent_id']);
-            // $player->addToScoreHistory($result['emoji'], $result['points'], $result['player_score_description']);
-            // $opponent->addToScoreHistory($result['emoji'], floor($result['points'] * 0.5), $result['opponent_score_description']);
+            $player->addToScoreHistory($result['emoji'], $result['points'], $result['player_score_description']);
+            $opponent->addToScoreHistory($result['emoji'], floor($result['points'] * 0.5), $result['opponent_score_description']);
         }
     }
 

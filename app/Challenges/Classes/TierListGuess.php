@@ -69,6 +69,7 @@ class TierListGuess extends BaseChallengeClass
         $has_submitted = in_array($player->id, $this->challenge->challenge_data['has_submitted']);
         $all_players_have_submitted = count($this->challenge->challenge_data['has_submitted']) === $this->challenge->game->players->count();
         $has_readied_up = in_array($player->id, $this->challenge->challenge_data['has_readied_up']);
+        $is_final_round = $this->challenge->game->challenges->where('status', 'upcoming')->count() === 0;
 
         $help_text = match ($type) {
             'opponent' => 'Below are 5 items submitted by '.$answers['opponent'].', in no particular order. Drag and drop the items from best to worst.',
@@ -106,12 +107,12 @@ class TierListGuess extends BaseChallengeClass
                     ->table(headers: ['Guess', 'Item', 'Correct Tier', 'Points'], rows: $results_table)
                     ->when(! $has_readied_up, fn ($form) => $form
                         ->buttonGroup()
-                        ->button('Ready for next round', 'readyUp')
+                        ->button($is_final_round ? 'End game' : 'Ready for next round', 'readyUp')
                         ->endGroup()
                     )
                     ->when($has_readied_up, fn ($form) => $form
                         ->divider()
-                        ->subtitle('Waiting for everyone to ready up...')
+                        ->subtitle($is_final_round ? 'Waiting for everyone to finish...' : 'Waiting for everyone to ready up...')
                     )
                 )
             )
