@@ -44,6 +44,7 @@ class TierListGuess extends BaseChallengeClass
             'has_readied_up' => [],
             'assignments' => $this->answerKeysForRound(),
             'type' => $type,
+            'results' => [],
         ];
     }
 
@@ -74,6 +75,19 @@ class TierListGuess extends BaseChallengeClass
             'category' => 'Below are 5 items submitted for '.$answers['category'].', in no particular order. Drag and drop the items from best to worst.',
         };
 
+        if ($has_submitted) {
+            $results = $this->challenge->fresh()->challenge_data['results'][$player->id] ?? [];
+
+            $results_table = collect($results)->map(function ($result) {
+                return [
+                    'guessed_tier' => $result['guessed_tier'],
+                    'item' => $result['original_submission_value'],
+                    'correct_tier' => $result['correct_tier'],
+                    'points' => $result['points'],
+                ];
+            })->toArray();
+        }
+
         return $this->form()
             ->title(self::NAME)
             ->when(! $has_submitted, fn ($form) => $form
@@ -90,7 +104,7 @@ class TierListGuess extends BaseChallengeClass
                 ->poll(5000)
                 ->when($all_players_have_submitted, fn ($form) => 
                     $form
-                    ->title('Show results...')
+                    ->table(headers: ['Guess', 'Item', 'Correct Tier', 'Points'], rows: $results_table)
                     ->when(! $has_readied_up, fn ($form) => 
                         $form
                         ->buttonGroup()
@@ -98,7 +112,8 @@ class TierListGuess extends BaseChallengeClass
                         ->endGroup()
                     )
                     ->when($has_readied_up, fn ($form) => $form
-                        ->subtitle('Waiting for everyone to readied up...')
+                        ->divider()
+                        ->subtitle('Waiting for everyone to ready up...')
                     )
                 )
             )
