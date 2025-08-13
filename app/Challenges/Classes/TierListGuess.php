@@ -102,11 +102,9 @@ class TierListGuess extends BaseChallengeClass
                     ->subtitle('Waiting for everyone to submit...')
                 )
                 ->poll(5000)
-                ->when($all_players_have_submitted, fn ($form) => 
-                    $form
+                ->when($all_players_have_submitted, fn ($form) => $form
                     ->table(headers: ['Guess', 'Item', 'Correct Tier', 'Points'], rows: $results_table)
-                    ->when(! $has_readied_up, fn ($form) => 
-                        $form
+                    ->when(! $has_readied_up, fn ($form) => $form
                         ->buttonGroup()
                         ->button('Ready for next round', 'readyUp')
                         ->endGroup()

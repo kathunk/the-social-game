@@ -2,14 +2,14 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
+use App\Events\Traits\HasChallenge;
+use App\Events\Traits\HasGame;
+use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasPlayer;
+use App\States\ChallengeState;
 use App\States\GameState;
 use App\States\PlayerState;
-use App\Events\Traits\HasGame;
-use App\States\ChallengeState;
-use App\Events\Traits\HasPlayer;
-use App\Events\Traits\HasModifier;
-use App\Events\Traits\HasChallenge;
+use Thunk\Verbs\Event;
 
 class PlayerSubmittedTierListGuess extends Event
 {
