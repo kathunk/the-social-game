@@ -23,6 +23,8 @@ class ChallengeCreated extends Event
 
     public ?Carbon $ends_at = null;
 
+    public ?int $round_number = null;
+
     public function applyToChallenge(ChallengeState $challenge)
     {
         $challenge->game_id = $this->game_id;
@@ -30,6 +32,7 @@ class ChallengeCreated extends Event
         $challenge->starts_at = $this->starts_at;
         $challenge->ends_at = $this->ends_at;
         $challenge->status = 'upcoming';
+        $challenge->round_number = $this->round_number;
     }
 
     public function applyToGame(GameState $game)
@@ -47,6 +50,7 @@ class ChallengeCreated extends Event
             'ends_at' => $this->ends_at,
             'status' => 'upcoming',
             'challenge_data' => [],
+            'round_number' => $this->round_number,
         ]);
     }
 }

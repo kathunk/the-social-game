@@ -37,11 +37,19 @@ class TierListConstructionPhase extends BaseChallengeClass
 
     public function dataArrayForState(): array
     {
-        // @todo prioritize categories that have been used less often
-        // $previously_played_categories = $this->game->players
+        $previously_played_categories = $this->challenge->game->players->map(fn ($player) => $player->user->games->filter(fn ($game) => $game->gameMode && in_array(self::key(), $game->challenges->pluck('class_key')->toArray())
+        )?->pluck('challenge_data.categories')->flatten()->toArray() ?? []
+        )->flatten()->toArray();
 
-        $categories = collect(['beverage', 'candy', 'chain_restaurant', 'chore', 'city', 'color', 'feeling', 'fictional_character', 'game', 'genre', 'greeting', 'guilty_pleasure', 'historical_figure', 'holiday', 'kitchen_utensil', 'life_skill', 'mammal', 'month', 'movie', 'musical_artist', 'musical_instrument', 'school_subject', 'smell', 'sound', 'sport', 'superpower', 'texture', 'tv_show', 'vegetable', 'weapon'])
+        $category_usage_counts = collect($previously_played_categories)
+            ->countBy()
+            ->toArray();
+
+        $all_categories = ['animal', 'app', 'beverage', 'body_part', 'book', 'candy', 'celebrity', 'chain_restaurant', 'chore', 'city', 'college_major', 'color', 'date_idea', 'feeling', 'fictional_character', 'game', 'genre', 'gift', 'greeting', 'guilty_pleasure', 'halloween_costume', 'historical_figure', 'hobby', 'holiday', 'job_title', 'kitchen_utensil', 'life_skill', 'mammal', 'month', 'movie', 'musical_artist', 'musical_instrument', 'names', 'nickname', 'politician', 'school_subject', 'smell', 'snack', 'song', 'sound', 'spherical_object', 'sport', 'superpower', 'texture', 'tv_show', 'vacation_destination', 'vegetable', 'vehicle', 'villain', 'weapon', 'website'];
+
+        $categories = collect($all_categories)
             ->shuffle()
+            ->sortBy(fn ($category) => $category_usage_counts[$category] ?? 0)
             ->take(3)
             ->toArray();
 
@@ -62,6 +70,7 @@ class TierListConstructionPhase extends BaseChallengeClass
             ->title(self::NAME)
             ->when($next_category === null, fn ($form) => $form
                 ->subtitle('Waiting for other players to submit their lists...')
+                ->poll(5000)
             )
             ->when($next_category !== null, fn ($form) => $form
                 ->subtitle(self::DESCRIPTION)
@@ -146,7 +155,8 @@ class TierListConstructionPhase extends BaseChallengeClass
 
         if (count($this->challenge->fresh()->challenge_data['has_submitted']) === $player->game->players->count()) {
             $this->challenge->fresh()->end();
-            $this->challenge->next()->start();
+            Verbs::commit();
+            $this->challenge->fresh()->next()->start();
         }
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);

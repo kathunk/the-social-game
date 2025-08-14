@@ -6,6 +6,7 @@ use App\Events\PlayerReadiedUp;
 use App\Events\PlayerSubmittedTierListGuess;
 use App\Models\Player;
 use App\Modifiers\Classes\TierListModifier;
+use Illuminate\Support\Str;
 use Thunk\Verbs\Facades\Verbs;
 
 class TierListGuess extends BaseChallengeClass
@@ -50,13 +51,12 @@ class TierListGuess extends BaseChallengeClass
 
     public function answerKeysForRound(): array
     {
-        $all_rounds = $this->challenge->game->challenges;
-        $current_round_number = $all_rounds->search($this->challenge) + 1;
+        $current_round_number = $this->challenge->round_number;
 
         $target_round_array_key = match ($current_round_number) {
-            1 => 'single_opponent_round_1',
-            2 => 'single_opponent_round_2',
-            3 => 'single_category',
+            2 => 'single_opponent_round_1',
+            3 => 'single_opponent_round_2',
+            4 => 'single_category',
         };
 
         return $this->modifier()->modifier_data['answer_keys'][$target_round_array_key];
@@ -73,7 +73,7 @@ class TierListGuess extends BaseChallengeClass
 
         $help_text = match ($type) {
             'opponent' => 'Below are 5 items submitted by '.$answers['opponent'].', in no particular order. Drag and drop the items from best to worst.',
-            'category' => 'Below are 5 items submitted for '.$answers['category'].', in no particular order. Drag and drop the items from best to worst.',
+            'category' => 'Below are 5 items submitted for '.Str::title(Str::replace('_', ' ', $answers['category'])).', in no particular order. Drag and drop the items from best to worst.',
         };
 
         if ($has_submitted) {

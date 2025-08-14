@@ -299,12 +299,13 @@ class Game extends Model
         }, []);
 
         if ($this->fresh()->challenges->count() === 0) {
-            foreach ($challenges_with_times as $challenge) {
+            foreach ($challenges_with_times as $index => $challenge) {
                 ChallengeCreated::fire(
                     game_id: $this->id,
                     starts_at: $challenge['starts_at'],
                     ends_at: $challenge['ends_at'],
                     class_key: $challenge['class_key'],
+                    round_number: $index + 1,
                 );
             }
         }

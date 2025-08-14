@@ -23,6 +23,8 @@ class ChallengeState extends State
 
     public array $challenge_data;
 
+    public ?int $round_number = null;
+
     public function game(): GameState
     {
         return GameState::load($this->game_id);
