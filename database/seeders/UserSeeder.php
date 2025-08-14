@@ -71,8 +71,8 @@ class UserSeeder extends Seeder
             UserGainedMembership::fire(user_id: $user->id);
         }
 
-        // foreach ($users as $user) {
-        //     $user = User::fromTemplate($user[0], $user[1], bcrypt('password'));
-        // }
+        foreach (collect($users)->take(10) as $user) {
+            $user = User::fromTemplate($user[0], $user[1], bcrypt('password'));
+        }
     }
 }

@@ -57,7 +57,6 @@ class ResetData extends Command
                     $this->error("WARNING: Table {$table} still has {$count} records after truncate!");
                 }
             } catch (\Exception $e) {
-                dump($e);
                 $this->error("Failed to truncate {$table}: ".$e->getMessage());
             }
         }

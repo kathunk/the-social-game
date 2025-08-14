@@ -66,6 +66,8 @@ class TierListConstructionPhase extends BaseChallengeClass
 
         $next_category = collect($all_categories)->filter(fn ($cat) => ! in_array($cat, $submitted))->first();
 
+        dd($this->challenge->game->state()->user_ids);
+
         return $this->form()
             ->title(self::NAME)
             ->when($next_category === null, fn ($form) => $form

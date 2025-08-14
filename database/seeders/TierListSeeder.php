@@ -85,15 +85,15 @@ class TierListSeeder extends Seeder
 
         $game->refresh();
 
-        $users = User::where('email', '!=', 'john@thunk.dev')->take(3)->get();
+        $users = User::where('email', '!=', 'john@thunk.dev')->take(2)->get();
 
-        foreach ($users->take(2) as $user) {
+        foreach ($users as $user) {
             $user->requestToJoinGame($game);
         }
 
         $game->start();
 
-        $this->simulateFirstRound($game);
+        // $this->simulateFirstRound($game);
     }
 
     private function simulateFirstRound(Game $game)

@@ -55,6 +55,8 @@ class UserAdmittedToGame extends Event
             );
         }
 
+        dump($this->user_id, $this->state(GameState::class)->user_ids, $this->state(GameState::class)->user_ids->contains($this->user_id));
+
         $this->assert(
             ! $this->state(GameState::class)->user_ids->contains($this->user_id),
             'User is already a player of this game',
