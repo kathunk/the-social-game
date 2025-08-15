@@ -45,7 +45,6 @@
                                 <flux:table.column>{{ $header }}</flux:table.column>
                             @endforeach
                         </flux:table.columns>
-                        {{-- @dd($element['rows']) --}}
 
                         <flux:table.rows>
                             @foreach ($element['rows'] as $row)
