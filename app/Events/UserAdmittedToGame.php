@@ -54,7 +54,7 @@ class UserAdmittedToGame extends Event
                 'Application has already been decided',
             );
         }
-        
+
         $this->assert(
             ! $this->state(GameState::class)->user_ids->contains($this->user_id),
             'User is already a player of this game',
