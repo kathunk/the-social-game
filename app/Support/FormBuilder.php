@@ -6,11 +6,16 @@ use App\Challenges\Classes\BaseChallengeClass;
 use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 use App\Modifiers\Classes\BaseModifierClass;
+use App\Support\FormBuilderTraits\TierListFOrmElements;
 use Illuminate\Support\Collection;
 
 class FormBuilder
 {
+    use TierListFOrmElements;
+
     protected array $elements = [];
+
+    protected ?int $poll_interval = null;
 
     protected ?array $currentGroup = null;
 
@@ -198,10 +203,16 @@ class FormBuilder
             throw new \RuntimeException('You must call endGroup() before build()');
         }
 
-        return [
+        $result = [
             'type' => 'form',
             'elements' => $this->elements,
         ];
+
+        if ($this->poll_interval !== null) {
+            $result['poll_interval'] = $this->poll_interval;
+        }
+
+        return $result;
     }
 
     public function teamSwap(
@@ -278,6 +289,13 @@ class FormBuilder
         if ($condition) {
             $callback($this);
         }
+
+        return $this;
+    }
+
+    public function poll(int $interval): static
+    {
+        $this->poll_interval = $interval;
 
         return $this;
     }

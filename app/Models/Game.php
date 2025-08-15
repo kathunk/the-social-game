@@ -209,7 +209,10 @@ class Game extends Model
         if (! $this->starts_at) {
             $duration = GameTemplate::find($this->game_template_id)
                 ->total_duration;
-            $ends_at = Carbon::parse(now())->addMinutes($duration);
+
+            $ends_at = $duration > 0
+                ? Carbon::parse(now())->addMinutes($duration)
+                : null;
 
             GameUpdated::fire(
                 game_id: $this->id,
@@ -282,7 +285,9 @@ class Game extends Model
                 $starts_at = $last_challenge['ends_at'];
             }
 
-            $ends_at = $starts_at->copy()->addMinutes($challenge['duration']);
+            $ends_at = $challenge['duration'] > 0
+                ? $starts_at->copy()->addMinutes($challenge['duration'])
+                : null;
 
             $carry[] = [
                 'starts_at' => $starts_at,
@@ -294,12 +299,13 @@ class Game extends Model
         }, []);
 
         if ($this->fresh()->challenges->count() === 0) {
-            foreach ($challenges_with_times as $challenge) {
+            foreach ($challenges_with_times as $index => $challenge) {
                 ChallengeCreated::fire(
                     game_id: $this->id,
                     starts_at: $challenge['starts_at'],
                     ends_at: $challenge['ends_at'],
                     class_key: $challenge['class_key'],
+                    round_number: $index + 1,
                 );
             }
         }
@@ -316,7 +322,7 @@ class Game extends Model
 
         Verbs::commit();
 
-        $challenge = $this->fresh()->challenges->sortBy('starts_at')->first();
+        $challenge = $this->fresh()->challenges->first();
 
         $challenge->start();
 

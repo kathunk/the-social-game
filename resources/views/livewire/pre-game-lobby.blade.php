@@ -118,7 +118,7 @@
                     </x-button>
                 @endif
                 <x-button @click="editGameMode = true" icon="pencil">Settings</x-button>
-                @if ($this->game->status === 'upcoming')
+                @if ($this->game->status === 'upcoming' && $this->game->total_duration > 0)
                     <x-button @click="editTime = true" icon="pencil">Time</x-button>
                 @endif
                 @if ($this->user->is_super_admin && $this->is_joinable)

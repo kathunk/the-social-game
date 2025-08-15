@@ -2,7 +2,11 @@
 
 @if (isset($form['elements']))
 <x-card>
-    <div class="flex flex-col space-y-1">
+    @if (isset($form['poll_interval']))
+        <div wire:poll.{{ $form['poll_interval'] }}ms="refreshChallenge" class="flex flex-col space-y-1">
+    @else
+        <div class="flex flex-col space-y-1">
+    @endif
         @if ($type === 'challenge')
             @php
                 $challenges = $this->game->challenges;
@@ -12,7 +16,9 @@
             <flux:text class="flex flex-wrap items-baseline gap-1 text-faded-gray text-tiny md:text-xxs font-medium">
                 <span>CHALLENGE</span>
                 <span>({{ $activated_challenges }} of {{ $total_challenges }})</span>
-                <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
+                @if ($this->challenge->ends_at)
+                    <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
+                @endif
             </flux:text>
         @endif
         @foreach ($form['elements'] as $element)
@@ -39,7 +45,6 @@
                                 <flux:table.column>{{ $header }}</flux:table.column>
                             @endforeach
                         </flux:table.columns>
-                        {{-- @dd($element['rows']) --}}
 
                         <flux:table.rows>
                             @foreach ($element['rows'] as $row)
@@ -103,6 +108,9 @@
                         @endforeach
                     </flux:select>
                 </flux:field>
+                    @break
+                @case('tier_list_guess')
+                    <x-game-components.custom-form-elements.guess-tiers :element="$element" />
                     @break
             @endswitch
         @endforeach
