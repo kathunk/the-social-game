@@ -4,6 +4,8 @@ namespace App\Modifiers\Classes;
 
 class TierListModifier extends BaseModifierClass
 {
+    const NAME = 'Tier lists';
+
     const TYPE = 'individual';
 
     public function isInvalidForTemplate(
