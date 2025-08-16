@@ -6,12 +6,12 @@ use App\Challenges\Classes\BaseChallengeClass;
 use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 use App\Modifiers\Classes\BaseModifierClass;
-use App\Support\FormBuilderTraits\TierListFOrmElements;
+use App\Support\FormBuilderTraits\TierListFormElements;
 use Illuminate\Support\Collection;
 
 class FormBuilder
 {
-    use TierListFOrmElements;
+    use TierListFormElements;
 
     protected array $elements = [];
 
