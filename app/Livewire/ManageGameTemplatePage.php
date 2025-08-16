@@ -90,7 +90,7 @@ class ManageGameTemplatePage extends Component
     {
         $this->challenges[] = [
             'challenge_keys' => [],
-            'duration' => 10,
+            'duration' => null,
         ];
     }
 
@@ -105,7 +105,7 @@ class ManageGameTemplatePage extends Component
         'team_names' => 'nullable|string',
         'challenges' => 'required|array|min:1',
         'challenges.*.challenge_keys' => 'required|array|min:1',
-        'challenges.*.duration' => 'required|integer|min:1',
+        'challenges.*.duration' => 'nullable|integer|min:1',
     ];
 
     public function saveTemplate()
