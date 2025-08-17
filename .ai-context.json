@@ -1,0 +1,164 @@
+{
+    "project": {
+        "name": "The Social Game",
+        "type": "Laravel Web Application",
+        "version": "1.0.0",
+        "description": "Social gaming platform with real-time mechanics, event sourcing, and AI integration",
+        "primaryLanguages": ["PHP", "JavaScript", "SQL"],
+        "framework": "Laravel 12.x"
+    },
+    "architecture": {
+        "pattern": "MVC with Event Sourcing",
+        "frontend": "Livewire + Alpine.js + Tailwind CSS",
+        "backend": "Laravel + MySQL",
+        "realtime": "Laravel Reverb (WebSockets)",
+        "queue": "Laravel Horizon",
+        "payments": "Laravel Cashier (Stripe)",
+        "eventSourcing": "Verbs Library"
+    },
+    "keyDirectories": {
+        "app/": "Laravel application code",
+        "app/Challenges/": "Game challenge implementations",
+        "app/Events/": "Event sourcing events for state changes",
+        "app/Livewire/": "Interactive UI components",
+        "app/Models/": "Eloquent models (User, Game, Challenge, etc.)",
+        "app/Modifiers/": "Game rule modification system",
+        "mcp/": "Model Context Protocol server for AI integration",
+        "docs/": "Project documentation including AI development guide",
+        "routes/web.php": "Main application routes",
+        "database/migrations/": "Database schema definitions"
+    },
+    "coreModels": {
+        "User": "Player accounts and authentication",
+        "Game": "Game instances with settings and state",
+        "Challenge": "Individual game challenges",
+        "Team": "Player teams within games",
+        "Modifier": "Dynamic game rule changes",
+        "GamePlayer": "Many-to-many relationship between users and games"
+    },
+    "gameFlow": [
+        "Game creation with templates and modes",
+        "Player registration and team formation",
+        "Pre-game lobby phase",
+        "Active game with sequential challenges",
+        "Real-time interactions and updates",
+        "Game completion and results"
+    ],
+    "eventSourcingEvents": {
+        "UserCreated": "New user registration",
+        "GameStarted": "Game begins active phase",
+        "ChallengeCompleted": "Player completes challenge",
+        "GameEnded": "Game reaches completion",
+        "UserJoinedGame": "Player joins a game",
+        "TeamFormed": "New team created"
+    },
+    "mcpIntegration": {
+        "location": "mcp/",
+        "server": "mcp/server.js",
+        "purpose": "Provides AI assistants structured access to game data",
+        "tools": [
+            "get_active_games",
+            "get_game_details",
+            "get_game_players",
+            "get_user_stats",
+            "get_game_challenges"
+        ],
+        "resources": [
+            "game://active",
+            "game://templates",
+            "stats://leaderboard"
+        ]
+    },
+    "developmentCommands": {
+        "php artisan serve": "Start development web server",
+        "php artisan queue:work": "Process background jobs",
+        "php artisan horizon": "Queue monitoring dashboard",
+        "php artisan reverb:start": "Start WebSocket server",
+        "npm run dev": "Start frontend build process",
+        "cd mcp && npm run dev": "Start MCP server in development mode"
+    },
+    "customArtisanCommands": {
+        "create:bots": "Generate bot users for testing",
+        "progress:games": "Advance game states automatically",
+        "fill:game-with-bots": "Add bots to existing games",
+        "fake:laracon-activity": "Generate fake game activity",
+        "db:reset-data": "Reset game data for development",
+        "verbs:replay-selective": "Replay specific events",
+        "promote:super-admin": "Promote user to super admin"
+    },
+    "importantFiles": {
+        "composer.json": "PHP dependencies and project metadata",
+        "package.json": "Node.js dependencies and scripts",
+        "routes/web.php": "Web application routes",
+        ".env": "Environment configuration (database, services)",
+        "mcp/README.md": "MCP server documentation",
+        "docs/ai-development-guide.md": "Comprehensive AI development guide"
+    },
+    "testingSetup": {
+        "framework": "Pest PHP",
+        "structure": "tests/Feature/ and tests/Unit/",
+        "database": "Uses database transactions for isolation",
+        "commands": "php artisan test",
+        "pattern": "Test everything through Livewire to prove frontend integration",
+        "helpers": "Use TestCase methods: mockGameTemplate(), createGame(), createPlayer()"
+    },
+    "deploymentConsiderations": {
+        "queues": "Requires queue workers for background processing",
+        "websockets": "Reverb server for real-time features",
+        "caching": "Redis recommended for sessions and cache",
+        "database": "MySQL/PostgreSQL with proper indexing",
+        "ssl": "Required for WebSocket connections"
+    },
+    "conventionsAndPatterns": {
+        "codeStyle": "PSR-12 PHP coding standards",
+        "naming": "Laravel naming conventions (Models, Controllers, etc.)",
+        "stateChanges": "All state changes must go through Events",
+        "frontend": "Use Livewire components for interactivity",
+        "database": "Use migrations for schema changes, UUIDs for primary keys",
+        "validation": "Form Requests and custom Rules classes"
+    },
+    "aiDevelopmentNotes": {
+        "contextFiles": [
+            ".ai-context.json (this file)",
+            "docs/ai-development-guide.md",
+            "docs/architectural-patterns.md",
+            "mcp/README.md"
+        ],
+        "whenMakingChanges": [
+            "Always consider the gaming domain and social aspects",
+            "CRITICAL: Use ONLY Verbs events for database changes - NEVER direct model updates",
+            "CRITICAL: Use only Livewire + Alpine.js - no other frontend frameworks",
+            "CRITICAL: Keep GameDashboard/PlayerView/TeamView completely generic and game-agnostic",
+            "CRITICAL: Write comprehensive Livewire integration tests for all features",
+            "Follow the architectural patterns in docs/architectural-patterns.md",
+            "Use GameDashboard + HandlesClassActions pattern for UI interactions",
+            "Challenge/Modifier classes should extend Base classes and follow established patterns",
+            "Frontend components should be generated via frontendComponent() methods",
+            "Consider real-time update requirements",
+            "Update documentation when adding major features"
+        ],
+        "mcpAwareness": "The MCP server in mcp/ directory provides AI assistants with database access and game information. Reference mcp/README.md for available tools and resources.",
+        "corePatterns": {
+            "gameInteractions": "GameDashboard (Livewire) + HandlesClassActions trait + Challenge/Modifier classes + form.blade.php component",
+            "stateChanges": "All via Verbs events with validate() -> apply() -> handle() pattern",
+            "uiGeneration": "Classes generate frontendComponent() arrays, rendered by form.blade.php",
+            "actionHandling": "callClassAction() validates, calls handler method, fires events, commits via Verbs::commit()",
+            "lifecycle": "mount() -> initializeProperties() -> user interaction -> callClassAction() -> event -> refresh"
+        },
+        "keyInsights": [
+            "This is an event-sourced system - all important state changes are events",
+            "NEVER update database directly - only through Verbs events or state becomes inconsistent",
+            "GameDashboard is a 'superhighway' - completely agnostic to game content",
+            "New game modes should work automatically without frontend changes",
+            "All features must be tested through Livewire to prove frontend integration",
+            "Livewire + Alpine.js ONLY - no React/Vue/other frontend frameworks",
+            "Real-time features are crucial - many actions need WebSocket updates",
+            "Game fairness and preventing cheating should be considered",
+            "Challenge and Modifier classes define both backend logic AND frontend UI",
+            "HandlesClassActions trait bridges Livewire frontend with class-based backend",
+            "Payment integration exists for premium features"
+        ]
+    },
+    "lastUpdated": "2024-12-19",
+    "maintainers": ["The Social Game Team"]
+}
