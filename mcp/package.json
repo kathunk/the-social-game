@@ -1,0 +1,41 @@
+{
+  "name": "@the-social-game/mcp-server",
+  "version": "1.0.0",
+  "description": "Model Context Protocol server for The Social Game",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "build": "echo 'No build step required for MCP server'",
+    "test": "echo 'No tests specified yet'"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "social-game",
+    "laravel"
+  ],
+  "author": "The Social Game Team",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "mysql2": "^3.9.0",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "file:../"
+  },
+  "mcp": {
+    "name": "the-social-game",
+    "description": "Provides access to social game data, player management, and game mechanics",
+    "version": "1.0.0"
+  }
+}

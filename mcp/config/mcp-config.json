@@ -1,0 +1,54 @@
+{
+  "mcpServers": {
+    "the-social-game": {
+      "command": "node",
+      "args": ["server.js"],
+      "cwd": "./mcp",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "description": "The Social Game MCP Server - Provides access to game data, player management, and game mechanics",
+      "capabilities": {
+        "tools": [
+          "get_active_games",
+          "get_game_details",
+          "get_game_players",
+          "get_user_stats",
+          "get_game_challenges"
+        ],
+        "resources": [
+          "game://active",
+          "game://templates",
+          "stats://leaderboard"
+        ]
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "author": "The Social Game Team",
+        "repository": "https://github.com/your-username/the-social-game",
+        "documentation": "./docs/mcp-api.md"
+      },
+      "connection": {
+        "type": "stdio",
+        "timeout": 30000,
+        "retries": 3
+      },
+      "logging": {
+        "level": "info",
+        "file": "./logs/mcp-server.log",
+        "maxSize": "10MB",
+        "maxFiles": 5
+      }
+    }
+  },
+  "global": {
+    "timeout": 30000,
+    "retries": 3,
+    "errorHandling": "graceful",
+    "security": {
+      "allowedCommands": ["node"],
+      "maxMemory": "512MB",
+      "maxCpu": "50%"
+    }
+  }
+}
