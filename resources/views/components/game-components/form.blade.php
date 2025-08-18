@@ -42,7 +42,7 @@
                     <flux:table>
                         <flux:table.columns>
                             @foreach ($element['headers'] as $header)
-                                <flux:table.column>{{ $header }}</flux:table.column>
+                                <flux:table.column class="text-xs break-words whitespace-normal">{{ $header }}</flux:table.column>
                             @endforeach
                         </flux:table.columns>
 
@@ -50,7 +50,7 @@
                             @foreach ($element['rows'] as $row)
                                 <flux:table.row>
                                     @foreach ($row as $cell)
-                                        <flux:table.cell>{{ $cell }}</flux:table.cell>
+                                        <flux:table.cell class="text-xs break-words whitespace-normal">{{ $cell }}</flux:table.cell>
                                     @endforeach
                                 </flux:table.row>
                             @endforeach

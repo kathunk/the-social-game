@@ -2,12 +2,13 @@
 
 namespace App\Challenges\Classes;
 
-use App\Events\PlayerReadiedUp;
-use App\Events\PlayerSubmittedTierListGuess;
 use App\Models\Player;
-use App\Modifiers\Classes\TierListModifier;
 use Illuminate\Support\Str;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerReadiedUp;
+use App\Events\GameUpdatedForReverb;
+use App\Modifiers\Classes\TierListModifier;
+use App\Events\PlayerSubmittedTierListGuess;
 
 class TierListGuess extends BaseChallengeClass
 {
@@ -82,9 +83,9 @@ class TierListGuess extends BaseChallengeClass
             $results_table = collect($results)->map(function ($result) {
                 return [
                     'guessed_tier' => $result['guessed_tier'],
-                    'item' => $result['original_submission_value'],
                     'correct_tier' => $result['correct_tier'],
-                    'points' => $result['points'],
+                    'points' => $result['points'] > -1 ? '+' . $result['points'] : $result['points'],
+                    'item' => $result['original_submission_value'],
                 ];
             })->toArray();
         }
@@ -102,9 +103,8 @@ class TierListGuess extends BaseChallengeClass
                 ->when(! $all_players_have_submitted, fn ($form) => $form
                     ->subtitle('Waiting for everyone to submit...')
                 )
-                ->poll(5000)
                 ->when($all_players_have_submitted, fn ($form) => $form
-                    ->table(headers: ['Guess', 'Item', 'Correct Tier', 'Points'], rows: $results_table)
+                    ->table(headers: ['Guess', 'Correct Tier', 'Points', 'Item'], rows: $results_table)
                     ->when(! $has_readied_up, fn ($form) => $form
                         ->buttonGroup()
                         ->button($is_final_round ? 'End game' : 'Ready for next round', 'readyUp')
@@ -135,6 +135,12 @@ class TierListGuess extends BaseChallengeClass
             guesses: $params['guesses_array'],
         );
 
+        Verbs::commit();
+
+        if (count($this->challenge->challenge_data['has_submitted']) === $this->challenge->game->players->count()) {
+            event(new GameUpdatedForReverb($player->game->fresh()));
+        }
+
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
@@ -158,6 +164,9 @@ class TierListGuess extends BaseChallengeClass
             $this->challenge->next()
                 ? $this->challenge->next()->start()
                 : $this->challenge->game->end();
+
+            Verbs::commit();
+            event(new GameUpdatedForReverb($player->game->fresh()));
         }
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);

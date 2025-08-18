@@ -85,7 +85,7 @@ class TierListSeeder extends Seeder
 
         $game->refresh();
 
-        $users = User::where('email', '!=', 'john@thunk.dev')->take(2)->get();
+        $users = User::where('email', '!=', 'john@thunk.dev')->take(1)->get();
 
         foreach ($users as $user) {
             $user->requestToJoinGame($game);

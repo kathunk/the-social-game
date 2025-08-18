@@ -2,12 +2,13 @@
 
 namespace App\Challenges\Classes;
 
-use App\Events\TierListSubmitted;
 use App\Models\Player;
-use App\Modifiers\Classes\TierListModifier;
 use App\States\GameState;
 use Illuminate\Support\Str;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\TierListSubmitted;
+use App\Events\GameUpdatedForReverb;
+use App\Modifiers\Classes\TierListModifier;
 
 class TierListConstructionPhase extends BaseChallengeClass
 {
@@ -70,7 +71,6 @@ class TierListConstructionPhase extends BaseChallengeClass
             ->title(self::NAME)
             ->when($next_category === null, fn ($form) => $form
                 ->subtitle('Waiting for other players to submit their lists...')
-                ->poll(5000)
             )
             ->when($next_category !== null, fn ($form) => $form
                 ->subtitle(self::DESCRIPTION)
@@ -78,32 +78,32 @@ class TierListConstructionPhase extends BaseChallengeClass
                 ->title(Str::title(Str::plural(Str::replace('_', ' ', $next_category))))
                 ->input(
                     property_name: $next_category.'-A',
-                    validation_rules: 'required|string|min:1',
-                    validation_messages: ['required' => 'Submisions are required'],
+                    validation_rules: 'required|string|min:1|max:100',
+                    validation_messages: ['required' => 'Submisions are required', 'max' => 'Submissions must be less than 100 characters'],
                     placeholder: 'A tier '.Str::singular(Str::replace('_', ' ', $next_category)),
                 )
                 ->input(
                     property_name: $next_category.'-B',
-                    validation_rules: 'required|string|min:1',
-                    validation_messages: ['required' => 'Submisions are required'],
+                    validation_rules: 'required|string|min:1|max:100',
+                    validation_messages: ['required' => 'Submisions are required', 'max' => 'Submissions must be less than 100 characters'],
                     placeholder: 'B tier '.Str::singular(Str::replace('_', ' ', $next_category)),
                 )
                 ->input(
                     property_name: $next_category.'-C',
-                    validation_rules: 'required|string|min:1',
-                    validation_messages: ['required' => 'Submisions are required'],
+                    validation_rules: 'required|string|min:1|max:100',
+                    validation_messages: ['required' => 'Submisions are required', 'max' => 'Submissions must be less than 100 characters'],
                     placeholder: 'C tier '.Str::singular(Str::replace('_', ' ', $next_category)),
                 )
                 ->input(
                     property_name: $next_category.'-D',
-                    validation_rules: 'required|string|min:1',
-                    validation_messages: ['required' => 'Submisions are required'],
+                    validation_rules: 'required|string|min:1|max:100',
+                    validation_messages: ['required' => 'Submisions are required', 'max' => 'Submissions must be less than 100 characters'],
                     placeholder: 'D tier '.Str::singular(Str::replace('_', ' ', $next_category)),
                 )
                 ->input(
                     property_name: $next_category.'-F',
-                    validation_rules: 'required|string|min:1',
-                    validation_messages: ['required' => 'Submisions are required'],
+                    validation_rules: 'required|string|min:1|max:100',
+                    validation_messages: ['required' => 'Submisions are required', 'max' => 'Submissions must be less than 100 characters'],
                     placeholder: 'F tier '.Str::singular(Str::replace('_', ' ', $next_category)),
                 )
                 ->buttonGroup()
@@ -157,6 +157,8 @@ class TierListConstructionPhase extends BaseChallengeClass
             $this->challenge->fresh()->end();
             Verbs::commit();
             $this->challenge->fresh()->next()->start();
+
+            event(new GameUpdatedForReverb($player->game->fresh()));
         }
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
@@ -310,6 +312,13 @@ class TierListConstructionPhase extends BaseChallengeClass
     public function generatePlayerAssignedOpponents(array $playerIds, array $forbiddenPairs = []): array
     {
         $maxAttempts = 100;
+
+        if (collect($playerIds)->unique()->count() === 2) {
+            return [
+                $playerIds[0] => $playerIds[1],
+                $playerIds[1] => $playerIds[0],
+            ];
+        }
 
         for ($i = 0; $i < $maxAttempts; $i++) {
             $shuffled = $playerIds;

@@ -70,8 +70,8 @@ class PlayerSubmittedTierListGuess extends Event
             $original_submission_value = $original_submission['value'];
             $player = $this->state(PlayerState::class);
 
-            $player_score_description = "Guessed that $original_submission_value was $guessed_tier-tier (submitted by $opponent_name at $correct_tier-tier)";
-            $opponent_score_description = "$player->name guessed that $original_submission_value was $correct_tier-tier (you ranked it as $guessed_tier-tier)";
+            $player_score_description = "You guessed that $original_submission_value was $guessed_tier-tier (submitted by $opponent_name at $correct_tier-tier)";
+            $opponent_score_description = "$player->name guessed that $original_submission_value was $guessed_tier-tier (you ranked it as $correct_tier-tier)";
 
             $results[] = [
                 'opponent_id' => $opponent->id,
