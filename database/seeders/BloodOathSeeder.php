@@ -34,6 +34,7 @@ class BloodOathSeeder extends Seeder
             max_players: 12,
             is_public: true,
             players_can_join_late: false,
+            scoreboard_type: 'blood_oath',
         )->game_mode_id;
 
         $mode = GameMode::find($mode_id);

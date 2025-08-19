@@ -1,5 +1,7 @@
 @props(['teams', 'players', 'type'])
+@if ($type === 'hide_until_end' && $this->game->status !== 'ended')
 
+@else
 <div>
     <x-card>
         <x-forms.heading class="!text-lg">Scoreboard</x-forms.heading>
@@ -182,3 +184,4 @@
         </flux:table>
     </x-card>
 </div>
+@endif

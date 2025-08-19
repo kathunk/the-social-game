@@ -31,6 +31,11 @@
                 <flux:radio value="individual" label="Individual" checked />
                 <flux:radio value="team" label="Team" />
             </flux:radio.group>
+            <flux:radio.group wire:model="scoreboard_type" label="Scoreboard Type">
+                @foreach (App\Livewire\ManageGameModePage::SCOREBOARD_TYPES as $key => $label)
+                    <flux:radio value="{{ $key }}" label="{{ $label }}" />
+                @endforeach
+            </flux:radio.group>
 
             <x-button variant="primary" wire:click="saveGameMode">Save</x-button>
         </div>

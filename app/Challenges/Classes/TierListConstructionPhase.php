@@ -67,6 +67,48 @@ class TierListConstructionPhase extends BaseChallengeClass
 
         $next_category = collect($all_categories)->filter(fn ($cat) => ! in_array($cat, $submitted))->first();
 
+        $formatted = Str::singular(Str::replace('_', ' ', $next_category));
+
+        $a_placeholder = collect(
+            'An A-tier '.$formatted.' that wows and delights',
+            'The best A-tier '.$formatted.' in the world',
+            'The A-tier '.$formatted.' above which no greater can be conceived',
+            'An A-tier '.$formatted.' you would bring home to mom',
+            'An A-tier '.$formatted.' deserving of standing ovations',
+            'The undisputed best A-tier '.$formatted,
+        )->random();
+        $b_placeholder = collect(
+            'A good but not great B-tier '.$formatted,
+            'A good enough B-tier '.$formatted,
+            'A solid B-tier '.$formatted,
+            'A pretty, pretty, pretty good B-tier '.$formatted,
+            'A reliable, if uninspiring B-tier '.$formatted,
+        )->random();
+        $c_placeholder = collect(
+            'A mediocre C-tier '.$formatted,
+            'A "meh" C-tier '.$formatted,
+            'A C-tier '.$formatted.' that is just okay',
+            'A C-tier '.$formatted.' that is neither here nor there',
+            'A C-tier '.$formatted.' you wouldn\'t write home about',
+            'A C-tier '.$formatted.' with strong middle-child energy',
+            'A C-tier '.$formatted.' that goes down like tap water',
+            'A C-tier '.$formatted.' that is no one\'s favorite',
+            'A C-tier '.$formatted.' that epitomizes "so-so"',
+        )->random();
+        $d_placeholder = collect(
+            'A D-tier '.$formatted.' that is bad',
+            'A D-tier '.$formatted.' that is just plain wrong',
+            'A deeply disappointing D-tier '.$formatted,
+            'A D-tier '.$formatted.' that is invited to zero cookouts',
+        )->random();
+        $f_placeholder = collect(
+            'A terrible horrible no good very bad F-tier '.$formatted,
+            'The absolute worst F-tier '.$formatted,
+            'The F-tier '.$formatted.' so bad it should be illegal',
+            'An F-tier '.$formatted.' that will get you blocked and muted',
+            'An F-tier '.$formatted.' that simply stinks',
+        )->random();
+
         return $this->form()
             ->title(self::NAME)
             ->when($next_category === null, fn ($form) => $form
@@ -80,31 +122,31 @@ class TierListConstructionPhase extends BaseChallengeClass
                     property_name: $next_category.'-A',
                     validation_rules: 'required|string|min:1|max:100',
                     validation_messages: ['required' => 'Submisions are required', 'max' => 'Submissions must be less than 100 characters'],
-                    placeholder: 'A tier '.Str::singular(Str::replace('_', ' ', $next_category)),
+                    placeholder: $a_placeholder,
                 )
                 ->input(
                     property_name: $next_category.'-B',
                     validation_rules: 'required|string|min:1|max:100',
                     validation_messages: ['required' => 'Submisions are required', 'max' => 'Submissions must be less than 100 characters'],
-                    placeholder: 'B tier '.Str::singular(Str::replace('_', ' ', $next_category)),
+                    placeholder: $b_placeholder,
                 )
                 ->input(
                     property_name: $next_category.'-C',
                     validation_rules: 'required|string|min:1|max:100',
                     validation_messages: ['required' => 'Submisions are required', 'max' => 'Submissions must be less than 100 characters'],
-                    placeholder: 'C tier '.Str::singular(Str::replace('_', ' ', $next_category)),
+                    placeholder: $c_placeholder,
                 )
                 ->input(
                     property_name: $next_category.'-D',
                     validation_rules: 'required|string|min:1|max:100',
                     validation_messages: ['required' => 'Submisions are required', 'max' => 'Submissions must be less than 100 characters'],
-                    placeholder: 'D tier '.Str::singular(Str::replace('_', ' ', $next_category)),
+                    placeholder: $d_placeholder,
                 )
                 ->input(
                     property_name: $next_category.'-F',
                     validation_rules: 'required|string|min:1|max:100',
                     validation_messages: ['required' => 'Submisions are required', 'max' => 'Submissions must be less than 100 characters'],
-                    placeholder: 'F tier '.Str::singular(Str::replace('_', ' ', $next_category)),
+                    placeholder: $f_placeholder,
                 )
                 ->buttonGroup()
                 ->button(
