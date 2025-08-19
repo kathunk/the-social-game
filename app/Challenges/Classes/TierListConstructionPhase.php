@@ -217,7 +217,7 @@ class TierListConstructionPhase extends BaseChallengeClass
 
         $categories_used = collect($categories)->mapWithKeys(fn ($category) => [$category => 0])->toArray();
 
-        $playerIds = collect($players)->pluck('id')->all();
+        $playerIds = collect($players)->pluck('id')->unique()->all();
         $playerNames = collect($players)->mapWithKeys(fn ($p) => [$p->id => $p->name])->all();
 
         foreach ($players as $player) {
@@ -227,6 +227,12 @@ class TierListConstructionPhase extends BaseChallengeClass
                 ->first();
             $categories_used[$random_least_used_category]++;
             $answer_keys['single_category'][$player->id]['category'] = $random_least_used_category;
+        }
+
+        $round1 = $this->generatePlayerAssignedOpponents($playerIds);
+        $round2 = $this->generatePlayerAssignedOpponents($playerIds, $round1);
+        if (count($playerIds) === 2) {
+            $round3 = $this->generatePlayerAssignedOpponents($playerIds, $round2);
         }
 
         foreach ($playerIds as $id) {
@@ -240,7 +246,6 @@ class TierListConstructionPhase extends BaseChallengeClass
         // Round 3 - distribute submissions to opponents
         // Assign per-tier using a derangement across players to guarantee feasibility
         if (count($playerIds) > 2) {
-
             foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
                 // Map each sender to a different receiver (no self) for this tier
                 $mapping = $this->generatePlayerAssignedOpponents($playerIds);
@@ -288,12 +293,6 @@ class TierListConstructionPhase extends BaseChallengeClass
                     throw new \Exception('Player '.$player->name.' has '.$a_tiers.' A tiers, '.$b_tiers.' B tiers, '.$c_tiers.' C tiers, '.$d_tiers.' D tiers, and '.$f_tiers.' F tiers');
                 }
             });
-        }
-
-        $round1 = $this->generatePlayerAssignedOpponents($playerIds);
-        $round2 = $this->generatePlayerAssignedOpponents($playerIds, $round1);
-        if (count($playerIds) === 2) {
-            $round3 = $this->generatePlayerAssignedOpponents($playerIds, $round2);
         }
 
         $round1_inverse = [];
