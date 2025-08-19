@@ -2,13 +2,13 @@
 
 namespace App\Challenges\Classes;
 
+use App\Events\GameUpdatedForReverb;
+use App\Events\TierListSubmitted;
 use App\Models\Player;
+use App\Modifiers\Classes\TierListModifier;
 use App\States\GameState;
 use Illuminate\Support\Str;
 use Thunk\Verbs\Facades\Verbs;
-use App\Events\TierListSubmitted;
-use App\Events\GameUpdatedForReverb;
-use App\Modifiers\Classes\TierListModifier;
 
 class TierListConstructionPhase extends BaseChallengeClass
 {
@@ -288,7 +288,7 @@ class TierListConstructionPhase extends BaseChallengeClass
                 $c_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'C')->count();
                 $d_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'D')->count();
                 $f_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'F')->count();
-    
+
                 if ($a_tiers !== 2 || $b_tiers !== 2 || $c_tiers !== 2 || $d_tiers !== 2 || $f_tiers !== 2) {
                     throw new \Exception('Player '.$player->name.' has '.$a_tiers.' A tiers, '.$b_tiers.' B tiers, '.$c_tiers.' C tiers, '.$d_tiers.' D tiers, and '.$f_tiers.' F tiers');
                 }

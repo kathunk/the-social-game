@@ -221,10 +221,9 @@ it(
         $total_players = $this->game->players->count();
         expect($submitted_count)->toBe($total_players);
 
-        $this->game->players->each(fn($p) =>
-            expect(
-                $this->construction_challenge->challenge_data['has_submitted'],
-            )->toContain($p->id)
+        $this->game->players->each(fn ($p) => expect(
+            $this->construction_challenge->challenge_data['has_submitted'],
+        )->toContain($p->id)
         );
     },
 );
@@ -715,7 +714,7 @@ it('handles 2 player games', function () {
     // the initial modifier has 3 rounds dedicated to a single opponent each, rather than having a category-based 3rd round
     expect($answer_keys)->toHaveKeys([
         'single_opponent_round_1',
-        'single_opponent_round_2', 
+        'single_opponent_round_2',
         'single_opponent_round_3',
     ]);
 
@@ -725,10 +724,10 @@ it('handles 2 player games', function () {
         $round1_opponent = $answer_keys['single_opponent_round_1'][$player_id]['opponent'];
         $round2_opponent = $answer_keys['single_opponent_round_2'][$player_id]['opponent'];
         $round3_opponent = $answer_keys['single_opponent_round_2'][$player_id]['opponent'];
-        
+
         // Both rounds should have the same opponent in 2-player games
         expect($round1_opponent)->toBe($round2_opponent)->toBe($round3_opponent);
-        
+
         // The opponent should be the other player
         if ($player_id === $player_1->id) {
             expect($round1_opponent)->toBe($player_2->name);
@@ -740,7 +739,7 @@ it('handles 2 player games', function () {
     // after both players submit, all 15 of their submissions should be distributed to the opponent
     foreach ([$player_1->id, $player_2->id] as $player_id) {
         $other_player_id = $player_id === $player_1->id ? $player_2->id : $player_1->id;
-        
+
         // Count submissions from the other player in round 1
         $round1_submissions = [];
         foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
@@ -749,7 +748,7 @@ it('handles 2 player games', function () {
                 $round1_submissions[] = $submission;
             }
         }
-        
+
         // Count submissions from the other player in round 2
         $round2_submissions = [];
         foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
@@ -758,7 +757,7 @@ it('handles 2 player games', function () {
                 $round2_submissions[] = $submission;
             }
         }
-        
+
         // Count submissions from the other player in round 3
         $round3_submissions = [];
         foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
@@ -767,12 +766,12 @@ it('handles 2 player games', function () {
                 $round3_submissions[] = $submission;
             }
         }
-        
+
         // Each round should have 5 submissions, totaling 15 submissions from the opponent
         expect($round1_submissions)->toHaveCount(5);
         expect($round2_submissions)->toHaveCount(5);
         expect($round3_submissions)->toHaveCount(5);
-        
+
         // Verify no duplicate submissions across rounds
         $all_submission_values = array_merge(
             array_column($round1_submissions, 'value'),

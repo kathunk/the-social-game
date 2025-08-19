@@ -2,11 +2,10 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
 use App\Models\GameMode;
-use App\Models\GameTemplate;
 use App\States\GameModeState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class GameModeAdded extends Event
 {
@@ -45,6 +44,11 @@ class GameModeAdded extends Event
         $this->assert(
             $this->min_players <= $this->max_players,
             'Minimum players must be less than or equal to maximum players.'
+        );
+
+        $this->assert(
+            in_array($this->scoreboard_type, ['individual', 'team', 'blood_oath', 'hide_until_end']),
+            'Scoreboard type must be either "individual", "team", "blood_oath", or "hide_until_end".'
         );
     }
 
@@ -91,7 +95,7 @@ class GameModeAdded extends Event
             return;
         }
 
-        $mode =GameMode::create([
+        $mode = GameMode::create([
             'id' => $this->game_mode_id,
             'name' => $this->name,
             'type' => $this->type,

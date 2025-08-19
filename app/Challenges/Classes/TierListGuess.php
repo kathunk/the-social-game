@@ -2,13 +2,13 @@
 
 namespace App\Challenges\Classes;
 
+use App\Events\GameUpdatedForReverb;
+use App\Events\PlayerReadiedUp;
+use App\Events\PlayerSubmittedTierListGuess;
 use App\Models\Player;
+use App\Modifiers\Classes\TierListModifier;
 use Illuminate\Support\Str;
 use Thunk\Verbs\Facades\Verbs;
-use App\Events\PlayerReadiedUp;
-use App\Events\GameUpdatedForReverb;
-use App\Modifiers\Classes\TierListModifier;
-use App\Events\PlayerSubmittedTierListGuess;
 
 class TierListGuess extends BaseChallengeClass
 {
@@ -84,7 +84,7 @@ class TierListGuess extends BaseChallengeClass
                 return [
                     'guessed_tier' => $result['guessed_tier'],
                     'correct_tier' => $result['correct_tier'],
-                    'points' => $result['points'] > -1 ? '+' . $result['points'] : $result['points'],
+                    'points' => $result['points'] > -1 ? '+'.$result['points'] : $result['points'],
                     'item' => $result['original_submission_value'],
                 ];
             })->toArray();
