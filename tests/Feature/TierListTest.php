@@ -42,9 +42,9 @@ beforeEach(function () {
     $this->createGame();
 
     $this->player_1 = $this->createPlayer();
-    // $this->player_2 = $this->createPlayer();
-    // $this->player_3 = $this->createPlayer();
-    // $this->player_4 = $this->createPlayer();
+    $this->player_2 = $this->createPlayer();
+    $this->player_3 = $this->createPlayer();
+    $this->player_4 = $this->createPlayer();
 
     $this->game->start();
 
@@ -676,7 +676,7 @@ it(
         expect($round4)->not()->toBeNull();
 
         // Round 2 should be opponent-based
-        expect($round2->challenge_data['type'])->toBe('opponent');
+        expect($round2->challenge_data['round_type'])->toBe('opponent');
 
         // Complete round 2
         completeGuessRound($round2, $this->game->players->all());
@@ -684,7 +684,7 @@ it(
         // Round 3 should start and be opponent-based
         $round3->refresh();
         expect($round3->status)->toBe('active');
-        expect($round3->challenge_data['type'])->toBe('opponent');
+        expect($round3->challenge_data['round_type'])->toBe('opponent');
 
         // Complete round 3
         completeGuessRound($round3, $this->game->players->all());
@@ -692,9 +692,15 @@ it(
         // Round 4 should start and be category-based
         $round4->refresh();
         expect($round4->status)->toBe('active');
-        expect($round4->challenge_data['type'])->toBe('category');
+        expect($round4->challenge_data['round_type'])->toBe('category');
     },
 );
+
+it('handles 2 player games', function () {
+    // the initial modifier has 3 rounds dedicated to a single opponent each, rather than having a category-based  3rd round
+
+    // after both players submit, all 15 of their submissions should be distributed to the opponent
+});
 
 function submitTierLists(Game $game, Challenge $construction_challenge)
 {

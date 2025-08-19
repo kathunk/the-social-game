@@ -12,7 +12,7 @@ use App\Modifiers\Classes\TierListModifier;
 
 class TierListConstructionPhase extends BaseChallengeClass
 {
-    const NAME = 'Build your tier lists';
+    const NAME = 'Build 3 tier lists';
 
     const DESCRIPTION = 'Add a submission for each tier in each category below.';
 
@@ -69,22 +69,22 @@ class TierListConstructionPhase extends BaseChallengeClass
 
         $formatted = Str::singular(Str::replace('_', ' ', $next_category));
 
-        $a_placeholder = collect(
+        $a_placeholder = collect([
             'An A-tier '.$formatted.' that wows and delights',
             'The best A-tier '.$formatted.' in the world',
             'The A-tier '.$formatted.' above which no greater can be conceived',
             'An A-tier '.$formatted.' you would bring home to mom',
             'An A-tier '.$formatted.' deserving of standing ovations',
             'The undisputed best A-tier '.$formatted,
-        )->random();
-        $b_placeholder = collect(
+        ])->random();
+        $b_placeholder = collect([
             'A good but not great B-tier '.$formatted,
             'A good enough B-tier '.$formatted,
             'A solid B-tier '.$formatted,
             'A pretty, pretty, pretty good B-tier '.$formatted,
             'A reliable, if uninspiring B-tier '.$formatted,
-        )->random();
-        $c_placeholder = collect(
+        ])->random();
+        $c_placeholder = collect([
             'A mediocre C-tier '.$formatted,
             'A "meh" C-tier '.$formatted,
             'A C-tier '.$formatted.' that is just okay',
@@ -94,20 +94,21 @@ class TierListConstructionPhase extends BaseChallengeClass
             'A C-tier '.$formatted.' that goes down like tap water',
             'A C-tier '.$formatted.' that is no one\'s favorite',
             'A C-tier '.$formatted.' that epitomizes "so-so"',
-        )->random();
-        $d_placeholder = collect(
+        ])->random();
+        $d_placeholder = collect([
             'A D-tier '.$formatted.' that is bad',
             'A D-tier '.$formatted.' that is just plain wrong',
             'A deeply disappointing D-tier '.$formatted,
             'A D-tier '.$formatted.' that is invited to zero cookouts',
-        )->random();
-        $f_placeholder = collect(
+        ])->random();
+        $f_placeholder = collect([
             'A terrible horrible no good very bad F-tier '.$formatted,
             'The absolute worst F-tier '.$formatted,
             'The F-tier '.$formatted.' so bad it should be illegal',
             'An F-tier '.$formatted.' that will get you blocked and muted',
             'An F-tier '.$formatted.' that simply stinks',
-        )->random();
+            'A truly abysmal F-tier '.$formatted,
+        ])->random();
 
         return $this->form()
             ->title(self::NAME)
@@ -228,86 +229,100 @@ class TierListConstructionPhase extends BaseChallengeClass
             $answer_keys['single_category'][$player->id]['category'] = $random_least_used_category;
         }
 
-        $round1 = $this->generatePlayerAssignedOpponents($playerIds);
-        $round2 = $this->generatePlayerAssignedOpponents($playerIds, $round1);
-
         foreach ($playerIds as $id) {
             $answer_keys['single_opponent_round_1'][$id]['opponent'] = $playerNames[$round1[$id]];
             $answer_keys['single_opponent_round_2'][$id]['opponent'] = $playerNames[$round2[$id]];
+            if (count($playerIds) === 2) {
+                $answer_keys['single_opponent_round_3'][$id]['opponent'] = $playerNames[$round3[$id]];
+            }
         }
 
         // Round 3 - distribute submissions to opponents
         // Assign per-tier using a derangement across players to guarantee feasibility
-        foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
-            // Map each sender to a different receiver (no self) for this tier
-            $mapping = $this->generatePlayerAssignedOpponents($playerIds);
+        if (count($playerIds) > 2) {
 
-            foreach ($mapping as $senderId => $receiverId) {
-                $receiver_category = $answer_keys['single_category'][$receiverId]['category'];
+            foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
+                // Map each sender to a different receiver (no self) for this tier
+                $mapping = $this->generatePlayerAssignedOpponents($playerIds);
 
-                $viable = collect($submissions)->first(function ($s) use ($senderId, $receiver_category, $tier) {
-                    return $s['player_id'] === $senderId
-                        && $s['category'] === $receiver_category
-                        && $s['tier'] === $tier;
-                });
+                foreach ($mapping as $senderId => $receiverId) {
+                    $receiver_category = $answer_keys['single_category'][$receiverId]['category'];
 
-                if (! $viable) {
-                    throw new \RuntimeException(
-                        "Round 3 allocation error: missing {$tier} for {$receiver_category} from sender {$playerNames[$senderId]}"
-                    );
+                    $viable = collect($submissions)->first(function ($s) use ($senderId, $receiver_category, $tier) {
+                        return $s['player_id'] === $senderId
+                            && $s['category'] === $receiver_category
+                            && $s['tier'] === $tier;
+                    });
+
+                    if (! $viable) {
+                        throw new \RuntimeException(
+                            "Round 3 allocation error: missing {$tier} for {$receiver_category} from sender {$playerNames[$senderId]}"
+                        );
+                    }
+
+                    // Assign and remove from pool
+                    $answer_keys['single_category'][$receiverId][$tier] = $viable;
+
+                    $submissions = collect($submissions)->reject(function ($s) use ($senderId, $receiver_category, $tier) {
+                        return $s['player_id'] === $senderId
+                            && $s['category'] === $receiver_category
+                            && $s['tier'] === $tier;
+                    })->toArray();
                 }
-
-                // Assign and remove from pool
-                $answer_keys['single_category'][$receiverId][$tier] = $viable;
-
-                $submissions = collect($submissions)->reject(function ($s) use ($senderId, $receiver_category, $tier) {
-                    return $s['player_id'] === $senderId
-                        && $s['category'] === $receiver_category
-                        && $s['tier'] === $tier;
-                })->toArray();
             }
-        }
 
-        // this is for debugging
-        if (count($submissions) !== $players->count() * 10) {
-            throw new \Exception('There are '.count($submissions).' submissions remaining, but there should be '.$players->count() * 10);
-        }
-
-        // this is for debugging
-        $players->each(function ($player) use ($submissions) {
-            $all_submissions = collect($submissions)->filter(fn ($submission) => $submission['player_id'] === $player->id);
-            $a_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'A')->count();
-            $b_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'B')->count();
-            $c_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'C')->count();
-            $d_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'D')->count();
-            $f_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'F')->count();
-
-            if ($a_tiers !== 2 || $b_tiers !== 2 || $c_tiers !== 2 || $d_tiers !== 2 || $f_tiers !== 2) {
-                throw new \Exception('Player '.$player->name.' has '.$a_tiers.' A tiers, '.$b_tiers.' B tiers, '.$c_tiers.' C tiers, '.$d_tiers.' D tiers, and '.$f_tiers.' F tiers');
+            // this is for debugging
+            if (count($submissions) !== $players->count() * 10) {
+                throw new \Exception('There are '.count($submissions).' submissions remaining, but there should be '.$players->count() * 10);
             }
-        });
+
+            $players->each(function ($player) use ($submissions) {
+                $all_submissions = collect($submissions)->filter(fn ($submission) => $submission['player_id'] === $player->id);
+                $a_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'A')->count();
+                $b_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'B')->count();
+                $c_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'C')->count();
+                $d_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'D')->count();
+                $f_tiers = $all_submissions->filter(fn ($submission) => $submission['tier'] === 'F')->count();
+    
+                if ($a_tiers !== 2 || $b_tiers !== 2 || $c_tiers !== 2 || $d_tiers !== 2 || $f_tiers !== 2) {
+                    throw new \Exception('Player '.$player->name.' has '.$a_tiers.' A tiers, '.$b_tiers.' B tiers, '.$c_tiers.' C tiers, '.$d_tiers.' D tiers, and '.$f_tiers.' F tiers');
+                }
+            });
+        }
 
         $round1 = $this->generatePlayerAssignedOpponents($playerIds);
         $round2 = $this->generatePlayerAssignedOpponents($playerIds, $round1);
+        if (count($playerIds) === 2) {
+            $round3 = $this->generatePlayerAssignedOpponents($playerIds, $round2);
+        }
 
         $round1_inverse = [];
         $round2_inverse = [];
+        $round3_inverse = [];
         foreach ($round1 as $guesser => $opponent) {
             $round1_inverse[$opponent] = $guesser;
         }
         foreach ($round2 as $guesser => $opponent) {
             $round2_inverse[$opponent] = $guesser;
         }
+        if (count($playerIds) === 2) {
+            foreach ($round3 as $guesser => $opponent) {
+                $round3_inverse[$opponent] = $guesser;
+            }
+        }
 
         foreach ($playerIds as $id) {
             $answer_keys['single_opponent_round_1'][$id]['opponent'] = $playerNames[$round1[$id]];
             $answer_keys['single_opponent_round_2'][$id]['opponent'] = $playerNames[$round2[$id]];
         }
 
-        // rounds 1 and 2 - distribute submissions to assigned opponents deterministically
+        // for opponent-specific rounds, distribute submissions to assigned opponents deterministically
         foreach ($players as $player) {
             $receiver_1_id = $round1_inverse[$player->id];
             $receiver_2_id = $round2_inverse[$player->id];
+            if (count($playerIds) === 2) {
+                $receiver_3_id = $round3_inverse[$player->id];
+            }
 
             // Group remaining submissions by tier for this player
             $player_submissions_by_tier = collect($submissions)
@@ -318,16 +333,20 @@ class TierListConstructionPhase extends BaseChallengeClass
             foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
                 $items = $player_submissions_by_tier->get($tier, collect())->values();
 
-                if ($items->count() !== 2) {
-                    throw new \Exception("Player {$player->name} has {$items->count()} '{$tier}' tiers remaining, expected 2");
-                }
-
                 // First goes to the player assigned to guess this player in round 1, second in round 2
                 $answer_keys['single_opponent_round_1'][$receiver_1_id][$tier] = $items[0];
                 $answer_keys['single_opponent_round_2'][$receiver_2_id][$tier] = $items[1];
+                if (count($playerIds) === 2) {
+                    $answer_keys['single_opponent_round_3'][$receiver_3_id][$tier] = $items[2];
+                }
+
+                $items_to_remove = [$items[0], $items[1]];
+                if (count($playerIds) === 2) {
+                    $items_to_remove[] = $items[2];
+                }
 
                 // Remove them from the pool
-                foreach ([$items[0], $items[1]] as $used) {
+                foreach ($items_to_remove as $used) {
                     $submissions = collect($submissions)
                         ->reject(fn ($sub) => $sub['player_id'] === $player->id
                             && $sub['tier'] === $used['tier']
