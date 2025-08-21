@@ -31,6 +31,7 @@ class TierListSeeder extends Seeder
             max_players: 10,
             is_public: true,
             players_can_join_late: false,
+            scoreboard_type: 'hide_until_end',
         )->game_mode_id;
 
         $mode = GameMode::find($mode_id);
@@ -85,7 +86,7 @@ class TierListSeeder extends Seeder
 
         $game->refresh();
 
-        $users = User::where('email', '!=', 'john@thunk.dev')->take(2)->get();
+        $users = User::where('email', '!=', 'john@thunk.dev')->take(1)->get();
 
         foreach ($users as $user) {
             $user->requestToJoinGame($game);

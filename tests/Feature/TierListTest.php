@@ -220,18 +220,11 @@ it(
         );
         $total_players = $this->game->players->count();
         expect($submitted_count)->toBe($total_players);
-        expect(
+
+        $this->game->players->each(fn ($p) => expect(
             $this->construction_challenge->challenge_data['has_submitted'],
-        )->toContain($this->player_1->id);
-        expect(
-            $this->construction_challenge->challenge_data['has_submitted'],
-        )->toContain($this->player_2->id);
-        expect(
-            $this->construction_challenge->challenge_data['has_submitted'],
-        )->toContain($this->player_3->id);
-        expect(
-            $this->construction_challenge->challenge_data['has_submitted'],
-        )->toContain($this->player_4->id);
+        )->toContain($p->id)
+        );
     },
 );
 
@@ -369,9 +362,13 @@ it('assigns different opponents for rounds 1 and 2', function () {
         $round2_opponent =
             $answer_keys['single_opponent_round_2'][$player->id]['opponent'];
 
-        expect($round1_opponent)->not()->toBe($round2_opponent);
-        expect($round1_opponent)->not()->toBe($player->name);
-        expect($round2_opponent)->not()->toBe($player->name);
+        if (count($this->game->players) === 2) {
+            expect($round1_opponent)->toBe($round2_opponent);
+        } else {
+            expect($round1_opponent)->not()->toBe($round2_opponent);
+            expect($round1_opponent)->not()->toBe($player->name);
+            expect($round2_opponent)->not()->toBe($player->name);
+        }
     }
 });
 
@@ -521,13 +518,15 @@ it('calculates correct points for tier guesses', function () {
         ['guessed_tier' => 'F', 'actual_tier' => 'D'],
     ];
 
+    $original_player = $this->game->players->first();
+
     $challenge_class = new TierListGuess($guess_challenge);
-    $challenge_class->submitTierList($this->player_2, [
+    $challenge_class->submitTierList($original_player, [
         'guesses_array' => $off_by_one_guesses,
     ]);
 
     $guess_challenge->refresh();
-    $results = $guess_challenge->challenge_data['results'][$this->player_2->id];
+    $results = $guess_challenge->challenge_data['results'][$original_player->id];
 
     foreach ($results as $result) {
         expect($result['points'])->toBe(1);
@@ -538,8 +537,9 @@ it('calculates correct points for tier guesses', function () {
 it('awards points to both guesser and original submitter', function () {
     submitTierLists($this->game, $this->construction_challenge);
 
-    $initial_score_1 = $this->player_1->fresh()->score;
-    $initial_score_2 = $this->player_2->fresh()->score;
+    $original_player = $this->game->players->first();
+    $initial_score_1 = $original_player->fresh()->score;
+    $initial_score_2 = $this->game->players->last()->fresh()->score;
 
     $guess_challenge = $this->game
         ->fresh()
@@ -557,12 +557,12 @@ it('awards points to both guesser and original submitter', function () {
 
     // Test the submission directly to avoid form rendering issues
     $challenge_class = new TierListGuess($guess_challenge);
-    $challenge_class->submitTierList($this->player_1, [
+    $challenge_class->submitTierList($original_player, [
         'guesses_array' => $perfect_guesses,
     ]);
 
     // Verify player scores were updated
-    $updated_score_1 = $this->player_1->fresh()->score;
+    $updated_score_1 = $original_player->fresh()->score;
     expect($updated_score_1)->toBeGreaterThan($initial_score_1);
 });
 
@@ -694,6 +694,93 @@ it(
         expect($round4->challenge_data['type'])->toBe('category');
     },
 );
+
+it('handles 2 player games', function () {
+    $two_player_game = $this->createGame();
+
+    $player_1 = $this->game->players->first();
+    $player_2 = $this->createPlayer();
+
+    $two_player_game->start();
+
+    $construction_challenge = $two_player_game->fresh()->challenges->first();
+    $tier_list_modifier = $two_player_game->modifiers->first();
+
+    submitTierLists($two_player_game->fresh(), $construction_challenge);
+
+    $tier_list_modifier->refresh();
+    $answer_keys = $tier_list_modifier->fresh()->modifier_data['answer_keys'];
+
+    // the initial modifier has 3 rounds dedicated to a single opponent each, rather than having a category-based 3rd round
+    expect($answer_keys)->toHaveKeys([
+        'single_opponent_round_1',
+        'single_opponent_round_2',
+        'single_opponent_round_3',
+    ]);
+
+    // In 2-player games, all rounds should use the same opponent
+    // since there's only one other player
+    foreach ([$player_1->id, $player_2->id] as $player_id) {
+        $round1_opponent = $answer_keys['single_opponent_round_1'][$player_id]['opponent'];
+        $round2_opponent = $answer_keys['single_opponent_round_2'][$player_id]['opponent'];
+        $round3_opponent = $answer_keys['single_opponent_round_2'][$player_id]['opponent'];
+
+        // Both rounds should have the same opponent in 2-player games
+        expect($round1_opponent)->toBe($round2_opponent)->toBe($round3_opponent);
+
+        // The opponent should be the other player
+        if ($player_id === $player_1->id) {
+            expect($round1_opponent)->toBe($player_2->name);
+        } else {
+            expect($round1_opponent)->toBe($player_1->name);
+        }
+    }
+
+    // after both players submit, all 15 of their submissions should be distributed to the opponent
+    foreach ([$player_1->id, $player_2->id] as $player_id) {
+        $other_player_id = $player_id === $player_1->id ? $player_2->id : $player_1->id;
+
+        // Count submissions from the other player in round 1
+        $round1_submissions = [];
+        foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
+            $submission = $answer_keys['single_opponent_round_1'][$player_id][$tier];
+            if ($submission['player_id'] === $other_player_id) {
+                $round1_submissions[] = $submission;
+            }
+        }
+
+        // Count submissions from the other player in round 2
+        $round2_submissions = [];
+        foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
+            $submission = $answer_keys['single_opponent_round_2'][$player_id][$tier];
+            if ($submission['player_id'] === $other_player_id) {
+                $round2_submissions[] = $submission;
+            }
+        }
+
+        // Count submissions from the other player in round 3
+        $round3_submissions = [];
+        foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
+            $submission = $answer_keys['single_opponent_round_3'][$player_id][$tier];
+            if ($submission['player_id'] === $other_player_id) {
+                $round3_submissions[] = $submission;
+            }
+        }
+
+        // Each round should have 5 submissions, totaling 15 submissions from the opponent
+        expect($round1_submissions)->toHaveCount(5);
+        expect($round2_submissions)->toHaveCount(5);
+        expect($round3_submissions)->toHaveCount(5);
+
+        // Verify no duplicate submissions across rounds
+        $all_submission_values = array_merge(
+            array_column($round1_submissions, 'value'),
+            array_column($round2_submissions, 'value'),
+            array_column($round3_submissions, 'value')
+        );
+        expect(array_unique($all_submission_values))->toHaveCount(15);
+    }
+});
 
 function submitTierLists(Game $game, Challenge $construction_challenge)
 {

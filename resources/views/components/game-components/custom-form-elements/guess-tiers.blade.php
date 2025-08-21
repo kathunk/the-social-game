@@ -51,10 +51,10 @@
             <p class="text-sm">{{ $key['value'] }}</p>
         </div>
         <flux:badge size="sm">
-            @if($element['type'] === 'opponent')
-                from {{ App\Models\Player::find($key['player_id'])->name }}
+            @if($element['round_type'] === 'opponent')
+              {{ Str::replace('_', ' ', Str::title($key['category'])) }}
             @else
-                {{ Str::replace('_', ' ', Str::title($key['category'])) }}
+              {{ App\Models\Player::find($key['player_id'])->name }}
             @endif
         </flux:badge>
       </li>

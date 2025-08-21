@@ -32,6 +32,8 @@ class GameModeAdded extends Event
 
     public ?string $post_game_message = '';
 
+    public ?string $scoreboard_type = 'individual';
+
     public function validate()
     {
         $this->assert(
@@ -42,6 +44,11 @@ class GameModeAdded extends Event
         $this->assert(
             $this->min_players <= $this->max_players,
             'Minimum players must be less than or equal to maximum players.'
+        );
+
+        $this->assert(
+            in_array($this->scoreboard_type, ['individual', 'team', 'blood_oath', 'hide_until_end']),
+            'Scoreboard type must be either "individual", "team", "blood_oath", or "hide_until_end".'
         );
     }
 
@@ -57,6 +64,11 @@ class GameModeAdded extends Event
         $game_mode->players_can_join_late = $this->players_can_join_late;
         $game_mode->footer_message = $this->footer_message;
         $game_mode->post_game_message = $this->post_game_message;
+        $game_mode->scoreboard_type = $this->scoreboard_type;
+
+        $game_mode->gameTemplates()->each(function ($game_template) {
+            $game_template->scoreboard_type = $this->scoreboard_type;
+        });
     }
 
     public function handle()
@@ -75,12 +87,15 @@ class GameModeAdded extends Event
                 'players_can_join_late' => $this->players_can_join_late,
                 'footer_message' => $this->footer_message,
                 'post_game_message' => $this->post_game_message,
+                'scoreboard_type' => $this->scoreboard_type,
             ]);
+
+            $this->setTemplateScoreboardType($existing);
 
             return;
         }
 
-        GameMode::create([
+        $mode = GameMode::create([
             'id' => $this->game_mode_id,
             'name' => $this->name,
             'type' => $this->type,
@@ -92,6 +107,17 @@ class GameModeAdded extends Event
             'players_can_join_late' => $this->players_can_join_late,
             'footer_message' => $this->footer_message,
             'post_game_message' => $this->post_game_message,
+            'scoreboard_type' => $this->scoreboard_type,
         ]);
+
+        $this->setTemplateScoreboardType($mode);
+    }
+
+    public function setTemplateScoreboardType(GameMode $mode)
+    {
+        $mode->gameTemplates->each(function ($game_template) {
+            $game_template->scoreboard_type = $this->scoreboard_type;
+            $game_template->save();
+        });
     }
 }

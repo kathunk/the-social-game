@@ -40,6 +40,7 @@ class Laracon2025Seeder extends Seeder
             max_players: null,
             is_public: true,
             players_can_join_late: true,
+            scoreboard_type: 'team',
         )->game_mode_id;
 
         Verbs::commit();
