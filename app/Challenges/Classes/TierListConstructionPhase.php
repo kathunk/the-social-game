@@ -140,47 +140,65 @@ class TierListConstructionPhase extends BaseChallengeClass
         $formatted = Str::singular(Str::replace('_', ' ', $next_category));
 
         $a_placeholder = collect([
-            'An A-tier '.$formatted.' that wows and delights',
-            'The best A-tier '.$formatted.' in the world',
-            'The A-tier '.
-            $formatted.
-            ' above which no greater can be conceived',
-            'An A-tier '.$formatted.' you would bring home to mom',
-            'An A-tier '.$formatted.' deserving of standing ovations',
+            'Glorious A-tier '.$formatted,
+            'Phenomenal A-tier '.$formatted,
+            'The greatest A-tier '.$formatted,
             'The undisputed best A-tier '.$formatted,
+            'Perfect A-tier '.$formatted,
+            'Legendary A-tier '.$formatted,
+            'Sublime A-tier '.$formatted,
+            'Unmatched A-tier '.$formatted,
+            'Elite A-tier '.$formatted,
         ])->random();
+        
         $b_placeholder = collect([
-            'A good but not great B-tier '.$formatted,
-            'A good enough B-tier '.$formatted,
-            'A solid B-tier '.$formatted,
-            'A pretty, pretty, pretty good B-tier '.$formatted,
-            'A reliable, if uninspiring B-tier '.$formatted,
+            'Good enough B-tier '.$formatted,
+            'Solid B-tier '.$formatted,
+            'Pretty good B-tier '.$formatted,
+            'Reliable B-tier '.$formatted,
+            'Respectable B-tier '.$formatted,
+            'Decent B-tier '.$formatted,
+            'Not bad B-tier '.$formatted,
+            'Worthy B-tier '.$formatted,
+            'Steady B-tier '.$formatted,
         ])->random();
+        
         $c_placeholder = collect([
-            'A mediocre C-tier '.$formatted,
-            'A "meh" C-tier '.$formatted,
-            'A C-tier '.$formatted.' that is just okay',
-            'A C-tier '.$formatted.' that is neither here nor there',
-            'A C-tier '.$formatted.' you wouldn\'t write home about',
-            'A C-tier '.$formatted.' with strong middle-child energy',
-            'A C-tier '.$formatted.' that goes down like tap water',
-            'A C-tier '.$formatted.' that is no one\'s favorite',
-            'A C-tier '.$formatted.' that epitomizes "so-so"',
+            'Mediocre C-tier '.$formatted,
+            '"Meh" C-tier '.$formatted,
+            'Okay C-tier '.$formatted,
+            'So-so C-tier '.$formatted,
+            'Forgettable C-tier '.$formatted,
+            'Average C-tier '.$formatted,
+            'Unremarkable C-tier '.$formatted,
+            'Plain C-tier '.$formatted,
+            'Serviceable C-tier '.$formatted,
         ])->random();
+        
         $d_placeholder = collect([
-            'A D-tier '.$formatted.' that is bad',
-            'A D-tier '.$formatted.' that is just plain wrong',
-            'A deeply disappointing D-tier '.$formatted,
-            'A D-tier '.$formatted.' that is invited to zero cookouts',
+            'Bad D-tier '.$formatted,
+            'Disappointing D-tier '.$formatted,
+            'D-tier '.$formatted,
+            'Sad D-tier '.$formatted,
+            'Weak D-tier '.$formatted,
+            'Regrettable D-tier '.$formatted,
+            'Lowly D-tier '.$formatted,
+            'Sorry D-tier '.$formatted,
         ])->random();
+        
         $f_placeholder = collect([
-            'A terrible horrible no good very bad F-tier '.$formatted,
-            'The absolute worst F-tier '.$formatted,
-            'The F-tier '.$formatted.' so bad it should be illegal',
-            'An F-tier '.$formatted.' that will get you blocked and muted',
-            'An F-tier '.$formatted.' that simply stinks',
-            'A truly abysmal F-tier '.$formatted,
+            'Terrible horrible F-tier '.$formatted,
+            'No good very bad F-tier '.$formatted,
+            'Absolute worst F-tier '.$formatted,
+            'Abysmal F-tier '.$formatted,
+            'Horrible F-tier '.$formatted,
+            'Terrible F-tier '.$formatted,
+            'Awful F-tier '.$formatted,
+            'Dumpster fire F-tier '.$formatted,
+            'Nightmare F-tier '.$formatted,
+            'Rock bottom F-tier '.$formatted,
         ])->random();
+        
 
         return $this->form()
             ->title(self::NAME)
