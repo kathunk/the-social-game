@@ -150,7 +150,7 @@ class TierListConstructionPhase extends BaseChallengeClass
             'Unmatched A-tier '.$formatted,
             'Elite A-tier '.$formatted,
         ])->random();
-        
+
         $b_placeholder = collect([
             'Good enough B-tier '.$formatted,
             'Solid B-tier '.$formatted,
@@ -162,7 +162,7 @@ class TierListConstructionPhase extends BaseChallengeClass
             'Worthy B-tier '.$formatted,
             'Steady B-tier '.$formatted,
         ])->random();
-        
+
         $c_placeholder = collect([
             'Mediocre C-tier '.$formatted,
             '"Meh" C-tier '.$formatted,
@@ -174,7 +174,7 @@ class TierListConstructionPhase extends BaseChallengeClass
             'Plain C-tier '.$formatted,
             'Serviceable C-tier '.$formatted,
         ])->random();
-        
+
         $d_placeholder = collect([
             'Bad D-tier '.$formatted,
             'Disappointing D-tier '.$formatted,
@@ -185,7 +185,7 @@ class TierListConstructionPhase extends BaseChallengeClass
             'Lowly D-tier '.$formatted,
             'Sorry D-tier '.$formatted,
         ])->random();
-        
+
         $f_placeholder = collect([
             'Terrible horrible F-tier '.$formatted,
             'No good very bad F-tier '.$formatted,
@@ -198,7 +198,6 @@ class TierListConstructionPhase extends BaseChallengeClass
             'Nightmare F-tier '.$formatted,
             'Rock bottom F-tier '.$formatted,
         ])->random();
-        
 
         return $this->form()
             ->title(self::NAME)
