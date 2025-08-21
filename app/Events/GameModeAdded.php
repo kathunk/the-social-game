@@ -68,6 +68,8 @@ class GameModeAdded extends Event
 
         $game_mode->gameTemplates()->each(function ($game_template) {
             $game_template->scoreboard_type = $this->scoreboard_type;
+            $game_template->min_players = $this->min_players;
+            $game_template->max_players = $this->max_players;
         });
     }
 
@@ -117,6 +119,8 @@ class GameModeAdded extends Event
     {
         $mode->gameTemplates->each(function ($game_template) {
             $game_template->scoreboard_type = $this->scoreboard_type;
+            $game_template->min_players = $this->min_players;
+            $game_template->max_players = $this->max_players;
             $game_template->save();
         });
     }
