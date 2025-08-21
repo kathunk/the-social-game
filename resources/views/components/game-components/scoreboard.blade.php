@@ -69,7 +69,11 @@
                     @endforeach
                 @endif
 
-                @if ($type === 'individual' || ($type === 'blood_oath' && $this->game->status === 'active'))
+                @if (
+                    $type === 'individual' 
+                    || ($type === 'blood_oath' && $this->game->status === 'active') 
+                    || ($type === 'hide_until_end' && $this->game->status === 'ended' && $this->game->challenges->first()->handler()::TYPE === 'individual')
+                )
                     @foreach ($players as $player)
                         <flux:table.row>
                             <flux:table.cell>

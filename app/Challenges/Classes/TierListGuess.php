@@ -57,7 +57,7 @@ class TierListGuess extends BaseChallengeClass
         $target_round_array_key = match ($current_round_number) {
             2 => 'single_opponent_round_1',
             3 => 'single_opponent_round_2',
-            4 => 'single_category',
+            4 => $this->challenge->game->players->count() === 2 ? 'single_opponent_round_3' : 'single_category',
         };
 
         return $this->modifier()->modifier_data['answer_keys'][$target_round_array_key];
