@@ -137,7 +137,7 @@ class TierListGuess extends BaseChallengeClass
 
         Verbs::commit();
 
-        if (count($this->challenge->challenge_data['has_submitted']) === $this->challenge->game->players->count()) {
+        if (count($this->challenge->fresh()->challenge_data['has_submitted']) === $this->challenge->game->players->count()) {
             event(new GameUpdatedForReverb($player->game->fresh()));
         }
 
