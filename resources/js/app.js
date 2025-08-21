@@ -10,3 +10,15 @@ if (window.Alpine) {
     window.Alpine.plugin(sort)
   })
 }
+
+window.Echo.connector.socket.on('open', () => {
+  window.Livewire?.all()?.forEach(c => c.$refresh());
+});
+window.Echo.connector.socket.on('reconnect', () => {
+  window.Livewire?.all()?.forEach(c => c.$refresh());
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    window.Livewire?.all()?.forEach(c => c.$refresh());
+  }
+});
