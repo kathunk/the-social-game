@@ -380,4 +380,12 @@ class Game extends Model
 
         return $challenges->sum(fn ($c) => $c['duration'] ?? 0);
     }
+
+    public function getCssThemeSlugAttribute(): string
+    {
+        return match ($this->gameMode->name) {
+            'Hot Takes' => 'hot-takes',
+            default => 'default',
+        };
+    }
 }

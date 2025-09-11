@@ -1,7 +1,7 @@
-@props(['form', 'type' => null, 'class_key'])
+@props(['form', 'type' => null, 'class_key', 'theme' => 'default'])
 
 @if (isset($form['elements']))
-<x-card>
+<x-card game-theme="{{ $theme }}">
     @if (isset($form['poll_interval']))
         <div wire:poll.{{ $form['poll_interval'] }}ms="refreshChallenge" class="flex flex-col space-y-1">
     @else

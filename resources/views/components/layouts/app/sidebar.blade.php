@@ -1,9 +1,13 @@
 <!DOCTYPE html>
+
+@props(['game_theme' => null, 'title' => null])
+
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-light-orange">
+
+    <body class="min-h-screen" game-theme="{{ $game_theme }}">
         @php
             $user = auth()->user();
         @endphp

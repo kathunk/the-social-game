@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-4" game-theme="{{ $this->game->css_theme_slug }}">
     @if ($this->is_game_admin && $this->game->status !== 'ended')
         <x-button icon="cog" :href="route('pre-game-lobby', $this->game)" variant="filled">Manage game</x-button>
     @endif
@@ -33,12 +33,12 @@
         <livewire:next-challenge-button />
     @endif
     @if ($this->challenge_component && $this->player->status === 'active' && $this->game->status === 'active')
-        <x-game-components.form :form="$this->challenge_component" type="challenge" class_key="{{ $this->challenge->class_key }}" />
+        <x-game-components.form :form="$this->challenge_component" type="challenge" class_key="{{ $this->challenge->class_key }}" :theme="$this->game->css_theme_slug" />
     @endif
     <flux:error name="error" />
     @if ($this->game->status === 'active' && count($this->modifier_components) > 0 && $this->player->status === 'active')
         @foreach ($this->modifier_components as $class_key => $modifier)
-            <x-game-components.form :form="$modifier" type="modifier" class_key="{{ $class_key }}" />
+            <x-game-components.form :form="$modifier" type="modifier" class_key="{{ $class_key }}" :theme="$this->game->css_theme_slug" />
         @endforeach
     @endif
     @if ($this->showScoreboard)
