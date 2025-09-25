@@ -252,8 +252,7 @@ class PreGameLobby extends Component
 
         Verbs::commit();
 
-        unset($this->application);
-        unset($this->player);
+        return redirect()->route('pre-game-lobby', $this->game->id);
     }
 
     public function removePlayer(string $player_id)
