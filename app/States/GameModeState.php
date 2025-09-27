@@ -31,6 +31,8 @@ class GameModeState extends State
 
     public string $scoreboard_type = 'individual';
 
+    public bool $requires_team_membership = false;
+
     public Collection $game_template_ids;
 
     public function __construct()

@@ -2,13 +2,14 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Modifier;
 use App\Models\Player;
+use App\Models\Modifier;
 use App\States\GameState;
-use App\States\ModifierState;
-use App\States\PlayerState;
 use App\States\TeamState;
+use App\States\PlayerState;
 use App\Support\FormBuilder;
+use App\States\ModifierState;
+use App\States\ChallengeState;
 use App\Support\FrontendComponentProcessor;
 
 abstract class BaseModifierClass
@@ -61,13 +62,32 @@ abstract class BaseModifierClass
         return false;
     }
 
+    public function onGameStarted(
+        GameState $game_state,
+        ModifierState $modifier_state,
+    ) {
+        // Optional override
+    }
+
     public function onSecretDiscovered(Player $player)
     {
         // Optional override
     }
 
-    public function onRoundEnded()
+    public function onChallengeStarted(
+        GameState $game_state,
+        ChallengeState $challenge_state,
+        ModifierState $modifier_state,
+    )
     {
+        // Optional override
+    }
+
+    public function onUserAdmittedToGame(
+        PlayerState $player_state,
+        GameState $game_state,
+        ModifierState $modifier_state,
+    ) {
         // Optional override
     }
 

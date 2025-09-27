@@ -2,16 +2,17 @@
 
 namespace App\Support;
 
-use App\Challenges\Classes\BaseChallengeClass;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
-use App\Modifiers\Classes\BaseModifierClass;
-use App\Support\FormBuilderTraits\TierListFormElements;
 use Illuminate\Support\Collection;
+use App\Modifiers\Classes\BaseModifierClass;
+use App\Challenges\Classes\BaseChallengeClass;
+use App\Support\FormBuilderTraits\FarmFormElements;
+use App\Support\FormBuilderTraits\TierListFormElements;
+use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 
 class FormBuilder
 {
-    use TierListFormElements;
+    use TierListFormElements, FarmFormElements;
 
     protected array $elements = [];
 

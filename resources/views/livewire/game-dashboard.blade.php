@@ -9,7 +9,7 @@
         </x-card>
     @endif
 
-    @if ($this->template->type === 'team' && $this->player->status === 'active' && $this->game->status === 'active')
+    @if ($this->template->type === 'team' && $this->player->status === 'active' && $this->game->status === 'active' && $this->gameMode->requires_team_membership    )
         <x-card>
             @if (! $this->current_team)
                 <flux:heading class="!text-faded-gray !text-xxs font-semibold">Join a team</flux:heading>

@@ -112,6 +112,12 @@
                 @case('tier_list_guess')
                     <x-game-components.custom-form-elements.guess-tiers :element="$element" />
                     @break
+                @case('farm_map')
+                    <x-game-components.custom-form-elements.farm-map :element="$element" />
+                    @break
+                @case('farm_actions')
+                    <x-game-components.custom-form-elements.farm-actions :element="$element" />
+                    @break
             @endswitch
         @endforeach
     </div>

@@ -34,6 +34,8 @@ class GameModeAdded extends Event
 
     public ?string $scoreboard_type = 'individual';
 
+    public ?bool $requires_team_membership = false;
+
     public function validate()
     {
         $this->assert(
@@ -65,6 +67,7 @@ class GameModeAdded extends Event
         $game_mode->footer_message = $this->footer_message;
         $game_mode->post_game_message = $this->post_game_message;
         $game_mode->scoreboard_type = $this->scoreboard_type;
+        $game_mode->requires_team_membership = $this->requires_team_membership;
 
         $game_mode->gameTemplates()->each(function ($game_template) {
             $game_template->scoreboard_type = $this->scoreboard_type;
@@ -90,6 +93,7 @@ class GameModeAdded extends Event
                 'footer_message' => $this->footer_message,
                 'post_game_message' => $this->post_game_message,
                 'scoreboard_type' => $this->scoreboard_type,
+                'requires_team_membership' => $this->requires_team_membership,
             ]);
 
             $this->setTemplateScoreboardType($existing);
@@ -110,6 +114,7 @@ class GameModeAdded extends Event
             'footer_message' => $this->footer_message,
             'post_game_message' => $this->post_game_message,
             'scoreboard_type' => $this->scoreboard_type,
+            'requires_team_membership' => $this->requires_team_membership,
         ]);
 
         $this->setTemplateScoreboardType($mode);
