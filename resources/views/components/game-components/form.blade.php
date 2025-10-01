@@ -118,6 +118,13 @@
                 @case('farm_actions')
                     <x-game-components.custom-form-elements.farm-actions :element="$element" />
                     @break
+                @case('radio_group')
+                    <flux:radio.group label="{{ $element['label'] }}" variant="cards" class="flex-col">
+                        @foreach ($element['options'] as $key => $value)
+                            <flux:radio value="{{ $key }}" label="{{ $value['label'] }}" description="{{ $value['description'] }}" :disabled="$value['disabled']" />
+                        @endforeach
+                    </flux:radio.group>
+                    @break
             @endswitch
         @endforeach
     </div>

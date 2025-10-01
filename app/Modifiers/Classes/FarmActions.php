@@ -40,13 +40,14 @@ class FarmActions extends BaseModifierClass
         if ($player->team_id === null) {
             return [];
         }
-        
+
         $player_actions = $this->modifier->modifier_data[$player->id] ?? [];
 
         $player_space = collect($this->farmMap()->modifier_data)
             ->filter(fn ($data) => in_array($player->id, $data['player_ids']))->first();
 
         return $this->form()
+            ->title('Actions')
             ->farmActions(
                 player_actions: $player_actions,
                 player_space: $player_space,

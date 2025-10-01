@@ -98,17 +98,69 @@ class FarmSkills extends BaseModifierClass
             return [];
         }
         
-        return [];
+        return $this->form()
+            ->title('Skills')
+            ->subtitle('Make yourself useful. Spend XP to upgrade your skills.')
+            ->buttonGroup()
+            ->button('See available upgrades', 'seeUpgrades')
+            ->endGroup()
+            ->build();
+    }
+
+    public function frontendComponentForDedicatedPage(Player $player): array
+    {
+        return $this->form()
+            ->title('Current XP: ' . $this->modifier->modifier_data[$player->id]['xp'])
+            ->subtitle('Each round, you will gain 1 XP. Spend it to upgrade your skills.')
+            ->divider()
+            ->radioGroup(
+                label: 'Skills',
+                property_name: 'skills',
+                options: $this->affordableSkills($player),
+                validation_rules: 'required|exists:skills,id',
+                validation_messages: [
+                    'required' => 'Must select a skill',
+                    'exists' => 'Must select a valid skill',
+                ],
+            )
+            ->buttonGroup()
+            ->button('Upgrade skill', 'upgradeSkill')
+            ->endGroup()
+            ->build();
+    }
+
+    public function seeUpgrades(Player $player, array $params)
+    {
+        return redirect()->route('games.secrets', ['game' => $player->game, 'modifier' => $this->modifier]);
+    }
+
+    public function upgradeSkill(Player $player, array $params)
+    {
+        // @todo upgrade skill
+    }
+
+    public function skillLevels(Player $player)
+    {
+        return $this->modifier->modifier_data[$player->id]['capabilities'];
     }
 
     public function affordableSkills(Player $player)
     {
         $buying_power = $this->modifier->modifier_data[$player->id]['xp'];
+        $capabilities = $this->skillLevels($player);
 
+        return collect(self::CAPABILITIES)
+            ->map(function ($capability) use ($capabilities, $buying_power) {
+                $existing_level = $capabilities[$capability['name']];
+                $cost = $existing_level + 1;
 
-        return collect(self::CAPABILITIES)->filter(function ($capability) use ($player) {
-            return $player->xp >= $capability['cost'];
-        })->toArray();
+                return [
+                    'label' => $capability['name'] . ' Level ' . $existing_level + 1,
+                    'value' => $capability['name'],
+                    'description' => $capability['level_' . $existing_level + 1] . ' (cost: ' . $cost . ' XP)',
+                    'disabled' => $buying_power < $cost,
+                ];
+            })->values()->toArray();
     }
 
     public function onGameStarted(
