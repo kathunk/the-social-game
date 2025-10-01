@@ -119,9 +119,14 @@
                     <x-game-components.custom-form-elements.farm-actions :element="$element" />
                     @break
                 @case('radio_group')
-                    <flux:radio.group label="{{ $element['label'] }}" variant="cards" class="flex-col">
-                        @foreach ($element['options'] as $key => $value)
-                            <flux:radio value="{{ $key }}" label="{{ $value['label'] }}" description="{{ $value['description'] }}" :disabled="$value['disabled']" />
+                    <flux:radio.group label="{{ $element['label'] }}" variant="cards" class="flex-col" wire:model="round_properties.{{ $class_key }}.{{ $element['property_name'] }}">
+                        @foreach ($element['options'] as $option)
+                            <flux:radio 
+                                value="{{ $option['value'] }}" 
+                                label="{{ $option['label'] }}" 
+                                description="{{ $option['description'] }}" 
+                                :disabled="$option['disabled']"
+                            />
                         @endforeach
                     </flux:radio.group>
                     @break

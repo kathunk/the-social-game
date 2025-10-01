@@ -6,8 +6,8 @@ use App\Models\Player;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\ModifierState;
-use App\States\ChallengeState;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerUpgradedSkillInFarm;
 
 class FarmSkills extends BaseModifierClass
 {
@@ -17,7 +17,7 @@ class FarmSkills extends BaseModifierClass
 
     const TYPE = 'team';
 
-    const CAPABILITIES = [
+    const SKILLS = [
         // 'chronicler' => [
         //     'name' => 'Chronicler',
         //     'level_1' => 'See 1 round of Action History for your space',
@@ -26,7 +26,7 @@ class FarmSkills extends BaseModifierClass
         // ],
         'brute' => [
             'name' => 'Brute',
-            'level_1' => '+1 attack and defense of structures',
+            'level_1' => 'Attack and defend structures',
             'level_2' => '+2 attack and defense of structures',
             'level_3' => '+3 attack and defense of structures',
         ],
@@ -56,9 +56,9 @@ class FarmSkills extends BaseModifierClass
         // ],
         'strategist' => [
             'name' => 'Strategist',
-            'level_1' => 'Max capacity of 5 Actions',
-            'level_2' => 'Max capacity of 7 Actions',
-            'level_3' => 'Max capacity of 10 Actions',
+            'level_1' => 'Store up to 5 Actions',
+            'level_2' => 'Store up to 7 Actions',
+            'level_3' => 'Store up to 10 Actions',
         ],
         'tactician' => [
             'name' => 'Tactician',
@@ -112,10 +112,9 @@ class FarmSkills extends BaseModifierClass
         return $this->form()
             ->title('Current XP: ' . $this->modifier->modifier_data[$player->id]['xp'])
             ->subtitle('Each round, you will gain 1 XP. Spend it to upgrade your skills.')
-            ->divider()
             ->radioGroup(
                 label: 'Skills',
-                property_name: 'skills',
+                property_name: 'selected_skill_to_upgrade',
                 options: $this->affordableSkills($player),
                 validation_rules: 'required|exists:skills,id',
                 validation_messages: [
@@ -131,12 +130,26 @@ class FarmSkills extends BaseModifierClass
 
     public function seeUpgrades(Player $player, array $params)
     {
-        return redirect()->route('games.secrets', ['game' => $player->game, 'modifier' => $this->modifier]);
+        return redirect()->route('games.mods', ['game' => $player->game, 'modifier' => $this->modifier]);
     }
 
     public function upgradeSkill(Player $player, array $params)
     {
-        // @todo upgrade skill
+        $selected_skill = $params['selected_skill_to_upgrade'];
+        $current_level = $this->modifier->modifier_data[$player->id]['capabilities'][$selected_skill];
+        $xp_cost = $current_level + 1;
+
+        PlayerUpgradedSkillInFarm::fire(
+            player_id: $player->id,
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            skill_name: $selected_skill,
+            xp_cost: $xp_cost,
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('games.mods', ['game' => $player->game, 'modifier' => $this->modifier]);
     }
 
     public function skillLevels(Player $player)
@@ -149,15 +162,18 @@ class FarmSkills extends BaseModifierClass
         $buying_power = $this->modifier->modifier_data[$player->id]['xp'];
         $capabilities = $this->skillLevels($player);
 
-        return collect(self::CAPABILITIES)
-            ->map(function ($capability) use ($capabilities, $buying_power) {
-                $existing_level = $capabilities[$capability['name']];
+        return collect(self::SKILLS)
+            ->map(function ($skill) use ($capabilities, $buying_power) {
+                $existing_level = $capabilities[$skill['name']];
                 $cost = $existing_level + 1;
+                $level_label = $existing_level === 0 
+                    ? '' 
+                    : $existing_level;
 
                 return [
-                    'label' => $capability['name'] . ' Level ' . $existing_level + 1,
-                    'value' => $capability['name'],
-                    'description' => $capability['level_' . $existing_level + 1] . ' (cost: ' . $cost . ' XP)',
+                    'label' => $skill['name'] . $level_label,
+                    'value' => $skill['name'],
+                    'description' => $skill['level_' . $existing_level + 1] . ' (cost: ' . $cost . ' XP)',
                     'disabled' => $buying_power < $cost,
                 ];
             })->values()->toArray();
@@ -184,8 +200,8 @@ class FarmSkills extends BaseModifierClass
     {
         $modifier_state->modifier_data[$player_id] = [
             'xp' => 3,
-            'capabilities' => collect(self::CAPABILITIES)
-                ->mapWithKeys(fn ($capability) => [$capability['name'] => 0])
+            'capabilities' => collect(self::SKILLS)
+                ->mapWithKeys(fn ($skill) => [$skill['name'] => 0])
                 ->toArray(),
         ];
     }
@@ -207,29 +223,6 @@ class FarmSkills extends BaseModifierClass
                     'xp' => $data['xp'] + $xp,
                     ...$data,
                 ];
-            })->toArray();
-    }
-
-    public function upgradePlayerCapability(
-        ModifierState $modifier_state,
-        int $player_id,
-        string $capability,
-    )
-    {
-        $modifier_state->modifier_data = collect($modifier_state->modifier_data)
-            ->map(function ($data) use ($player_id, $capability) {
-
-                if ($player_id !== $data['player_id']) {
-                    return $data;
-                }
-
-                $current_capability = $data['capabilities'][$capability];
-                $xp_cost = $current_capability +1;
-
-                $data['capabilities'][$capability] = $current_capability + 1;
-                $data['xp'] = $data['xp'] - $xp_cost;
-
-                return $data;
             })->toArray();
     }
 }

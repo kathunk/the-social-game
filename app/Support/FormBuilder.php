@@ -153,8 +153,6 @@ class FormBuilder
         string $property_name, // this will be the name of the property in livewire
         string $validation_rules,
         array $validation_messages,
-        ?string $placeholder = null,
-        ?bool $searchable = true,
     ): static {
         $this->elements[] = [
             'type' => 'radio_group',
@@ -172,8 +170,6 @@ class FormBuilder
             'property_name' => $property_name,
             'validation_rules' => $validation_rules,
             'validation_messages' => $validation_messages,
-            'placeholder' => $placeholder,
-            'searchable' => $searchable,
         ];
 
         return $this;

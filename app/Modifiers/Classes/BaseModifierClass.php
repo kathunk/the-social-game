@@ -121,10 +121,12 @@ abstract class BaseModifierClass
         return [];
     }
 
-    public function propertiesForLivewire(Player $player): array
+    public function propertiesForLivewire(Player $player, ?bool $for_dedicated_page = false): array
     {
         return FrontendComponentProcessor::propertiesForLivewire(
-            $this->frontendComponent($player),
+            $for_dedicated_page 
+                ? $this->frontendComponentForDedicatedPage($player) 
+                : $this->frontendComponent($player),
             useEmptyStringForSelects: true
         );
     }
