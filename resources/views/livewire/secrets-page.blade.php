@@ -6,4 +6,5 @@
     </div>
 
     <x-game-components.form :form="$this->modifier->handler()->frontendComponentForDedicatedPage($this->player)" type="modifier" class_key="{{ $this->modifier->class_key }}" />
+    <flux:error name="error" />
 </div>

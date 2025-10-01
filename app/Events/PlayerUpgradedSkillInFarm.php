@@ -6,10 +6,11 @@ use Thunk\Verbs\Event;
 use App\States\ModifierState;
 use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasActivePlayer;
+use App\Events\Traits\HasGame;
 
 class PlayerUpgradedSkillInFarm extends Event
 {
-    use HasActivePlayer, HasModifier;
+    use HasActivePlayer, HasModifier, HasGame;
 
     public string $skill_name;
 
@@ -22,25 +23,21 @@ class PlayerUpgradedSkillInFarm extends Event
         // @todo validate that the modifier is a FarmSkills modifier]
     }
 
-    public function applyToModifier(ModifierState $modifier)
+    public function apply(ModifierState $modifier)
     {
-        dd(
-            $this->player_id,
-            $this->modifier_id,
-            $this->skill_name,
-            $this->xp_cost,
-        );
         $modifier->modifier_data = collect($modifier->modifier_data)
-            ->map(function ($data) {
-                if ($data['player_id'] !== $this->player_id) {
+            ->map(function ($data, $player_id) {
+                if ($player_id !== $this->player_id) {
                     return $data;
                 }
-                
-                $data['capabilities'][$this->skill_name] = $data['capabilities'][$this->skill_name] + 1;
-                $data['xp'] = $data['xp'] - $this->xp_cost;
+
+                $data["capabilities"][$this->skill_name] =
+                    $data["capabilities"][$this->skill_name] + 1;
+                $data["xp"] = $data["xp"] - $this->xp_cost;
 
                 return $data;
-            })->toArray();
+            })
+            ->toArray();
     }
 
     public function handle()
