@@ -37,6 +37,10 @@ class FarmActions extends BaseModifierClass
 
     public function frontendComponent(Player $player): array
     {
+        if ($player->team_id === null) {
+            return [];
+        }
+        
         $player_actions = $this->modifier->modifier_data[$player->id] ?? [];
 
         $player_space = collect($this->farmMap()->modifier_data)

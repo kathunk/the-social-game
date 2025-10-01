@@ -94,7 +94,21 @@ class FarmSkills extends BaseModifierClass
 
     public function frontendComponent(Player $player): array
     {
+        if ($player->team_id === null) {
+            return [];
+        }
+        
+        return [];
+    }
 
+    public function affordableSkills(Player $player)
+    {
+        $buying_power = $this->modifier->modifier_data[$player->id]['xp'];
+
+
+        return collect(self::CAPABILITIES)->filter(function ($capability) use ($player) {
+            return $player->xp >= $capability['cost'];
+        })->toArray();
     }
 
     public function onGameStarted(
@@ -118,7 +132,9 @@ class FarmSkills extends BaseModifierClass
     {
         $modifier_state->modifier_data[$player_id] = [
             'xp' => 3,
-            'capabilities' => collect(self::CAPABILITIES)->mapWithKeys(fn ($capability) => [$capability => 0])->toArray(),
+            'capabilities' => collect(self::CAPABILITIES)
+                ->mapWithKeys(fn ($capability) => [$capability['name'] => 0])
+                ->toArray(),
         ];
     }
 

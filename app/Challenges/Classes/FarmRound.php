@@ -35,12 +35,4 @@ class FarmRound extends BaseChallengeClass
     {
         return [];
     }
-
-    public function frontendComponent(Player $player): array
-    {
-        return $this->form()
-            ->title(self::NAME)
-            ->subtitle(self::DESCRIPTION)
-            ->build();
-    }
 }
