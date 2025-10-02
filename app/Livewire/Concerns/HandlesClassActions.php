@@ -67,7 +67,17 @@ trait HandlesClassActions
                 }
             }
 
-            $this->validate($filtered_rules, $filtered_messages);
+            try {
+                $this->validate($filtered_rules, $filtered_messages);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                // Validation failed - manually add the errors to the error bag
+                foreach ($e->errors() as $field => $messages) {
+                    foreach ($messages as $message) {
+                        $this->addError($field, $message);
+                    }
+                }
+                return;
+            }
         }
 
         try {
@@ -76,7 +86,7 @@ trait HandlesClassActions
                 $params['round_properties']
             );
         } catch (\Exception $e) {
-            $this->addError('error', $e->getMessage());
+            $this->addError('action_error', $e->getMessage());
 
             return;
         }

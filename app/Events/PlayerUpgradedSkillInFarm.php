@@ -31,8 +31,8 @@ class PlayerUpgradedSkillInFarm extends Event
                     return $data;
                 }
 
-                $data["capabilities"][$this->skill_name] =
-                    $data["capabilities"][$this->skill_name] + 1;
+                $data["skills"][$this->skill_name] =
+                    $data["skills"][$this->skill_name] + 1;
                 $data["xp"] = $data["xp"] - $this->xp_cost;
 
                 return $data;

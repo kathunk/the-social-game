@@ -44,13 +44,11 @@ class FarmSeeder extends Seeder
             type: 'team',
             is_public: true,
             team_names: [],
-            challenges: [
-                [
-                    'challenge_keys' => [FarmRound::key()],
-                    'duration' => 1000,
-                ],
-            ],
-            modifiers: [FarmTeams::key(), FarmSkills::key(), FarmActions::key(), FarmMap::key()],
+            challenges: collect(range(1, 28))->map(fn ($i) => [
+                'challenge_keys' => [FarmRound::key()],
+                'duration' => 1000,
+            ])->toArray(),
+            modifiers: [FarmActions::key(), FarmSkills::key(), FarmTeams::key(), FarmMap::key()],
             players_can_join_late: false,
         )->game_template_id;
 

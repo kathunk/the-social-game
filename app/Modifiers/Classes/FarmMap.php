@@ -35,8 +35,8 @@ class FarmMap extends BaseModifierClass
 
     public function dataArrayForState(): array
     {
-        return collect()->times(60, function ($i) {
-            $spaces_per_row = 6;
+        return collect()->times(100, function ($i) {
+            $spaces_per_row = 10;
             $y = intdiv($i - 1, $spaces_per_row);
             $x = ($i - 1) % $spaces_per_row;
         
@@ -45,16 +45,29 @@ class FarmMap extends BaseModifierClass
                 'x-index' => $x,
                 'type' => collect(['grass', 'desert', 'swamp', 'mountain'])->random(),
                 'player_ids' => [],
-                'farm_status' => 'null',
-                'road_team_id' => null,
-                'silo_team_id' => null,
-                'silo_amount' => 0,
+                'farm_status' => [
+                    'level' => null,
+                    'stage' => null,
+                ],
+                'road_status' => [
+                    'level' => null,
+                    'owner_team_id' => null,
+                ],
+                'silo_status' => [
+                    'level' => null,
+                    'owner_team_id' => null,
+                    'amount' => 0,
+                ],
             ];
         })->toArray();
     }
 
     public function frontendComponent(Player $player): array
     {
+        if ($player->team_id === null) {
+            return [];
+        }
+        
         return $this->form()
             ->farmMap($this->modifier->modifier_data, $player)
             ->build();

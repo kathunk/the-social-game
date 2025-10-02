@@ -58,7 +58,7 @@ class FarmSkills extends BaseModifierClass
             "name" => "Strategist",
             "level_1" => "Store up to 5 Actions",
             "level_2" => "Store up to 7 Actions",
-            "level_3" => "Store up to 10 Actions",
+            "level_3" => "Store up to 9 Actions",
         ],
         "tactician" => [
             "name" => "Tactician",
@@ -145,7 +145,7 @@ class FarmSkills extends BaseModifierClass
     {
         $selected_skill = $params["selected_skill_to_upgrade"];
         $current_level =
-            $this->modifier->modifier_data[$player->id]["capabilities"][
+            $this->modifier->modifier_data[$player->id]["skills"][
                 $selected_skill
             ];
         $xp_cost = $current_level + 1;
@@ -168,17 +168,17 @@ class FarmSkills extends BaseModifierClass
 
     public function skillLevels(Player $player)
     {
-        return $this->modifier->modifier_data[$player->id]["capabilities"];
+        return $this->modifier->modifier_data[$player->id]["skills"];
     }
 
     public function affordableSkills(Player $player)
     {
         $buying_power = $this->modifier->modifier_data[$player->id]["xp"];
-        $capabilities = $this->skillLevels($player);
+        $skills = $this->skillLevels($player);
 
         return collect(self::SKILLS)
-            ->map(function ($skill) use ($capabilities, $buying_power) {
-                $existing_level = $capabilities[$skill["name"]];
+            ->map(function ($skill) use ($skills, $buying_power) {
+                $existing_level = $skills[$skill["name"]];
 
                 if ($existing_level === 3) {
                     return [];
@@ -228,7 +228,7 @@ class FarmSkills extends BaseModifierClass
     ) {
         $modifier_state->modifier_data[$player_id] = [
             "xp" => 20,
-            "capabilities" => collect(self::SKILLS)
+            "skills" => collect(self::SKILLS)
                 ->mapWithKeys(fn($skill) => [$skill["name"] => 0])
                 ->toArray(),
         ];
