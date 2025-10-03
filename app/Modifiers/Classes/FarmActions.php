@@ -6,7 +6,6 @@ use App\Models\Player;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\ModifierState;
-use App\States\ChallengeState;
 use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerMovedInFarm;
 
@@ -131,7 +130,9 @@ class FarmActions extends BaseModifierClass
 
     public function onChallengeEnded(GameState $game_state)
     {
-        $all_skills = $this->allSkills();
+
+        $skills_modifier = $game_state->modifiers()->firstWhere('class_key', FarmSkills::key());
+        $all_skills = $skills_modifier->modifier_data;
 
         $modifier_state = $game_state->modifiers()->firstWhere('class_key', self::key());
 

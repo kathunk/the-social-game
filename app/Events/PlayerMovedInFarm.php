@@ -32,7 +32,7 @@ class PlayerMovedInFarm extends Event
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
                 $space['player_ids'][] = $this->player_id;
             } else {
-                $space['player_ids'] = array_diff($space['player_ids'], [$this->player_id]);
+                $space['player_ids'] = array_values(array_diff($space['player_ids'], [$this->player_id]));
             }
 
             return $space;
