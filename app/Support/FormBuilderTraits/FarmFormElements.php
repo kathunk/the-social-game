@@ -2,6 +2,7 @@
 
 namespace App\Support\FormBuilderTraits;
 
+use App\Models\Team;
 use App\Models\Player;
 
 trait FarmFormElements
@@ -24,11 +25,13 @@ trait FarmFormElements
         array $farm_map, 
         bool $can_move,
         bool $can_plant_field,
-        int $current_player_id = null
+        bool $can_harvest_field,
+        Player $player
     ) {
         // Generate sprite configuration for the player's current space
-        $sprite_config = $this->buildSpaceSpriteConfig($player_space, $current_player_id);
+        $sprite_config = $this->buildSpaceSpriteConfig($player_space, $player);
 
+        // @farmtodo is this array even necessary?
         $this->elements[] = [
             'type' => 'farm_actions',
             'property_name' => 'farm_actions',
@@ -39,8 +42,24 @@ trait FarmFormElements
             'farm_map' => $farm_map,
             'can_move' => $can_move,
             'can_plant_field' => $can_plant_field,
+            'can_harvest_field' => $can_harvest_field,
             'sprite_config' => $sprite_config,
         ];
+
+        if ($player_space['field_status']['level'] > 0) {
+            $this->divider();
+            $this->title('Field (Level: ' . $player_space['field_status']['level'] . ')')
+                ->subtitle('Owned by ' . Team::find($player_space['field_status']['owner_team_id'])->name)
+                ->subtitle('Stage: ' . $player_space['field_status']['stage'])
+                ->when($player_space['field_status']['stage'] === 'mature', function ($builder) use ($player_space, $can_harvest_field) {
+                    $builder->subtitle('Quantity: ' . $player_space['field_status']['quantity'])
+                    ->when($can_harvest_field, function ($builder) {
+                        $builder->buttonGroup()
+                            ->button('Harvest', 'harvestField')
+                            ->endGroup();
+                    });
+                });
+        }
 
         if ($can_plant_field) {
             $this->buttonGroup()
@@ -49,6 +68,8 @@ trait FarmFormElements
         }
 
         if ($can_move) {
+            $this->divider()->title('Move to another space');
+            // @farmtodo player can wrap around map like a globe lol
             $player_x = $player_space['x-index'];
             $player_y = $player_space['y-index'];
 
@@ -86,7 +107,7 @@ trait FarmFormElements
     /**
      * Build sprite configuration for a space
      */
-    protected function buildSpaceSpriteConfig(array $player_space, int $current_player_id = null): array
+    protected function buildSpaceSpriteConfig(array $player_space, Player $player): array
     {
         if (empty($player_space)) {
             return [
@@ -138,7 +159,7 @@ trait FarmFormElements
         // Add player overlays
         $player_ids = $player_space['player_ids'] ?? [];
         foreach ($player_ids as $index => $player_id) {
-            $config['overlays'][] = $this->buildPlayerOverlay($player_id, $index, $current_player_id);
+            $config['overlays'][] = $this->buildPlayerOverlay($player_id, $index, $player);
         }
 
         return $config;
@@ -205,7 +226,7 @@ trait FarmFormElements
     /**
      * Build player overlay configuration
      */
-    protected function buildPlayerOverlay(int $player_id, int $index, int $current_player_id = null): array
+    protected function buildPlayerOverlay(int $player_id, int $index, Player $player): array
     {
         // Distribute players around the center of the space with smaller scale
         $positions = [
@@ -219,7 +240,7 @@ trait FarmFormElements
         $position = $positions[$index % count($positions)];
         
         // Check if this is the current player
-        $is_current_player = ($current_player_id !== null && $player_id === $current_player_id);
+        $is_current_player = ($player_id === $player->id);
         
         // Generate a color based on player ID for consistency
         $colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];

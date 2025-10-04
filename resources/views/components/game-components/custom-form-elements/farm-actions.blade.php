@@ -112,6 +112,8 @@
 
     {{-- Actions Information --}}
     <div class="mt-4">
-        <x-heading>Actions: {{ $element['actions']['actions'] }} / {{ $element['limit'] }}</x-heading>
+        <x-heading>You</x-heading>
+        <x-subheading>Actions: {{ $element['actions']['actions'] }} / {{ $element['limit'] }}</x-subheading>
+        <x-subheading>Grain: {{ $element['actions']['grain'] }} / {{ $element['actions']['grain_capacity'] }}</x-subheading>
     </div>
 </div>

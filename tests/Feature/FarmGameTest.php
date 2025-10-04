@@ -528,3 +528,198 @@ it('regression (UI workflow): player upgrades Strategist, spends all actions, sh
     // NOT 6 actions (which would be the bug)
     expect($farmActions->modifier_data[$player->id]['actions'])->toBe(3, 'Player with 0 actions should regenerate to 3, not 6');
 });
+
+it('advances field stages each round: seedlings -> sprouts -> mature -> rotted -> null', function () {
+    $player = $this->createPlayer();
+    $this->game->start();
+
+    $farmSkills = $this->game->fresh()->modifiers->firstWhere('class_key', FarmSkills::key());
+    $farmActions = $this->game->fresh()->modifiers->firstWhere('class_key', FarmActions::key());
+    $farmMap = $this->game->fresh()->modifiers->firstWhere('class_key', FarmMap::key());
+
+    // Upgrade Farmer skill so player can plant
+    PlayerUpgradedSkillInFarm::fire(
+        game_id: $this->game->id,
+        modifier_id: $farmSkills->id,
+        player_id: $player->id,
+        skill_name: 'Farmer',
+        xp_cost: 1,
+    );
+
+    Verbs::commit();
+
+    // Get player's current position
+    $playerSpace = collect($farmMap->modifier_data)
+        ->filter(fn ($space) => in_array($player->id, $space['player_ids']))
+        ->first();
+
+    // Plant a level 1 field
+    PlayerPlantedField::fire(
+        game_id: $this->game->id,
+        modifier_id: $farmActions->id,
+        player_id: $player->id,
+        team_id: $player->team_id,
+        x_index: $playerSpace['x-index'],
+        y_index: $playerSpace['y-index'],
+        level: 1,
+    );
+
+    Verbs::commit();
+
+    // Verify field is planted at seedlings stage
+    $farmMap->refresh();
+    $space = collect($farmMap->modifier_data)
+        ->firstWhere(fn ($s) => $s['x-index'] === $playerSpace['x-index'] && $s['y-index'] === $playerSpace['y-index']);
+
+    expect($space['field_status']['stage'])->toBe('seedlings');
+    expect($space['field_status']['level'])->toBe(1);
+    expect($space['field_status']['quantity'])->toBe(0);
+
+    // Round 1: seedlings -> sprouts
+    $challenge = $this->game->fresh()->currentChallenge;
+    $challenge->end();
+
+    $farmMap->refresh();
+    $space = collect($farmMap->modifier_data)
+        ->firstWhere(fn ($s) => $s['x-index'] === $playerSpace['x-index'] && $s['y-index'] === $playerSpace['y-index']);
+
+    expect($space['field_status']['stage'])->toBe('sprouts');
+    expect($space['field_status']['level'])->toBe(1);
+    expect($space['field_status']['quantity'])->toBe(0);
+
+    // Start next challenge
+    $nextChallenge = $this->game->fresh()->challenges->skip(1)->first();
+    $nextChallenge->start();
+
+    // Round 2: sprouts -> mature
+    $nextChallenge->end();
+
+    $farmMap->refresh();
+    $space = collect($farmMap->modifier_data)
+        ->firstWhere(fn ($s) => $s['x-index'] === $playerSpace['x-index'] && $s['y-index'] === $playerSpace['y-index']);
+
+    expect($space['field_status']['stage'])->toBe('mature');
+    expect($space['field_status']['level'])->toBe(1);
+    expect($space['field_status']['quantity'])->toBe(5, 'Level 1 field should produce 5 grain');
+
+    // Start next challenge
+    $finalChallenge = $this->game->fresh()->challenges->skip(2)->first();
+    $finalChallenge->start();
+
+    // Round 3: mature -> rotted
+    $finalChallenge->end();
+
+    $farmMap->refresh();
+    $space = collect($farmMap->modifier_data)
+        ->firstWhere(fn ($s) => $s['x-index'] === $playerSpace['x-index'] && $s['y-index'] === $playerSpace['y-index']);
+
+    expect($space['field_status']['stage'])->toBe('rotted');
+    expect($space['field_status']['level'])->toBe(1);
+    expect($space['field_status']['quantity'])->toBe(0, 'Rotted field has no grain');
+});
+
+it('produces correct grain quantities based on field level', function () {
+    $player = $this->createPlayer();
+    $this->game->start();
+
+    $farmSkills = $this->game->fresh()->modifiers->firstWhere('class_key', FarmSkills::key());
+    $farmActions = $this->game->fresh()->modifiers->firstWhere('class_key', FarmActions::key());
+    $farmMap = $this->game->fresh()->modifiers->firstWhere('class_key', FarmMap::key());
+
+    // Upgrade Farmer to level 3
+    for ($i = 1; $i <= 3; $i++) {
+        PlayerUpgradedSkillInFarm::fire(
+            game_id: $this->game->id,
+            modifier_id: $farmSkills->id,
+            player_id: $player->id,
+            skill_name: 'Farmer',
+            xp_cost: $i,
+        );
+    }
+
+    Verbs::commit();
+
+    // Get player's current position
+    $playerSpace = collect($farmMap->modifier_data)
+        ->filter(fn ($space) => in_array($player->id, $space['player_ids']))
+        ->first();
+
+    // Plant a level 3 field
+    PlayerPlantedField::fire(
+        game_id: $this->game->id,
+        modifier_id: $farmActions->id,
+        player_id: $player->id,
+        team_id: $player->team_id,
+        x_index: $playerSpace['x-index'],
+        y_index: $playerSpace['y-index'],
+        level: 3,
+    );
+
+    Verbs::commit();
+
+    // Advance through seedlings and sprouts stages
+    $challenge = $this->game->fresh()->currentChallenge;
+    $challenge->end();
+
+    $nextChallenge = $this->game->fresh()->challenges->skip(1)->first();
+    $nextChallenge->start();
+    $nextChallenge->end();
+
+    // Verify level 3 field produces 15 grain when mature
+    $farmMap->refresh();
+    $space = collect($farmMap->modifier_data)
+        ->firstWhere(fn ($s) => $s['x-index'] === $playerSpace['x-index'] && $s['y-index'] === $playerSpace['y-index']);
+
+    expect($space['field_status']['stage'])->toBe('mature');
+    expect($space['field_status']['level'])->toBe(3);
+    expect($space['field_status']['quantity'])->toBe(15, 'Level 3 field should produce 15 grain');
+});
+
+it('increases grain capacity when Porter skill is upgraded', function () {
+    $player = $this->createPlayer();
+    $this->game->start();
+
+    $farmSkills = $this->game->fresh()->modifiers->firstWhere('class_key', FarmSkills::key());
+    $farmActions = $this->game->fresh()->modifiers->firstWhere('class_key', FarmActions::key());
+
+    // Initial grain capacity should be 5
+    expect($farmActions->modifier_data[$player->id]['grain_capacity'])->toBe(5);
+
+    // Upgrade Porter to level 1 (cost 1 XP)
+    PlayerUpgradedSkillInFarm::fire(
+        game_id: $this->game->id,
+        modifier_id: $farmSkills->id,
+        player_id: $player->id,
+        skill_name: 'Porter',
+        xp_cost: 1,
+    );
+
+    Verbs::commit();
+
+    // Verify Porter skill increased
+    $farmSkills->refresh();
+    expect($farmSkills->modifier_data[$player->id]['skills']['Porter'])->toBe(1);
+
+    // Grain capacity should now be 10 (5 + 5)
+    $farmActions->refresh();
+    expect($farmActions->modifier_data[$player->id]['grain_capacity'])->toBe(10, 'Porter level 1 should increase capacity to 10');
+
+    // Upgrade Porter to level 2 (cost 2 XP)
+    PlayerUpgradedSkillInFarm::fire(
+        game_id: $this->game->id,
+        modifier_id: $farmSkills->id,
+        player_id: $player->id,
+        skill_name: 'Porter',
+        xp_cost: 2,
+    );
+
+    Verbs::commit();
+
+    // Verify Porter skill increased
+    $farmSkills->refresh();
+    expect($farmSkills->modifier_data[$player->id]['skills']['Porter'])->toBe(2);
+
+    // Grain capacity should now be 15 (10 + 5)
+    $farmActions->refresh();
+    expect($farmActions->modifier_data[$player->id]['grain_capacity'])->toBe(15, 'Porter level 2 should increase capacity to 15');
+});

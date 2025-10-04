@@ -78,10 +78,10 @@ class FarmTeams extends BaseModifierClass
 
         return [];
 
-        // @todo request to join team
-        // @todo approve / reject request to join team
-        // @todo boot player
-        // @todo vote to boot player
+        // @farmtodo request to join team
+        // @farmtodo approve / reject request to join team
+        // @farmtodo boot player
+        // @farmtodo vote to boot player
     }
 
     public function createTeam(Player $player, array $params)

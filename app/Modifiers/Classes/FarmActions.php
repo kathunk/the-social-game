@@ -10,6 +10,7 @@ use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerMovedInFarm;
 use App\Events\PlayerPlantedFarm;
 use App\Events\PlayerPlantedField;
+use App\Events\PlayerHarvestedField;
 
 class FarmActions extends BaseModifierClass
 {
@@ -58,7 +59,8 @@ class FarmActions extends BaseModifierClass
                 farm_map: $this->farmMap()->modifier_data,
                 can_move: $this->canMove($player),
                 can_plant_field: $this->canPlantField($player, $player_skills, $player_space),
-                current_player_id: $player->id, // Pass the current player ID
+                can_harvest_field: $this->canHarvestField($player, $player_space, $player_actions),
+                player: $player,
             )
             ->build();
     }
@@ -74,6 +76,14 @@ class FarmActions extends BaseModifierClass
             && $player_skills['Farmer'] > 0
             && ($player_space['field_status']['level'] ?? null) === null
             && ($player_space['type'] === 'grass' || $player_space['type'] === 'mountain');
+    }
+
+    public function canHarvestField(Player $player, array $player_space, array $player_actions)
+    {
+        return $this->modifier->modifier_data[$player->id]['actions'] > 0
+            && $player_space['field_status']['stage'] === 'mature'
+            && $player_space['field_status']['owner_team_id'] === $player->team_id
+            && $player_actions['grain_capacity'] > $player_actions['grain'];
     }
 
     public function farmMap()
@@ -203,5 +213,31 @@ class FarmActions extends BaseModifierClass
             y_index: $player_space['y-index'],
             level: $player_skills['Farmer'],
         );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function harvestField(Player $player, array $params)
+    {
+        $mod_data = $this->modifier->modifier_data[$player->id];
+        $player_space = $this->playerSpace($player);
+        
+        PlayerHarvestedField::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+            field_quantity: $player_space['field_status']['quantity'],
+            player_capacity: $mod_data['grain_capacity'],
+            player_grain: $mod_data['grain'],
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 }
