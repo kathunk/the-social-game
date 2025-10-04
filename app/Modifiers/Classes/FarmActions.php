@@ -8,6 +8,8 @@ use App\States\PlayerState;
 use App\States\ModifierState;
 use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerMovedInFarm;
+use App\Events\PlayerPlantedFarm;
+use App\Events\PlayerPlantedField;
 
 class FarmActions extends BaseModifierClass
 {
@@ -55,7 +57,7 @@ class FarmActions extends BaseModifierClass
                 player_skills: $player_skills,
                 farm_map: $this->farmMap()->modifier_data,
                 can_move: $this->canMove($player),
-                can_plant_farm: $this->canPlantFarm($player, $player_skills, $player_space),
+                can_plant_field: $this->canPlantField($player, $player_skills, $player_space),
                 current_player_id: $player->id, // Pass the current player ID
             )
             ->build();
@@ -66,11 +68,11 @@ class FarmActions extends BaseModifierClass
         return $this->modifier->modifier_data[$player->id]['actions'] > 0;
     }
 
-    public function canPlantFarm(Player $player, array $player_skills, array $player_space)
+    public function canPlantField(Player $player, array $player_skills, array $player_space)
     {
-        return $this->modifier->modifier_data[$player->id]['actions'] > 0 
+        return $this->modifier->modifier_data[$player->id]['actions'] > 0
             && $player_skills['Farmer'] > 0
-            && $player_space['farm_status'] === 'null'
+            && ($player_space['field_status']['level'] ?? null) === null
             && ($player_space['type'] === 'grass' || $player_space['type'] === 'mountain');
     }
 
@@ -102,6 +104,12 @@ class FarmActions extends BaseModifierClass
         return [];
     }
 
+    public function playerSpace(Player $player)
+    {
+        return collect($this->farmMap()->modifier_data)
+            ->filter(fn ($data) => in_array($player->id, $data['player_ids']))->first();
+    }
+
     public function onGameStarted(
         GameState $game_state,
         ModifierState $modifier_state,
@@ -130,7 +138,6 @@ class FarmActions extends BaseModifierClass
 
     public function onChallengeEnded(GameState $game_state)
     {
-
         $skills_modifier = $game_state->modifiers()->firstWhere('class_key', FarmSkills::key());
         $all_skills = $skills_modifier->modifier_data;
 
@@ -182,8 +189,19 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public function plantFarm(Player $player, array $params)
+    public function plantField(Player $player, array $params)
     {
-        dd($params);
+        $player_space = $this->playerSpace($player);
+        $player_skills = $this->allSkills()[$player->id]['skills'];
+        
+        PlayerPlantedField::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+            level: $player_skills['Farmer'],
+        );
     }
 }

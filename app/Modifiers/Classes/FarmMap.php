@@ -46,6 +46,7 @@ class FarmMap extends BaseModifierClass
                 'type' => collect(['grass', 'desert', 'swamp', 'mountain'])->random(),
                 'player_ids' => [],
                 'farm_status' => [
+                    'owner_team_id' => null,
                     'level' => null,
                     'stage' => null,
                 ],

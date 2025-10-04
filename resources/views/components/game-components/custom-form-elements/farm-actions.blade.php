@@ -61,11 +61,14 @@
         {{-- Background --}}
         <use href="#bg-{{ $config['background'] ?? 'grass' }}" />
 
+        {{-- Debug: Show overlay count --}}
+        <!-- Overlays count: {{ count($overlays) }} -->
+
         {{-- Overlays --}}
         @foreach ($overlays as $i => $o)
             @php
                 $type = $o['type'] ?? 'player';
-                $x = $o['x'] ?? 0; 
+                $x = $o['x'] ?? 0;
                 $y = $o['y'] ?? 0;
                 $rotate = $o['rotate'] ?? 0;
 
@@ -90,7 +93,20 @@
                 if (!empty($o['opacity'])) $style .= "opacity: {$o['opacity']};";
             @endphp
 
-            <use href="#obj-{{ $type }}" transform="{{ $transform }}" style="{{ $style }}" />
+            @if($type === 'text')
+                <!-- Text overlay: {{ $o['text'] ?? '' }} -->
+                <text
+                    x="{{ $x }}"
+                    y="{{ $y }}"
+                    font-size="{{ $o['font-size'] ?? 12 }}"
+                    fill="{{ $o['fill'] ?? '#000' }}"
+                    text-anchor="{{ $o['text-anchor'] ?? 'middle' }}"
+                    dominant-baseline="{{ $o['dominant-baseline'] ?? 'middle' }}"
+                >{{ $o['text'] ?? '' }}</text>
+            @else
+                <!-- Overlay {{ $i }}: type={{ $type }}, href=#obj-{{ $type }}, transform={{ $transform }} -->
+                <use href="#obj-{{ $type }}" transform="{{ $transform }}" style="{{ $style }}" stroke-width="0" />
+            @endif
         @endforeach
     </svg>
 

@@ -23,7 +23,7 @@ trait FarmFormElements
         array $player_skills,
         array $farm_map, 
         bool $can_move,
-        bool $can_plant_farm,
+        bool $can_plant_field,
         int $current_player_id = null
     ) {
         // Generate sprite configuration for the player's current space
@@ -38,13 +38,13 @@ trait FarmFormElements
             'player_skills' => $player_skills,
             'farm_map' => $farm_map,
             'can_move' => $can_move,
-            'can_plant_farm' => $can_plant_farm,
+            'can_plant_field' => $can_plant_field,
             'sprite_config' => $sprite_config,
         ];
 
-        if ($can_plant_farm) {
+        if ($can_plant_field) {
             $this->buttonGroup()
-                ->button('Plant farm', 'plantFarm')
+                ->button('Plant field', 'plantField')
                 ->endGroup();
         }
 
@@ -114,10 +114,25 @@ trait FarmFormElements
             $config['overlays'][] = $this->buildSiloOverlay($silo_status);
         }
 
-        // Add farm overlay if present
-        $farm_status = $player_space['farm_status'] ?? [];
-        if (!empty($farm_status['level'])) {
-            $config['overlays'][] = $this->buildFarmOverlay($farm_status);
+        // Add field overlay if present
+        $field_status = $player_space['field_status'] ?? [];
+
+        if (!empty($field_status['level'])) {
+            $overlay = $this->buildFarmOverlay($field_status);
+            $config['overlays'][] = $overlay;
+
+            // Add level number as text overlay
+            $config['overlays'][] = [
+                'type' => 'text',
+                'text' => (string)$field_status['level'],
+                'x' => 800 + (65 - 50) * 0.3, // Adjust for badge position (65,73 in symbol coords)
+                'y' => 700 + (73 - 50) * 0.3,
+                'font-size' => 8,
+                'fill' => '#000',
+                'text-anchor' => 'middle',
+                'dominant-baseline' => 'middle',
+                'z' => 21, // Above the field
+            ];
         }
 
         // Add player overlays
@@ -163,20 +178,26 @@ trait FarmFormElements
     }
 
     /**
-     * Build farm overlay configuration
+     * Build farm/field overlay configuration
+     *
+     * Layout grid (1000x1000 viewBox):
+     * - Road: left edge (x=100)
+     * - Silo: left side, bottom (x=200, y=800)
+     * - Players: center area (x=400-600, y=400-600)
+     * - Field: right side, middle-bottom (x=800, y=700)
      */
     protected function buildFarmOverlay(array $farm_status): array
     {
         $level = $farm_status['level'] ?? 1;
-        $scale = min(0.4, 0.2 + ($level * 0.05)); // Much smaller scale
+        $stage = strtolower($farm_status['stage'] ?? 'seedlings'); // seedlings, sprouts, mature, rotted
 
         return [
-            'type' => 'farm',
+            'type' => 'field-' . $stage,
             'x' => 800, // Right side of space
-            'y' => 800, // Near bottom
-            'scale' => $scale,
+            'y' => 700, // Middle-bottom area
+            'scale' => 0.3, // Slightly smaller than silo
             'rotate' => 0,
-            'anchor' => 'bottom',
+            'anchor' => 'center', // Use center anchor like players (works correctly)
             'z' => 20,
         ];
     }
