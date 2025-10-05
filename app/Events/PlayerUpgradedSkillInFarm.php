@@ -56,6 +56,21 @@ class PlayerUpgradedSkillInFarm extends Event
                     return $data;
                 })->toArray();
         }
+
+        if ($this->skill_name === 'Strategist') {
+            $game_state = $this->state(GameState::class);
+            $actions_state = $game_state->modifiers()->firstWhere('class_key', FarmActions::key());
+            $actions_state->modifier_data = collect($actions_state->modifier_data)
+                ->map(function ($data, $player_id) {
+                    if ($player_id !== $this->player_id) {
+                        return $data;
+                    }
+
+                    $data['action_limit'] = $data['action_limit'] + 2;
+
+                    return $data;
+                })->toArray();
+        }
     }
 
     public function handle()

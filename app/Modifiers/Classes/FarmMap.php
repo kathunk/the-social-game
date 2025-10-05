@@ -61,6 +61,7 @@ class FarmMap extends BaseModifierClass
                     'level' => null,
                     'owner_team_id' => null,
                     'amount' => 0,
+                    'capacity' => 0,
                 ],
             ];
         })->toArray();

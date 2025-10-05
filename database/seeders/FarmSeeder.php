@@ -48,7 +48,7 @@ class FarmSeeder extends Seeder
                 'challenge_keys' => [FarmRound::key()],
                 'duration' => 1000,
             ])->toArray(),
-            modifiers: [FarmActions::key(), FarmSkills::key(), FarmTeams::key(), FarmMap::key()],
+            modifiers: [FarmTeams::key(), FarmActions::key(), FarmSkills::key(), FarmMap::key()],
             players_can_join_late: false,
         )->game_template_id;
 

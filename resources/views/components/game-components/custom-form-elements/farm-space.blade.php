@@ -1,17 +1,17 @@
 <svg width="0" height="0" style="position:absolute">
   <defs>
     <!-- Backgrounds using actual images -->
-    <symbol id="bg-grass" viewBox="0 0 1000 1000">
-      <image href="/images/farm/grass.jpg" x="0" y="0" width="1000" height="1000" preserveAspectRatio="xMidYMid slice"/>
+    <symbol id="bg-grass" viewBox="0 0 1600 1000">
+      <image href="/images/farm/grass.jpg" x="0" y="0" width="1600" height="1000" preserveAspectRatio="xMidYMid slice"/>
     </symbol>
-    <symbol id="bg-desert" viewBox="0 0 1000 1000">
-      <image href="/images/farm/desert.jpg" x="0" y="0" width="1000" height="1000" preserveAspectRatio="xMidYMid slice"/>
+    <symbol id="bg-desert" viewBox="0 0 1600 1000">
+      <image href="/images/farm/desert.jpg" x="0" y="0" width="1600" height="1000" preserveAspectRatio="xMidYMid slice"/>
     </symbol>
-    <symbol id="bg-mountain" viewBox="0 0 1000 1000">
-      <image href="/images/farm/mountain.jpg" x="0" y="0" width="1000" height="1000" preserveAspectRatio="xMidYMid slice"/>
+    <symbol id="bg-mountain" viewBox="0 0 1600 1000">
+      <image href="/images/farm/mountain.jpg" x="0" y="0" width="1600" height="1000" preserveAspectRatio="xMidYMid slice"/>
     </symbol>
-    <symbol id="bg-swamp" viewBox="0 0 1000 1000">
-      <image href="/images/farm/swamp.jpeg" x="0" y="0" width="1000" height="1000" preserveAspectRatio="xMidYMid slice"/>
+    <symbol id="bg-swamp" viewBox="0 0 1600 1000">
+      <image href="/images/farm/swamp.jpeg" x="0" y="0" width="1600" height="1000" preserveAspectRatio="xMidYMid slice"/>
     </symbol>
 
     <!-- Objects (100x100 local coords for easy scaling) -->

@@ -45,7 +45,7 @@
         </x-heading>
         @if(collect($element['player_space']['player_ids'])->count() > 1)
             <x-subheading>
-                Other players: {{ implode(', ', collect($element['player_space']['player_ids'])->reject(fn ($id) => $id === $this->player->id)->map(fn ($id) => App\Models\Player::find($id)->name)->toArray()) }}
+                Other players: {{ implode(', ', collect($element['player_space']['player_ids'])->reject(fn ($id) => $id === $this->player->id)->map(fn ($id) => App\Models\Player::find($id)->name . ' (' . App\Models\Player::find($id)->team->name . ')')->toArray()) }}
             </x-subheading>
         @endif
     </div>
@@ -54,9 +54,10 @@
     <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="{{ $minX }} {{ $minY }} {{ $vbWidth }} {{ $vbHeight }}"
+        preserveAspectRatio="xMidYMid meet"
         role="img"
         aria-label="Farm Map"
-        class="w-full h-auto max-w-md mx-auto border border-gray-300 rounded-lg"
+        class="w-full h-auto border border-gray-300 rounded-lg"
     >
         {{-- Background --}}
         <use href="#bg-{{ $config['background'] ?? 'grass' }}" />
@@ -112,8 +113,7 @@
 
     {{-- Actions Information --}}
     <div class="mt-4">
-        <x-heading>You</x-heading>
-        <x-subheading>Actions: {{ $element['actions']['actions'] }} / {{ $element['limit'] }}</x-subheading>
+        <x-subheading>Actions: {{ $element['actions']['actions'] }} / {{ $element['limit'] }} (buttons with 💪 cost 1 action)</x-subheading>
         <x-subheading>Grain: {{ $element['actions']['grain'] }} / {{ $element['actions']['grain_capacity'] }}</x-subheading>
     </div>
 </div>

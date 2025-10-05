@@ -6,6 +6,9 @@ use App\Models\Player;
 use App\Events\TeamCreated;
 use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerJoinedTeam;
+use Illuminate\Support\Collection;
+use App\Events\PlayerRequestedToJoinFarmTeam;
+use App\Events\PlayerPromotedToTeamLeaderInFarm;
 
 class FarmTeams extends BaseModifierClass
 {
@@ -35,7 +38,11 @@ class FarmTeams extends BaseModifierClass
 
     public function dataArrayForState(): array
     {
-        return [];
+        return [
+            // 'leaders' => [
+            //     'team_id' => 'player_id',
+            // ],
+        ];
     }
 
     public function frontendComponent(Player $player): array
@@ -75,17 +82,128 @@ class FarmTeams extends BaseModifierClass
                 ->endGroup()
                 ->build();
         }
+        
+        if ($this->rivalLeadersOnSpace($player)->isNotEmpty()) {
+            return $this->form()
+                ->title("A rival leader is on your space")
+                ->subtitle("You may request to join their team")
+                ->buttonGroup()
+                ->button("See available teams", "seeTeams")
+                ->endGroup()
+                ->build();
+        }
+
+        if ($this->subjectsOnSpace($player)->isNotEmpty()) {
+            return $this->form()
+                ->title("Teammates are on your space")
+                ->subtitle("As team leader, you may boot them from your team.")
+                ->buttonGroup()
+                ->button("Manage nearby teammates", "seeTeams")
+                ->endGroup()
+                ->build();
+        }
 
         return [];
-
-        // @farmtodo request to join team
-        // @farmtodo approve / reject request to join team
-        // @farmtodo boot player
-        // @farmtodo vote to boot player
     }
+
+    public function frontendComponentForDedicatedPage(Player $player): array
+    {
+        $form = $this->form()
+            ->title("Teams");
+
+        $rival_leaders_on_space = $this->rivalLeadersOnSpace($player);
+        $subjects_on_space = $this->subjectsOnSpace($player);
+
+        if ($rival_leaders_on_space->isNotEmpty()) {
+            $form->subtitle("A rival leader is on your space. You may request to join their team.");
+
+            $form->select(
+                label: 'Select a team',
+                property_name: 'team_id',
+                options: $rival_leaders_on_space->mapWithKeys(fn ($rival_leader) => [$rival_leader->team_id => $rival_leader->team->name . ' (score: ' . $rival_leader->team->score . ')'])->toArray(),
+                // options: [
+                //     1 => 'Team 1',
+                //     2 => 'Team 2',
+                //     3 => 'Team 3',
+                // ],
+                placeholder: 'Select a team...',
+                validation_rules: 'required|exists:teams,id',
+                validation_messages: [
+                    'required' => 'Must select a team',
+                    'exists' => 'Must select a valid team',
+                ],
+            )
+            ->buttonGroup()
+            ->button("Request to join", "requestToJoin")
+            ->endGroup();
+        }
+
+        return $form->build();
+    }
+
+    // data helpers
+
+    public function farmMap()
+    {
+        if ($this->modifier) {
+            return $this->modifier->game->modifiers->firstWhere('class_key', FarmMap::key());
+        }
+
+        if ($this->modifier_state) {
+            return $this->modifier_state->game()->modifiers()->filter(fn ($modifier) => $modifier->class_key === FarmMap::key())->first();
+        }
+
+        return [];
+    }
+
+    public function playerSpace(Player $player): array
+    {
+        return collect($this->farmMap()->modifier_data)
+            ->filter(fn ($data) => in_array($player->id, $data['player_ids']))->first();
+    }
+
+    public function playersOnSpace(Player $player): Collection
+    {
+        return collect($this->playerSpace($player)['player_ids'])
+            ->map(fn ($player_id) => Player::find($player_id));
+    }
+
+    public function rivalLeadersOnSpace(Player $player): Collection
+    {
+        return $this->playersOnSpace($player)
+            ->filter(fn ($p) => 
+                collect($this->modifier->modifier_data['leaders'])->contains($p->id)
+                && $p->team_id !== $player->team_id
+            );
+    }
+
+    public function playerIsLeader(Player $player): bool
+    {
+        return collect($this->modifier->modifier_data['leaders'])->contains($player->id);
+    }
+
+    public function subjectsOnSpace(Player $player): Collection
+    {
+        if (! $this->playerIsLeader($player)) {
+            return collect();
+        }
+
+        return $this->playersOnSpace($player)
+            ->filter(fn ($p) => 
+                $p->team_id === $player->team_id
+            );
+    }
+
+    // actions
 
     public function createTeam(Player $player, array $params)
     {
+        $existing_team_names = $player->game->teams->pluck('name');
+
+        if ($existing_team_names->contains($params['adjective'] . ' ' . $params['noun'])) {
+            throw new \Exception('A team already exists with that name. Try a different combination.');
+        }
+        
         $team_id = TeamCreated::fire(
             game_id: $player->game_id,
             name: $params['adjective'] . ' ' . $params['noun'],
@@ -98,8 +216,39 @@ class FarmTeams extends BaseModifierClass
             previous_team_id: $player->team_id,
         );
 
+        PlayerPromotedToTeamLeaderInFarm::fire(
+            player_id: $player->id,
+            team_id: $team_id,
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+        );
+
         Verbs::commit();
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function seeTeams(Player $player, array $params)
+    {
+        return redirect()->route("games.mods", [
+            "game" => $player->game,
+            "modifier" => $this->modifier,
+        ]);
+    }
+
+    public function requestToJoin(Player $player, array $params)
+    {
+        PlayerRequestedToJoinFarmTeam::fire(
+            player_id: $player->id,
+            team_id: (int) $params['team_id'],
+            game_id: $player->game_id,
+        );
+
+        Verbs::commit();
+
+        return redirect()->route("games.mods", [
+            "game" => $player->game,
+            "modifier" => $this->modifier,
+        ]);
     }
 }

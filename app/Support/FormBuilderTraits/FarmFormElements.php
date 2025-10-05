@@ -26,6 +26,11 @@ trait FarmFormElements
         bool $can_move,
         bool $can_plant_field,
         bool $can_harvest_field,
+        bool $can_build_silo,
+        bool $silo_exists,
+        bool $can_upgrade_silo,
+        bool $can_withdraw_silo,
+        bool $can_deposit_silo,
         Player $player
     ) {
         // Generate sprite configuration for the player's current space
@@ -36,26 +41,27 @@ trait FarmFormElements
             'type' => 'farm_actions',
             'property_name' => 'farm_actions',
             'actions' => $player_actions,
-            'limit' => $player_skills['Strategist'] * 2 + 3,
+            'limit' => $player_actions['action_limit'],
             'player_space' => $player_space,
             'player_skills' => $player_skills,
             'farm_map' => $farm_map,
             'can_move' => $can_move,
             'can_plant_field' => $can_plant_field,
             'can_harvest_field' => $can_harvest_field,
+            'can_build_silo' => $can_build_silo,
             'sprite_config' => $sprite_config,
         ];
 
         if ($player_space['field_status']['level'] > 0) {
             $this->divider();
-            $this->title('Field (Level: ' . $player_space['field_status']['level'] . ')')
+            $this->title('Field (level: ' . $player_space['field_status']['level'] . ')')
                 ->subtitle('Owned by ' . Team::find($player_space['field_status']['owner_team_id'])->name)
                 ->subtitle('Stage: ' . $player_space['field_status']['stage'])
                 ->when($player_space['field_status']['stage'] === 'mature', function ($builder) use ($player_space, $can_harvest_field) {
                     $builder->subtitle('Quantity: ' . $player_space['field_status']['quantity'])
                     ->when($can_harvest_field, function ($builder) {
                         $builder->buttonGroup()
-                            ->button('Harvest', 'harvestField')
+                            ->button('Harvest 💪', 'harvestField')
                             ->endGroup();
                     });
                 });
@@ -63,8 +69,64 @@ trait FarmFormElements
 
         if ($can_plant_field) {
             $this->buttonGroup()
-                ->button('Plant field', 'plantField')
+                ->button('Plant field 💪', 'plantField')
                 ->endGroup();
+        }
+
+        if ($can_build_silo) {
+            $this->buttonGroup()
+                ->button('Build silo 💪', 'buildSilo')
+                ->endGroup();
+        }
+
+        if ($silo_exists) {
+            $amount_in_silo = $player_space['silo_status']['amount'];
+            $silo_capacity = $player_space['silo_status']['capacity'];
+            $player_grain = $player_actions['grain'];
+            $player_capacity = $player_actions['grain_capacity'];
+
+            $withdrawable = min($amount_in_silo, $player_capacity - $player_grain);
+            $depositable = min($player_grain, $silo_capacity - $amount_in_silo);
+
+            $this->divider()->title('Silo (level: ' . $player_space['silo_status']['level'] . ')')
+                ->subtitle('Owned by ' . Team::find($player_space['silo_status']['owner_team_id'])->name)
+                ->subtitle('Amount: ' . $amount_in_silo . ' / ' . $silo_capacity)
+                ->when($can_withdraw_silo, function ($builder) use ($withdrawable) {
+                    $this->select(
+                        label: 'Withdraw amount',
+                        property_name: 'withdraw_amount',
+                        validation_rules: 'required|in:'.implode(',', collect(range(1, $withdrawable))->toArray()),
+                        validation_messages: ['required' => 'Amount is required', 'numeric' => 'Amount must be a number', 'min' => 'Amount must be greater than 0'],
+                        options: collect(range(1, $withdrawable))->mapWithKeys(function ($amount) {
+                            return [$amount => $amount];
+                        })->toArray(),
+                        placeholder: 'Select an amount...',
+                    )
+                    ->buttonGroup()
+                        ->button('Withdraw', 'withdrawSilo')
+                        ->endGroup();
+                })
+                ->when($can_deposit_silo, function ($builder) use ($depositable) {
+                    $this->select(
+                        label: 'Deposit amount',
+                        property_name: 'deposit_amount',
+                        validation_rules: 'required|in:'.implode(',', collect(range(1, $depositable))->toArray()),
+                        validation_messages: ['required' => 'Amount is required', 'numeric' => 'Amount must be a number', 'min' => 'Amount must be greater than 0'],
+                        options: collect(range(1, $depositable))->mapWithKeys(function ($amount) {
+                            return [$amount => $amount];
+                        })->toArray(),
+                        placeholder: 'Select an amount...',
+                    )
+                    ->buttonGroup()
+                        ->button('Deposit', 'depositSilo')
+                        ->endGroup();
+                })
+                ->when($can_upgrade_silo, function ($builder) {
+                    $this->buttonGroup()
+                        ->button('Upgrade 💪', 'upgradeSilo')
+                        ->endGroup();
+                });
+                
         }
 
         if ($can_move) {
@@ -89,7 +151,7 @@ trait FarmFormElements
             })->toArray();
             
             $this->select(
-                label: 'Move to a space (cost: 1 action)',
+                label: 'Select a space',
                 options: $available_spaces,
                 property_name: 'space_string',
                 validation_rules: 'required|in:'.implode(',', $available_spaces),
@@ -97,7 +159,7 @@ trait FarmFormElements
                 placeholder: 'Select a space...',
             );
             $this->buttonGroup()
-                ->button('Move', 'move', ['space_string'])
+                ->button('Move 💪', 'move', ['space_string'])
                 ->endGroup();
         }
 
@@ -111,14 +173,14 @@ trait FarmFormElements
     {
         if (empty($player_space)) {
             return [
-                'viewBox' => [0, 0, 1000, 1000],
+                'viewBox' => [0, 0, 1600, 1000],
                 'background' => 'grass',
                 'overlays' => [],
             ];
         }
 
         $config = [
-            'viewBox' => [0, 0, 1000, 1000],
+            'viewBox' => [0, 0, 1600, 1000],
             'background' => $player_space['type'] ?? 'grass',
             'overlays' => [],
         ];
@@ -146,7 +208,7 @@ trait FarmFormElements
             $config['overlays'][] = [
                 'type' => 'text',
                 'text' => (string)$field_status['level'],
-                'x' => 800 + (65 - 50) * 0.3, // Adjust for badge position (65,73 in symbol coords)
+                'x' => 1200 + (65 - 50) * 0.3, // Adjust for badge position (65,73 in symbol coords)
                 'y' => 700 + (73 - 50) * 0.3,
                 'font-size' => 8,
                 'fill' => '#000',
@@ -173,7 +235,7 @@ trait FarmFormElements
         // Roads are smaller and positioned at the edge
         return [
             'type' => 'road',
-            'x' => 100, // Left side of space
+            'x' => 200, // Left side of space
             'y' => 500, // Middle vertically
             'scale' => 0.3, // Much smaller scale
             'rotate' => 0,
@@ -189,7 +251,7 @@ trait FarmFormElements
     {
         return [
             'type' => 'silo',
-            'x' => 200, // Left side of space
+            'x' => 400, // Left-center of space
             'y' => 800, // Near bottom
             'scale' => 0.4, // Smaller scale
             'rotate' => 0,
@@ -201,11 +263,11 @@ trait FarmFormElements
     /**
      * Build farm/field overlay configuration
      *
-     * Layout grid (1000x1000 viewBox):
-     * - Road: left edge (x=100)
-     * - Silo: left side, bottom (x=200, y=800)
-     * - Players: center area (x=400-600, y=400-600)
-     * - Field: right side, middle-bottom (x=800, y=700)
+     * Layout grid (1600x1000 viewBox):
+     * - Road: left edge (x=200)
+     * - Silo: left-center (x=400, y=800)
+     * - Players: center area (x=700-900, y=400-600)
+     * - Field: right side, middle-bottom (x=1200, y=700)
      */
     protected function buildFarmOverlay(array $farm_status): array
     {
@@ -214,7 +276,7 @@ trait FarmFormElements
 
         return [
             'type' => 'field-' . $stage,
-            'x' => 800, // Right side of space
+            'x' => 1200, // Right side of space
             'y' => 700, // Middle-bottom area
             'scale' => 0.3, // Slightly smaller than silo
             'rotate' => 0,
@@ -230,11 +292,11 @@ trait FarmFormElements
     {
         // Distribute players around the center of the space with smaller scale
         $positions = [
-            [500, 500], // Center
-            [400, 400], // Top-left
-            [600, 400], // Top-right
-            [400, 600], // Bottom-left
-            [600, 600], // Bottom-right
+            [800, 500], // Center
+            [700, 400], // Top-left
+            [900, 400], // Top-right
+            [700, 600], // Bottom-left
+            [900, 600], // Bottom-right
         ];
         
         $position = $positions[$index % count($positions)];
