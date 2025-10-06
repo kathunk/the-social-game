@@ -9,9 +9,11 @@ use App\Events\Traits\HasTeam;
 use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasModifier;
 
-class PlayerRequestedToJoinFarmTeam extends Event
+class TeamLeaderAcceptedRequestToJoinFarmTeam extends Event
 {
     use HasGame, HasPlayer, HasTeam, HasModifier;
+
+    public int $requester_id;
 
     public function validate()
     {
@@ -20,7 +22,8 @@ class PlayerRequestedToJoinFarmTeam extends Event
 
     public function apply(ModifierState $modifier)
     {
-        $modifier->modifier_data['requests'][$this->player_id] = $this->team_id;
+        $modifier->modifier_data['requests'] = collect($modifier->modifier_data['requests'])
+            ->reject(fn ($team_id, $player_id) => $player_id === $this->requester_id)->toArray();
     }
 
     public function handle()
