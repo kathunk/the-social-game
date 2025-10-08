@@ -45,7 +45,20 @@
         </x-heading>
         @if(collect($element['player_space']['player_ids'])->count() > 1)
             <x-subheading>
-                Other players: {{ implode(', ', collect($element['player_space']['player_ids'])->reject(fn ($id) => $id === $this->player->id)->map(fn ($id) => App\Models\Player::find($id)->name . ' (' . App\Models\Player::find($id)->team->name . ')')->toArray()) }}
+                <flux:table>
+                    <flux:table.columns>
+                        <flux:table.column>Name</flux:table.column>
+                        <flux:table.column>Team</flux:table.column>
+                    </flux:table.columns>
+                    <flux:table.rows>
+                        @foreach (collect($element['player_space']['player_ids'])->reject(fn ($id) => $id === $this->player->id) as $id)
+                            <flux:table.row>
+                                <flux:table.cell>{{ App\Models\Player::find($id)->name }}</flux:table.cell>
+                                <flux:table.cell>{{ App\Models\Player::find($id)->team->name ?? 'No team' }}</flux:table.cell>
+                            </flux:table.row>
+                        @endforeach
+                    </flux:table.rows>
+                </flux:table>
             </x-subheading>
         @endif
     </div>

@@ -28,6 +28,6 @@ class TeamLeaderAcceptedRequestToJoinFarmTeam extends Event
 
     public function handle()
     {
-        // And I swear to everything, when I leave this Earth, it's gonna be on both feet, never knees in the dirt. - Lil Wayne
+        $this->modifier()->updateModelWithStateData();
     }
 }
