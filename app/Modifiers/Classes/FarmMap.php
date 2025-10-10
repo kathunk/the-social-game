@@ -78,37 +78,6 @@ class FarmMap extends BaseModifierClass
             ->build();
     }
 
-    public function onGameStarted(
-        GameState $game_state,
-        ModifierState $modifier_state,
-    ) {
-        $game_state->player_ids->each(function ($player_id) use ($modifier_state) {
-            $this->putPlayerInRandomSpace($modifier_state, $player_id);
-        });
-    }
-
-    public function onUserAdmittedToGame(
-        PlayerState $player_state,
-        GameState $game_state,
-        ModifierState $modifier_state,
-    ) { 
-        $this->putPlayerInRandomSpace($modifier_state, $player_state->id);
-    }
-
-    public function putPlayerInRandomSpace(ModifierState $modifier_state, int $player_id)
-    {
-        $spaces = collect($modifier_state->modifier_data);
-        $random_space = $spaces->random();
-        $spaces = collect($spaces)->map(function ($space) use ($random_space, $player_id) {
-            if ($space['x-index'] === $random_space['x-index'] && $space['y-index'] === $random_space['y-index']) {
-                $space['player_ids'][] = $player_id;
-            }
-
-            return $space;
-        })->toArray();
-        $modifier_state->modifier_data = $spaces;
-    }
-
     public function onChallengeEnded(GameState $game_state)
     {
         $modifier_state = $game_state->modifiers()->firstWhere('class_key', self::key());

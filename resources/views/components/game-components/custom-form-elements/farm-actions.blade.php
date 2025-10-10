@@ -44,6 +44,7 @@
             You are in space {{ chr(65 + $element['player_space']['x-index']) }}{{ $element['player_space']['y-index'] + 1 }}: {{ $element['player_space']['type'] }}
         </x-heading>
         @if(collect($element['player_space']['player_ids'])->count() > 1)
+            <x-heading class="mt-4">Other players on your space:</x-heading>
             <x-subheading>
                 <flux:table>
                     <flux:table.columns>
@@ -53,7 +54,14 @@
                     <flux:table.rows>
                         @foreach (collect($element['player_space']['player_ids'])->reject(fn ($id) => $id === $this->player->id) as $id)
                             <flux:table.row>
-                                <flux:table.cell>{{ App\Models\Player::find($id)->name }}</flux:table.cell>
+                                <flux:table.cell>
+                                    <div class="flex items-center gap-1">
+                                        {{ App\Models\Player::find($id)->name }}
+                                        @if(collect($element['leader_ids'])->contains($id))
+                                            <x-icons.crown class="text-yellow-500 w-4 h-4" />
+                                        @endif
+                                    </div>
+                                </flux:table.cell>
                                 <flux:table.cell>{{ App\Models\Player::find($id)->team->name ?? 'No team' }}</flux:table.cell>
                             </flux:table.row>
                         @endforeach

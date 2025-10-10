@@ -312,7 +312,19 @@ class Game extends Model
 
         if ($this->fresh()->modifiers->count() === 0) {
             foreach ($this->gameTemplate->modifiers as $modifier) {
-                ModifierCreated::fire(game_id: $this->id, class_key: $modifier);
+                $config = $this->modifierConfigurations->firstWhere('modifier_key', $modifier);
+
+                if ($config) {
+                    $modifier_data = $config->modifier_data;
+                } else {
+                    $modifier_data = (new (ModifierRegistry::retrieveFromKey($modifier)))->dataArrayForState();
+                }
+
+                ModifierCreated::fire(
+                    game_id: $this->id, 
+                    class_key: $modifier,
+                    modifier_data: $modifier_data,
+                );
             }
         }
 

@@ -31,7 +31,8 @@ trait FarmFormElements
         bool $can_upgrade_silo,
         bool $can_withdraw_silo,
         bool $can_deposit_silo,
-        Player $player
+        Player $player,
+        array $all_leader_ids
     ) {
         // Generate sprite configuration for the player's current space
         $sprite_config = $this->buildSpaceSpriteConfig($player_space, $player);
@@ -50,6 +51,7 @@ trait FarmFormElements
             'can_harvest_field' => $can_harvest_field,
             'can_build_silo' => $can_build_silo,
             'sprite_config' => $sprite_config,
+            'leader_ids' => $all_leader_ids,
         ];
 
         if ($player_space['field_status']['level'] > 0) {

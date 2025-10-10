@@ -4,11 +4,13 @@ namespace App\Events;
 
 use Thunk\Verbs\Event;
 use App\States\GameState;
+use App\States\TeamState;
+use App\States\PlayerState;
 use App\Events\Traits\HasGame;
+use App\Events\Traits\HasTeam;
 use App\Events\Traits\HasModifier;
 use App\Modifiers\Classes\FarmMap;
 use App\Events\Traits\HasActivePlayer;
-use App\Events\Traits\HasTeam;
 use App\Modifiers\Classes\FarmActions;
 
 class PlayerHarvestedField extends Event
@@ -66,8 +68,15 @@ class PlayerHarvestedField extends Event
             })->toArray();
     }
 
+    public function applyToTeam(TeamState $team)
+    {
+        $amount_to_harvest = min($this->field_quantity, $this->player_capacity - $this->player_grain);
+        $team->addToScoreHistory('🌾', $amount_to_harvest, $this->state(PlayerState::class)->name . ' harvested ' . $amount_to_harvest . ' grain.');
+    }
+
     public function handle()
     {
         $this->game()->modifiers->each(fn ($modifier) => $modifier->updateModelWithStateData());
+        $this->team()->updateModelWithStateData();
     }
 }

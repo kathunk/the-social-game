@@ -8,11 +8,15 @@ use App\Events\TeamCreated;
 use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerJoinedTeam;
 use Illuminate\Support\Collection;
+use App\Events\PlayerSpawnedInFarm;
+use App\Events\PlayerJoinedFarmTeam;
+use App\Events\PlayerBootedFromFarmTeam;
 use App\Events\PlayerRequestedToJoinFarmTeam;
 use App\Events\PlayerPromotedToTeamLeaderInFarm;
 use App\Events\PlayerCanceledRequestToJoinFarmTeam;
 use App\Events\TeamLeaderDeclineRequestToJoinFarmTeam;
 use App\Events\TeamLeaderAcceptedRequestToJoinFarmTeam;
+use App\Events\PlayerRedistributedResourcesToNewFarmTeam;
 
 class FarmTeams extends BaseModifierClass
 {
@@ -43,9 +47,9 @@ class FarmTeams extends BaseModifierClass
     public function dataArrayForState(): array
     {
         return [
-            // 'leaders' => [
+            'leaders' => [
             //     'team_id' => 'player_id',
-            // ],
+            ],
             'requests' => [
                 // 'player_id' => 'team_id',
             ]
@@ -98,7 +102,7 @@ class FarmTeams extends BaseModifierClass
                 ->divider();
         }
 
-        if ($this->outstandingRequesters($player) !== []) {
+        if ($this->outstandingRequesters($player)->isNotEmpty()) {
             $form
                 ->subtitle("Players are requesting to join your team.")
                 ->divider();
@@ -119,12 +123,19 @@ class FarmTeams extends BaseModifierClass
 
     public function frontendComponentForDedicatedPage(Player $player): array
     {
+        if ($player->team_id === null) {
+            return $this->form()->subtitle('You are a lone wolf. Return to the game dashboard to create a new team.')->build();
+        }
+
+
         $form = $this->form()->title($player->team->name);
 
         $rival_leaders_on_space = $this->rivalLeadersOnSpace($player);
         $subjects_on_space = $this->subjectsOnSpace($player);
         $outstanding_requesters = $this->outstandingRequesters($player);
         $existing_request = $this->existingRequest($player);
+        $current_team = $player->team;
+        $other_players_on_team = $current_team->players->filter(fn ($p) => $p->id !== $player->id);
 
         if ($outstanding_requesters->isNotEmpty()) {
             $form->divider()->subtitle("Players are requesting to join your team. Approve or decline them below.")
@@ -147,6 +158,13 @@ class FarmTeams extends BaseModifierClass
 
         if ($rival_leaders_on_space->isNotEmpty() && ! $existing_request) {
             $form->divider()->subtitle("A rival leader is on your space. You may request to join their team.")
+                ->subtitle("If they accept, you will switch teams and your Grain in your possession will count towards your new team.")
+                ->when($other_players_on_team->isNotEmpty(), function ($form) {
+                    $form->subtitle("Grain in your current team's silos will remain with them.");
+                })
+                ->when($other_players_on_team->isEmpty(), function ($form) {
+                    $form->subtitle("Since you are the last member of your current team, ownership of your Silos, Fields, and Roads will transfer to the new team as well.");
+                })
                 ->select(
                     label: 'Select a team',
                     property_name: 'team_id',
@@ -171,6 +189,24 @@ class FarmTeams extends BaseModifierClass
                         ->endGroup();
         }
 
+        if ($subjects_on_space->isNotEmpty()) {
+            $form->divider()->subtitle("Teammates are on your space. You may boot them from your team.")
+                    ->select(
+                        label: 'Select a teammate',
+                        property_name: 'teammate_id',
+                        options: $subjects_on_space->mapWithKeys(fn ($teammate) => [$teammate->id => $teammate->name])->toArray(),
+                        placeholder: 'Select a teammate...',
+                        validation_rules: 'required|exists:players,id',
+                        validation_messages: [
+                            'required' => 'Must select a teammate',
+                            'exists' => 'Must select a valid teammate',
+                        ],
+                    )
+                ->buttonGroup()
+                    ->button("Boot", "bootTeammate")
+                ->endGroup();
+        }
+
         return $form->build();
     }
 
@@ -189,7 +225,7 @@ class FarmTeams extends BaseModifierClass
         return [];
     }
 
-    public function playerSpace(Player $player): array
+    public function playerSpace(Player $player): array | null
     {
         return collect($this->farmMap()->modifier_data)
             ->filter(fn ($data) => in_array($player->id, $data['player_ids']))->first();
@@ -246,6 +282,24 @@ class FarmTeams extends BaseModifierClass
             ->first();
     }
 
+    public function actionsModifier()
+    {
+        if ($this->modifier) {
+            return $this->modifier->game->modifiers->firstWhere('class_key', FarmActions::key())->modifier_data;
+        }
+
+        if ($this->modifier_state) {
+            return $this->modifier_state->game()->modifiers()->filter(fn ($modifier) => $modifier->class_key === FarmActions::key())->first()->modifier_data;
+        }
+
+        return [];
+    }
+
+    public function canAbandonTeam(Player $player): bool
+    {
+        return $player->team->players->count() > 1;
+    }
+
     // actions
 
     public function createTeam(Player $player, array $params)
@@ -261,19 +315,32 @@ class FarmTeams extends BaseModifierClass
             name: $params['adjective'] . ' ' . $params['noun'],
         )->team_id;
 
-        PlayerJoinedTeam::fire(
-            player_id: $player->id,
-            team_id: $team_id,
-            game_id: $player->game_id,
-            previous_team_id: $player->team_id,
-        );
-
         PlayerPromotedToTeamLeaderInFarm::fire(
             player_id: $player->id,
             team_id: $team_id,
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
         );
+
+        PlayerJoinedFarmTeam::fire(
+            player_id: $player->id,
+            team_id: $team_id,
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+        );
+
+        if ($this->playerSpace($player) === null) {
+            $farm_map = $this->farmMap();
+            $random_space = collect($farm_map->modifier_data)->random();
+
+            PlayerSpawnedInFarm::fire(
+                player_id: $player->id,
+                game_id: $player->game_id,
+                map_modifier_id: $farm_map->id,
+                x_index: $random_space['x-index'],
+                y_index: $random_space['y-index'],
+            );
+        }
 
         Verbs::commit();
 
@@ -343,6 +410,9 @@ class FarmTeams extends BaseModifierClass
     {
         $requester = Player::find((int) $params['player_id']);
         $previous_team_id = $requester->team_id;
+        $requester_grain = $this->actionsModifier()[$requester->id]['grain'];
+        $requester_team = $requester->team;
+        $player_is_last_on_team = $requester_team->players->count() === 1;
         
         TeamLeaderAcceptedRequestToJoinFarmTeam::fire(
             player_id: $player->id,
@@ -351,19 +421,34 @@ class FarmTeams extends BaseModifierClass
             modifier_id: $this->modifier->id,
             requester_id: (int) $params['player_id'],
         );
-
-        PlayerJoinedTeam::fire(
-            player_id: (int) $params['player_id'],
-            team_id: (int) $params['team_id'],
-            game_id: $player->game_id,
-            previous_team_id: $previous_team_id,
-        );
         
-        PlayerRedistributedResourcesToNewFarmTeam::fire(
-            player_id: (int) $params['requester_id'],
+        PlayerJoinedFarmTeam::fire(
+            player_id: $requester->id,
             previous_team_id: $previous_team_id,
-            team_id: (int) $params['team_id'],
+            team_id: $player->team_id,
             game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            requester_previous_team_id: $requester_team->id,
+            player_is_last_on_team: $player_is_last_on_team,
+            requester_grain: $requester_grain,
+        );
+
+        Verbs::commit();
+
+        return redirect()->route("games.mods", [
+            "game" => $player->game,
+            "modifier" => $this->modifier,
+        ]);
+    }
+
+    public function bootTeammate(Player $player, array $params)
+    {
+        PlayerBootedFromFarmTeam::fire(
+            player_id: $player->id,
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            team_id: $player->team_id,
+            grain_in_possession: $this->actionsModifier()[$player->id]['grain'],
         );
 
         Verbs::commit();

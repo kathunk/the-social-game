@@ -70,6 +70,7 @@ class FarmActions extends BaseModifierClass
                 can_withdraw_silo: $this->canWithdrawSilo($player, $player_space, $player_actions),
                 can_deposit_silo: $this->canDepositSilo($player, $player_space, $player_actions),
                 player: $player,
+                all_leader_ids: $this->allLeaderIds()->toArray(),
             )
             ->build();
     }
@@ -117,6 +118,23 @@ class FarmActions extends BaseModifierClass
         return $player_space['silo_status']['level'] > 0;
     }
 
+    public function farmTeams()
+    {
+        if ($this->modifier) {
+            return $this->modifier->game->modifiers->firstWhere('class_key', FarmTeams::key());
+        }
+
+        if ($this->modifier_state) {
+            return $this->modifier_state->game()->modifiers()->filter(fn ($modifier) => $modifier->class_key === FarmTeams::key())->first();
+        }
+
+        return [];
+    }
+
+    public function allLeaderIds()
+    {
+        return collect($this->farmTeams()->modifier_data['leaders'])->values();
+    }
 
 
     // actions
@@ -239,7 +257,8 @@ class FarmActions extends BaseModifierClass
     public function canWithdrawSilo(Player $player, array $player_space, array $player_actions)
     {
         return $player_actions['grain_capacity'] > $player_actions['grain']
-            && $player_space['silo_status']['amount'] > 0;
+            && $player_space['silo_status']['amount'] > 0
+            && $player_space['silo_status']['owner_team_id'] === $player->team_id;
     }
 
     public function withdrawSilo(Player $player, array $params)
@@ -264,7 +283,8 @@ class FarmActions extends BaseModifierClass
     public function canDepositSilo(Player $player, array $player_space, array $player_actions)
     {
         return $player_actions['grain'] > 0
-            && $player_space['silo_status']['capacity'] > $player_space['silo_status']['amount'];
+            && $player_space['silo_status']['capacity'] > $player_space['silo_status']['amount']
+            && $player_space['silo_status']['owner_team_id'] === $player->team_id;
     }
 
     public function depositSilo(Player $player, array $params)

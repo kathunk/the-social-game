@@ -18,6 +18,8 @@ class ModifierCreated extends Event
 
     public string $class_key;
 
+    public ?array $modifier_data = null;
+
     public function applyToGame(GameState $game)
     {
         $game->modifier_ids->push($this->modifier_id);
@@ -27,6 +29,13 @@ class ModifierCreated extends Event
     {
         $modifier->game_id = $this->game_id;
         $modifier->class_key = $this->class_key;
+
+        if ($this->modifier_data) {
+            $modifier->modifier_data = $this->modifier_data;
+            return;
+        } 
+
+        // this is only in here for backwards compatibility with old events
 
         $config = $this->state(GameState::class)->modifierConfigurations()->firstWhere('modifier_key', $this->class_key);
 

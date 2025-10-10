@@ -15,7 +15,7 @@ class PlayerState extends State
 
     public int $game_id;
 
-    public int $team_id;
+    public ?int $team_id = null;
 
     public Carbon $last_switched_team_at;
 
