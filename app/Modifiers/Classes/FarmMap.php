@@ -4,9 +4,9 @@ namespace App\Modifiers\Classes;
 
 use App\Models\Player;
 use App\States\GameState;
-use App\States\PlayerState;
-use App\States\ModifierState;
-use App\States\ChallengeState;
+use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerBuiltRoad;
+use App\Events\PlayerMovedInFarm;
 
 class FarmMap extends BaseModifierClass
 {
@@ -72,9 +72,21 @@ class FarmMap extends BaseModifierClass
         if ($player->team_id === null) {
             return [];
         }
+
+        $actions = $this->playerActions($player);
+        $player_space = $this->playerSpace($player);
+        $accessible_spaces = $this->accessibleSpaces($player, $this->modifier->modifier_data, $player_space);
+        $player_skills = $this->playerSkills($player);
         
         return $this->form()
-            ->farmMap($this->modifier->modifier_data, $player)
+            ->farmMap(
+                spaces: $this->modifier->modifier_data,
+                player: $player,
+                player_space: $player_space,
+                accessible_spaces: $accessible_spaces,
+                can_move: $this->canMove($player, $actions),
+                can_build_road: $this->canBuildRoad($player, $player_skills, $player_space, $actions),
+            )
             ->build();
     }
 
@@ -111,5 +123,175 @@ class FarmMap extends BaseModifierClass
 
             return $space;
         })->toArray();
+    }
+
+    // data helpers
+
+    public function playerActions(Player $player)
+    {
+        return $this->modifier->game->modifiers->firstWhere('class_key', FarmActions::key())->modifier_data[$player->id]['actions'];
+    }
+
+    public function playerSpace(Player $player)
+    {
+        return collect($this->modifier->modifier_data)->filter(fn ($space) => in_array($player->id, $space['player_ids']))->first();
+    }
+
+    public function playerSkills(Player $player)
+    {
+        return $this->modifier->game->modifiers->firstWhere('class_key', FarmSkills::key())->modifier_data[$player->id]['skills'];
+    }
+
+    public function accessibleSpaces(Player $player, array $spaces, array $player_space)
+    {
+        $player_x = $player_space['x-index'];
+        $player_y = $player_space['y-index'];
+
+        // Create a map for quick space lookup by coordinates
+        $space_map = collect($spaces)->keyBy(function ($space) {
+            return $space['x-index'] . ',' . $space['y-index'];
+        });
+
+        // Check if player's current space has a road
+        $player_has_road = ($player_space['road_status']['owner_team_id'] ?? null) !== null;
+
+        // Get all spaces that are adjacent to player's current position
+        $immediate_adjacent = [
+            ['x' => $player_x + 1, 'y' => $player_y],
+            ['x' => $player_x - 1, 'y' => $player_y],
+            ['x' => $player_x, 'y' => $player_y + 1],
+            ['x' => $player_x, 'y' => $player_y - 1],
+        ];
+
+        $accessible = [];
+        $visited = [];
+
+        // For each immediately adjacent space
+        foreach ($immediate_adjacent as $adj) {
+            $adj_key = $adj['x'] . ',' . $adj['y'];
+
+            if (!$space_map->has($adj_key)) {
+                continue;
+            }
+
+            $adj_space = $space_map->get($adj_key);
+
+            // Always add immediately adjacent spaces
+            $accessible[$adj_key] = $adj;
+            $visited[$adj_key] = true;
+
+            // Only explore road network if PLAYER's current space has a road AND adjacent space has a road
+            if ($player_has_road && ($adj_space['road_status']['owner_team_id'] ?? null) !== null) {
+                $queue = [$adj];
+
+                while (!empty($queue)) {
+                    $current = array_shift($queue);
+                    $current_key = $current['x'] . ',' . $current['y'];
+                    $current_space = $space_map->get($current_key);
+
+                    if (!$current_space) {
+                        continue;
+                    }
+
+                    // Only continue if current space has a road
+                    if (($current_space['road_status']['owner_team_id'] ?? null) === null) {
+                        continue;
+                    }
+
+                    // Get spaces adjacent to this road space
+                    $road_adjacent = [
+                        ['x' => $current['x'] + 1, 'y' => $current['y']],
+                        ['x' => $current['x'] - 1, 'y' => $current['y']],
+                        ['x' => $current['x'], 'y' => $current['y'] + 1],
+                        ['x' => $current['x'], 'y' => $current['y'] - 1],
+                    ];
+
+                    foreach ($road_adjacent as $next) {
+                        $next_key = $next['x'] . ',' . $next['y'];
+
+                        if (!isset($visited[$next_key]) && $space_map->has($next_key)) {
+                            $visited[$next_key] = true;
+                            $accessible[$next_key] = $next;
+
+                            $next_space = $space_map->get($next_key);
+
+                            // Only add to queue if it has a road (to continue exploring)
+                            if (($next_space['road_status']['owner_team_id'] ?? null) !== null) {
+                                $queue[] = $next;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Convert accessible spaces to pretty format
+        return collect($accessible)->mapWithKeys(function ($coords) {
+            $pretty = chr(65 + $coords['x']) . ($coords['y'] + 1);
+            return [$pretty => $pretty];
+        })->toArray();
+    }
+
+    // actions
+
+    public function canMove(Player $player, int $actions)
+    {
+        return $actions > 0;
+    }
+
+    public function move(Player $player, array $params)
+    {
+        $space_string = $params['selected_space'];
+
+        $x = ord($space_string[0]) - 65;
+        $y = intval($space_string[1]) - 1;
+
+        $space = collect($this->modifier->modifier_data)
+            ->filter(fn ($space) => $space['x-index'] === $x && $space['y-index'] === $y)
+            ->first();
+
+        if (! $space) {
+            throw new \Exception('Space not found');
+        }
+
+        PlayerMovedInFarm::fire(
+            game_id: $this->modifier->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            x_index: $x,
+            y_index: $y,
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function canBuildRoad(Player $player, array $player_skills, array $player_space, int $actions)
+    {
+        return $actions > 0
+            && $player_skills['Builder'] > 2
+            && ($player_space['road_status']['owner_team_id'] ?? null) === null
+            && ($player_space['type'] !== 'swamp')
+            && ($player_space['type'] !== 'mountain');
+    }
+
+    public function buildRoad(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+        
+        PlayerBuiltRoad::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+            level: 1,
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 }

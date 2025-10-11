@@ -127,7 +127,6 @@ class FarmTeams extends BaseModifierClass
             return $this->form()->subtitle('You are a lone wolf. Return to the game dashboard to create a new team.')->build();
         }
 
-
         $form = $this->form()->title($player->team->name);
 
         $rival_leaders_on_space = $this->rivalLeadersOnSpace($player);
@@ -322,11 +321,16 @@ class FarmTeams extends BaseModifierClass
             modifier_id: $this->modifier->id,
         );
 
+        $grain = isset($this->actionsModifier()[$player->id]['grain']) 
+            ? $this->actionsModifier()[$player->id]['grain'] 
+            : 0;
+
         PlayerJoinedFarmTeam::fire(
             player_id: $player->id,
             team_id: $team_id,
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
+            player_grain: $grain,
         );
 
         if ($this->playerSpace($player) === null) {
@@ -430,7 +434,7 @@ class FarmTeams extends BaseModifierClass
             modifier_id: $this->modifier->id,
             requester_previous_team_id: $requester_team->id,
             player_is_last_on_team: $player_is_last_on_team,
-            requester_grain: $requester_grain,
+            player_grain: $requester_grain,
         );
 
         Verbs::commit();
@@ -443,12 +447,14 @@ class FarmTeams extends BaseModifierClass
 
     public function bootTeammate(Player $player, array $params)
     {
+        $teammate = Player::find((int) $params['teammate_id']);
+
         PlayerBootedFromFarmTeam::fire(
-            player_id: $player->id,
+            player_id: $teammate->id,
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
             team_id: $player->team_id,
-            grain_in_possession: $this->actionsModifier()[$player->id]['grain'],
+            grain_in_possession: $this->actionsModifier()[$teammate->id]['grain'],
         );
 
         Verbs::commit();

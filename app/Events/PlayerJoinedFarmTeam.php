@@ -3,7 +3,6 @@
 namespace App\Events;
 
 use App\Models\Team;
-use App\Models\Player;
 use Thunk\Verbs\Event;
 use App\States\GameState;
 use App\States\TeamState;
@@ -21,7 +20,7 @@ class PlayerJoinedFarmTeam extends Event
 
     public ?int $requester_previous_team_id = null;
     public ?bool $player_is_last_on_team = false;
-    public ?int $requester_grain = 0;
+    public ?int $player_grain = 0;
 
     public function validate()
     {
@@ -83,7 +82,7 @@ class PlayerJoinedFarmTeam extends Event
         $team->player_ids->push($this->player_id);
         $requester = PlayerState::load($this->player_id);
 
-        $amount_to_transfer = $this->requester_grain;
+        $amount_to_transfer = $this->player_grain;
 
         if ($this->requester_previous_team_id !== null) {
             $previous_team = TeamState::load($this->requester_previous_team_id);
@@ -91,7 +90,7 @@ class PlayerJoinedFarmTeam extends Event
         }
 
         if ($this->player_is_last_on_team) {
-            $amount_to_transfer += $previous_team->score() - $this->requester_grain;
+            $amount_to_transfer += $previous_team->score() - $this->player_grain;
         }
         
         if ($this->requester_previous_team_id !== null) {

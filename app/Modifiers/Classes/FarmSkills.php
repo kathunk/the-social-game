@@ -32,8 +32,8 @@ class FarmSkills extends BaseModifierClass
         ],
         "builder" => [
             "name" => "Builder",
-            "level_1" => "Build level 1 Silos and Roads",
-            "level_2" => "Build level 2 Silos and Roads",
+            "level_1" => "Build level 1 Silos",
+            "level_2" => "Build level 2 Silos",
             "level_3" => "Build level 3 Silos and Roads",
         ],
         "farmer" => [

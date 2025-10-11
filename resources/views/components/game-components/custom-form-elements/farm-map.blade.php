@@ -16,6 +16,13 @@
     }
 
     $player_space = collect($element['spaces'])->filter(fn ($space) => in_array($this->player->id, $space['player_ids']))->first();
+
+    // Parse accessible spaces (e.g., "A1", "B2") into coordinates
+    $accessible_coordinates = collect($element['accessible_spaces'])->map(function($coord) {
+        $column = ord(strtoupper($coord[0])) - 65; // Convert A->0, B->1, etc.
+        $row = intval(substr($coord, 1)) - 1; // Convert 1->0, 2->1, etc.
+        return ['x' => $column, 'y' => $row];
+    });
 @endphp
 
 <div>
@@ -40,9 +47,25 @@
             
             <!-- Grid cells for this row -->
             @for($x = 0; $x <= $maxX; $x++)
-                <div style="border: 1px solid #ccc; padding: 1px; min-height: 10px; display: flex; align-items: center; justify-content: center;">
+                @php
+                    $isPlayerSpace = ($x === $player_space['x-index'] && $y === $player_space['y-index']);
+                    $isAccessible = $accessible_coordinates->contains(fn($coord) => $coord['x'] === $x && $coord['y'] === $y);
+                    $coordinate = chr(65 + $x) . ($y + 1); // Convert x,y to A1 format
+                    $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
+                    $isSelected = $selectedValue === $coordinate;
+
+                    $bgColor = $isPlayerSpace ? 'background-color: #fef3c7;' : ($isSelected ? 'background-color: #93c5fd;' : ($isAccessible ? 'background-color: #e5e7eb;' : ''));
+                    $border = $isSelected ? 'border: 3px solid #3b82f6;' : 'border: 1px solid #ccc;';
+                    $cursor = $isAccessible ? 'cursor: pointer;' : '';
+                @endphp
+                <div
+                    style="{{ $border }} padding: 1px; min-height: 10px; display: flex; align-items: center; justify-content: center; {{ $bgColor }} {{ $cursor }}"
+                    @if($isAccessible)
+                        wire:click="$set('round_properties.{{ \App\Modifiers\Classes\FarmMap::key() }}.{{ $element['property_name'] }}', '{{ $coordinate }}')"
+                    @endif
+                >
                     @if(isset($grid[$y][$x]))
-                        @if($x === $player_space['x-index'] && $y === $player_space['y-index'])
+                        @if($isPlayerSpace)
                             <flux:icon.user variant="micro"/>
                         @endif
                     @else
@@ -51,5 +74,30 @@
                 </div>
             @endfor
         @endfor
+    </div>
+    <div class="flex flex-wrap gap-2 mt-4 justify-end">
+        @php
+            $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
+        @endphp
+        <x-button
+            wire:loading.attr="disabled"
+            wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-move"
+            variant="primary"
+            wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
+            :disabled="empty($selectedValue)"
+        >
+            💪 Move
+        </x-button>
+
+        @if ($element['can_build_road'])
+            <x-button
+                wire:loading.attr="disabled"
+                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-build-road"
+                variant="primary"
+                wire:click="callClassAction('buildRoad', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
+            >
+                💪 Build Road
+            </x-button>
+        @endif
     </div>
 </div>

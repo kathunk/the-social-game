@@ -7,9 +7,9 @@ use App\States\GameState;
 use App\States\PlayerState;
 use App\States\ModifierState;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerBuiltRoad;
 use App\Events\PlayerBuiltSilo;
 use App\Events\PlayerMovedInFarm;
-use App\Events\PlayerPlantedFarm;
 use App\Events\PlayerPlantedField;
 use App\Events\PlayerUpgradedSilo;
 use App\Events\PlayerHarvestedField;
@@ -61,7 +61,6 @@ class FarmActions extends BaseModifierClass
                 player_space: $player_space,
                 player_skills: $player_skills,
                 farm_map: $this->farmMap()->modifier_data,
-                can_move: $this->canMove($player),
                 can_plant_field: $this->canPlantField($player, $player_skills, $player_space),
                 can_harvest_field: $this->canHarvestField($player, $player_space, $player_actions),
                 can_build_silo: $this->canBuildSilo($player, $player_skills, $player_space),
@@ -138,39 +137,6 @@ class FarmActions extends BaseModifierClass
 
 
     // actions
-
-    public function canMove(Player $player)
-    {
-        return $this->modifier->modifier_data[$player->id]['actions'] > 0;
-    }
-
-    public function move(Player $player, array $params)
-    {
-        $space_string = $params['space_string'];
-
-        $x = ord($space_string[0]) - 65;
-        $y = intval($space_string[1]) - 1;
-
-        $space = collect($this->farmMap()->modifier_data)
-            ->filter(fn ($space) => $space['x-index'] === $x && $space['y-index'] === $y)
-            ->first();
-
-        if (! $space) {
-            throw new \Exception('Space not found');
-        }
-
-        PlayerMovedInFarm::fire(
-            game_id: $this->modifier->game_id,
-            modifier_id: $this->modifier->id,
-            player_id: $player->id,
-            x_index: $x,
-            y_index: $y,
-        );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
-    }
 
     public function canPlantField(Player $player, array $player_skills, array $player_space)
     {

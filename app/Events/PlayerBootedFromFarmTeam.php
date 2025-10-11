@@ -49,7 +49,7 @@ class PlayerBootedFromFarmTeam extends Event
 
         $amount_to_transfer = $this->grain_in_possession;
 
-        $team->addToScoreHistory('🥾', $amount_to_transfer, $player->name . ' was booted from team and took ' . $amount_to_transfer . ' grain with them.');
+        $team->addToScoreHistory('🥾', -$amount_to_transfer, $player->name . ' was booted from team and took ' . $amount_to_transfer . ' grain with them.');
     }
 
     public function handle()

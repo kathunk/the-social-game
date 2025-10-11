@@ -7,12 +7,26 @@ use App\Models\Player;
 
 trait FarmFormElements
 {
-    public function farmMap(array $spaces, Player $player)
+    public function farmMap(
+        array $spaces, 
+        Player $player,
+        array $player_space,
+        array $accessible_spaces,
+        bool $can_move,
+        bool $can_build_road,
+    )
     {
         $this->elements[] = [
             'type' => 'farm_map',
             'property_name' => 'farm_map',
             'spaces' => $spaces,
+            'player_space' => $player_space,
+            'accessible_spaces' => $accessible_spaces,
+            'can_move' => $can_move,
+            'can_build_road' => $can_build_road,
+            'property_name' => 'selected_space',
+            'validation_rules' => 'required|in:'.implode(',', $accessible_spaces),
+            'validation_messages' => ['required' => 'Space is required', 'in' => 'Space is invalid'],
         ];
 
         return $this;
@@ -23,7 +37,6 @@ trait FarmFormElements
         array $player_space, 
         array $player_skills,
         array $farm_map, 
-        bool $can_move,
         bool $can_plant_field,
         bool $can_harvest_field,
         bool $can_build_silo,
@@ -46,7 +59,6 @@ trait FarmFormElements
             'player_space' => $player_space,
             'player_skills' => $player_skills,
             'farm_map' => $farm_map,
-            'can_move' => $can_move,
             'can_plant_field' => $can_plant_field,
             'can_harvest_field' => $can_harvest_field,
             'can_build_silo' => $can_build_silo,
@@ -128,41 +140,6 @@ trait FarmFormElements
                         ->button('Upgrade 💪', 'upgradeSilo')
                         ->endGroup();
                 });
-                
-        }
-
-        if ($can_move) {
-            $this->divider()->title('Move to another space');
-            // @farmtodo player can wrap around map like a globe lol
-            $player_x = $player_space['x-index'];
-            $player_y = $player_space['y-index'];
-
-            $available_spaces = collect($farm_map)->filter(function ($space) use ($player_x, $player_y) {
-                $x = $space['x-index'];
-                $y = $space['y-index'];
-
-                return (
-                    ($x === $player_x + 1 && $y === $player_y) ||
-                    ($x === $player_x - 1 && $y === $player_y) ||
-                    ($x === $player_x && $y === $player_y + 1) ||
-                    ($x === $player_x && $y === $player_y - 1)
-                );
-            })->mapWithKeys(function ($space) {
-                $pretty = chr(65 + $space['x-index']) . ($space['y-index'] + 1);
-                return [$pretty => $pretty];
-            })->toArray();
-            
-            $this->select(
-                label: 'Select a space',
-                options: $available_spaces,
-                property_name: 'space_string',
-                validation_rules: 'required|in:'.implode(',', $available_spaces),
-                validation_messages: ['required' => 'Space is required', 'in' => 'Space is invalid'],
-                placeholder: 'Select a space...',
-            );
-            $this->buttonGroup()
-                ->button('Move 💪', 'move', ['space_string'])
-                ->endGroup();
         }
 
         return $this;
