@@ -48,12 +48,12 @@ class FarmSkills extends BaseModifierClass
             "level_2" => "Max Grain capacity of 7",
             "level_3" => "Max Grain capacity of 10",
         ],
-        // 'scout' => [
-        //     'name' => 'Scout',
-        //     'level_1' => 'Inspect up to 1 space away',
-        //     'level_2' => 'Inspect up to 2 spaces away',
-        //     'level_3' => 'Inspect up to 3 spaces away',
-        // ],
+        'scout' => [
+            'name' => 'Scout',
+            'level_1' => 'Inspect up to 1 space away',
+            'level_2' => 'Inspect up to 2 spaces away',
+            'level_3' => 'Inspect up to 3 spaces away',
+        ],
         "strategist" => [
             "name" => "Strategist",
             "level_1" => "Store up to 5 Actions",
@@ -90,21 +90,6 @@ class FarmSkills extends BaseModifierClass
         }
 
         return false;
-    }
-
-    public function frontendComponent(Player $player): array
-    {
-        if ($player->team_id === null) {
-            return [];
-        }
-
-        return $this->form()
-            ->title("Skills")
-            ->subtitle("Make yourself useful. Spend XP to upgrade your skills.")
-            ->buttonGroup()
-            ->button("See available upgrades", "seeUpgrades")
-            ->endGroup()
-            ->build();
     }
 
     public function frontendComponentForDedicatedPage(Player $player): array

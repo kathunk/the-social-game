@@ -14,6 +14,7 @@ trait FarmFormElements
         array $accessible_spaces,
         bool $can_move,
         bool $can_build_road,
+        array $scoutable_spaces,
     )
     {
         $this->elements[] = [
@@ -27,6 +28,7 @@ trait FarmFormElements
             'property_name' => 'selected_space',
             'validation_rules' => 'required|in:'.implode(',', $accessible_spaces),
             'validation_messages' => ['required' => 'Space is required', 'in' => 'Space is invalid'],
+            'scoutable_spaces' => $scoutable_spaces,
         ];
 
         return $this;
@@ -45,12 +47,13 @@ trait FarmFormElements
         bool $can_withdraw_silo,
         bool $can_deposit_silo,
         Player $player,
-        array $all_leader_ids
+        array $all_leader_ids,
+        array $field_seize_data,
+        array $silo_seize_data
     ) {
         // Generate sprite configuration for the player's current space
         $sprite_config = $this->buildSpaceSpriteConfig($player_space, $player);
 
-        // @farmtodo is this array even necessary?
         $this->elements[] = [
             'type' => 'farm_actions',
             'property_name' => 'farm_actions',
@@ -64,6 +67,8 @@ trait FarmFormElements
             'can_build_silo' => $can_build_silo,
             'sprite_config' => $sprite_config,
             'leader_ids' => $all_leader_ids,
+            'field_seize_data' => $field_seize_data,
+            'silo_seize_data' => $silo_seize_data,
         ];
 
         if ($player_space['field_status']['level'] > 0) {

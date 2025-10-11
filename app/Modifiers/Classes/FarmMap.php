@@ -36,8 +36,7 @@ class FarmMap extends BaseModifierClass
 
     public function dataArrayForState(): array
     {
-        // @farmtodo: can't have randomness in this array
-        return collect()->times(100, function ($i) {
+        return collect()->times(200, function ($i) {
             $spaces_per_row = 10;
             $y = intdiv($i - 1, $spaces_per_row);
             $x = ($i - 1) % $spaces_per_row;
@@ -86,6 +85,7 @@ class FarmMap extends BaseModifierClass
                 accessible_spaces: $accessible_spaces,
                 can_move: $this->canMove($player, $actions),
                 can_build_road: $this->canBuildRoad($player, $player_skills, $player_space, $actions),
+                scoutable_spaces: $this->scoutableSpaces($player_space, $player_skills),
             )
             ->build();
     }
@@ -140,6 +140,29 @@ class FarmMap extends BaseModifierClass
     public function playerSkills(Player $player)
     {
         return $this->modifier->game->modifiers->firstWhere('class_key', FarmSkills::key())->modifier_data[$player->id]['skills'];
+    }
+
+    public function scoutableSpaces(array $player_space, array $player_skills)
+    {
+        $scout_distance = $player_skills['Scout'];
+
+        if ($scout_distance === 0) {
+            return [];
+        }
+
+        $player_x = $player_space['x-index'];
+        $player_y = $player_space['y-index'];
+
+        // return spaces that are within scout distance using Manhattan distance (no diagonals)
+        return collect($this->modifier->modifier_data)->filter(function ($space) use ($player_x, $player_y, $scout_distance) {
+            $dx = abs($space['x-index'] - $player_x);
+            $dy = abs($space['y-index'] - $player_y);
+
+            // Manhattan distance: sum of absolute differences
+            $manhattan_distance = $dx + $dy;
+
+            return $manhattan_distance > 0 && $manhattan_distance <= $scout_distance;
+        })->toArray();
     }
 
     public function accessibleSpaces(Player $player, array $spaces, array $player_space)

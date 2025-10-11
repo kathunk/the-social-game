@@ -12,6 +12,7 @@ use App\Events\PlayerBuiltSilo;
 use App\Events\PlayerMovedInFarm;
 use App\Events\PlayerPlantedField;
 use App\Events\PlayerUpgradedSilo;
+use Illuminate\Support\Collection;
 use App\Events\PlayerHarvestedField;
 use App\Events\PlayerDepositedToSilo;
 use App\Events\PlayerWithrewFromSilo;
@@ -70,6 +71,8 @@ class FarmActions extends BaseModifierClass
                 can_deposit_silo: $this->canDepositSilo($player, $player_space, $player_actions),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
+                field_seize_data: $this->seizePropertyData($player, $this->allPlayersOnSpace($player), $this->allSkills(), $player_space['field_status']['level'], $player_space['field_status']['owner_team_id']),
+                silo_seize_data: $this->seizePropertyData($player, $this->allPlayersOnSpace($player), $this->allSkills(), $player_space['silo_status']['level'], $player_space['silo_status']['owner_team_id']),
             )
             ->build();
     }
@@ -133,6 +136,12 @@ class FarmActions extends BaseModifierClass
     public function allLeaderIds()
     {
         return collect($this->farmTeams()->modifier_data['leaders'])->values();
+    }
+
+    public function allPlayersOnSpace(Player $player)
+    {
+        return collect($this->playerSpace($player)['player_ids'])
+            ->map(fn ($player_id) => Player::find($player_id));
     }
 
 
@@ -301,14 +310,47 @@ class FarmActions extends BaseModifierClass
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
-    
+
+    public function seizePropertyData(
+        Player $player, 
+        Collection $players_on_space, 
+        array $all_skills, 
+        ?int $property_level = null, 
+        ?int $property_owner_team_id = null
+    )
+    {
+        if ($property_level === null || $property_owner_team_id === null) {
+            return [
+                'property_defense' => null,
+                'attack_power_from_attackers' => null,
+                'defense_power_from_defenders' => null,
+                'attack_power' => null,
+                'defense_power' => null,
+                'can_seize' => false,
+            ];
+        }
+
+        $defenders = $players_on_space->filter(fn ($p) => $p->team_id === $property_owner_team_id);
+        $defense_power = $property_level - 1 + $defenders->sum(fn ($p) => $all_skills[$p->id]['skills']['Brute']);
+
+        $attackers = $players_on_space->filter(fn ($p) => $p->team_id === $player->team_id);
+        $attack_power = $attackers->sum(fn ($p) => $all_skills[$p->id]['skills']['Brute']);
+
+        return [
+            'property_defense' => $property_level - 1,
+            'attack_power_from_attackers' => $attack_power,
+            'defense_power_from_defenders' => $defense_power,
+            'attack_power' => $attack_power,
+            'defense_power' => $defense_power,
+            'can_seize' => $attack_power > $defense_power,
+        ];
+    }
 
     // routines
 
     public function initializePlayerActions(ModifierState $modifier_state, int $player_id)
     {
         $modifier_state->modifier_data[$player_id] = [
-            // @farmtodo replace this with real values
             'actions' => 300,
             'action_limit' => 300,
             'grain' => 0,

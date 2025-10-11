@@ -36,13 +36,23 @@
                 default => [-50, -50],
             };
         }
+
+        $skills_modifier_id = $this->player->game->modifiers->firstWhere('class_key', \App\Modifiers\Classes\FarmSkills::key())->id;
+        $teams_modifier_id = $this->player->game->modifiers->firstWhere('class_key', \App\Modifiers\Classes\FarmTeams::key())->id;
     @endphp
 
     {{-- Space Information --}}
     <div class="mb-4">
-        <x-heading>
-            You are in space {{ chr(65 + $element['player_space']['x-index']) }}{{ $element['player_space']['y-index'] + 1 }}: {{ $element['player_space']['type'] }}
-        </x-heading>
+        <div class="mt-4 flex justify-between">
+            <div class="flex flex-col gap-1">
+                <x-subheading>💪 Actions available : {{ $element['actions']['actions'] }} / {{ $element['limit'] }}</x-subheading>
+                <x-subheading>🌾 Grain sack: {{ $element['actions']['grain'] }} / {{ $element['actions']['grain_capacity'] }}</x-subheading>
+            </div>
+            <div class="flex flex-col gap-1">
+                <flux:link variant="ghost" class="text-sm" href="{{ route('games.mods', ['game' => $this->player->game, 'modifier' => $skills_modifier_id]) }}">Upgrade skills</flux:link>
+                <flux:link variant="ghost" class="text-sm" href="{{ route('games.mods', ['game' => $this->player->game, 'modifier' => $teams_modifier_id]) }}">Manage team</flux:link>
+            </div>
+        </div>
         @if(collect($element['player_space']['player_ids'])->count() > 1)
             <x-heading class="mt-4">Other players on your space:</x-heading>
             <x-subheading>
@@ -69,6 +79,12 @@
                 </flux:table>
             </x-subheading>
         @endif
+    </div>
+
+    <flux:separator />
+
+    <div class="mt-4 mb-2">
+        <x-heading>You are on {{ chr(65 + $element['player_space']['x-index']) }}{{ $element['player_space']['y-index'] + 1 }} ({{ $element['player_space']['type'] }})</x-heading>
     </div>
 
     {{-- SVG Map Display --}}
@@ -131,10 +147,4 @@
             @endif
         @endforeach
     </svg>
-
-    {{-- Actions Information --}}
-    <div class="mt-4">
-        <x-subheading>Actions: {{ $element['actions']['actions'] }} / {{ $element['limit'] }} (buttons with 💪 cost 1 action)</x-subheading>
-        <x-subheading>Grain: {{ $element['actions']['grain'] }} / {{ $element['actions']['grain_capacity'] }}</x-subheading>
-    </div>
 </div>
