@@ -98,7 +98,7 @@
                 <tbody>
                     <tr class="border-b">
                         <td class="py-1 px-2 font-semibold bg-gray-100">Type</td>
-                        <td class="py-1 px-2" x-text="selectedScoutSpace.type"></td>
+                        <td class="py-1 px-2" x-text="selectedScoutSpace.type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')"></td>
                     </tr>
 
                     <template x-if="selectedScoutSpace.field_status?.level">

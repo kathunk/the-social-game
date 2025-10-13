@@ -49,7 +49,8 @@ trait FarmFormElements
         Player $player,
         array $all_leader_ids,
         array $field_seize_data,
-        array $silo_seize_data
+        array $silo_seize_data,
+        bool $can_see_history,
     ) {
         // Generate sprite configuration for the player's current space
         $sprite_config = $this->buildSpaceSpriteConfig($player_space, $player);
@@ -69,20 +70,41 @@ trait FarmFormElements
             'leader_ids' => $all_leader_ids,
             'field_seize_data' => $field_seize_data,
             'silo_seize_data' => $silo_seize_data,
+            'can_see_history' => $can_see_history,
         ];
 
         if ($player_space['field_status']['level'] > 0) {
+
+            $seize_data_table = [
+                ['Defense from level', $player_space['field_status']['level'] - 1],
+                ['Defense from owner team', $field_seize_data['defense_power_from_defenders']],
+                ['Total defense', $field_seize_data['defense_power']],
+            ];
+
+            $defense_names = $field_seize_data['defender_names'] ? ' from ' . $field_seize_data['defender_names'] : ' from players';
+            $defense_text = '🛡️ ' . $field_seize_data['defense_power'] . ' defense: ' . ($player_space['field_status']['level'] - 1) . ' from level + '. $field_seize_data['defense_power_from_defenders'] . $defense_names;
+
             $this->divider();
-            $this->title('Field (level: ' . $player_space['field_status']['level'] . ')')
-                ->subtitle('Owned by ' . Team::find($player_space['field_status']['owner_team_id'])->name)
-                ->subtitle('Stage: ' . $player_space['field_status']['stage'])
+            $this->title('Field')
+                ->subtitle('📈 Level: ' . $player_space['field_status']['level'])
+                ->subtitle('📜 Owner: ' . Team::find($player_space['field_status']['owner_team_id'])->name)
+                ->subtitle('🌱 Stage: ' . $player_space['field_status']['stage'])
+                ->subtitle($defense_text)
+                ->when($player_space['field_status']['owner_team_id'] !== $player->team_id, function ($builder) use ($field_seize_data) {
+                    $builder->subtitle('⚔️ ' . $field_seize_data['attack_power_from_attackers'] . ' attack from: ' . $field_seize_data['attacker_names']);
+                })
                 ->when($player_space['field_status']['stage'] === 'mature', function ($builder) use ($player_space, $can_harvest_field) {
-                    $builder->subtitle('Quantity: ' . $player_space['field_status']['quantity'])
+                    $builder->subtitle('🌾 Grain: ' . $player_space['field_status']['quantity'])
                     ->when($can_harvest_field, function ($builder) {
                         $builder->buttonGroup()
                             ->button('Harvest 💪', 'harvestField')
                             ->endGroup();
                     });
+                })
+                ->when($field_seize_data['can_seize'], function ($builder) {
+                    $builder->buttonGroup()
+                        ->button('Seize 💪', 'seizeField')
+                        ->endGroup();
                 });
         }
 
@@ -107,9 +129,20 @@ trait FarmFormElements
             $withdrawable = min($amount_in_silo, $player_capacity - $player_grain);
             $depositable = min($player_grain, $silo_capacity - $amount_in_silo);
 
-            $this->divider()->title('Silo (level: ' . $player_space['silo_status']['level'] . ')')
-                ->subtitle('Owned by ' . Team::find($player_space['silo_status']['owner_team_id'])->name)
-                ->subtitle('Amount: ' . $amount_in_silo . ' / ' . $silo_capacity)
+            $can_seize = $silo_seize_data['can_seize'];
+
+            $defense_names = $silo_seize_data['defender_names'] ? ' from ' . $silo_seize_data['defender_names'] : ' from players';
+            $defense_text = '🛡️ ' . $silo_seize_data['defense_power'] . ' defense: ' . ($player_space['silo_status']['level'] - 1) . ' from level + '. $silo_seize_data['defense_power_from_defenders'] . $defense_names;
+
+            $this->divider()
+                ->title('Silo')
+                ->subtitle('📈 Level: ' . $player_space['silo_status']['level'])
+                ->subtitle('📜 Owner: ' . Team::find($player_space['silo_status']['owner_team_id'])->name)
+                ->subtitle('🌾 Amount: ' . $amount_in_silo . ' / ' . $silo_capacity)
+                ->subtitle($defense_text)
+                ->when($player_space['silo_status']['owner_team_id'] !== $player->team_id, function ($builder) use ($silo_seize_data) {
+                    $builder->subtitle('⚔️ ' . $silo_seize_data['attack_power_from_attackers'] . ' attack from: ' . $silo_seize_data['attacker_names']);
+                })
                 ->when($can_withdraw_silo, function ($builder) use ($withdrawable) {
                     $this->select(
                         label: 'Withdraw amount',
@@ -143,6 +176,11 @@ trait FarmFormElements
                 ->when($can_upgrade_silo, function ($builder) {
                     $this->buttonGroup()
                         ->button('Upgrade 💪', 'upgradeSilo')
+                        ->endGroup();
+                })
+                ->when($can_seize, function ($builder) use ($silo_seize_data) {
+                    $this->buttonGroup()
+                        ->button('Seize 💪', 'seizeSilo')
                         ->endGroup();
                 });
         }

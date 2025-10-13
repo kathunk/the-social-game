@@ -40,9 +40,14 @@ class PlayerHarvestedField extends Event
         $amount_to_harvest = min($this->field_quantity, $this->player_capacity - $this->player_grain);
 
         $map_state->modifier_data = collect($map_state->modifier_data)
-            ->map(function ($space) use ($amount_to_harvest) {
+            ->map(function ($space) use ($amount_to_harvest, $game) {
                 if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
                     $space['field_status']['quantity'] = $this->field_quantity - $amount_to_harvest;
+                    $space['history'][] = [
+                        'round_number' => $game->currentChallenge()->round_number,
+                        'emoji' => '🌾',
+                        'message' => $this->state(PlayerState::class)->name . ' harvested ' . $amount_to_harvest . ' grain',
+                    ];
                 }
 
                 if ($space['field_status']['quantity'] === 0) {

@@ -13,6 +13,15 @@
     <symbol id="bg-swamp" viewBox="0 0 1600 1000">
       <image href="/images/farm/swamp.jpeg" x="0" y="0" width="1600" height="1000" preserveAspectRatio="xMidYMid slice"/>
     </symbol>
+    <symbol id="bg-ash_heap" viewBox="0 0 1600 1000">
+      <image href="/images/farm/ash_heap.jpeg" x="0" y="0" width="1600" height="1000" preserveAspectRatio="xMidYMid slice"/>
+    </symbol>
+    <symbol id="bg-fertile_ashland" viewBox="0 0 1600 1000">
+      <image href="/images/farm/fertile_ashland.jpg" x="0" y="0" width="1600" height="1000" preserveAspectRatio="xMidYMid slice"/>
+    </symbol>
+    <symbol id="bg-volcano" viewBox="0 0 1600 1000">
+      <image href="/images/farm/volcano.jpg" x="0" y="0" width="1600" height="1000" preserveAspectRatio="xMidYMid slice"/>
+    </symbol>
 
     <!-- Objects (100x100 local coords for easy scaling) -->
 

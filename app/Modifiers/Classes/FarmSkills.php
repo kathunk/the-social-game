@@ -18,17 +18,17 @@ class FarmSkills extends BaseModifierClass
     const TYPE = "team";
 
     const SKILLS = [
-        // 'chronicler' => [
-        //     'name' => 'Chronicler',
-        //     'level_1' => 'See 1 round of Action History for your space',
-        //     'level_2' => 'See 3 rounds of Action History for your space',
-        //     'level_3' => 'See complete Action History for your space',
-        // ],
+        'chronicler' => [
+            'name' => 'Chronicler',
+            'level_1' => 'See 2 rounds of history for your space',
+            'level_2' => 'See 5 rounds of history for your space',
+            'level_3' => 'See complete history for your space',
+        ],
         "brute" => [
             "name" => "Brute",
-            "level_1" => "Attack and defend structures",
-            "level_2" => "+2 attack and defense of structures",
-            "level_3" => "+3 attack and defense of structures",
+            "level_1" => "Seize and defend structures",
+            "level_2" => "+2 seize and defense of structures",
+            "level_3" => "+3 seize and defense of structures",
         ],
         "builder" => [
             "name" => "Builder",
@@ -66,12 +66,12 @@ class FarmSkills extends BaseModifierClass
             "level_2" => "Gain 5 actions each round.",
             "level_3" => "Gain 6 actions each round.",
         ],
-        "thief" => [
-            "name" => "Thief",
-            "level_1" => "Pickpocket opponents for 25% of their grain",
-            "level_2" => "Pickpocket opponents for 50% of their grain",
-            "level_3" => "Pickpocket opponents for 100% of their grain",
-        ],
+        // "thief" => [
+        //     "name" => "Thief",
+        //     "level_1" => "Pickpocket opponents for 25% of their grain",
+        //     "level_2" => "Pickpocket opponents for 50% of their grain",
+        //     "level_3" => "Pickpocket opponents for 100% of their grain",
+        // ],
     ];
 
     public static function key(): string

@@ -4,6 +4,7 @@ namespace App\Modifiers\Classes;
 
 use App\Models\Player;
 use App\States\GameState;
+use App\States\TeamState;
 use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerBuiltRoad;
 use App\Events\PlayerMovedInFarm;
@@ -36,7 +37,7 @@ class FarmMap extends BaseModifierClass
 
     public function dataArrayForState(): array
     {
-        return collect()->times(200, function ($i) {
+        $spaces = collect()->times(200, function ($i) {
             $spaces_per_row = 10;
             $y = intdiv($i - 1, $spaces_per_row);
             $x = ($i - 1) % $spaces_per_row;
@@ -62,12 +63,43 @@ class FarmMap extends BaseModifierClass
                     'amount' => 0,
                     'capacity' => 0,
                 ],
+                'history' => [
+                    // [
+                        // 'round_number' => 1,
+                        // 'emoji' => '🌾',
+                        // 'message' => 'Player planted a level 1 farm',
+                    // ],
+                ]
             ];
-        })->toArray();
+        });
+
+        $random_x = rand(1, 9);
+        $random_y = rand(1, 19);
+
+        $spaces = $spaces->map(function ($space) use ($random_x, $random_y) {
+            if ($space['x-index'] === $random_x && $space['y-index'] === $random_y) {
+                $space['type'] = 'volcano';
+                $explosion_count = rand(2, 4);
+                $space['explodes_on_rounds'] = collect(range(1, 28))->shuffle()->take($explosion_count)->toArray();
+            }
+
+            if ($space['x-index'] === $random_x && ($space['y-index'] === $random_y + 1 || $space['y-index'] === $random_y - 1)) {
+                $space['type'] = 'fertile_ashland';
+            }
+
+            if ($space['y-index'] === $random_y && ($space['x-index'] === $random_x + 1 || $space['x-index'] === $random_x - 1)) {
+                $space['type'] = 'fertile_ashland';
+            }
+
+            return $space;
+        });
+
+        return $spaces->toArray();
     }
 
     public function frontendComponent(Player $player): array
     {
+        // dd(collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'volcano'));
         if ($player->team_id === null) {
             return [];
         }
@@ -90,11 +122,59 @@ class FarmMap extends BaseModifierClass
             ->build();
     }
 
+    public function frontendComponentForDedicatedPage(Player $player): array
+    {
+        $limit_of_rounds_to_show = match ($this->playerSkills($player)['Chronicler']) {
+            1 => 2,
+            2 => 5,
+            3 => null,
+        };
+
+        $current_round_number = $this->modifier->game->currentChallenge->round_number;
+        $first_round_number = $limit_of_rounds_to_show 
+            ? max(1, $current_round_number - $limit_of_rounds_to_show + 1) 
+            : 1;
+
+        $round_numbers_to_show = range($first_round_number, $current_round_number);
+
+        $history = collect($this->playerSpace($player)['history']);
+
+        if ($limit_of_rounds_to_show) {
+            $history = $history->filter(fn ($event) => in_array($event['round_number'], $round_numbers_to_show));
+        }
+
+        $form = $this->form()
+            ->title("Space History")
+            ->when($limit_of_rounds_to_show !== null, fn ($form) => $form->subtitle("Showing up to last " . $limit_of_rounds_to_show . " rounds of history"))
+            ->when($limit_of_rounds_to_show === null, fn ($form) => $form->subtitle("Showing complete history"));
+
+        foreach ($round_numbers_to_show as $round_number) {
+            $form->divider()
+                ->title("Round " . $round_number);
+
+            $events = $history->filter(fn ($event) => $event['round_number'] === $round_number);
+
+            if ($events->isEmpty()) {
+                $form->subtitle("No events for round " . $round_number);
+                continue;
+            }
+
+            foreach ($events as $event) {
+                $form->subtitle($event['emoji'] . ' ' . $event['message']);
+            }
+        }
+
+        return $form->build();
+    }
+
     public function onChallengeEnded(GameState $game_state)
     {
         $modifier_state = $game_state->modifiers()->firstWhere('class_key', self::key());
 
-        $modifier_state->modifier_data = collect($modifier_state->modifier_data)->map(function ($space) {
+        $volcano_space = collect($modifier_state->modifier_data)->filter(fn ($space) => $space['type'] === 'volcano')->first();
+        $explosion = in_array($game_state->currentChallenge()->round_number, $volcano_space['explodes_on_rounds']);
+
+        $modifier_state->modifier_data = collect($modifier_state->modifier_data)->map(function ($space) use ($explosion, $game_state) {
             $new_field_stage = match ($space['field_status']['stage'] ?? null) {
                 'seedlings' => 'sprouts',
                 'sprouts' => 'mature',
@@ -114,12 +194,73 @@ class FarmMap extends BaseModifierClass
                 null => 0,
             };
 
+            if ($space['type'] === 'fertile_ashland') {
+                $new_field_quantity = $new_field_quantity *2;
+            }
+
             $space['field_status'] = [
                 'level' => $new_field_stage === null ? null : $space['field_status']['level'],
                 'owner_team_id' => $new_field_stage === null ? null : $space['field_status']['owner_team_id'],
                 'stage' => $new_field_stage,
                 'quantity' => $new_field_quantity,
             ];
+
+            if ($explosion) {
+                $field_level = $space['field_status']['level'];
+                $field_quantity = $space['field_status']['quantity'];
+                $silo_level = $space['silo_status']['level'];
+                $silo_amount = $space['silo_status']['amount'];
+                $road_level = $space['road_status']['level'];
+
+                if ($field_level) {
+                    $field_owner = TeamState::load($space['field_status']['owner_team_id']);
+                    $space['history'][] = [
+                        'round_number' => $game_state->currentChallenge()->round_number,
+                        'emoji' => '🌋',
+                        'message' => 'Volcano destroyed a level ' . $field_level . ' field with ' . $field_quantity . ' grain owned by ' . $field_owner->name . '.',
+                    ];
+                }
+
+                if ($silo_level) {
+                    $silo_owner = TeamState::load($space['silo_status']['owner_team_id']);
+                    $space['history'][] = [
+                        'round_number' => $game_state->currentChallenge()->round_number,
+                        'emoji' => '🌋',
+                        'message' => 'Volcano destroyed a level ' . $silo_level . ' silo with ' . $silo_amount . ' grain owned by ' . $silo_owner->name . '.',
+                    ];
+
+                    $silo_owner->addToScoreHistory('🌋', -$silo_amount, 'Volcano destroyed a level ' . $silo_level . ' silo with ' . $silo_amount . ' grain with it.');
+                }
+
+                if ($road_level) {
+                    $space['history'][] = [
+                        'round_number' => $game_state->currentChallenge()->round_number,
+                        'emoji' => '🌋',
+                        'message' => 'Volcano destroyed a road.',
+                    ];
+                }
+
+                $space['field_status']['quantity'] = 0;
+                $space['field_status']['stage'] = null;
+                $space['field_status']['level'] = null;
+                $space['field_status']['owner_team_id'] = null;
+
+                $space['silo_status']['level'] = null;
+                $space['silo_status']['owner_team_id'] = null;
+                $space['silo_status']['amount'] = 0;
+                $space['silo_status']['capacity'] = 0;
+
+                $space['road_status']['level'] = null;
+                $space['road_status']['owner_team_id'] = null;
+
+                if ($space['type'] === 'fertile_ashland' || $space['type'] === 'ash_heap') {
+                    $space['type'] = 'ash_heap';
+                }
+            }
+
+            if (! $explosion && $space['type'] === 'ash_heap') {
+                $space['type'] = 'fertile_ashland';
+            }
 
             return $space;
         })->toArray();
@@ -267,7 +408,7 @@ class FarmMap extends BaseModifierClass
         $space_string = $params['selected_space'];
 
         $x = ord($space_string[0]) - 65;
-        $y = intval($space_string[1]) - 1;
+        $y = intval(substr($space_string, 1)) - 1;
 
         $space = collect($this->modifier->modifier_data)
             ->filter(fn ($space) => $space['x-index'] === $x && $space['y-index'] === $y)
@@ -296,7 +437,9 @@ class FarmMap extends BaseModifierClass
             && $player_skills['Builder'] > 2
             && ($player_space['road_status']['owner_team_id'] ?? null) === null
             && ($player_space['type'] !== 'swamp')
-            && ($player_space['type'] !== 'mountain');
+            && ($player_space['type'] !== 'mountain')
+            && ($player_space['type'] !== 'volcano')
+            && ($player_space['type'] !== 'ash_heap');
     }
 
     public function buildRoad(Player $player, array $params)

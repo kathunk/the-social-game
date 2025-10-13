@@ -4,11 +4,12 @@ namespace App\Events;
 
 use Thunk\Verbs\Event;
 use App\States\GameState;
+use App\States\PlayerState;
 use App\Events\Traits\HasGame;
+use App\Events\Traits\HasTeam;
 use App\Events\Traits\HasModifier;
 use App\Modifiers\Classes\FarmMap;
 use App\Events\Traits\HasActivePlayer;
-use App\Events\Traits\HasTeam;
 use App\Modifiers\Classes\FarmActions;
 
 class PlayerDepositedToSilo extends Event
@@ -33,9 +34,14 @@ class PlayerDepositedToSilo extends Event
     {
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
 
-        $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) {
+        $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
                 $space['silo_status']['amount'] += $this->amount;
+                $space['history'][] = [
+                    'round_number' => $game->currentChallenge()->round_number,
+                    'emoji' => '📈',
+                    'message' => $this->state(PlayerState::class)->name . ' deposited ' . $this->amount . ' grain to silo',
+                ];
             }
 
             return $space;

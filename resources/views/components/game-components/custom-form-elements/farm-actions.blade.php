@@ -39,6 +39,7 @@
 
         $skills_modifier_id = $this->player->game->modifiers->firstWhere('class_key', \App\Modifiers\Classes\FarmSkills::key())->id;
         $teams_modifier_id = $this->player->game->modifiers->firstWhere('class_key', \App\Modifiers\Classes\FarmTeams::key())->id;
+        $map_modifier_id = $this->player->game->modifiers->firstWhere('class_key', \App\Modifiers\Classes\FarmMap::key())->id;
     @endphp
 
     {{-- Space Information --}}
@@ -54,6 +55,7 @@
             </div>
         </div>
         @if(collect($element['player_space']['player_ids'])->count() > 1)
+            <div class="mt-4"></div>
             <x-heading class="mt-4">Other players on your space:</x-heading>
             <x-subheading>
                 <flux:table>
@@ -83,8 +85,19 @@
 
     <flux:separator />
 
-    <div class="mt-4 mb-2">
-        <x-heading>You are on {{ chr(65 + $element['player_space']['x-index']) }}{{ $element['player_space']['y-index'] + 1 }} ({{ $element['player_space']['type'] }})</x-heading>
+    <div class="mt-4 mb-2 flex justify-between">
+        <x-heading>You are on {{ chr(65 + $element['player_space']['x-index']) }}{{ $element['player_space']['y-index'] + 1 }} ({{ match($element['player_space']['type']) {
+            'grass' => 'Grass',
+            'desert' => 'Desert',
+            'mountain' => 'Mountain',
+            'swamp' => 'Swamp',
+            'ash_heap' => 'Ash Heap',
+            'fertile_ashland' => 'Fertile Ashland',
+            'volcano' => 'Volcano',
+        } }})</x-heading>
+        @if ($element['can_see_history'])
+            <flux:link variant="ghost" class="text-sm" href="{{ route('games.mods', ['game' => $this->player->game, 'modifier' => $map_modifier_id]) }}">See space history</flux:link>
+        @endif
     </div>
 
     {{-- SVG Map Display --}}

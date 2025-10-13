@@ -16,6 +16,7 @@ use Illuminate\Support\Collection;
 use App\Events\PlayerHarvestedField;
 use App\Events\PlayerDepositedToSilo;
 use App\Events\PlayerWithrewFromSilo;
+use App\Events\PlayerSeizedFarmProperty;
 
 class FarmActions extends BaseModifierClass
 {
@@ -73,6 +74,7 @@ class FarmActions extends BaseModifierClass
                 all_leader_ids: $this->allLeaderIds()->toArray(),
                 field_seize_data: $this->seizePropertyData($player, $this->allPlayersOnSpace($player), $this->allSkills(), $player_space['field_status']['level'], $player_space['field_status']['owner_team_id']),
                 silo_seize_data: $this->seizePropertyData($player, $this->allPlayersOnSpace($player), $this->allSkills(), $player_space['silo_status']['level'], $player_space['silo_status']['owner_team_id']),
+                can_see_history: $this->canSeeHistory($player, $player_skills),
             )
             ->build();
     }
@@ -152,7 +154,9 @@ class FarmActions extends BaseModifierClass
         return $this->modifier->modifier_data[$player->id]['actions'] > 0
             && $player_skills['Farmer'] > 0
             && ($player_space['field_status']['level'] ?? null) === null
-            && ($player_space['type'] === 'grass' || $player_space['type'] === 'mountain');
+            && $player_space['type'] !== 'swamp'
+            && $player_space['type'] !== 'volcano'
+            && $player_space['type'] !== 'ash_heap';
     }
 
     public function plantField(Player $player, array $params)
@@ -180,7 +184,9 @@ class FarmActions extends BaseModifierClass
         return $this->modifier->modifier_data[$player->id]['actions'] > 0
             && $player_skills['Builder'] > 0
             && ($player_space['silo_status']['level'] ?? null) === null
-            && ($player_space['type'] !== 'swamp');
+            && $player_space['type'] !== 'swamp'
+            && $player_space['type'] !== 'volcano'
+            && $player_space['type'] !== 'ash_heap';
     }
 
     public function buildSilo(Player $player, array $params)
@@ -331,6 +337,7 @@ class FarmActions extends BaseModifierClass
         }
 
         $defenders = $players_on_space->filter(fn ($p) => $p->team_id === $property_owner_team_id);
+        $defense_from_defenders = $defenders->sum(fn ($p) => $all_skills[$p->id]['skills']['Brute']);
         $defense_power = $property_level - 1 + $defenders->sum(fn ($p) => $all_skills[$p->id]['skills']['Brute']);
 
         $attackers = $players_on_space->filter(fn ($p) => $p->team_id === $player->team_id);
@@ -339,11 +346,55 @@ class FarmActions extends BaseModifierClass
         return [
             'property_defense' => $property_level - 1,
             'attack_power_from_attackers' => $attack_power,
-            'defense_power_from_defenders' => $defense_power,
+            'defense_power_from_defenders' => $defense_from_defenders,
             'attack_power' => $attack_power,
             'defense_power' => $defense_power,
             'can_seize' => $attack_power > $defense_power,
+            'defender_names' => $defenders->map(fn ($p) => $p->name)->implode(', '),
+            'attacker_names' => $attackers->map(fn ($p) => $p->name)->implode(', '),
         ];
+    }
+
+    public function seizeSilo(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+        
+        PlayerSeizedFarmProperty::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+            property_type: 'silo',
+            grain_transferred: $player_space['silo_status']['amount'],
+            previous_owner_team_id: $player_space['silo_status']['owner_team_id'],
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function seizeField(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+        
+        PlayerSeizedFarmProperty::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+            property_type: 'field',
+            grain_transferred: 0,
+            previous_owner_team_id: $player_space['field_status']['owner_team_id'],
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     // routines
@@ -399,5 +450,10 @@ class FarmActions extends BaseModifierClass
                     'grain_capacity' => $data['grain_capacity'],
                 ];
             })->toArray();
+    }
+
+    public function canSeeHistory(Player $player, array $player_skills)
+    {
+        return $player_skills['Chronicler'] > 0;
     }
 }

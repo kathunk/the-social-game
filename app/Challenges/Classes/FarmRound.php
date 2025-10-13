@@ -18,6 +18,11 @@ class FarmRound extends BaseChallengeClass
         return 'farm_round';
     }
 
+    public function frontendComponent(Player $player): array
+    {
+        return $this->form()->title("Round " . $this->challenge->round_number)->build();
+    }
+
     public function isInvalidForTemplate(
         array $challenge_keys,
         array $modifier_keys,
