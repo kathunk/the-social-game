@@ -2,12 +2,13 @@
 
 namespace App\Events;
 
-use App\Events\Traits\HasGame;
+use App\Models\Game;
+use Thunk\Verbs\Event;
 use App\Models\Modifier;
 use App\States\GameState;
 use App\States\ModifierState;
+use App\Events\Traits\HasGame;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
-use Thunk\Verbs\Event;
 
 class ModifierCreated extends Event
 {
@@ -42,7 +43,7 @@ class ModifierCreated extends Event
         if ($config) {
             $modifier->modifier_data = $config->modifier_data;
         } else {
-            $modifier->modifier_data = $modifier->handler()->dataArrayForState();
+            $modifier->modifier_data = $modifier->handler()->dataArrayForState(Game::find($this->game_id));
         }
     }
 

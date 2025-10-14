@@ -2,6 +2,7 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Models\Game;
 use App\Models\Player;
 use App\States\GameState;
 use App\States\TeamState;
@@ -35,7 +36,7 @@ class FarmMap extends BaseModifierClass
         return false;
     }
 
-    public function dataArrayForState(): array
+    public function dataArrayForState(?Game $game = null): array
     {
         $spaces = collect()->times(200, function ($i) {
             $spaces_per_row = 10;

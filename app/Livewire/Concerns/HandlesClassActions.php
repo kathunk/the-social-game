@@ -67,17 +67,7 @@ trait HandlesClassActions
                 }
             }
 
-            try {
-                $this->validate($filtered_rules, $filtered_messages);
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                // Validation failed - manually add the errors to the error bag
-                foreach ($e->errors() as $field => $messages) {
-                    foreach ($messages as $message) {
-                        $this->addError($field, $message);
-                    }
-                }
-                return;
-            }
+            $this->validate($filtered_rules, $filtered_messages);
         }
 
         try {

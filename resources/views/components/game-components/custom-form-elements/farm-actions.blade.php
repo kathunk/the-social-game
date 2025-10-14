@@ -22,19 +22,21 @@
             ])->values();
 
         // Small helper: translate anchor keyword to local offsets (for 100x100 symbols)
-        function anchorOffset($anchor) {
-            return match($anchor) {
-                'center' => [-50, -50],
-                'bottom' => [-50, -100],
-                'top'    => [-50, 0],
-                'top-left' => [0, 0],
-                'bottom-left' => [0, -100],
-                'top-right' => [-100, 0],
-                'bottom-right' => [-100, -100],
-                'left' => [0, -50],
-                'right' => [-100, -50],
-                default => [-50, -50],
-            };
+        if (!function_exists('anchorOffset')) {
+            function anchorOffset($anchor) {
+                return match($anchor) {
+                    'center' => [-50, -50],
+                    'bottom' => [-50, -100],
+                    'top'    => [-50, 0],
+                    'top-left' => [0, 0],
+                    'bottom-left' => [0, -100],
+                    'top-right' => [-100, 0],
+                    'bottom-right' => [-100, -100],
+                    'left' => [0, -50],
+                    'right' => [-100, -50],
+                    default => [-50, -50],
+                };
+            }
         }
 
         $skills_modifier_id = $this->player->game->modifiers->firstWhere('class_key', \App\Modifiers\Classes\FarmSkills::key())->id;

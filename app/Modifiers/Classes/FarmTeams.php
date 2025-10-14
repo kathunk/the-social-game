@@ -2,6 +2,7 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Models\Game;
 use App\Models\Team;
 use App\Models\Player;
 use App\Events\TeamCreated;
@@ -44,7 +45,7 @@ class FarmTeams extends BaseModifierClass
         return false;
     }
 
-    public function dataArrayForState(): array
+    public function dataArrayForState(?Game $game = null): array
     {
         return [
             'leaders' => [

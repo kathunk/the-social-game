@@ -2,6 +2,7 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Models\Game;
 use App\Models\Player;
 use App\Models\Modifier;
 use App\States\GameState;
@@ -48,7 +49,7 @@ abstract class BaseModifierClass
         return new static;
     }
 
-    public function dataArrayForState(): array
+    public function dataArrayForState(?Game $game = null): array
     {
         return [];
     }

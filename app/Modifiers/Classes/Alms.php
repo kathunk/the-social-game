@@ -2,6 +2,7 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Models\Game;
 use App\Models\Player;
 use App\States\GameState;
 
@@ -16,12 +17,6 @@ class Alms extends BaseModifierClass
     public static function key(): string
     {
         return 'alms';
-    }
-
-    public function dataArrayForState(): array
-    {
-        return $this->modifier_state->game()->challenges()
-            ->map(fn ($challenge) => [$challenge->id => ['player_ids' => null]])->toArray();
     }
 
     public function frontendComponent(Player $player): array

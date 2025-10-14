@@ -402,8 +402,8 @@ class FarmActions extends BaseModifierClass
     public function initializePlayerActions(ModifierState $modifier_state, int $player_id)
     {
         $modifier_state->modifier_data[$player_id] = [
-            'actions' => 300,
-            'action_limit' => 300,
+            'actions' => 3,
+            'action_limit' => 3,
             'grain' => 0,
             'grain_capacity' => 5,
         ];

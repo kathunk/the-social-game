@@ -2,6 +2,8 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Models\Game;
+
 class TierListModifier extends BaseModifierClass
 {
     const NAME = 'Tier lists';
@@ -23,9 +25,9 @@ class TierListModifier extends BaseModifierClass
         return 'tier_list_modifier';
     }
 
-    public function dataArrayForState(): array
+    public function dataArrayForState(?Game $game = null): array
     {
-        $player_ids = $this->modifier_state->game()->player_ids;
+        $player_ids = $game->players->pluck('id');
 
         $round_3_data = $player_ids->count() === 2
             ? ['single_opponent_round_3' => $player_ids->mapWithKeys(fn ($player_id) => [

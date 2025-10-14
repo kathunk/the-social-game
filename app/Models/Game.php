@@ -317,7 +317,7 @@ class Game extends Model
                 if ($config) {
                     $modifier_data = $config->modifier_data;
                 } else {
-                    $modifier_data = (new (ModifierRegistry::retrieveFromKey($modifier)))->dataArrayForState();
+                    $modifier_data = (new (ModifierRegistry::retrieveFromKey($modifier)))->dataArrayForState($this);
                 }
 
                 ModifierCreated::fire(
