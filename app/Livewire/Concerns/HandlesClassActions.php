@@ -80,16 +80,16 @@ trait HandlesClassActions
             }
         }
 
-        // try {
+        try {
             $response = $handler->{$action}(
                 $this->player,
                 $params['round_properties']
             );
-        // } catch (\Exception $e) {
-        //     $this->addError('action_error', $e->getMessage());
+        } catch (\Exception $e) {
+            $this->addError('action_error', $e->getMessage());
 
-        //     return;
-        // }
+            return;
+        }
 
         Verbs::commit();
 
