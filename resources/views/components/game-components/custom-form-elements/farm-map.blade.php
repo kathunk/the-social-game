@@ -108,7 +108,7 @@
                                 <div>Level: <span x-text="selectedScoutSpace.field_status.level"></span></div>
                                 <div>Stage: <span x-text="selectedScoutSpace.field_status.stage"></span></div>
                                 <div x-show="selectedScoutSpace.field_status.owner_team_id">
-                                    Owner: <span x-text="@js($this->player->game->teams->keyBy('id')->toArray())[selectedScoutSpace.field_status.owner_team_id]?.name || selectedScoutSpace.field_status.owner_team_id"></span>
+                                    Owner: <span x-text="Object.values(@js($this->teams)).find(team => String(team.id) === String(selectedScoutSpace.field_status.owner_team_id))?.name || 'Unknown'"></span>
                                 </div>
                             </td>
                         </tr>
@@ -129,7 +129,7 @@
                             <td class="py-1 px-2">
                                 <div>Level: <span x-text="selectedScoutSpace.silo_status.level"></span></div>
                                 <div x-show="selectedScoutSpace.silo_status.owner_team_id">
-                                    Owner: <span x-text="@js($this->player->game->teams->keyBy('id')->toArray())[selectedScoutSpace.silo_status.owner_team_id]?.name || selectedScoutSpace.silo_status.owner_team_id"></span>
+                                    Owner: <span x-text="Object.values(@js($this->teams)).find(team => String(team.id) === String(selectedScoutSpace.silo_status.owner_team_id))?.name || 'Unknown'"></span>
                                 </div>
                             </td>
                         </tr>

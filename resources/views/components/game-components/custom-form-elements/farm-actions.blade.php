@@ -114,12 +114,11 @@
         {{-- Background --}}
         <use href="#bg-{{ $config['background'] ?? 'grass' }}" />
 
-        {{-- Road - render directly instead of using symbol to avoid transform issues --}}
+        {{-- Overlays - Road rendered directly instead of using symbol to avoid transform issues --}}
         @if($overlays->contains('type', 'road'))
             @php
-                $roadY = 890; // Position near bottom
+                $roadY = 890;
             @endphp
-            <!-- Road overlay -->
             <rect x="0" y="{{ $roadY }}" width="1600" height="80" fill="#555"/>
             <rect x="0" y="{{ $roadY + 30 }}" width="1600" height="20" fill="#d4a574"/>
             <rect x="0" y="{{ $roadY }}" width="1600" height="5" fill="#333"/>
