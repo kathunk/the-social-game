@@ -2,18 +2,18 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\ModifierState;
+use App\Events\Traits\HasActivePlayer;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
-use App\Events\Traits\HasActivePlayer;
 use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmSkills;
+use App\States\GameState;
+use App\States\ModifierState;
+use Thunk\Verbs\Event;
 
 class PlayerUpgradedSkillInFarm extends Event
 {
-    use HasActivePlayer, HasModifier, HasGame;
+    use HasActivePlayer, HasGame, HasModifier;
 
     public string $skill_name;
 
@@ -34,9 +34,9 @@ class PlayerUpgradedSkillInFarm extends Event
                     return $data;
                 }
 
-                $data["skills"][$this->skill_name] =
-                    $data["skills"][$this->skill_name] + 1;
-                $data["xp"] = $data["xp"] - $this->xp_cost;
+                $data['skills'][$this->skill_name] =
+                    $data['skills'][$this->skill_name] + 1;
+                $data['xp'] = $data['xp'] - $this->xp_cost;
 
                 return $data;
             })
@@ -67,6 +67,21 @@ class PlayerUpgradedSkillInFarm extends Event
                     }
 
                     $data['action_limit'] = $data['action_limit'] + 2;
+
+                    return $data;
+                })->toArray();
+        }
+
+        if ($this->skill_name === 'Tactician') {
+            $game_state = $this->state(GameState::class);
+            $actions_state = $game_state->modifiers()->firstWhere('class_key', FarmActions::key());
+            $actions_state->modifier_data = collect($actions_state->modifier_data)
+                ->map(function ($data, $player_id) {
+                    if ($player_id !== $this->player_id) {
+                        return $data;
+                    }
+
+                    $data['actions_gained_per_round'] = $data['actions_gained_per_round'] + 1;
 
                     return $data;
                 })->toArray();

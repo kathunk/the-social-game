@@ -2,21 +2,20 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Player;
-use App\States\GameState;
-use App\States\PlayerState;
-use App\States\ModifierState;
-use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerBuiltRoad;
 use App\Events\PlayerBuiltSilo;
-use App\Events\PlayerMovedInFarm;
-use App\Events\PlayerPlantedField;
-use App\Events\PlayerUpgradedSilo;
-use Illuminate\Support\Collection;
-use App\Events\PlayerHarvestedField;
 use App\Events\PlayerDepositedToSilo;
-use App\Events\PlayerWithrewFromSilo;
+use App\Events\PlayerHarvestedField;
+use App\Events\PlayerPlantedField;
 use App\Events\PlayerSeizedFarmProperty;
+use App\Events\PlayerUpgradedSilo;
+use App\Events\PlayerWithrewFromSilo;
+use App\Models\Player;
+use App\States\GameState;
+use App\States\ModifierState;
+use App\States\PlayerState;
+use Illuminate\Support\Collection;
+use Thunk\Verbs\Facades\Verbs;
 
 class FarmActions extends BaseModifierClass
 {
@@ -70,6 +69,7 @@ class FarmActions extends BaseModifierClass
                 can_upgrade_silo: $this->canUpgradeSilo($player, $player_skills, $player_space),
                 can_withdraw_silo: $this->canWithdrawSilo($player, $player_space, $player_actions),
                 can_deposit_silo: $this->canDepositSilo($player, $player_space, $player_actions),
+                can_build_road: $this->canBuildRoad($player_skills, $player_space, $player_actions['actions']),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
                 field_seize_data: $this->seizePropertyData($player, $this->allPlayersOnSpace($player), $this->allSkills(), $player_space['field_status']['level'], $player_space['field_status']['owner_team_id']),
@@ -78,8 +78,6 @@ class FarmActions extends BaseModifierClass
             )
             ->build();
     }
-
-
 
     // data helpers
 
@@ -146,7 +144,6 @@ class FarmActions extends BaseModifierClass
             ->map(fn ($player_id) => Player::find($player_id));
     }
 
-
     // actions
 
     public function canPlantField(Player $player, array $player_skills, array $player_space)
@@ -163,7 +160,7 @@ class FarmActions extends BaseModifierClass
     {
         $player_space = $this->playerSpace($player);
         $player_skills = $this->allSkills()[$player->id]['skills'];
-        
+
         PlayerPlantedField::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
@@ -193,7 +190,7 @@ class FarmActions extends BaseModifierClass
     {
         $player_space = $this->playerSpace($player);
         $player_skills = $this->allSkills()[$player->id]['skills'];
-        
+
         PlayerBuiltSilo::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
@@ -219,7 +216,7 @@ class FarmActions extends BaseModifierClass
     {
         $player_space = $this->playerSpace($player);
         $player_skills = $this->allSkills()[$player->id]['skills'];
-        
+
         PlayerUpgradedSilo::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
@@ -271,7 +268,7 @@ class FarmActions extends BaseModifierClass
     public function depositSilo(Player $player, array $params)
     {
         $player_space = $this->playerSpace($player);
-        
+
         PlayerDepositedToSilo::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
@@ -299,7 +296,7 @@ class FarmActions extends BaseModifierClass
     {
         $mod_data = $this->modifier->modifier_data[$player->id];
         $player_space = $this->playerSpace($player);
-        
+
         PlayerHarvestedField::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
@@ -318,13 +315,12 @@ class FarmActions extends BaseModifierClass
     }
 
     public function seizePropertyData(
-        Player $player, 
-        Collection $players_on_space, 
-        array $all_skills, 
-        ?int $property_level = null, 
+        Player $player,
+        Collection $players_on_space,
+        array $all_skills,
+        ?int $property_level = null,
         ?int $property_owner_team_id = null
-    )
-    {
+    ) {
         if ($property_level === null || $property_owner_team_id === null) {
             return [
                 'property_defense' => null,
@@ -358,7 +354,7 @@ class FarmActions extends BaseModifierClass
     public function seizeSilo(Player $player, array $params)
     {
         $player_space = $this->playerSpace($player);
-        
+
         PlayerSeizedFarmProperty::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
@@ -379,7 +375,7 @@ class FarmActions extends BaseModifierClass
     public function seizeField(Player $player, array $params)
     {
         $player_space = $this->playerSpace($player);
-        
+
         PlayerSeizedFarmProperty::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
@@ -397,13 +393,44 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
+    public function canBuildRoad(array $player_skills, array $player_space, int $actions)
+    {
+        return $actions > 0
+            && $player_skills['Builder'] > 2
+            && ($player_space['road_status']['owner_team_id'] ?? null) === null
+            && ($player_space['type'] !== 'swamp')
+            && ($player_space['type'] !== 'mountain')
+            && ($player_space['type'] !== 'volcano')
+            && ($player_space['type'] !== 'ash_heap');
+    }
+
+    public function buildRoad(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+
+        PlayerBuiltRoad::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+            level: 1,
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
     // routines
 
     public function initializePlayerActions(ModifierState $modifier_state, int $player_id)
     {
         $modifier_state->modifier_data[$player_id] = [
-            'actions' => 3,
-            'action_limit' => 3,
+            'actions' => 6,
+            'action_limit' => 6,
+            'actions_gained_per_round' => 3,
             'grain' => 0,
             'grain_capacity' => 5,
         ];
@@ -422,22 +449,17 @@ class FarmActions extends BaseModifierClass
         PlayerState $player_state,
         GameState $game_state,
         ModifierState $modifier_state,
-    ) { 
+    ) {
         $this->initializePlayerActions($modifier_state, $player_state->id);
     }
 
     public function onChallengeEnded(GameState $game_state)
     {
-        $skills_modifier = $game_state->modifiers()->firstWhere('class_key', FarmSkills::key());
-        $all_skills = $skills_modifier->modifier_data;
-
         $modifier_state = $game_state->modifiers()->firstWhere('class_key', self::key());
 
         $modifier_state->modifier_data = collect($modifier_state->modifier_data)
-            ->map(function ($data, $player_id) use ($all_skills) {
-
-                $player_skills = $all_skills[$player_id]['skills'];
-                $actions_to_gain = 3 + $player_skills['Tactician'];
+            ->map(function ($data, $player_id) {
+                $actions_to_gain = $data['actions_gained_per_round'];
                 $current_actions = $data['actions'];
                 $limit = $data['action_limit'];
 
@@ -446,6 +468,7 @@ class FarmActions extends BaseModifierClass
                 return [
                     'actions' => $new_actions,
                     'action_limit' => $limit,
+                    'actions_gained_per_round' => $actions_to_gain,
                     'grain' => $data['grain'],
                     'grain_capacity' => $data['grain_capacity'],
                 ];

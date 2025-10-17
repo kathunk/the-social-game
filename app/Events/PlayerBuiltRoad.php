@@ -2,19 +2,19 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
+use App\Events\Traits\HasActivePlayer;
+use App\Events\Traits\HasGame;
+use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasTeam;
+use App\Modifiers\Classes\FarmActions;
+use App\Modifiers\Classes\FarmMap;
 use App\States\GameState;
 use App\States\PlayerState;
-use App\Events\Traits\HasGame;
-use App\Events\Traits\HasTeam;
-use App\Events\Traits\HasModifier;
-use App\Modifiers\Classes\FarmMap;
-use App\Events\Traits\HasActivePlayer;
-use App\Modifiers\Classes\FarmActions;
+use Thunk\Verbs\Event;
 
 class PlayerBuiltRoad extends Event
 {
-    use HasActivePlayer, HasModifier, HasGame, HasTeam;
+    use HasActivePlayer, HasGame, HasModifier, HasTeam;
 
     public int $x_index;
 
@@ -37,7 +37,7 @@ class PlayerBuiltRoad extends Event
                 $space['history'][] = [
                     'round_number' => $game->currentChallenge()->round_number,
                     'emoji' => '🛣️',
-                    'message' => $this->state(PlayerState::class)->name . ' built a road',
+                    'message' => $this->state(PlayerState::class)->name.' built a road',
                 ];
             }
 

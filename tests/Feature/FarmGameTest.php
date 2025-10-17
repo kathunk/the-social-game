@@ -1,16 +1,13 @@
 <?php
 
 use App\Challenges\Classes\FarmRound;
-use App\Events\PlayerBuiltRoad;
 use App\Events\PlayerBuiltSilo;
 use App\Events\PlayerDepositedToSilo;
 use App\Events\PlayerHarvestedField;
-use App\Events\PlayerJoinedFarmTeam;
 use App\Events\PlayerMovedInFarm;
 use App\Events\PlayerPlantedField;
-use App\Events\PlayerSeizedFarmProperty;
-use App\Events\PlayerUpgradedSkillInFarm;
 use App\Events\PlayerUpgradedSilo;
+use App\Events\PlayerUpgradedSkillInFarm;
 use App\Events\PlayerWithrewFromSilo;
 use App\Livewire\GameDashboard;
 use App\Livewire\SecretsPage;
@@ -184,7 +181,7 @@ it('allows players to move to adjacent spaces', function () {
     // Calculate an adjacent space
     $adjacentX = min($currentSpace['x-index'] + 1, 9);
     $adjacentY = $currentSpace['y-index'];
-    $spaceString = chr(65 + $adjacentX) . ($adjacentY + 1);
+    $spaceString = chr(65 + $adjacentX).($adjacentY + 1);
 
     $farmActions = $this->game->fresh()->modifiers->firstWhere('class_key', FarmActions::key());
     $actionsBefore = $farmActions->modifier_data[$player->id]['actions'];
@@ -667,7 +664,7 @@ it('advances field stages each round: seedlings -> sprouts -> mature -> rotted -
     expect($space['field_status']['level'])->toBe(1);
     expect($space['field_status']['quantity'])->toBe(0, 'Rotted field has no grain');
 })->skip();
-// flaky 
+// flaky
 
 // TODO: Flaky test - volcano may destroy field randomly
 it('produces correct grain quantities based on field level', function () {

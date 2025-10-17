@@ -2,13 +2,13 @@
 
 namespace App\Events;
 
+use App\Events\Traits\HasGame;
 use App\Models\Game;
-use Thunk\Verbs\Event;
 use App\Models\Modifier;
 use App\States\GameState;
 use App\States\ModifierState;
-use App\Events\Traits\HasGame;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class ModifierCreated extends Event
 {
@@ -33,8 +33,9 @@ class ModifierCreated extends Event
 
         if ($this->modifier_data) {
             $modifier->modifier_data = $this->modifier_data;
+
             return;
-        } 
+        }
 
         // this is only in here for backwards compatibility with old events
 

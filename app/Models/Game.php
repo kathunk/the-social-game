@@ -321,7 +321,7 @@ class Game extends Model
                 }
 
                 ModifierCreated::fire(
-                    game_id: $this->id, 
+                    game_id: $this->id,
                     class_key: $modifier,
                     modifier_data: $modifier_data,
                 );

@@ -6,12 +6,11 @@ use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasTeam;
-use App\States\ModifierState;
 use App\States\PlayerState;
 use App\States\TeamState;
 use Thunk\Verbs\Event;
 
-class PlayerBootedFromFarmTeam extends Event
+class PlayerAbandonedFarmTeam extends Event
 {
     use HasGame, HasModifier, HasPlayer, HasTeam;
 
@@ -27,21 +26,6 @@ class PlayerBootedFromFarmTeam extends Event
         $player->team_id = null;
     }
 
-    public function applyToModifier(ModifierState $modifier)
-    {
-        $modifier->modifier_data['leaders'] = collect($modifier->modifier_data['leaders'])
-            ->map(function ($player_id, $team_id) {
-                if ($team_id === $this->team_id) {
-                    $previous_team = $this->state(TeamState::class);
-
-                    return $previous_team->player_ids
-                        ->reject(fn ($p_id) => $p_id === $this->player_id)->first();
-                }
-
-                return $player_id;
-            })->toArray();
-    }
-
     public function applyToTeam(TeamState $team)
     {
         $team->player_ids = $team->player_ids->reject(fn ($player_id) => $player_id === $this->player_id);
@@ -49,7 +33,7 @@ class PlayerBootedFromFarmTeam extends Event
 
         $amount_to_transfer = $this->grain_in_possession;
 
-        $team->addToScoreHistory('🥾', -$amount_to_transfer, $player->name.' was booted from team and took '.$amount_to_transfer.' grain with them.');
+        $team->addToScoreHistory('🫥', -$amount_to_transfer, $player->name.' abandoned team and took '.$amount_to_transfer.' grain with them.');
     }
 
     public function handle()

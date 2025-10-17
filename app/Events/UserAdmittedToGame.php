@@ -2,18 +2,18 @@
 
 namespace App\Events;
 
-use App\Models\Game;
-use App\Models\User;
-use App\Models\Player;
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\UserState;
-use App\States\PlayerState;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasUser;
+use App\Models\Game;
 use App\Models\GameApplication;
+use App\Models\Player;
+use App\Models\User;
 use App\States\GameApplicationState;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\UserState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class UserAdmittedToGame extends Event
 {

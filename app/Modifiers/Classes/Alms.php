@@ -2,7 +2,6 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Game;
 use App\Models\Player;
 use App\States\GameState;
 

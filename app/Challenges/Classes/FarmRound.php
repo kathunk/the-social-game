@@ -3,6 +3,7 @@
 namespace App\Challenges\Classes;
 
 use App\Models\Player;
+use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmMap;
 
 class FarmRound extends BaseChallengeClass
@@ -16,11 +17,6 @@ class FarmRound extends BaseChallengeClass
     public static function key(): string
     {
         return 'farm_round';
-    }
-
-    public function frontendComponent(Player $player): array
-    {
-        return $this->form()->title("Round " . $this->challenge->round_number)->build();
     }
 
     public function isInvalidForTemplate(
@@ -39,5 +35,31 @@ class FarmRound extends BaseChallengeClass
     public function dataArrayForState(): array
     {
         return [];
+    }
+
+    public function frontendComponent(Player $player): array
+    {
+        if (! $player->team_id) {
+            return [];
+        }
+
+        $is_final_round = $this->challenge->round_number === $this->challenge->game->challenges->count();
+
+        $actions = $this->actionsModifier($player);
+        $actions_limit = $actions['action_limit'];
+        $actions_current = $actions['actions'];
+        $actions_gained_per_round = $actions['actions_gained_per_round'];
+
+        return $this->form()->title('Round '.$this->challenge->round_number)
+            ->when(! $is_final_round, fn ($form) => $form->subtitle('You have '.$actions_current.' actions to use. You will gain '.$actions_gained_per_round.' actions per at the end of this round, but you can only hold up to '.$actions_limit.' actions at a time.'))
+            ->when($is_final_round, fn ($form) => $form->subtitle('You have '.$actions_current.' actions to use. This is the final round. Good luck.'))
+            ->build();
+    }
+
+    public function actionsModifier(Player $player): array
+    {
+        $mod = $this->challenge->game->modifiers->firstWhere('class_key', FarmActions::key());
+
+        return $mod->modifier_data[$player->id];
     }
 }

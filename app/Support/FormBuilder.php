@@ -2,17 +2,17 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Collection;
-use App\Modifiers\Classes\BaseModifierClass;
 use App\Challenges\Classes\BaseChallengeClass;
+use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
+use App\Modifiers\Classes\BaseModifierClass;
 use App\Support\FormBuilderTraits\FarmFormElements;
 use App\Support\FormBuilderTraits\TierListFormElements;
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
+use Illuminate\Support\Collection;
 
 class FormBuilder
 {
-    use TierListFormElements, FarmFormElements;
+    use FarmFormElements, TierListFormElements;
 
     protected array $elements = [];
 
@@ -158,7 +158,7 @@ class FormBuilder
             'type' => 'radio_group',
             'label' => $label,
             'options' => $options,
-            // example: 
+            // example:
             // 'options' => [
             //     [
             //         'label' => 'Strategist',

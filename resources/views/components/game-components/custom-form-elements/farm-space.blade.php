@@ -25,57 +25,51 @@
 
     <!-- Objects (100x100 local coords for easy scaling) -->
 
-    <!-- Field stages - compact, with level indicators -->
-    <!-- Note: Level number will be added dynamically via overlay config -->
-    <symbol id="obj-field-seedlings" viewBox="0 0 100 100">
-      <!-- Light green soil with tiny seedling dots -->
-      <rect x="30" y="70" width="40" height="30" fill="#8b7355" rx="2" stroke="#654321" stroke-width="1"/>
-      <circle cx="40" cy="85" r="2" fill="#90EE90"/>
-      <circle cx="50" cy="85" r="2" fill="#90EE90"/>
-      <circle cx="60" cy="85" r="2" fill="#90EE90"/>
-      <!-- Level badge placeholder - will be filled with text overlay -->
-      <circle cx="65" cy="73" r="5" fill="#fff" stroke="#654321" stroke-width="1"/>
+    <symbol id="obj-field-seedlings" viewBox="0 0 880 880">
+      @include('components.game-components.custom-form-elements.farm-space-elements.field')
     </symbol>
 
-    <symbol id="obj-field-sprouts" viewBox="0 0 100 100">
-      <!-- Medium green sprouts emerging -->
-      <rect x="30" y="70" width="40" height="30" fill="#8b7355" rx="2" stroke="#654321" stroke-width="1"/>
-      <line x1="40" y1="85" x2="40" y2="72" stroke="#3CB371" stroke-width="2"/>
-      <line x1="50" y1="85" x2="50" y2="72" stroke="#3CB371" stroke-width="2"/>
-      <line x1="60" y1="85" x2="60" y2="72" stroke="#3CB371" stroke-width="2"/>
-      <!-- Level badge -->
-      <circle cx="65" cy="73" r="5" fill="#fff" stroke="#654321" stroke-width="1"/>
+    <symbol id="obj-field-sprouts" viewBox="0 0 880 880">
+      @include('components.game-components.custom-form-elements.farm-space-elements.field')
     </symbol>
 
-    <symbol id="obj-field-mature" viewBox="0 0 100 100">
-      <!-- Full green mature crops -->
-      <rect x="30" y="70" width="40" height="30" fill="#8b7355" rx="2" stroke="#654321" stroke-width="1"/>
-      <rect x="37" y="60" width="6" height="25" fill="#228B22" rx="1"/>
-      <rect x="47" y="55" width="6" height="30" fill="#228B22" rx="1"/>
-      <rect x="57" y="58" width="6" height="27" fill="#228B22" rx="1"/>
-      <!-- Level badge -->
-      <circle cx="65" cy="73" r="5" fill="#fff" stroke="#654321" stroke-width="1"/>
+    <symbol id="obj-field-mature" viewBox="0 0 880 880">
+      @include('components.game-components.custom-form-elements.farm-space-elements.field')
     </symbol>
 
-    <symbol id="obj-field-rotted" viewBox="0 0 100 100">
-      <!-- Brown/dark rotted field -->
-      <rect x="30" y="70" width="40" height="30" fill="#654321" rx="2" stroke="#3d2817" stroke-width="1"/>
-      <path d="M 40 80 Q 40 77 43 77" stroke="#8B4513" stroke-width="2" fill="none"/>
-      <path d="M 50 82 Q 50 79 53 79" stroke="#8B4513" stroke-width="2" fill="none"/>
-      <path d="M 60 81 Q 60 78 63 78" stroke="#8B4513" stroke-width="2" fill="none"/>
-      <!-- Level badge -->
-      <circle cx="65" cy="73" r="5" fill="#fff" stroke="#654321" stroke-width="1"/>
+    <symbol id="obj-field-rotted" viewBox="0 0 880 880">
+      @include('components.game-components.custom-form-elements.farm-space-elements.field')
     </symbol>
 
     <symbol id="obj-silo" viewBox="0 0 100 100">
-      <rect x="40" y="20" width="20" height="60" rx="8" fill="#9aa3ad"/>
-      <circle cx="50" cy="20" r="12" fill="#7f8891"/>
+      <!-- Red barn -->
+      <rect x="10" y="50" width="25" height="30" fill="#c41e3a" stroke="#8b1a2e" stroke-width="1.5"/>
+      <polygon points="10,50 22.5,35 35,50" fill="#8b1a2e" stroke="#6b1423" stroke-width="1.5"/>
+      <!-- Barn door -->
+      <rect x="17" y="65" width="10" height="15" fill="#5a1118"/>
+
+      <!-- Brown silo -->
+      <rect x="45" y="25" width="18" height="55" rx="6" fill="#8b6914" stroke="#5a4409" stroke-width="1.5"/>
+      <!-- Silo top dome -->
+      <ellipse cx="54" cy="25" rx="9" ry="6" fill="#6b5010" stroke="#5a4409" stroke-width="1.5"/>
+      <!-- Silo bands for detail -->
+      <line x1="45" y1="40" x2="63" y2="40" stroke="#5a4409" stroke-width="1"/>
+      <line x1="45" y1="55" x2="63" y2="55" stroke="#5a4409" stroke-width="1"/>
+      <line x1="45" y1="70" x2="63" y2="70" stroke="#5a4409" stroke-width="1"/>
+
+      <!-- Connecting chute from barn to silo -->
+      <rect x="35" y="54" width="10" height="4" fill="#6b5010" stroke="#5a4409" stroke-width="1"/>
     </symbol>
 
-    <!-- Roads can be straight segments you rotate/scale -->
+    <!-- Roads - horizontal road that spans the width -->
     <symbol id="obj-road" viewBox="0 0 100 100">
-      <rect x="0" y="45" width="100" height="10" fill="#555"/>
-      <rect x="0" y="49" width="100" height="2" fill="#bbb" />
+      <!-- Dark gray road base -->
+      <rect x="0" y="40" width="100" height="20" fill="#555"/>
+      <!-- Yellow center lines -->
+      <rect x="0" y="48" width="100" height="4" fill="#ffcc00"/>
+      <!-- Side edges -->
+      <rect x="0" y="40" width="100" height="2" fill="#333"/>
+      <rect x="0" y="58" width="100" height="2" fill="#333"/>
     </symbol>
 
     <!-- Player pawn placeholder -->

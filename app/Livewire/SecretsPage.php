@@ -47,10 +47,10 @@ class SecretsPage extends Component
             $this->modifier->class_key => $modifier->handler()?->propertiesForLivewire($this->player, for_dedicated_page: true),
         ];
 
-    $this->validation_rules[$modifier->class_key] =
-        $modifier
-            ->handler()
-            ?->validationRulesForLivewire($this->player) ?? [];
+        $this->validation_rules[$modifier->class_key] =
+            $modifier
+                ->handler()
+                ?->validationRulesForLivewire($this->player) ?? [];
         $this->frontend_component = $this->modifier
             ->handler()
             ->frontendComponentForDedicatedPage($this->player);

@@ -2,15 +2,15 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\ModifierState;
 use App\Events\Traits\HasGame;
-use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasPlayer;
+use App\States\ModifierState;
+use Thunk\Verbs\Event;
 
 class PlayerCanceledRequestToJoinFarmTeam extends Event
 {
-    use HasGame, HasPlayer, HasModifier;
+    use HasGame, HasModifier, HasPlayer;
 
     public function validate()
     {

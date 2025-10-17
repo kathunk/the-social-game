@@ -2,24 +2,26 @@
 
 namespace App\Events;
 
-use App\Models\Team;
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
-use App\States\ModifierState;
 use App\Events\Traits\HasGame;
-use App\Events\Traits\HasTeam;
-use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasPlayer;
+use App\Events\Traits\HasTeam;
+use App\Models\Team;
 use App\Modifiers\Classes\FarmMap;
+use App\States\GameState;
+use App\States\ModifierState;
+use App\States\PlayerState;
+use App\States\TeamState;
+use Thunk\Verbs\Event;
 
 class PlayerJoinedFarmTeam extends Event
 {
-    use HasGame, HasPlayer, HasTeam, HasModifier;
+    use HasGame, HasModifier, HasPlayer, HasTeam;
 
     public ?int $requester_previous_team_id = null;
+
     public ?bool $player_is_last_on_team = false;
+
     public ?int $player_grain = 0;
 
     public function validate()
@@ -41,9 +43,8 @@ class PlayerJoinedFarmTeam extends Event
                     $next_player_on_previous_team_id = $previous_team
                         ->player_ids->reject(fn ($p_id) => $p_id === $this->player_id)->first();
 
-
-                    return $this->player_is_last_on_team 
-                        ? null 
+                    return $this->player_is_last_on_team
+                        ? null
                         : $next_player_on_previous_team_id;
                 }
 
@@ -92,21 +93,21 @@ class PlayerJoinedFarmTeam extends Event
         if ($this->player_is_last_on_team) {
             $amount_to_transfer += $previous_team->score() - $this->player_grain;
         }
-        
+
         if ($this->requester_previous_team_id !== null) {
-            $previous_team->addToScoreHistory('🫥', -$amount_to_transfer, $requester->name . ' left team and took all their grain with them.');
+            $previous_team->addToScoreHistory('🫥', -$amount_to_transfer, $requester->name.' left team and took all their grain with them.');
         }
 
-        $team->addToScoreHistory('👋', $amount_to_transfer, $requester->name . ' joined team and brought ' . $amount_to_transfer . ' grain with them.');
+        $team->addToScoreHistory('👋', $amount_to_transfer, $requester->name.' joined team and brought '.$amount_to_transfer.' grain with them.');
     }
 
     public function handle()
     {
         $this->player()->update([
-            'team_id' => $this->team_id
+            'team_id' => $this->team_id,
         ]);
-        $this->game()->teams()->each(fn($t) => $t->updateModelWithStateData());
-        $this->game()->modifiers()->each(fn($m) => $m->updateModelWithStateData());
+        $this->game()->teams()->each(fn ($t) => $t->updateModelWithStateData());
+        $this->game()->modifiers()->each(fn ($m) => $m->updateModelWithStateData());
 
         if ($this->player_is_last_on_team) {
             $previous_team = Team::find($this->requester_previous_team_id);

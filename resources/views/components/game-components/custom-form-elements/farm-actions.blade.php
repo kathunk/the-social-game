@@ -114,13 +114,27 @@
         {{-- Background --}}
         <use href="#bg-{{ $config['background'] ?? 'grass' }}" />
 
-        {{-- Debug: Show overlay count --}}
-        <!-- Overlays count: {{ count($overlays) }} -->
+        {{-- Road - render directly instead of using symbol to avoid transform issues --}}
+        @if($overlays->contains('type', 'road'))
+            @php
+                $roadY = 890; // Position near bottom
+            @endphp
+            <!-- Road overlay -->
+            <rect x="0" y="{{ $roadY }}" width="1600" height="80" fill="#555"/>
+            <rect x="0" y="{{ $roadY + 30 }}" width="1600" height="20" fill="#d4a574"/>
+            <rect x="0" y="{{ $roadY }}" width="1600" height="5" fill="#333"/>
+            <rect x="0" y="{{ $roadY + 75 }}" width="1600" height="5" fill="#333"/>
+        @endif
 
         {{-- Overlays --}}
         @foreach ($overlays as $i => $o)
             @php
                 $type = $o['type'] ?? 'player';
+
+                // Skip road since we render it directly above
+                if ($type === 'road') {
+                    continue;
+                }
                 $x = $o['x'] ?? 0;
                 $y = $o['y'] ?? 0;
                 $rotate = $o['rotate'] ?? 0;
@@ -139,11 +153,12 @@
                 // 4) translate to x,y in map space
                 $transform = "translate({$x} {$y}) rotate({$rotate}) scale({$sx} {$sy}) translate({$ax} {$ay})";
 
-                // Optional color override
+                // Optional color and style overrides
                 $style = '';
                 if (!empty($o['fill'])) $style .= "fill: {$o['fill']};";
                 if (!empty($o['stroke'])) $style .= "stroke: {$o['stroke']};";
-                if (!empty($o['opacity'])) $style .= "opacity: {$o['opacity']};";
+                if (isset($o['stroke-width'])) $style .= "stroke-width: {$o['stroke-width']};";
+                if (isset($o['opacity'])) $style .= "opacity: {$o['opacity']};";
             @endphp
 
             @if($type === 'text')
@@ -158,7 +173,7 @@
                 >{{ $o['text'] ?? '' }}</text>
             @else
                 <!-- Overlay {{ $i }}: type={{ $type }}, href=#obj-{{ $type }}, transform={{ $transform }} -->
-                <use href="#obj-{{ $type }}" transform="{{ $transform }}" style="{{ $style }}" stroke-width="0" />
+                <use href="#obj-{{ $type }}" transform="{{ $transform }}" style="{{ $style }}" />
             @endif
         @endforeach
     </svg>

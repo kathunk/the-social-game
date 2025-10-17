@@ -2,20 +2,20 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
-use App\Events\Traits\HasGame;
-use App\Events\Traits\HasTeam;
-use App\Events\Traits\HasModifier;
-use App\Modifiers\Classes\FarmMap;
 use App\Events\Traits\HasActivePlayer;
+use App\Events\Traits\HasGame;
+use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasTeam;
 use App\Modifiers\Classes\FarmActions;
+use App\Modifiers\Classes\FarmMap;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\TeamState;
+use Thunk\Verbs\Event;
 
 class PlayerHarvestedField extends Event
 {
-    use HasActivePlayer, HasModifier, HasGame, HasTeam;
+    use HasActivePlayer, HasGame, HasModifier, HasTeam;
 
     public int $x_index;
 
@@ -46,7 +46,7 @@ class PlayerHarvestedField extends Event
                     $space['history'][] = [
                         'round_number' => $game->currentChallenge()->round_number,
                         'emoji' => '🌾',
-                        'message' => $this->state(PlayerState::class)->name . ' harvested ' . $amount_to_harvest . ' grain',
+                        'message' => $this->state(PlayerState::class)->name.' harvested '.$amount_to_harvest.' grain',
                     ];
                 }
 
@@ -58,17 +58,17 @@ class PlayerHarvestedField extends Event
 
                 return $space;
             })->toArray();
-        
+
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
         $actions_state->modifier_data = collect($actions_state->modifier_data)
             ->map(function ($data, $player_id) use ($amount_to_harvest) {
                 if ($player_id !== $this->player_id) {
                     return $data;
                 }
-                
+
                 $data['actions'] = $data['actions'] - 1;
                 $data['grain'] = $data['grain'] + $amount_to_harvest;
-                
+
                 return $data;
             })->toArray();
     }
@@ -76,7 +76,7 @@ class PlayerHarvestedField extends Event
     public function applyToTeam(TeamState $team)
     {
         $amount_to_harvest = min($this->field_quantity, $this->player_capacity - $this->player_grain);
-        $team->addToScoreHistory('🌾', $amount_to_harvest, $this->state(PlayerState::class)->name . ' harvested ' . $amount_to_harvest . ' grain.');
+        $team->addToScoreHistory('🌾', $amount_to_harvest, $this->state(PlayerState::class)->name.' harvested '.$amount_to_harvest.' grain.');
     }
 
     public function handle()

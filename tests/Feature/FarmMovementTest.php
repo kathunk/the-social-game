@@ -59,7 +59,7 @@ it('allows players to move to adjacent spaces', function () {
     // Calculate an adjacent space
     $adjacentX = min($currentSpace['x-index'] + 1, 9);
     $adjacentY = $currentSpace['y-index'];
-    $spaceString = chr(65 + $adjacentX) . ($adjacentY + 1);
+    $spaceString = chr(65 + $adjacentX).($adjacentY + 1);
 
     $farmActions = $this->game->fresh()->modifiers->firstWhere('class_key', FarmActions::key());
     $actionsBefore = $farmActions->modifier_data[$player->id]['actions'];

@@ -160,16 +160,5 @@
         >
             💪 Move
         </x-button>
-
-        @if ($element['can_build_road'])
-            <x-button
-                wire:loading.attr="disabled"
-                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-build-road"
-                variant="primary"
-                wire:click="callClassAction('buildRoad', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
-            >
-                💪 Build Road
-            </x-button>
-        @endif
     </div>
 </div>

@@ -2,12 +2,12 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\Models\Modifier;
-use App\States\ModifierState;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasPlayer;
+use App\Models\Modifier;
+use App\States\ModifierState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use Thunk\Verbs\Event;
 
 class PlayerSpawnedInFarm extends Event
 {

@@ -4,19 +4,19 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Challenges\Classes\FarmRound;
+use App\Events\GameModeAdded;
+use App\Events\GameTemplateAdded;
 use App\Models\Game;
-use App\Models\User;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
-use App\Events\GameModeAdded;
-use Thunk\Verbs\Facades\Verbs;
-use Illuminate\Database\Seeder;
-use App\Events\GameTemplateAdded;
-use App\Modifiers\Classes\FarmMap;
-use App\Modifiers\Classes\FarmTeams;
-use App\Challenges\Classes\FarmRound;
-use App\Modifiers\Classes\FarmSkills;
+use App\Models\User;
 use App\Modifiers\Classes\FarmActions;
+use App\Modifiers\Classes\FarmMap;
+use App\Modifiers\Classes\FarmSkills;
+use App\Modifiers\Classes\FarmTeams;
+use Illuminate\Database\Seeder;
+use Thunk\Verbs\Facades\Verbs;
 
 class FarmSeeder extends Seeder
 {

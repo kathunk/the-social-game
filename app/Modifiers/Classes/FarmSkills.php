@@ -2,51 +2,51 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Events\PlayerUpgradedSkillInFarm;
 use App\Models\Player;
 use App\States\GameState;
-use App\States\PlayerState;
 use App\States\ModifierState;
+use App\States\PlayerState;
 use Thunk\Verbs\Facades\Verbs;
-use App\Events\PlayerUpgradedSkillInFarm;
 
 class FarmSkills extends BaseModifierClass
 {
-    const NAME = "Farm Skills";
+    const NAME = 'Farm Skills';
 
-    const DESCRIPTION = "The skills for the farm game.";
+    const DESCRIPTION = 'The skills for the farm game.';
 
-    const TYPE = "team";
+    const TYPE = 'team';
 
     const SKILLS = [
+        'brute' => [
+            'name' => 'Brute',
+            'level_1' => 'Seize and defend structures',
+            'level_2' => '+2 seize and defense of structures',
+            'level_3' => '+3 seize and defense of structures',
+        ],
+        'builder' => [
+            'name' => 'Builder',
+            'level_1' => 'Build level 1 Silos',
+            'level_2' => 'Build level 2 Silos',
+            'level_3' => 'Build level 3 Silos and Roads',
+        ],
         'chronicler' => [
             'name' => 'Chronicler',
             'level_1' => 'See 2 rounds of history for your space',
             'level_2' => 'See 5 rounds of history for your space',
             'level_3' => 'See complete history for your space',
         ],
-        "brute" => [
-            "name" => "Brute",
-            "level_1" => "Seize and defend structures",
-            "level_2" => "+2 seize and defense of structures",
-            "level_3" => "+3 seize and defense of structures",
+        'farmer' => [
+            'name' => 'Farmer',
+            'level_1' => 'Plant level 1 Farms',
+            'level_2' => 'Plant level 2 Farms',
+            'level_3' => 'Plant level 3 Farms',
         ],
-        "builder" => [
-            "name" => "Builder",
-            "level_1" => "Build level 1 Silos",
-            "level_2" => "Build level 2 Silos",
-            "level_3" => "Build level 3 Silos and Roads",
-        ],
-        "farmer" => [
-            "name" => "Farmer",
-            "level_1" => "Plant level 1 Farms",
-            "level_2" => "Plant level 2 Farms",
-            "level_3" => "Plant level 3 Farms",
-        ],
-        "porter" => [
-            "name" => "Porter",
-            "level_1" => "Max Grain capacity of 5",
-            "level_2" => "Max Grain capacity of 7",
-            "level_3" => "Max Grain capacity of 10",
+        'porter' => [
+            'name' => 'Porter',
+            'level_1' => 'Max Grain capacity of 5',
+            'level_2' => 'Max Grain capacity of 7',
+            'level_3' => 'Max Grain capacity of 10',
         ],
         'scout' => [
             'name' => 'Scout',
@@ -54,17 +54,17 @@ class FarmSkills extends BaseModifierClass
             'level_2' => 'Inspect up to 2 spaces away',
             'level_3' => 'Inspect up to 3 spaces away',
         ],
-        "strategist" => [
-            "name" => "Strategist",
-            "level_1" => "Store up to 5 Actions",
-            "level_2" => "Store up to 7 Actions",
-            "level_3" => "Store up to 9 Actions",
+        'strategist' => [
+            'name' => 'Strategist',
+            'level_1' => 'Store up to 8 Actions',
+            'level_2' => 'Store up to 10 Actions',
+            'level_3' => 'Store up to 12 Actions',
         ],
-        "tactician" => [
-            "name" => "Tactician",
-            "level_1" => "Gain 4 actions each round.",
-            "level_2" => "Gain 5 actions each round.",
-            "level_3" => "Gain 6 actions each round.",
+        'tactician' => [
+            'name' => 'Tactician',
+            'level_1' => 'Gain 4 actions each round.',
+            'level_2' => 'Gain 5 actions each round.',
+            'level_3' => 'Gain 6 actions each round.',
         ],
         // "thief" => [
         //     "name" => "Thief",
@@ -76,7 +76,7 @@ class FarmSkills extends BaseModifierClass
 
     public static function key(): string
     {
-        return "farm_skills";
+        return 'farm_skills';
     }
 
     public function isInvalidForTemplate(
@@ -85,8 +85,8 @@ class FarmSkills extends BaseModifierClass
         string $type,
         array $team_names,
     ) {
-        if (!in_array(FarmMap::key(), $modifiers)) {
-            return "Farm teams modifier is required to run this modifier";
+        if (! in_array(FarmMap::key(), $modifiers)) {
+            return 'Farm teams modifier is required to run this modifier';
         }
 
         return false;
@@ -96,41 +96,41 @@ class FarmSkills extends BaseModifierClass
     {
         return $this->form()
             ->title(
-                "Current XP: " .
-                    $this->modifier->modifier_data[$player->id]["xp"],
+                'Current XP: '.
+                    $this->modifier->modifier_data[$player->id]['xp'],
             )
             ->subtitle(
-                "Each round, you will gain 1 XP. Spend it to upgrade your skills.",
+                'Each round, you will gain 1 XP. Spend it to upgrade your skills.',
             )
             ->radioGroup(
-                label: "Skills",
-                property_name: "selected_skill_to_upgrade",
+                label: 'Skills',
+                property_name: 'selected_skill_to_upgrade',
                 options: $this->affordableSkills($player),
-                validation_rules: "required|exists:skills,id",
+                validation_rules: 'required|exists:skills,id',
                 validation_messages: [
-                    "required" => "Must select a skill",
-                    "exists" => "Must select a valid skill",
+                    'required' => 'Must select a skill',
+                    'exists' => 'Must select a valid skill',
                 ],
             )
             ->buttonGroup()
-            ->button("Upgrade skill", "upgradeSkill")
+            ->button('Upgrade skill', 'upgradeSkill')
             ->endGroup()
             ->build();
     }
 
     public function seeUpgrades(Player $player, array $params)
     {
-        return redirect()->route("games.mods", [
-            "game" => $player->game,
-            "modifier" => $this->modifier,
+        return redirect()->route('games.mods', [
+            'game' => $player->game,
+            'modifier' => $this->modifier,
         ]);
     }
 
     public function upgradeSkill(Player $player, array $params)
     {
-        $selected_skill = $params["selected_skill_to_upgrade"];
+        $selected_skill = $params['selected_skill_to_upgrade'];
         $current_level =
-            $this->modifier->modifier_data[$player->id]["skills"][
+            $this->modifier->modifier_data[$player->id]['skills'][
                 $selected_skill
             ];
         $xp_cost = $current_level + 1;
@@ -145,42 +145,41 @@ class FarmSkills extends BaseModifierClass
 
         Verbs::commit();
 
-        return redirect()->route("games.mods", [
-            "game" => $player->game,
-            "modifier" => $this->modifier,
+        return redirect()->route('games.mods', [
+            'game' => $player->game,
+            'modifier' => $this->modifier,
         ]);
     }
 
     public function skillLevels(Player $player)
     {
-        return $this->modifier->modifier_data[$player->id]["skills"];
+        return $this->modifier->modifier_data[$player->id]['skills'];
     }
 
     public function affordableSkills(Player $player)
     {
-        $buying_power = $this->modifier->modifier_data[$player->id]["xp"];
+        $buying_power = $this->modifier->modifier_data[$player->id]['xp'];
         $skills = $this->skillLevels($player);
 
         return collect(self::SKILLS)
             ->map(function ($skill) use ($skills, $buying_power) {
-                $existing_level = $skills[$skill["name"]];
+                $existing_level = $skills[$skill['name']];
 
                 if ($existing_level === 3) {
                     return [];
                 }
 
                 $cost = $existing_level + 1;
-                $level_label = $existing_level === 0 ? "" : ' +' . $existing_level;
+                $level_label = $existing_level === 0 ? '' : ' +'.$existing_level;
 
                 return [
-                    "label" => $skill["name"] . $level_label,
-                    "value" => $skill["name"],
-                    "description" =>
-                        $skill["level_" . $existing_level + 1] .
-                        " (cost: " .
-                        $cost .
-                        " XP)",
-                    "disabled" => $buying_power < $cost,
+                    'label' => $skill['name'].$level_label,
+                    'value' => $skill['name'],
+                    'description' => $skill['level_'.$existing_level + 1].
+                        ' (cost: '.
+                        $cost.
+                        ' XP)',
+                    'disabled' => $buying_power < $cost,
                 ];
             })
             ->filter()
@@ -212,9 +211,9 @@ class FarmSkills extends BaseModifierClass
         int $player_id,
     ) {
         $modifier_state->modifier_data[$player_id] = [
-            "xp" => 20,
-            "skills" => collect(self::SKILLS)
-                ->mapWithKeys(fn($skill) => [$skill["name"] => 0])
+            'xp' => 200,
+            'skills' => collect(self::SKILLS)
+                ->mapWithKeys(fn ($skill) => [$skill['name'] => 0])
                 ->toArray(),
         ];
     }
@@ -226,12 +225,12 @@ class FarmSkills extends BaseModifierClass
     ) {
         $modifier_state->modifier_data = collect($modifier_state->modifier_data)
             ->map(function ($data) use ($player_id, $xp) {
-                if ($player_id !== $data["player_id"]) {
+                if ($player_id !== $data['player_id']) {
                     return $data;
                 }
 
                 return [
-                    "xp" => $data["xp"] + $xp,
+                    'xp' => $data['xp'] + $xp,
                     ...$data,
                 ];
             })
