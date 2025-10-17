@@ -55,7 +55,7 @@ class PlayerUpgradedSilo extends Event
 
         $this->assert(
             $player_builder_level >= $this->level,
-            'Player\'s Builder skill level is not high enough to upgrade silo to level ' . $this->level,
+            'Player\'s Builder skill level is not high enough to upgrade silo to level '.$this->level,
         );
 
         // Space has a silo owned by player's team
@@ -77,7 +77,7 @@ class PlayerUpgradedSilo extends Event
 
         $this->assert(
             $current_silo_level < $this->level,
-            'Silo is already at or above level ' . $this->level,
+            'Silo is already at or above level '.$this->level,
         );
     }
 

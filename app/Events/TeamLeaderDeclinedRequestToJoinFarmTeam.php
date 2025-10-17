@@ -6,7 +6,6 @@ use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasTeam;
-use App\Modifiers\Classes\FarmTeams;
 use App\States\ModifierState;
 use Thunk\Verbs\Event;
 

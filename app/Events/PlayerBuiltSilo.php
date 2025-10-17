@@ -68,7 +68,7 @@ class PlayerBuiltSilo extends Event
         // Space was not swamp, volcano, or ash heap
         $invalid_types = ['swamp', 'volcano', 'ash_heap'];
         $this->assert(
-            !in_array($player_space['type'], $invalid_types),
+            ! in_array($player_space['type'], $invalid_types),
             'Cannot build silo on '.$player_space['type'].' terrain',
         );
     }

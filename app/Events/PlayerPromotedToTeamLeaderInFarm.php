@@ -20,16 +20,25 @@ class PlayerPromotedToTeamLeaderInFarm extends Event
         $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\FarmTeams::key());
         $player = $this->state(\App\States\PlayerState::class);
 
-        // Player was on team OR is being promoted as part of team creation (player_id will be null for new teams)
-        // This handles both: promoting existing team member AND initial team leader assignment during team creation
-        $this->assert(
-            $player->team_id === $this->team_id || $player->team_id === null,
-            'Player is on a different team',
-        );
+        // Check if this is the initial team leader assignment (team has no leader yet)
+        $team_leader_id = $teams_modifier->modifier_data['leaders'][$this->team_id] ?? null;
+        $is_initial_assignment = $team_leader_id === null;
+
+        // For initial assignment, player must either be on the team or have no team
+        // For promotion, player must be on the specific team
+        if ($is_initial_assignment) {
+            $this->assert(
+                $player->team_id === $this->team_id || $player->team_id === null,
+                'Player is on a different team',
+            );
+        } else {
+            $this->assert(
+                $player->team_id === $this->team_id,
+                'Player is not on the specified team',
+            );
+        }
 
         // Player was not already a team leader
-        $team_leader_id = $teams_modifier->modifier_data['leaders'][$this->team_id] ?? null;
-
         $this->assert(
             $team_leader_id !== $this->player_id,
             'Player is already the leader of this team',

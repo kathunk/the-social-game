@@ -57,15 +57,15 @@ it('initializes players with default actions and skills on game start', function
     $playerActions = $farmActions->modifier_data[$player->id];
     $playerSkills = $farmSkills->modifier_data[$player->id];
 
-    expect($playerActions['actions'])->toBe(3);
+    expect($playerActions['actions'])->toBe(6);
     expect($playerActions['grain'])->toBe(0);
     expect($playerActions['grain_capacity'])->toBe(5);
 
-    expect($playerSkills['xp'])->toBe(20);
+    expect($playerSkills['xp'])->toBe(3);
     expect($playerSkills['skills'])->toBe([
-        'Chronicler' => 0,
         'Brute' => 0,
         'Builder' => 0,
+        'Chronicler' => 0,
         'Farmer' => 0,
         'Porter' => 0,
         'Scout' => 0,

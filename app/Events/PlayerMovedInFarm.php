@@ -47,7 +47,7 @@ class PlayerMovedInFarm extends Event
         );
 
         $accessible_spaces = $this->getAccessibleSpaces($player_space, $map_state->modifier_data);
-        $target_coordinate = chr(65 + $this->x_index) . ($this->y_index + 1);
+        $target_coordinate = chr(65 + $this->x_index).($this->y_index + 1);
 
         $this->assert(
             in_array($target_coordinate, $accessible_spaces),
@@ -61,7 +61,7 @@ class PlayerMovedInFarm extends Event
         $player_y = $player_space['y-index'];
 
         $space_map = collect($spaces)->keyBy(function ($space) {
-            return $space['x-index'] . ',' . $space['y-index'];
+            return $space['x-index'].','.$space['y-index'];
         });
 
         $player_has_road = ($player_space['road_status']['owner_team_id'] ?? null) !== null;
@@ -77,9 +77,9 @@ class PlayerMovedInFarm extends Event
         $visited = [];
 
         foreach ($immediate_adjacent as $adj) {
-            $adj_key = $adj['x'] . ',' . $adj['y'];
+            $adj_key = $adj['x'].','.$adj['y'];
 
-            if (!$space_map->has($adj_key)) {
+            if (! $space_map->has($adj_key)) {
                 continue;
             }
 
@@ -90,12 +90,12 @@ class PlayerMovedInFarm extends Event
             if ($player_has_road && ($adj_space['road_status']['owner_team_id'] ?? null) !== null) {
                 $queue = [$adj];
 
-                while (!empty($queue)) {
+                while (! empty($queue)) {
                     $current = array_shift($queue);
-                    $current_key = $current['x'] . ',' . $current['y'];
+                    $current_key = $current['x'].','.$current['y'];
                     $current_space = $space_map->get($current_key);
 
-                    if (!$current_space || ($current_space['road_status']['owner_team_id'] ?? null) === null) {
+                    if (! $current_space || ($current_space['road_status']['owner_team_id'] ?? null) === null) {
                         continue;
                     }
 
@@ -107,9 +107,9 @@ class PlayerMovedInFarm extends Event
                     ];
 
                     foreach ($road_adjacent as $next) {
-                        $next_key = $next['x'] . ',' . $next['y'];
+                        $next_key = $next['x'].','.$next['y'];
 
-                        if (!isset($visited[$next_key]) && $space_map->has($next_key)) {
+                        if (! isset($visited[$next_key]) && $space_map->has($next_key)) {
                             $visited[$next_key] = true;
                             $accessible[$next_key] = $next;
 
@@ -124,7 +124,7 @@ class PlayerMovedInFarm extends Event
         }
 
         return collect($accessible)->map(function ($coords) {
-            return chr(65 + $coords['x']) . ($coords['y'] + 1);
+            return chr(65 + $coords['x']).($coords['y'] + 1);
         })->values()->toArray();
     }
 

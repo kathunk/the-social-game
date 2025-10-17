@@ -211,7 +211,7 @@ class FarmSkills extends BaseModifierClass
         int $player_id,
     ) {
         $modifier_state->modifier_data[$player_id] = [
-            'xp' => 200,
+            'xp' => 3,
             'skills' => collect(self::SKILLS)
                 ->mapWithKeys(fn ($skill) => [$skill['name'] => 0])
                 ->toArray(),

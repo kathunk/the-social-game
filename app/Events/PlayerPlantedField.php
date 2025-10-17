@@ -68,7 +68,7 @@ class PlayerPlantedField extends Event
         // Space was not swamp, mountain, volcano, or ash heap
         $invalid_types = ['swamp', 'mountain', 'volcano', 'ash_heap'];
         $this->assert(
-            !in_array($player_space['type'], $invalid_types),
+            ! in_array($player_space['type'], $invalid_types),
             'Cannot plant field on '.$player_space['type'].' terrain',
         );
     }
