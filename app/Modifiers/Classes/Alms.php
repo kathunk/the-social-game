@@ -18,12 +18,6 @@ class Alms extends BaseModifierClass
         return 'alms';
     }
 
-    public function dataArrayForState(): array
-    {
-        return $this->modifier_state->game()->challenges()
-            ->map(fn ($challenge) => [$challenge->id => ['player_ids' => null]])->toArray();
-    }
-
     public function frontendComponent(Player $player): array
     {
         return $this->form()

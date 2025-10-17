@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasUser;
+use App\Models\Game;
 use App\Models\GameApplication;
 use App\Models\Player;
 use App\Models\User;
@@ -66,6 +67,14 @@ class UserAdmittedToGame extends Event
         $game->user_ids->push($this->user_id);
         $game->player_ids->push($this->player_id);
         $game->unaccepted_user_ids = $game->unaccepted_user_ids->reject(fn ($user_id) => $user_id === $this->user_id);
+
+        $game->modifiers()->each(function ($modifier) {
+            $modifier->handler()->onUserAdmittedToGame(
+                player_state: $this->state(PlayerState::class),
+                game_state: $this->state(GameState::class),
+                modifier_state: $modifier,
+            );
+        });
     }
 
     public function applyToUser(UserState $user)
@@ -110,6 +119,12 @@ class UserAdmittedToGame extends Event
             'decided_by_id' => $this->admin_id,
             'decided_at' => now(),
         ]);
+
+        $game = Game::find($this->game_id);
+
+        $game->modifiers->each(function ($modifier) {
+            $modifier->updateModelWithStateData();
+        });
 
         return $player;
     }

@@ -114,17 +114,23 @@ class GameDashboard extends Component
     }
 
     #[Computed]
+    public function gameMode()
+    {
+        return $this->game->gameMode;
+    }
+
+    #[Computed]
     public function footerMessage()
     {
         if (
             $this->game->status !== 'active' ||
-            ! $this->game->gameMode->footer_message
+            ! $this->gameMode->footer_message
         ) {
             return null;
         }
 
         return (new HtmlTransformer(
-            $this->game->gameMode->footer_message
+            $this->gameMode->footer_message
         ))->formatted();
     }
 
@@ -133,13 +139,13 @@ class GameDashboard extends Component
     {
         if (
             $this->game->status !== 'ended' ||
-            ! $this->game->gameMode->post_game_message
+            ! $this->gameMode->post_game_message
         ) {
             return null;
         }
 
         return (new HtmlTransformer(
-            $this->game->gameMode->post_game_message
+            $this->gameMode->post_game_message
         ))->formatted();
     }
 
@@ -152,7 +158,7 @@ class GameDashboard extends Component
         }
 
         $player_needs_to_join_team =
-            $this->template->type === 'team' && ! $this->player->team;
+            $this->template->type === 'team' && ! $this->player->team && $this->gameMode->requires_team_membership;
 
         if ($player_needs_to_join_team) {
             return;

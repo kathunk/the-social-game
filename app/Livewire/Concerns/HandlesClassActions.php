@@ -76,7 +76,7 @@ trait HandlesClassActions
                 $params['round_properties']
             );
         } catch (\Exception $e) {
-            $this->addError('error', $e->getMessage());
+            $this->addError('action_error', $e->getMessage());
 
             return;
         }

@@ -37,6 +37,8 @@ class ManageGameModePage extends Component
 
     public string $scoreboard_type;
 
+    public bool $requires_team_membership;
+
     const SCOREBOARD_TYPES = [
         'individual' => 'Individual',
         'team' => 'Team',
@@ -66,6 +68,7 @@ class ManageGameModePage extends Component
             $this->players_can_join_late = $game_mode->players_can_join_late ?? false;
             $this->game_type = $game_mode->type ?? 'individual';
             $this->scoreboard_type = $game_mode->scoreboard_type ?? 'individual';
+            $this->requires_team_membership = $game_mode->requires_team_membership ?? false;
         } else {
             $this->name = '';
             $this->description = '';
@@ -78,6 +81,7 @@ class ManageGameModePage extends Component
             $this->players_can_join_late = false;
             $this->game_type = 'individual';
             $this->scoreboard_type = $game_mode->scoreboard_type ?? 'individual';
+            $this->requires_team_membership = false;
         }
     }
 
@@ -95,6 +99,7 @@ class ManageGameModePage extends Component
             'players_can_join_late' => 'boolean',
             'game_type' => 'required|string|in:individual,team',
             'scoreboard_type' => 'required|string|in:'.implode(',', array_keys(self::SCOREBOARD_TYPES)),
+            'requires_team_membership' => 'boolean',
         ];
     }
 
@@ -118,6 +123,7 @@ class ManageGameModePage extends Component
                 is_public: $this->is_public,
                 players_can_join_late: $this->players_can_join_late,
                 scoreboard_type: $this->scoreboard_type,
+                requires_team_membership: $this->requires_team_membership,
             )->game_mode_id;
         } catch (Exception $e) {
             $this->addError('error', $e->getMessage());

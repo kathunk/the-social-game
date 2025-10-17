@@ -6,12 +6,13 @@ use App\Challenges\Classes\BaseChallengeClass;
 use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
 use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
 use App\Modifiers\Classes\BaseModifierClass;
+use App\Support\FormBuilderTraits\FarmFormElements;
 use App\Support\FormBuilderTraits\TierListFormElements;
 use Illuminate\Support\Collection;
 
 class FormBuilder
 {
-    use TierListFormElements;
+    use FarmFormElements, TierListFormElements;
 
     protected array $elements = [];
 
@@ -141,6 +142,34 @@ class FormBuilder
             'validation_messages' => $validation_messages,
             'placeholder' => $placeholder,
             'searchable' => $searchable,
+        ];
+
+        return $this;
+    }
+
+    public function radioGroup(
+        string $label,
+        array $options,
+        string $property_name, // this will be the name of the property in livewire
+        string $validation_rules,
+        array $validation_messages,
+    ): static {
+        $this->elements[] = [
+            'type' => 'radio_group',
+            'label' => $label,
+            'options' => $options,
+            // example:
+            // 'options' => [
+            //     [
+            //         'label' => 'Strategist',
+            //         'value' => 'strategist',
+            //         'description' => 'Max capacity of 5 Actions',
+            //         'disabled' => false,
+            //     ],
+            // ],
+            'property_name' => $property_name,
+            'validation_rules' => $validation_rules,
+            'validation_messages' => $validation_messages,
         ];
 
         return $this;

@@ -4,6 +4,7 @@ namespace App\Modifiers\Classes;
 
 use App\Events\PlayerMadeOathOfSolitude;
 use App\Events\PlayerOfferedBloodOath;
+use App\Models\Game;
 use App\Models\Player;
 
 class BloodOaths extends BaseModifierClass
@@ -20,7 +21,7 @@ class BloodOaths extends BaseModifierClass
         return 'blood_oaths';
     }
 
-    public function dataArrayForState(): array
+    public function dataArrayForState(?Game $game = null): array
     {
         return ['offers' => [], 'pairs' => [], 'lone_wolves' => []];
     }

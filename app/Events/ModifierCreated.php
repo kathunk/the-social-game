@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Events\Traits\HasGame;
+use App\Models\Game;
 use App\Models\Modifier;
 use App\States\GameState;
 use App\States\ModifierState;
@@ -18,6 +19,8 @@ class ModifierCreated extends Event
 
     public string $class_key;
 
+    public ?array $modifier_data = null;
+
     public function applyToGame(GameState $game)
     {
         $game->modifier_ids->push($this->modifier_id);
@@ -28,18 +31,26 @@ class ModifierCreated extends Event
         $modifier->game_id = $this->game_id;
         $modifier->class_key = $this->class_key;
 
+        if ($this->modifier_data) {
+            $modifier->modifier_data = $this->modifier_data;
+
+            return;
+        }
+
+        // this is only in here for backwards compatibility with old events
+
         $config = $this->state(GameState::class)->modifierConfigurations()->firstWhere('modifier_key', $this->class_key);
 
         if ($config) {
             $modifier->modifier_data = $config->modifier_data;
         } else {
-            $modifier->modifier_data = $modifier->handler()->dataArrayForState();
+            $modifier->modifier_data = $modifier->handler()->dataArrayForState(Game::find($this->game_id));
         }
     }
 
     public function handle()
     {
-        $mod = Modifier::create([
+        Modifier::create([
             'id' => $this->modifier_id,
             'game_id' => $this->game_id,
             'class_key' => $this->class_key,

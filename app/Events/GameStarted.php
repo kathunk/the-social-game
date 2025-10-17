@@ -30,10 +30,22 @@ class GameStarted extends Event
     {
         $state->status = 'active';
         $state->players_can_join_late = $state->template()->players_can_join_late;
+
+        $state->modifiers()->each(function ($modifier) {
+            $modifier->handler()->onGameStarted(
+                game_state: $this->state(GameState::class),
+                modifier_state: $modifier,
+            );
+        });
     }
 
     public function handle()
     {
-        Game::find($this->game_id)->update(['status' => 'active']);
+        $game = Game::find($this->game_id);
+        $game->update(['status' => 'active']);
+
+        $game->modifiers->each(function ($modifier) {
+            $modifier->updateModelWithStateData();
+        });
     }
 }

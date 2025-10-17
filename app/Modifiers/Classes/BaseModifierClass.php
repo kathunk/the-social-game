@@ -2,8 +2,10 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Models\Game;
 use App\Models\Modifier;
 use App\Models\Player;
+use App\States\ChallengeState;
 use App\States\GameState;
 use App\States\ModifierState;
 use App\States\PlayerState;
@@ -47,7 +49,7 @@ abstract class BaseModifierClass
         return new static;
     }
 
-    public function dataArrayForState(): array
+    public function dataArrayForState(?Game $game = null): array
     {
         return [];
     }
@@ -61,13 +63,31 @@ abstract class BaseModifierClass
         return false;
     }
 
+    public function onGameStarted(
+        GameState $game_state,
+        ModifierState $modifier_state,
+    ) {
+        // Optional override
+    }
+
     public function onSecretDiscovered(Player $player)
     {
         // Optional override
     }
 
-    public function onRoundEnded()
-    {
+    public function onChallengeStarted(
+        GameState $game_state,
+        ChallengeState $challenge_state,
+        ModifierState $modifier_state,
+    ) {
+        // Optional override
+    }
+
+    public function onUserAdmittedToGame(
+        PlayerState $player_state,
+        GameState $game_state,
+        ModifierState $modifier_state,
+    ) {
         // Optional override
     }
 
@@ -101,10 +121,12 @@ abstract class BaseModifierClass
         return [];
     }
 
-    public function propertiesForLivewire(Player $player): array
+    public function propertiesForLivewire(Player $player, ?bool $for_dedicated_page = false): array
     {
         return FrontendComponentProcessor::propertiesForLivewire(
-            $this->frontendComponent($player),
+            $for_dedicated_page
+                ? $this->frontendComponentForDedicatedPage($player)
+                : $this->frontendComponent($player),
             useEmptyStringForSelects: true
         );
     }

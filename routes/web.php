@@ -58,7 +58,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/game-modes/{game_mode}', ManageGameModePage::class)->name('game-modes.show');
     Route::get('/{game_mode}/game-templates/create', ManageGameTemplatePage::class)->name('game-templates.create');
     Route::get('{game_mode}/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
-    Route::get('/games/{game}/secrets/{modifier}', SecretsPage::class)->name('games.secrets');
+    Route::get('/games/{game}/mods/{modifier}', SecretsPage::class)->name('games.mods');
 
     Route::prefix('subscribe')->name('subscribe.')->group(function () {
         Route::get('success', [CheckoutController::class, 'success'])->name('success');

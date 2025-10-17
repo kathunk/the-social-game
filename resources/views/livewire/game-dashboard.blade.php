@@ -9,7 +9,7 @@
         </x-card>
     @endif
 
-    @if ($this->template->type === 'team' && $this->player->status === 'active' && $this->game->status === 'active')
+    @if ($this->template->type === 'team' && $this->player->status === 'active' && $this->game->status === 'active' && $this->gameMode->requires_team_membership    )
         <x-card>
             @if (! $this->current_team)
                 <flux:heading class="!text-faded-gray !text-xxs font-semibold">Join a team</flux:heading>
@@ -35,12 +35,16 @@
     @if ($this->challenge_component && $this->player->status === 'active' && $this->game->status === 'active')
         <x-game-components.form :form="$this->challenge_component" type="challenge" class_key="{{ $this->challenge->class_key }}" />
     @endif
-    <flux:error name="error" />
     @if ($this->game->status === 'active' && count($this->modifier_components) > 0 && $this->player->status === 'active')
         @foreach ($this->modifier_components as $class_key => $modifier)
             <x-game-components.form :form="$modifier" type="modifier" class_key="{{ $class_key }}" />
         @endforeach
     @endif
+    @foreach ($this->getErrorBag()->toArray() as $field => $messages)
+        @foreach ($messages as $message)
+            <div class="text-red-600 text-sm">{{ $message }}</div>
+        @endforeach
+    @endforeach
     @if ($this->showScoreboard)
         <x-game-components.scoreboard :teams="$this->teams" :players="$this->players->filter(fn ($p) => $p->status === 'active')" :type="$this->template->scoreboard_type" />
     @else

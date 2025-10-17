@@ -33,6 +33,14 @@ class ChallengeStarted extends Event
     public function applyToGame(GameState $state)
     {
         $state->current_challenge_id = $this->challenge_id;
+
+        $state->modifiers()->each(function ($modifier) {
+            $modifier->handler()->onChallengeStarted(
+                game_state: $this->state(GameState::class),
+                challenge_state: $this->state(ChallengeState::class),
+                modifier_state: $modifier,
+            );
+        });
     }
 
     public function handle(ChallengeState $state)

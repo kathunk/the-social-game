@@ -3,6 +3,7 @@
 namespace App\Modifiers\Classes;
 
 use App\Events\PlayerAssignedSecretAllyInTeamGame;
+use App\Models\Game;
 use App\Models\Modifier;
 use App\Models\Player;
 use App\States\GameState;
@@ -29,7 +30,7 @@ class TeamSecretAlliance extends BaseModifierClass
         return 'team_secret_alliance';
     }
 
-    public function dataArrayForState(): array
+    public function dataArrayForState(?Game $game = null): array
     {
         return ['pairs' => []];
     }
@@ -113,7 +114,7 @@ class TeamSecretAlliance extends BaseModifierClass
 
     public function learnMore(Player $player, array $params)
     {
-        return redirect()->route('games.secrets', ['game' => $player->game, 'modifier' => $this->modifier]);
+        return redirect()->route('games.mods', ['game' => $player->game, 'modifier' => $this->modifier]);
     }
 
     public function elligiblePartners(Player $player)
@@ -167,7 +168,7 @@ class TeamSecretAlliance extends BaseModifierClass
 
         Verbs::commit();
 
-        return redirect()->route('games.secrets', [$player->game, $this->modifier]);
+        return redirect()->route('games.mods', [$player->game, $this->modifier]);
     }
 
     public function onPlayerJoinedTeam(

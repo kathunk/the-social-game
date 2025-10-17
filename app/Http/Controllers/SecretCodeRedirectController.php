@@ -21,7 +21,7 @@ class SecretCodeRedirectController extends Controller
             ->firstWhere('class_key', TeamSecretCodes::key());
 
         if ($modifier) {
-            return redirect()->route('games.secrets', [
+            return redirect()->route('games.mods', [
                 'game' => $game->id,
                 'modifier' => $modifier->id,
             ]);

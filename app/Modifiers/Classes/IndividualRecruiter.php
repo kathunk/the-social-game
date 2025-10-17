@@ -3,6 +3,7 @@
 namespace App\Modifiers\Classes;
 
 use App\Events\PlayerGaveReferralBonus;
+use App\Models\Game;
 use App\Models\Player;
 
 class IndividualRecruiter extends BaseModifierClass
@@ -18,7 +19,7 @@ class IndividualRecruiter extends BaseModifierClass
         return 'individual_recruiter';
     }
 
-    public function dataArrayForState(): array
+    public function dataArrayForState(?Game $game = null): array
     {
         return [
             'referree_ids' => [],
