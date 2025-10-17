@@ -24,11 +24,6 @@ class PlayerJoinedFarmTeam extends Event
 
     public ?int $player_grain = 0;
 
-    public function validate()
-    {
-        //
-    }
-
     public function applyToPlayer(PlayerState $player)
     {
         $player->team_id = $this->team_id;

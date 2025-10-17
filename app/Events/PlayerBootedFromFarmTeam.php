@@ -6,6 +6,7 @@ use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasTeam;
+use App\States\GameState;
 use App\States\ModifierState;
 use App\States\PlayerState;
 use App\States\TeamState;
@@ -15,11 +16,29 @@ class PlayerBootedFromFarmTeam extends Event
 {
     use HasGame, HasModifier, HasPlayer, HasTeam;
 
+    public int $booter_player_id;
+
     public int $grain_in_possession;
 
     public function validate()
     {
-        //
+        $game = $this->state(GameState::class);
+        $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\FarmTeams::key());
+
+        // Player was on team
+        $player = $this->state(PlayerState::class);
+        $this->assert(
+            $player->team_id === $this->team_id,
+            'Player is not on the specified team',
+        );
+
+        // Booter was leader of team
+        $team_leader_id = $teams_modifier->modifier_data['leaders'][$this->team_id] ?? null;
+
+        $this->assert(
+            $team_leader_id === $this->booter_player_id,
+            'Booter is not the leader of the team',
+        );
     }
 
     public function applyToPlayer(PlayerState $player)

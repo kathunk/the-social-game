@@ -9,7 +9,7 @@ use App\Events\PlayerHarvestedField;
 use App\Events\PlayerPlantedField;
 use App\Events\PlayerSeizedFarmProperty;
 use App\Events\PlayerUpgradedSilo;
-use App\Events\PlayerWithrewFromSilo;
+use App\Events\PlayerWithdrewFromSilo;
 use App\Models\Player;
 use App\States\GameState;
 use App\States\ModifierState;
@@ -69,7 +69,7 @@ class FarmActions extends BaseModifierClass
                 can_upgrade_silo: $this->canUpgradeSilo($player, $player_skills, $player_space),
                 can_withdraw_silo: $this->canWithdrawSilo($player, $player_space, $player_actions),
                 can_deposit_silo: $this->canDepositSilo($player, $player_space, $player_actions),
-                can_build_road: $this->canBuildRoad($player_skills, $player_space, $player_actions['actions']),
+                can_build_road: $this->canBuildRoad($player_skills, $player_space, $player_actions['actions'] ?? 0),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
                 field_seize_data: $this->seizePropertyData($player, $this->allPlayersOnSpace($player), $this->allSkills(), $player_space['field_status']['level'], $player_space['field_status']['owner_team_id']),
@@ -234,7 +234,7 @@ class FarmActions extends BaseModifierClass
 
     public function canWithdrawSilo(Player $player, array $player_space, array $player_actions)
     {
-        return $player_actions['grain_capacity'] > $player_actions['grain']
+        return ($player_actions['grain_capacity'] ?? 0) > ($player_actions['grain'] ?? 0)
             && $player_space['silo_status']['amount'] > 0
             && $player_space['silo_status']['owner_team_id'] === $player->team_id;
     }
@@ -243,7 +243,7 @@ class FarmActions extends BaseModifierClass
     {
         $player_space = $this->playerSpace($player);
 
-        PlayerWithrewFromSilo::fire(
+        PlayerWithdrewFromSilo::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
             player_id: $player->id,
@@ -260,7 +260,7 @@ class FarmActions extends BaseModifierClass
 
     public function canDepositSilo(Player $player, array $player_space, array $player_actions)
     {
-        return $player_actions['grain'] > 0
+        return ($player_actions['grain'] ?? 0) > 0
             && $player_space['silo_status']['capacity'] > $player_space['silo_status']['amount']
             && $player_space['silo_status']['owner_team_id'] === $player->team_id;
     }
@@ -289,7 +289,7 @@ class FarmActions extends BaseModifierClass
         return $this->modifier->modifier_data[$player->id]['actions'] > 0
             && $player_space['field_status']['stage'] === 'mature'
             && $player_space['field_status']['owner_team_id'] === $player->team_id
-            && $player_actions['grain_capacity'] > $player_actions['grain'];
+            && ($player_actions['grain_capacity'] ?? 0) > ($player_actions['grain'] ?? 0);
     }
 
     public function harvestField(Player $player, array $params)

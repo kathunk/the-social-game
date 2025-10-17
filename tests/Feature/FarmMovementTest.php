@@ -151,7 +151,7 @@ it('allows Builder level 3 to build roads', function () {
 
     // Verify action was consumed
     $farmActions = $farmActions->fresh();
-    expect($farmActions->modifier_data[$player->id]['actions'])->toBe(2); // Started with 3, built road (-1)
+    expect($farmActions->modifier_data[$player->id]['actions'])->toBe(5); // Started with 6, built road (-1)
 });
 
 it('allows movement along connected road network', function () {

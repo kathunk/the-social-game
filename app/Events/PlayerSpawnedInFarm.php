@@ -20,11 +20,6 @@ class PlayerSpawnedInFarm extends Event
 
     public int $y_index;
 
-    public function validate()
-    {
-        //
-    }
-
     public function apply(ModifierState $modifier)
     {
         $modifier->modifier_data = collect($modifier->modifier_data)->map(function ($space) {

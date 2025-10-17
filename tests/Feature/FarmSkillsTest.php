@@ -101,13 +101,13 @@ it('regenerates actions correctly between rounds based on Tactician skill', func
 
     $farmActions = $this->game->fresh()->modifiers->firstWhere('class_key', FarmActions::key());
 
-    // Players start with 3 actions
-    // Player 1: 3 + (3 + 0) = 6, limit 9
-    // Player 2: 3 + (3 + 1) = 7, limit 9
-    // Player 3: 3 + (3 + 2) = 8, limit 9
-    expect($farmActions->modifier_data[$player1->id]['actions'])->toBe(6, 'Player 1: 3 + 3 = 6');
-    expect($farmActions->modifier_data[$player2->id]['actions'])->toBe(7, 'Player 2: 3 + 4 = 7 (Tactician +1)');
-    expect($farmActions->modifier_data[$player3->id]['actions'])->toBe(8, 'Player 3: 3 + 5 = 8 (Tactician +2)');
+    // Players start with 6 actions, limit is 12 (6 + 3*2 Strategist)
+    // Player 1: 6 + 3 = 9, limit 12
+    // Player 2: 6 + (3 + 1) = 10, limit 12 (Tactician +1)
+    // Player 3: 6 + (3 + 2) = 11, limit 12 (Tactician +2)
+    expect($farmActions->modifier_data[$player1->id]['actions'])->toBe(9, 'Player 1: 6 + 3 = 9');
+    expect($farmActions->modifier_data[$player2->id]['actions'])->toBe(10, 'Player 2: 6 + 4 = 10 (Tactician +1)');
+    expect($farmActions->modifier_data[$player3->id]['actions'])->toBe(11, 'Player 3: 6 + 5 = 11 (Tactician +2)');
 });
 
 it('combines Tactician and Strategist skills correctly', function () {
@@ -159,10 +159,10 @@ it('combines Tactician and Strategist skills correctly', function () {
 
     $farmActions = $this->game->fresh()->modifiers->firstWhere('class_key', FarmActions::key());
 
-    // Player starts with 3 actions
+    // Player starts with 6 actions
     // Gains: 3 + 2 (Tactician) = 5
-    // Total: 3 + 5 = 8, but capped at 7 (Strategist 2 limit)
-    expect($farmActions->modifier_data[$player->id]['actions'])->toBe(7, 'Player should be capped at 7 (3 + 5 = 8, but limit is 7)');
+    // Total: 6 + 5 = 11, but capped at 10 (Strategist 2 limit: 6 + 2*2)
+    expect($farmActions->modifier_data[$player->id]['actions'])->toBe(10, 'Player should be capped at 10 (6 + 5 = 11, but limit is 10)');
 });
 
 it('regression: player with 0 actions who upgrades Strategist should only get 3 actions next round', function () {

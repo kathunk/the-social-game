@@ -11,7 +11,7 @@ use App\Events\PlayerRequestedToJoinFarmTeam;
 use App\Events\PlayerSpawnedInFarm;
 use App\Events\TeamCreated;
 use App\Events\TeamLeaderAcceptedRequestToJoinFarmTeam;
-use App\Events\TeamLeaderDeclineRequestToJoinFarmTeam;
+use App\Events\TeamLeaderDeclinedRequestToJoinFarmTeam;
 use App\Models\Game;
 use App\Models\Player;
 use App\Models\Team;
@@ -417,7 +417,7 @@ class FarmTeams extends BaseModifierClass
 
     public function declineRequestToJoin(Player $player, array $params)
     {
-        TeamLeaderDeclineRequestToJoinFarmTeam::fire(
+        TeamLeaderDeclinedRequestToJoinFarmTeam::fire(
             player_id: $player->id,
             team_id: $player->team_id,
             game_id: $player->game_id,
@@ -478,6 +478,7 @@ class FarmTeams extends BaseModifierClass
             modifier_id: $this->modifier->id,
             team_id: $player->team_id,
             grain_in_possession: $this->actionsModifier()[$teammate->id]['grain'],
+            booter_player_id: $player->id,
         );
 
         Verbs::commit();

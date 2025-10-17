@@ -18,7 +18,12 @@ class PlayerAbandonedFarmTeam extends Event
 
     public function validate()
     {
-        //
+        // Player was on team
+        $player = $this->state(PlayerState::class);
+        $this->assert(
+            $player->team_id === $this->team_id,
+            'Player is not on the specified team',
+        );
     }
 
     public function applyToPlayer(PlayerState $player)

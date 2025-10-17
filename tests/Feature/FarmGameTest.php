@@ -8,7 +8,7 @@ use App\Events\PlayerMovedInFarm;
 use App\Events\PlayerPlantedField;
 use App\Events\PlayerUpgradedSilo;
 use App\Events\PlayerUpgradedSkillInFarm;
-use App\Events\PlayerWithrewFromSilo;
+use App\Events\PlayerWithdrewFromSilo;
 use App\Livewire\GameDashboard;
 use App\Livewire\SecretsPage;
 use App\Modifiers\Classes\FarmActions;
@@ -1224,7 +1224,7 @@ it('allows depositing and withdrawing grain from silos', function () {
     expect($space['silo_status']['amount'])->toBe(3);
 
     // Withdraw 2 grain from silo
-    PlayerWithrewFromSilo::fire(
+    PlayerWithdrewFromSilo::fire(
         game_id: $this->game->id,
         modifier_id: $farmActions->id,
         player_id: $player->id,

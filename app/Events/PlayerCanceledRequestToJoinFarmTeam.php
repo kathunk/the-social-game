@@ -12,11 +12,6 @@ class PlayerCanceledRequestToJoinFarmTeam extends Event
 {
     use HasGame, HasModifier, HasPlayer;
 
-    public function validate()
-    {
-        //
-    }
-
     public function apply(ModifierState $modifier)
     {
         $modifier->modifier_data['requests'] = collect($modifier->modifier_data['requests'])

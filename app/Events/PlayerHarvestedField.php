@@ -29,8 +29,68 @@ class PlayerHarvestedField extends Event
 
     public function validate()
     {
-        // player has actions
-        // player is in correct space
+        $game = $this->state(GameState::class);
+
+        // Player has actions
+        $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
+        $player_data = $actions_state->modifier_data[$this->player_id];
+        $player_actions = $player_data['actions'];
+
+        $this->assert(
+            $player_actions > 0,
+            'Player does not have enough actions to harvest field',
+        );
+
+        // Player is in correct space
+        $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
+        $player_space = collect($map_state->modifier_data)
+            ->firstWhere(fn ($space) => in_array($this->player_id, $space['player_ids']));
+
+        $this->assert(
+            $player_space !== null,
+            'Player is not currently on any space',
+        );
+
+        $this->assert(
+            $player_space['x-index'] === $this->x_index && $player_space['y-index'] === $this->y_index,
+            'Player is not on the specified space',
+        );
+
+        // There is a field in the space
+        $field_level = $player_space['field_status']['level'] ?? null;
+        $this->assert(
+            $field_level !== null,
+            'There is no field in this space',
+        );
+
+        // Field is mature
+        $field_stage = $player_space['field_status']['stage'] ?? null;
+        $this->assert(
+            $field_stage === 'mature',
+            'Field is not mature (current stage: '.$field_stage.')',
+        );
+
+        // Field is owned by player's team
+        $field_owner = $player_space['field_status']['owner_team_id'] ?? null;
+        $this->assert(
+            $field_owner === $this->team_id,
+            'Field is not owned by player\'s team',
+        );
+
+        // Player has enough capacity in grain sack
+        $player_grain = $this->player_grain;
+        $player_capacity = $this->player_capacity;
+        $this->assert(
+            $player_grain < $player_capacity,
+            'Player\'s grain sack is full',
+        );
+
+        // Field has enough grain to harvest
+        $field_quantity = $player_space['field_status']['quantity'] ?? 0;
+        $this->assert(
+            $field_quantity > 0,
+            'Field has no grain to harvest',
+        );
     }
 
     public function apply(GameState $game)

@@ -6,6 +6,7 @@ use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasTeam;
+use App\States\GameState;
 use App\States\ModifierState;
 use Thunk\Verbs\Event;
 
@@ -17,7 +18,36 @@ class TeamLeaderAcceptedRequestToJoinFarmTeam extends Event
 
     public function validate()
     {
-        //
+        $game = $this->state(GameState::class);
+        $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\FarmTeams::key());
+
+        // Player was leader of team
+        $team_leader_id = $teams_modifier->modifier_data['leaders'][$this->team_id] ?? null;
+
+        $this->assert(
+            $team_leader_id === $this->player_id,
+            'Player is not the leader of this team',
+        );
+
+        // Requester was not already on team
+        $requester = $this->state(\App\States\PlayerState::class, $this->requester_id);
+        $this->assert(
+            $requester->team_id !== $this->team_id,
+            'Requester is already on this team',
+        );
+
+        // Requester has an existing request to join team
+        $request_team_id = $teams_modifier->modifier_data['requests'][$this->requester_id] ?? null;
+
+        $this->assert(
+            $request_team_id !== null,
+            'Requester does not have a pending request',
+        );
+
+        $this->assert(
+            $request_team_id === $this->team_id,
+            'Requester has not requested to join this team',
+        );
     }
 
     public function apply(ModifierState $modifier)
