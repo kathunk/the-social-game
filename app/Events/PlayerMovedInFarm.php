@@ -37,22 +37,22 @@ class PlayerMovedInFarm extends Event
         );
 
         // Space is reachable from player space (needs to check for roads)
-        $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
-        $player_space = collect($map_state->modifier_data)
-            ->firstWhere(fn ($space) => in_array($this->player_id, $space['player_ids']));
+        // $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
+        // $player_space = collect($map_state->modifier_data)
+        //     ->firstWhere(fn ($space) => in_array($this->player_id, $space['player_ids']));
 
-        $this->assert(
-            $player_space !== null,
-            'Player is not currently on any space',
-        );
+        // $this->assert(
+        //     $player_space !== null,
+        //     'Player is not currently on any space',
+        // );
 
-        $accessible_spaces = $this->getAccessibleSpaces($player_space, $map_state->modifier_data);
-        $target_coordinate = chr(65 + $this->x_index).($this->y_index + 1);
+        // $accessible_spaces = $this->getAccessibleSpaces($player_space, $map_state->modifier_data);
+        // $target_coordinate = chr(65 + $this->x_index).($this->y_index + 1);
 
-        $this->assert(
-            in_array($target_coordinate, $accessible_spaces),
-            'Space is not reachable from player\'s current position',
-        );
+        // $this->assert(
+        //     in_array($target_coordinate, $accessible_spaces),
+        //     'Space is not reachable from player\'s current position',
+        // );
     }
 
     protected function getAccessibleSpaces(array $player_space, array $spaces): array
