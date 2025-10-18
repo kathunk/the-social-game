@@ -45,9 +45,9 @@ class FarmSkills extends BaseModifierClass
         ],
         'porter' => [
             'name' => 'Porter',
-            'level_1' => 'Max Grain capacity of 5',
-            'level_2' => 'Max Grain capacity of 7',
-            'level_3' => 'Max Grain capacity of 10',
+            'level_1' => 'Max Grain capacity to 10',
+            'level_2' => 'Max Grain capacity to 15',
+            'level_3' => 'Max Grain capacity to 20',
         ],
         'scout' => [
             'name' => 'Scout',
