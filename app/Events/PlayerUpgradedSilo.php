@@ -88,7 +88,7 @@ class PlayerUpgradedSilo extends Event
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
                 $space['silo_status']['level'] = $this->level;
-                $space['silo_status']['capacity'] = 10 * $this->level;
+                $space['silo_status']['capacity'] = 20 * $this->level;
             }
 
             return $space;
