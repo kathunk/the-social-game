@@ -87,6 +87,7 @@
                                             <flux:icon.user-group class="text-green-500 w-4 h-4" />
                                         @endif
                                     </div>
+                                </flux:table.cell>
                             </flux:table.row>
                         @endforeach
                     </flux:table.rows>
