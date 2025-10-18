@@ -84,7 +84,7 @@
                                     <div class="flex items-center gap-1">
                                         {{ $team->name ?? 'No team' }}
                                         @if(collect($element['leader_ids'])->contains($id))
-                                            <x-icons.user-group class="text-green-500 w-4 h-4" />
+                                            <flux:icon.user-group class="text-green-500 w-4 h-4" />
                                         @endif
                                     </div>
                             </flux:table.row>
