@@ -225,12 +225,13 @@ class FarmSkills extends BaseModifierClass
         ModifierState $modifier_state,
     ) {
         $modifier_state->modifier_data = collect($modifier_state->modifier_data)
-            ->map(function ($data) {
+            ->map(function ($data, $player_id) {
                 return [
                     'xp' => $data['xp'] + 1,
                     'skills' => $data['skills'],
                 ];
-            })->toArray();
+            })
+            ->all();
     }
 
     public function incrementPlayerXp(
