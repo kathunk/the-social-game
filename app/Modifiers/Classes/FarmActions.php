@@ -151,6 +151,7 @@ class FarmActions extends BaseModifierClass
         return $this->modifier->modifier_data[$player->id]['actions'] > 0
             && $player_skills['Farmer'] > 0
             && ($player_space['field_status']['level'] ?? null) === null
+            && $player_space['type'] !== 'desert'
             && $player_space['type'] !== 'swamp'
             && $player_space['type'] !== 'volcano'
             && $player_space['type'] !== 'ash_heap';
