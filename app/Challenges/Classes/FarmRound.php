@@ -51,8 +51,8 @@ class FarmRound extends BaseChallengeClass
         $actions_gained_per_round = $actions['actions_gained_per_round'];
 
         return $this->form()->title('Round '.$this->challenge->round_number)
-            ->when(! $is_final_round, fn ($form) => $form->subtitle('You have '.$actions_current.' actions to use. You will gain '.$actions_gained_per_round.' actions per at the end of this round, but you can only hold up to '.$actions_limit.' actions at a time.'))
-            ->when($is_final_round, fn ($form) => $form->subtitle('You have '.$actions_current.' actions to use. This is the final round. Good luck.'))
+            ->when(! $is_final_round, fn ($form) => $form->subtitle('You will gain '.$actions_gained_per_round.' actions at the end of this round, but you can only hold up to '.$actions_limit.' actions at a time.'))
+            ->when($is_final_round, fn ($form) => $form->subtitle('This is the final round. Good luck.'))
             ->build();
     }
 
