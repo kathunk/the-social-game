@@ -82,7 +82,7 @@ class PlayerBuiltSilo extends Event
                 $space['silo_status']['level'] = $this->level;
                 $space['silo_status']['owner_team_id'] = $this->team_id;
                 $space['silo_status']['amount'] = 0;
-                $space['silo_status']['capacity'] = 10 * $this->level;
+                $space['silo_status']['capacity'] = 20 * $this->level;
                 $space['history'][] = [
                     'round_number' => $game->currentChallenge()->round_number,
                     'emoji' => '🏠',
