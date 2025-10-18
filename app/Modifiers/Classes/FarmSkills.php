@@ -2,12 +2,13 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Events\PlayerUpgradedSkillInFarm;
 use App\Models\Player;
 use App\States\GameState;
-use App\States\ModifierState;
 use App\States\PlayerState;
+use App\States\ModifierState;
+use App\States\ChallengeState;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerUpgradedSkillInFarm;
 
 class FarmSkills extends BaseModifierClass
 {
@@ -216,6 +217,20 @@ class FarmSkills extends BaseModifierClass
                 ->mapWithKeys(fn ($skill) => [$skill['name'] => 0])
                 ->toArray(),
         ];
+    }
+
+    public function onChallengeStarted(
+        GameState $game_state,
+        ChallengeState $challenge_state,
+        ModifierState $modifier_state,
+    ) {
+        $modifier_state->modifier_data = collect($modifier_state->modifier_data)
+            ->map(function ($data) {
+                return [
+                    'xp' => $data['xp'] + 1,
+                    'skills' => $data['skills'],
+                ];
+            })->toArray();
     }
 
     public function incrementPlayerXp(

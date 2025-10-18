@@ -175,6 +175,8 @@ class GameDashboard extends Component
         }
 
         $this->initializeProperties();
+
+        dd($this->challenge->next()->state());
     }
 
     protected function initializeProperties()
