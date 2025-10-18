@@ -41,13 +41,6 @@ class TeamLeaderAcceptedRequestToJoinFarmTeam extends Event
             $request_team_id === $this->team_id,
             'Requester has not requested to join this team',
         );
-
-        // Requester was not already on team
-        $requester = $this->state(\App\States\PlayerState::class, $this->requester_id);
-        $this->assert(
-            $requester->team_id !== $this->team_id,
-            'Requester is already on this team',
-        );
     }
 
     public function apply(ModifierState $modifier)
