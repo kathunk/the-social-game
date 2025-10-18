@@ -231,6 +231,10 @@ class Game extends Model
 
         if ($this->fresh()->teams->count() === 0) {
             foreach ($this->gameTemplate->team_names as $team_name) {
+                if ($team_name === '') {
+                    continue;
+                }
+
                 TeamCreated::fire(game_id: $this->id, name: $team_name);
             }
         }
