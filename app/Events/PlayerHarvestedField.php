@@ -108,12 +108,12 @@ class PlayerHarvestedField extends Event
                         'emoji' => '🌾',
                         'message' => $this->state(PlayerState::class)->name.' harvested '.$amount_to_harvest.' grain',
                     ];
-                }
 
-                if ($space['field_status']['quantity'] === 0) {
-                    $space['field_status']['stage'] = null;
-                    $space['field_status']['level'] = null;
-                    $space['field_status']['owner_team_id'] = null;
+                    if ($space['field_status']['quantity'] === 0) {
+                        $space['field_status']['stage'] = null;
+                        $space['field_status']['level'] = null;
+                        $space['field_status']['owner_team_id'] = null;
+                    }
                 }
 
                 return $space;

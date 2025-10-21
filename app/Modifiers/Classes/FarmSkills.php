@@ -2,13 +2,13 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Player;
-use App\States\GameState;
-use App\States\PlayerState;
-use App\States\ModifierState;
-use App\States\ChallengeState;
-use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerUpgradedSkillInFarm;
+use App\Models\Player;
+use App\States\ChallengeState;
+use App\States\GameState;
+use App\States\ModifierState;
+use App\States\PlayerState;
+use Thunk\Verbs\Facades\Verbs;
 
 class FarmSkills extends BaseModifierClass
 {

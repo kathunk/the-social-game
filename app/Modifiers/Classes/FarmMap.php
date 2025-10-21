@@ -252,10 +252,6 @@ class FarmMap extends BaseModifierClass
 
                 $space['road_status']['level'] = null;
                 $space['road_status']['owner_team_id'] = null;
-
-                if ($space['type'] === 'fertile_ashland' || $space['type'] === 'ash_heap') {
-                    $space['type'] = 'ash_heap';
-                }
             }
 
             if (! $explosion && $space['type'] === 'ash_heap') {
