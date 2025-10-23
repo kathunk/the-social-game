@@ -205,6 +205,10 @@ class FarmMap extends BaseModifierClass
                 'quantity' => $new_field_quantity,
             ];
 
+            if (! in_array($space['type'], ['fertile_ashland', 'ash_heap'])) {
+                return $space;
+            }
+
             if ($explosion) {
                 $field_level = $space['field_status']['level'];
                 $field_quantity = $space['field_status']['quantity'];
