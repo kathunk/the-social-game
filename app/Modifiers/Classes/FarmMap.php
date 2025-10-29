@@ -99,7 +99,6 @@ class FarmMap extends BaseModifierClass
 
     public function frontendComponent(Player $player): array
     {
-        // dd(collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'volcano'));
         if ($player->team_id === null) {
             return [];
         }
@@ -283,13 +282,13 @@ class FarmMap extends BaseModifierClass
         return $this->modifier->game->modifiers->firstWhere('class_key', FarmSkills::key())->modifier_data[$player->id]['skills'];
     }
 
-    public function scoutableSpaces(array $player_space, array $player_skills)
+    public function scoutableSpaces(?array $player_space, array $player_skills)
     {
-        $scout_distance = $player_skills['Scout'];
-
-        if ($scout_distance === 0) {
+        if ($player_space === null) {
             return [];
         }
+
+        $scout_distance = $player_skills['Scout'] + 1;
 
         $player_x = $player_space['x-index'];
         $player_y = $player_space['y-index'];
@@ -306,8 +305,12 @@ class FarmMap extends BaseModifierClass
         })->toArray();
     }
 
-    public function accessibleSpaces(Player $player, array $spaces, array $player_space)
+    public function accessibleSpaces(Player $player, array $spaces, ?array $player_space = null)
     {
+        if ($player_space === null) {
+            return [];
+        }
+
         $player_x = $player_space['x-index'];
         $player_y = $player_space['y-index'];
 

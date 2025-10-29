@@ -10,10 +10,10 @@ trait FarmFormElements
     public function farmMap(
         array $spaces,
         Player $player,
-        array $player_space,
         array $accessible_spaces,
         bool $can_move,
         array $scoutable_spaces,
+        ?array $player_space = null,
     ) {
         $this->elements[] = [
             'type' => 'farm_map',

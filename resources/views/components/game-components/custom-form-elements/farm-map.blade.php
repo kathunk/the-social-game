@@ -53,7 +53,7 @@
             <!-- Grid cells for this row -->
             @for($x = 0; $x <= $maxX; $x++)
                 @php
-                    $isPlayerSpace = ($x === $player_space['x-index'] && $y === $player_space['y-index']);
+                    $isPlayerSpace = $player_space && ($x === $player_space['x-index'] && $y === $player_space['y-index']);
                     $isAccessible = $accessible_coordinates->contains(fn($coord) => $coord['x'] === $x && $coord['y'] === $y);
                     $coordinate = chr(65 + $x) . ($y + 1); // Convert x,y to A1 format
                     $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
@@ -68,10 +68,8 @@
                     $spaceData = isset($grid[$y][$x]) ? $grid[$y][$x] : null;
                 @endphp
                 <div
-                    style="{{ $border }} padding: 1px; min-height: 10px; display: flex; align-items: center; justify-content: center; {{ $bgColor }} {{ $cursor }}"
-                    @if($isClickable)
-                        wire:click="$set('round_properties.{{ \App\Modifiers\Classes\FarmMap::key() }}.{{ $element['property_name'] }}', '{{ $coordinate }}')"
-                    @endif
+                    style="{{ $border }} padding: 1px; min-height: 10px; display: flex; align-items: center; justify-content: center; {{ $bgColor }} cursor: pointer;"
+                    wire:click="$set('round_properties.{{ \App\Modifiers\Classes\FarmMap::key() }}.{{ $element['property_name'] }}', '{{ $coordinate }}')"
                     @if($isScoutable && $spaceData)
                         x-on:click="selectedScoutSpace = {{ json_encode($spaceData) }}"
                     @endif
@@ -151,14 +149,26 @@
             $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
             $isAccessibleSpace = !empty($selectedValue) && in_array($selectedValue, $element['accessible_spaces']);
         @endphp
-        <x-button
-            wire:loading.attr="disabled"
-            wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-move"
-            variant="primary"
-            wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
-            :disabled="!$isAccessibleSpace"
-        >
-            💪 Move
-        </x-button>
+        @if($player_space)
+            <x-button
+                wire:loading.attr="disabled"
+                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-move"
+                variant="primary"
+                wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
+                :disabled="!$isAccessibleSpace"
+            >
+                💪 Move
+            </x-button>
+        @else
+            <x-button
+                wire:loading.attr="disabled"
+                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-spawn"
+                variant="primary"
+                wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
+                :disabled="empty($selectedValue)"
+            >
+                🏠 Spawn
+            </x-button>
+        @endif
     </div>
 </div>
