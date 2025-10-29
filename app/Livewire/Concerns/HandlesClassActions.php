@@ -70,16 +70,16 @@ trait HandlesClassActions
             $this->validate($filtered_rules, $filtered_messages);
         }
 
-        try {
-            $response = $handler->{$action}(
-                $this->player,
-                $params['round_properties']
-            );
-        } catch (\Exception $e) {
-            $this->addError('action_error', $e->getMessage());
+        // try {
+        $response = $handler->{$action}(
+            $this->player,
+            $params['round_properties']
+        );
+        // } catch (\Exception $e) {
+        //     $this->addError('action_error', $e->getMessage());
 
-            return;
-        }
+        //     return;
+        // }
 
         Verbs::commit();
 

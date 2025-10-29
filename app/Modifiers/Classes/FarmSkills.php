@@ -22,57 +22,33 @@ class FarmSkills extends BaseModifierClass
         'brute' => [
             'name' => 'Brute',
             'level_1' => 'Seize and defend structures',
-            'level_2' => '+2 seize and defense of structures',
-            'level_3' => '+3 seize and defense of structures',
+            'level_2' => '+2 Seize and defense of structures, and spend fewer actions to seize',
+            'level_3' => '+3 Seize and defense of structures, and spend fewer actions to seize',
         ],
-        'builder' => [
+        'engineer' => [
             'name' => 'Builder',
-            'level_1' => 'Build level 1 Silos',
-            'level_2' => 'Build level 2 Silos',
-            'level_3' => 'Build level 3 Silos and Roads',
-        ],
-        'chronicler' => [
-            'name' => 'Chronicler',
-            'level_1' => 'See 2 rounds of history for your space',
-            'level_2' => 'See 5 rounds of history for your space',
-            'level_3' => 'See complete history for your space',
+            'level_1' => 'Build Roads, Silos, Watchtowers, and Traps',
+            'level_2' => 'Build level 2 Silos, Watchtowers, and Traps, and spend fewer actions to build',
+            'level_3' => 'Build level 3 Silos, Watchtowers, and Traps, and spend fewer actions to build',
         ],
         'farmer' => [
             'name' => 'Farmer',
             'level_1' => 'Plant level 1 Farms',
-            'level_2' => 'Plant level 2 Farms',
-            'level_3' => 'Plant level 3 Farms',
-        ],
-        'porter' => [
-            'name' => 'Porter',
-            'level_1' => 'Max Grain capacity to 10',
-            'level_2' => 'Max Grain capacity to 15',
-            'level_3' => 'Max Grain capacity to 20',
+            'level_2' => 'Plant level 2 Farms, and spend fewer actions to plant',
+            'level_3' => 'Plant level 3 Farms, and spend fewer actions to plant',
         ],
         'scout' => [
             'name' => 'Scout',
-            'level_1' => 'Inspect up to 1 space away',
-            'level_2' => 'Inspect up to 2 spaces away',
-            'level_3' => 'Inspect up to 3 spaces away',
+            'level_1' => 'Inspect up to 2 spaces away',
+            'level_2' => 'Inspect up to 3 spaces away',
+            'level_3' => 'Inspect up to 4 spaces away',
         ],
-        'strategist' => [
-            'name' => 'Strategist',
-            'level_1' => 'Store up to 8 Actions',
-            'level_2' => 'Store up to 10 Actions',
-            'level_3' => 'Store up to 12 Actions',
+        'thief' => [
+            'name' => 'Thief',
+            'level_1' => 'Pickpocket opponents',
+            'level_2' => 'Spend fewer actions to pickpocket opponents',
+            'level_3' => 'Spend fewer actions to pickpocket opponents',
         ],
-        'tactician' => [
-            'name' => 'Tactician',
-            'level_1' => 'Gain 4 actions each round.',
-            'level_2' => 'Gain 5 actions each round.',
-            'level_3' => 'Gain 6 actions each round.',
-        ],
-        // "thief" => [
-        //     "name" => "Thief",
-        //     "level_1" => "Pickpocket opponents for 25% of their grain",
-        //     "level_2" => "Pickpocket opponents for 50% of their grain",
-        //     "level_3" => "Pickpocket opponents for 100% of their grain",
-        // ],
     ];
 
     public static function key(): string
@@ -95,27 +71,35 @@ class FarmSkills extends BaseModifierClass
 
     public function frontendComponentForDedicatedPage(Player $player): array
     {
+        $affordable_skills = $this->affordableSkills($player);
+
         return $this->form()
             ->title(
                 'Current XP: '.
                     $this->modifier->modifier_data[$player->id]['xp'],
             )
             ->subtitle(
-                'Each round, you will gain 1 XP. Spend it to upgrade your skills.',
+                'Each round, you will gain 1 XP. Spend it to upgrade your skills. You can only upgrade 2 different skills. Once you have begun upgrading those skills, all other skills will be disabled for you.',
             )
-            ->radioGroup(
-                label: 'Skills',
-                property_name: 'selected_skill_to_upgrade',
-                options: $this->affordableSkills($player),
-                validation_rules: 'required|exists:skills,id',
-                validation_messages: [
-                    'required' => 'Must select a skill',
-                    'exists' => 'Must select a valid skill',
-                ],
-            )
-            ->buttonGroup()
-            ->button('Upgrade skill', 'upgradeSkill')
-            ->endGroup()
+            ->divider()
+            ->when(count($affordable_skills) > 0, function ($form) use ($affordable_skills) {
+                $form->radioGroup(
+                    label: 'Skills',
+                    property_name: 'selected_skill_to_upgrade',
+                    options: $affordable_skills,
+                    validation_rules: 'required|exists:skills,id',
+                    validation_messages: [
+                        'required' => 'Must select a skill',
+                        'exists' => 'Must select a valid skill',
+                    ],
+                )
+                    ->buttonGroup()
+                    ->button('Upgrade skill', 'upgradeSkill')
+                    ->endGroup();
+            })
+            ->when(count($affordable_skills) === 0, function ($form) {
+                $form->subtitle('You have upgraded as much as possible. Now get back to work!');
+            })
             ->build();
     }
 
@@ -134,7 +118,11 @@ class FarmSkills extends BaseModifierClass
             $this->modifier->modifier_data[$player->id]['skills'][
                 $selected_skill
             ];
-        $xp_cost = $current_level + 1;
+        $xp_cost = match ($current_level) {
+            0 => 1,
+            1 => 3,
+            2 => 5,
+        };
 
         PlayerUpgradedSkillInFarm::fire(
             player_id: $player->id,
@@ -162,25 +150,32 @@ class FarmSkills extends BaseModifierClass
         $buying_power = $this->modifier->modifier_data[$player->id]['xp'];
         $skills = $this->skillLevels($player);
 
+        $existing_skills = collect($skills)->filter(fn ($level) => $level > 0)->keys()->toArray();
+
         return collect(self::SKILLS)
-            ->map(function ($skill) use ($skills, $buying_power) {
+            ->map(function ($skill) use ($skills, $buying_power, $existing_skills) {
                 $existing_level = $skills[$skill['name']];
 
                 if ($existing_level === 3) {
                     return [];
                 }
 
-                $cost = $existing_level + 1;
+                if (count($existing_skills) === 2 && $existing_level === 0) {
+                    return [];
+                }
+
+                $cost = match ($existing_level) {
+                    0 => 1,
+                    1 => 3,
+                    2 => 5,
+                };
                 $level_label = $existing_level === 0 ? '' : ' +'.$existing_level;
 
                 return [
                     'label' => $skill['name'].$level_label,
                     'value' => $skill['name'],
-                    'description' => $skill['level_'.$existing_level + 1].
-                        ' (cost: '.
-                        $cost.
-                        ' XP)',
-                    'disabled' => $buying_power < $cost,
+                    'description' => $skill['level_'.$existing_level + 1].' (cost: '.$cost.' XP)',
+                    'disabled' => ($buying_power < $cost),
                 ];
             })
             ->filter()
@@ -212,7 +207,7 @@ class FarmSkills extends BaseModifierClass
         int $player_id,
     ) {
         $modifier_state->modifier_data[$player_id] = [
-            'xp' => 3,
+            'xp' => 15,
             'skills' => collect(self::SKILLS)
                 ->mapWithKeys(fn ($skill) => [$skill['name'] => 0])
                 ->toArray(),
