@@ -41,7 +41,11 @@ class PlayerUpgradedSkillInFarm extends Event
 
         // Validate player is at requisite level (can only upgrade by 1 level at a time)
         $current_skill_level = $player_data['skills'][$this->skill_name];
-        $expected_cost = $current_skill_level + 1;
+        $expected_cost = match ($current_skill_level) {
+            0 => 1,
+            1 => 3,
+            2 => 5,
+        };
 
         $this->assert(
             $this->xp_cost === $expected_cost,

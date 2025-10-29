@@ -478,6 +478,7 @@ class FarmActions extends BaseModifierClass
 
     public function canSeeHistory(Player $player, array $player_skills)
     {
-        return $player_skills['Chronicler'] > 0;
+        // return $player_skills['Chronicler'] > 0;
+        return false;
     }
 }
