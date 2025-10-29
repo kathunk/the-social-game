@@ -8,7 +8,6 @@ use App\Events\PlayerCanceledRequestToJoinFarmTeam;
 use App\Events\PlayerJoinedFarmTeam;
 use App\Events\PlayerPromotedToTeamLeaderInFarm;
 use App\Events\PlayerRequestedToJoinFarmTeam;
-use App\Events\PlayerSpawnedInFarm;
 use App\Events\TeamCreated;
 use App\Events\TeamLeaderAcceptedRequestToJoinFarmTeam;
 use App\Events\TeamLeaderDeclinedRequestToJoinFarmTeam;
@@ -240,7 +239,13 @@ class FarmTeams extends BaseModifierClass
 
     public function playersOnSpace(Player $player): Collection
     {
-        return collect($this->playerSpace($player)['player_ids'])
+        $player_space = $this->playerSpace($player);
+
+        if ($player_space === null) {
+            return collect();
+        }
+
+        return collect($player_space['player_ids'])
             ->map(fn ($player_id) => Player::find($player_id));
     }
 
@@ -355,19 +360,6 @@ class FarmTeams extends BaseModifierClass
             modifier_id: $this->modifier->id,
             player_grain: $grain,
         );
-
-        if ($this->playerSpace($player) === null) {
-            $farm_map = $this->farmMap();
-            $random_space = collect($farm_map->modifier_data)->random();
-
-            PlayerSpawnedInFarm::fire(
-                player_id: $player->id,
-                game_id: $player->game_id,
-                map_modifier_id: $farm_map->id,
-                x_index: $random_space['x-index'],
-                y_index: $random_space['y-index'],
-            );
-        }
 
         Verbs::commit();
 

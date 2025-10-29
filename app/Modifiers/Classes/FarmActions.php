@@ -54,6 +54,10 @@ class FarmActions extends BaseModifierClass
         $player_space = collect($this->farmMap()->modifier_data)
             ->filter(fn ($data) => in_array($player->id, $data['player_ids']))->first();
 
+        if ($player_space === null) {
+            return [];
+        }
+
         $player_skills = $this->allSkills()[$player->id]['skills'];
 
         return $this->form()
