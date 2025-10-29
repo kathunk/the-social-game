@@ -21,7 +21,7 @@ class FarmSkills extends BaseModifierClass
     const SKILLS = [
         'brute' => [
             'name' => 'Brute',
-            'level_1' => 'Seize and defend structures',
+            'level_1' => 'Seize and defend Silos and Fields',
             'level_2' => '+2 Seize and defense of structures, and spend fewer actions to seize',
             'level_3' => '+3 Seize and defense of structures, and spend fewer actions to seize',
         ],
