@@ -58,7 +58,16 @@ class FarmActions extends BaseModifierClass
             return [];
         }
 
-        $player_skills = $this->allSkills()[$player->id]['skills'];
+        $all_players_on_space = $this->allPlayersOnSpace($player);
+        $allies_on_space = $all_players_on_space->filter(fn ($p) => $p->team_id === $player->team_id);
+
+        $all_skills = $this->allSkills();
+        $player_skills = $all_skills[$player->id]['skills'];
+        $ally_skills = collect($all_skills)
+            ->filter(fn ($skill_set, $player_id) => $allies_on_space->pluck('id')->contains($player_id)
+                && $player_id !== $player->id
+            )
+            ->toArray();
 
         return $this->form()
             ->farmActions(
@@ -66,18 +75,18 @@ class FarmActions extends BaseModifierClass
                 player_space: $player_space,
                 player_skills: $player_skills,
                 farm_map: $this->farmMap()->modifier_data,
-                can_plant_field: $this->canPlantField($player, $player_skills, $player_space),
-                can_harvest_field: $this->canHarvestField($player, $player_space, $player_actions),
+                can_plant_field: $this->canPlantField($player, $player_skills, $player_space, $ally_skills),
+                can_harvest_field: $this->canHarvestField($player, $player_space, $player_actions, $player_skills, $ally_skills),
                 can_build_silo: $this->canBuildSilo($player, $player_skills, $player_space),
                 silo_exists: $this->siloExists($player, $player_space),
                 can_upgrade_silo: $this->canUpgradeSilo($player, $player_skills, $player_space),
                 can_withdraw_silo: $this->canWithdrawSilo($player, $player_space, $player_actions),
                 can_deposit_silo: $this->canDepositSilo($player, $player_space, $player_actions),
-                can_build_road: $this->canBuildRoad($player_skills, $player_space, $player_actions['actions'] ?? 0),
+                can_build_road: $this->canBuildRoad($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
-                field_seize_data: $this->seizePropertyData($player, $this->allPlayersOnSpace($player), $this->allSkills(), $player_space['field_status']['level'], $player_space['field_status']['owner_team_id']),
-                silo_seize_data: $this->seizePropertyData($player, $this->allPlayersOnSpace($player), $this->allSkills(), $player_space['silo_status']['level'], $player_space['silo_status']['owner_team_id']),
+                field_seize_data: $this->seizePropertyData($player, $all_players_on_space, $this->allSkills(), $player_space['field_status']['level'], $player_space['field_status']['owner_team_id']),
+                silo_seize_data: $this->seizePropertyData($player, $all_players_on_space, $this->allSkills(), $player_space['silo_status']['level'], $player_space['silo_status']['owner_team_id']),
                 can_see_history: $this->canSeeHistory($player, $player_skills),
             )
             ->build();
@@ -148,17 +157,35 @@ class FarmActions extends BaseModifierClass
             ->map(fn ($player_id) => Player::find($player_id));
     }
 
+    public function allySkillLevelOnSpace(string $skill, array $player_space, array $ally_skills)
+    {
+        return collect($ally_skills)
+            ->filter(fn ($s) => $s['skills'][$skill] > 0)
+            ->max();
+    }
+
     // actions
 
-    public function canPlantField(Player $player, array $player_skills, array $player_space)
+    public function canPlantField(Player $player, array $player_skills, array $player_space, array $ally_skills)
     {
-        return $this->modifier->modifier_data[$player->id]['actions'] > 0
+        $cost = 4 - $player_skills['Farmer'];
+        $actions = $this->modifier->modifier_data[$player->id]['actions'];
+        $type = $player_space['type'];
+        $ally_brute_level = $this->allySkillLevelOnSpace('Brute', $player_space, $ally_skills);
+        $ally_builder_level = $this->allySkillLevelOnSpace('Builder', $player_space, $ally_skills);
+
+        $type_is_valid = match ($type) {
+            'grass' => true,
+            'fertile_ashland' => true,
+            'mountain' => $ally_brute_level && $ally_brute_level > 0,
+            'desert' => $ally_builder_level && $ally_builder_level > 0,
+            default => false,
+        };
+
+        return $actions >= $cost
             && $player_skills['Farmer'] > 0
             && ($player_space['field_status']['level'] ?? null) === null
-            && $player_space['type'] !== 'desert'
-            && $player_space['type'] !== 'swamp'
-            && $player_space['type'] !== 'volcano'
-            && $player_space['type'] !== 'ash_heap';
+            && $type_is_valid;
     }
 
     public function plantField(Player $player, array $params)
@@ -289,12 +316,35 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public function canHarvestField(Player $player, array $player_space, array $player_actions)
+    public function canHarvestField(Player $player, array $player_space, array $player_actions, array $player_skills, array $ally_skills)
     {
-        return $this->modifier->modifier_data[$player->id]['actions'] > 0
-            && $player_space['field_status']['stage'] === 'mature'
-            && $player_space['field_status']['owner_team_id'] === $player->team_id
-            && ($player_actions['grain_capacity'] ?? 0) > ($player_actions['grain'] ?? 0);
+        $stage = $player_space['field_status']['stage'] ?? null;
+        if (! $stage === 'mature_1' || $stage === 'mature_2' || $stage === 'mature_3') {
+            return false;
+        }
+
+        $farmer_level = $player_skills['Farmer'];
+        $action_cost = 3 - $farmer_level;
+
+        if ($this->modifier->modifier_data[$player->id]['actions'] < $action_cost) {
+            return false;
+        }
+
+        if (($player_actions['grain_capacity'] ?? 0) === ($player_actions['grain'] ?? 0)) {
+            return false;
+        }
+
+        $player_is_thief = $player_skills['Thief'] > 0;
+        $player_is_farmer = $farmer_level > 0;
+        $ally_farmer_level = $this->allySkillLevelOnSpace('Farmer', $player_space, $ally_skills);
+        $ally_thief_level = $this->allySkillLevelOnSpace('Thief', $player_space, $ally_skills);
+
+        $can_harvest_own_field = $player_space['field_status']['owner_team_id'] === $player->team_id;
+
+        $can_harvest_opponent_field = ($player_is_thief && $ally_farmer_level && $ally_farmer_level > 0)
+            || ($player_is_farmer && $ally_thief_level && $ally_thief_level > 0);
+
+        return $can_harvest_own_field || $can_harvest_opponent_field;
     }
 
     public function harvestField(Player $player, array $params)
@@ -398,15 +448,35 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public function canBuildRoad(array $player_skills, array $player_space, int $actions)
+    public function canBuildRoad(array $player_skills, array $player_space, int $actions, array $ally_skills)
     {
-        return $actions > 0
-            && $player_skills['Builder'] > 2
-            && ($player_space['road_status']['owner_team_id'] ?? null) === null
-            && ($player_space['type'] !== 'swamp')
-            && ($player_space['type'] !== 'mountain')
-            && ($player_space['type'] !== 'volcano')
-            && ($player_space['type'] !== 'ash_heap');
+        if ($player_skills['Builder'] < 1) {
+            return false;
+        }
+
+        if (($player_space['road_status']['owner_team_id'] ?? null) !== null) {
+            return false;
+        }
+
+        $acceptable_types = ['grass', 'fertile_ashland', 'mountain', 'desert'];
+
+        if (! in_array($player_space['type'], $acceptable_types)) {
+            return false;
+        }
+
+        $action_cost = 4 - $player_skills['Builder'];
+
+        if ($actions < $action_cost) {
+            return false;
+        }
+
+        $ally_farmer_level = $this->allySkillLevelOnSpace('Farmer', $player_space, $ally_skills);
+
+        if (! $ally_farmer_level || $ally_farmer_level < 1) {
+            return false;
+        }
+
+        return true;
     }
 
     public function buildRoad(Player $player, array $params)
@@ -433,11 +503,11 @@ class FarmActions extends BaseModifierClass
     public function initializePlayerActions(ModifierState $modifier_state, int $player_id)
     {
         $modifier_state->modifier_data[$player_id] = [
-            'actions' => 6,
-            'action_limit' => 6,
-            'actions_gained_per_round' => 3,
+            'actions' => 10,
+            'action_limit' => 20,
+            'actions_gained_per_round' => 10,
             'grain' => 0,
-            'grain_capacity' => 5,
+            'grain_capacity' => 20,
         ];
     }
 

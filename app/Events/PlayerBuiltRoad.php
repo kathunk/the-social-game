@@ -8,6 +8,7 @@ use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasTeam;
 use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmMap;
+use App\Modifiers\Classes\FarmSkills;
 use App\States\GameState;
 use App\States\PlayerState;
 use Thunk\Verbs\Event;
@@ -54,15 +55,6 @@ class PlayerBuiltRoad extends Event
             'Player is not on the specified space',
         );
 
-        // Player was level 3 builder
-        $skills_state = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\FarmSkills::key());
-        $player_builder_level = $skills_state->modifier_data[$this->player_id]['skills']['Builder'];
-
-        $this->assert(
-            $player_builder_level >= 3,
-            'Player must have Builder level 3 to build roads',
-        );
-
         // Space had no road
         $this->assert(
             ($player_space['road_status']['owner_team_id'] ?? null) === null,
@@ -70,10 +62,10 @@ class PlayerBuiltRoad extends Event
         );
 
         // Space was not swamp, mountain, volcano, or ash heap
-        $invalid_types = ['swamp', 'mountain', 'volcano', 'ash_heap'];
+        $valid_types = ['grass', 'fertile_ashland', 'mountain', 'desert'];
         $this->assert(
-            ! in_array($player_space['type'], $invalid_types),
-            'Cannot build road on '.$player_space['type'].' terrain',
+            in_array($player_space['type'], $valid_types),
+            'Can only build road on '.implode(', ', $valid_types).', not '.$player_space['type'],
         );
     }
 
@@ -94,14 +86,20 @@ class PlayerBuiltRoad extends Event
             return $space;
         })->toArray();
 
+        $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key())
+            ->modifier_data[$this->player_id]['skills'];
+
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
         $actions_state->modifier_data = collect($actions_state->modifier_data)
-            ->map(function ($data, $player_id) {
+            ->map(function ($data, $player_id) use ($player_skills) {
                 if ($player_id !== $this->player_id) {
                     return $data;
                 }
 
-                $data['actions'] = $data['actions'] - 1;
+                $builder_level = $player_skills['Builder'];
+                $action_cost = 4 - $builder_level;
+
+                $data['actions'] = $data['actions'] - $action_cost;
 
                 return $data;
             })->toArray();

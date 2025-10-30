@@ -83,20 +83,32 @@ trait FarmFormElements
             $defense_names = $field_seize_data['defender_names'] ? ' from '.$field_seize_data['defender_names'] : ' from players';
             $defense_text = '🛡️ '.$field_seize_data['defense_power'].' defense: '.($player_space['field_status']['level'] - 1).' from level + '.$field_seize_data['defense_power_from_defenders'].$defense_names;
 
+            $is_mature = $player_space['field_status']['stage'] === 'mature_1' || $player_space['field_status']['stage'] === 'mature_2' || $player_space['field_status']['stage'] === 'mature_3';
+            $stage_display = str_starts_with($player_space['field_status']['stage'], 'mature_')
+                ? 'mature'
+                : $player_space['field_status']['stage'];
+
             $this->divider();
             $this->title('Field')
                 ->subtitle('📈 Level: '.$player_space['field_status']['level'])
                 ->subtitle('📜 Owner: '.Team::find($player_space['field_status']['owner_team_id'])->name)
-                ->subtitle('🌱 Stage: '.$player_space['field_status']['stage'])
+                ->subtitle('🌱 Stage: '.$stage_display)
                 ->subtitle($defense_text)
                 ->when($player_space['field_status']['owner_team_id'] !== $player->team_id, function ($builder) use ($field_seize_data) {
                     $builder->subtitle('⚔️ '.$field_seize_data['attack_power_from_attackers'].' attack from: '.$field_seize_data['attacker_names']);
                 })
-                ->when($player_space['field_status']['stage'] === 'mature', function ($builder) use ($player_space, $can_harvest_field) {
+                ->when($is_mature, function ($builder) use ($player_space, $can_harvest_field, $player_skills) {
+                    $harvest_cost = match ($player_skills['Farmer']) {
+                        0 => '💪💪💪',
+                        1 => '💪💪',
+                        2 => '💪',
+                        3 => '',
+                        default => '',
+                    };
                     $builder->subtitle('🌾 Grain: '.$player_space['field_status']['quantity'])
-                        ->when($can_harvest_field, function ($builder) {
+                        ->when($can_harvest_field, function ($builder) use ($harvest_cost) {
                             $builder->buttonGroup()
-                                ->button('Harvest 💪', 'harvestField')
+                                ->button('Harvest '.$harvest_cost, 'harvestField')
                                 ->endGroup();
                         });
                 })
@@ -173,15 +185,29 @@ trait FarmFormElements
         }
 
         if ($can_plant_field || $can_build_silo || $can_build_road) {
+            $plant_cost = match ($player_skills['Farmer']) {
+                1 => '💪💪💪',
+                2 => '💪💪',
+                3 => '💪',
+                default => '',
+            };
+
+            $build_cost = match ($player_skills['Builder']) {
+                1 => '💪💪💪',
+                2 => '💪💪',
+                3 => '💪',
+                default => '',
+            };
+
             $this->buttonGroup()
-                ->when($can_plant_field, function ($builder) {
-                    $builder->button('Plant field 💪', 'plantField');
+                ->when($can_plant_field, function ($builder) use ($plant_cost) {
+                    $builder->button('Plant field '.$plant_cost, 'plantField');
                 })
-                ->when($can_build_silo, function ($builder) {
-                    $builder->button('Build silo 💪', 'buildSilo');
+                ->when($can_build_silo, function ($builder) use ($build_cost) {
+                    $builder->button('Build silo '.$build_cost, 'buildSilo');
                 })
-                ->when($can_build_road, function ($builder) {
-                    $builder->button('Build road 💪', 'buildRoad');
+                ->when($can_build_road, function ($builder) use ($build_cost) {
+                    $builder->button('Build road '.$build_cost, 'buildRoad');
                 })
                 ->endGroup();
         }

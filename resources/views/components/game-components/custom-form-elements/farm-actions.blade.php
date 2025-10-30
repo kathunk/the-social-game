@@ -68,13 +68,13 @@
                     <flux:table.rows>
                         @foreach (collect($element['player_space']['player_ids'])->reject(fn ($id) => $id === $this->player->id) as $id)
                             @php
-                                $player = App\Models\Player::find($id);
+                                $other_player = App\Models\Player::find($id);
                                 $team = App\Models\Player::find($id)->team;
                             @endphp
                             <flux:table.row>
                                 <flux:table.cell>
                                     <div class="flex items-center gap-1">
-                                        {{ $player->name }}
+                                        {{ $other_player->name }}
                                         @if(collect($element['leader_ids'])->contains($id))
                                             <x-icons.crown class="text-yellow-500 w-4 h-4" />
                                         @endif
@@ -83,7 +83,7 @@
                                 <flux:table.cell>
                                     <div class="flex items-center gap-1">
                                         {{ $team->name ?? 'No team' }}
-                                        @if(collect($element['leader_ids'])->contains($id))
+                                        @if($other_player->team_id === $this->player->team_id)
                                             <flux:icon.user-group class="text-green-500 w-4 h-4" />
                                         @endif
                                     </div>

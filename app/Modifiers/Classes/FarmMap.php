@@ -206,20 +206,23 @@ class FarmMap extends BaseModifierClass
         $modifier_state->modifier_data = collect($modifier_state->modifier_data)->map(function ($space) use ($explosion, $game_state) {
             $new_field_stage = match ($space['field_status']['stage'] ?? null) {
                 'seedlings' => 'sprouts',
-                'sprouts' => 'mature',
-                'mature' => 'rotted',
+                'sprouts' => 'mature_1',
+                'mature_1' => 'mature_2',
+                'mature_2' => 'mature_3',
+                'mature_3' => 'rotted',
                 'rotted' => null,
                 null => null,
             };
 
             $new_field_quantity = match ($new_field_stage) {
-                'sprouts' => 0,
-                'mature' => match ($space['field_status']['level']) {
+                'mature_1' => match ($space['field_status']['level']) {
                     1 => 5,
                     2 => 10,
                     3 => 15,
                 },
-                'rotted' => 0,
+                'mature_2' => $space['field_status']['quantity'],
+                'mature_3' => $space['field_status']['quantity'],
+                default => 0,
                 null => 0,
             };
 

@@ -8,6 +8,7 @@ use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasTeam;
 use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmMap;
+use App\Modifiers\Classes\FarmSkills;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
@@ -33,11 +34,12 @@ class PlayerHarvestedField extends Event
 
         // Player has actions
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
-        $player_data = $actions_state->modifier_data[$this->player_id];
-        $player_actions = $player_data['actions'];
+        $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key());
+        $farmer_skill = $player_skills->modifier_data[$this->player_id]['skills']['Farmer'];
+        $action_cost = 3 - $farmer_skill;
 
         $this->assert(
-            $player_actions > 0,
+            $actions_state->modifier_data[$this->player_id]['actions'] >= $action_cost,
             'Player does not have enough actions to harvest field',
         );
 
@@ -66,16 +68,16 @@ class PlayerHarvestedField extends Event
         // Field is mature
         $field_stage = $player_space['field_status']['stage'] ?? null;
         $this->assert(
-            $field_stage === 'mature',
+            $field_stage === 'mature_1' || $field_stage === 'mature_2' || $field_stage === 'mature_3',
             'Field is not mature (current stage: '.$field_stage.')',
         );
 
         // Field is owned by player's team
-        $field_owner = $player_space['field_status']['owner_team_id'] ?? null;
-        $this->assert(
-            $field_owner === $this->team_id,
-            'Field is not owned by player\'s team',
-        );
+        // $field_owner = $player_space['field_status']['owner_team_id'] ?? null;
+        // $this->assert(
+        //     $field_owner === $this->team_id,
+        //     'Field is not owned by player\'s team',
+        // );
 
         // Player has enough capacity in grain sack
         $player_grain = $this->player_grain;
@@ -119,14 +121,20 @@ class PlayerHarvestedField extends Event
                 return $space;
             })->toArray();
 
+        $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key())
+            ->modifier_data[$this->player_id]['skills'];
+
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
         $actions_state->modifier_data = collect($actions_state->modifier_data)
-            ->map(function ($data, $player_id) use ($amount_to_harvest) {
+            ->map(function ($data, $player_id) use ($amount_to_harvest, $player_skills) {
                 if ($player_id !== $this->player_id) {
                     return $data;
                 }
 
-                $data['actions'] = $data['actions'] - 1;
+                $farmer_level = $player_skills['Farmer'];
+                $action_cost = 3 - $farmer_level;
+
+                $data['actions'] = $data['actions'] - $action_cost;
                 $data['grain'] = $data['grain'] + $amount_to_harvest;
 
                 return $data;

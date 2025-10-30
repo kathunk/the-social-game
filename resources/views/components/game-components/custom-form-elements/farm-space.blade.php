@@ -40,6 +40,18 @@
       @include('components.game-components.custom-form-elements.farm-space-elements.field')
     </symbol>
 
+    <symbol id="obj-field-mature_1" viewBox="0 0 880 880">
+      @include('components.game-components.custom-form-elements.farm-space-elements.field')
+    </symbol>
+
+    <symbol id="obj-field-mature_2" viewBox="0 0 880 880">
+      @include('components.game-components.custom-form-elements.farm-space-elements.field')
+    </symbol>
+
+    <symbol id="obj-field-mature_3" viewBox="0 0 880 880">
+      @include('components.game-components.custom-form-elements.farm-space-elements.field')
+    </symbol>
+
     <symbol id="obj-field-rotted" viewBox="0 0 880 880">
       @include('components.game-components.custom-form-elements.farm-space-elements.field')
     </symbol>
