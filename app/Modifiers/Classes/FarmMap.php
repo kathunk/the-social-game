@@ -37,8 +37,10 @@ class FarmMap extends BaseModifierClass
 
     public function dataArrayForState(?Game $game = null): array
     {
-        $spaces = collect()->times(200, function ($i) {
-            $spaces_per_row = 10;
+        $map_size = 200;
+        $spaces_per_row = 10;
+
+        $spaces = collect()->times($map_size, function ($i) use ($spaces_per_row) {
             $y = intdiv($i - 1, $spaces_per_row);
             $x = ($i - 1) % $spaces_per_row;
 
@@ -73,21 +75,44 @@ class FarmMap extends BaseModifierClass
             ];
         });
 
-        $random_x = rand(1, 9);
-        $random_y = rand(1, 19);
+        $min_x = 1;
+        $max_x = $spaces_per_row - 1;
+        $min_y = 1;
+        $max_y = $map_size / $spaces_per_row - 1;
 
-        $spaces = $spaces->map(function ($space) use ($random_x, $random_y) {
-            if ($space['x-index'] === $random_x && $space['y-index'] === $random_y) {
+        $volcano_x = rand($min_x, $max_x);
+        $volcano_y = rand($min_y, $max_y);
+
+        $volcano_is_west = $volcano_x < $max_x / 2;
+        $volcano_is_north = $volcano_y < $max_y / 2;
+
+        $tunnel_x = $volcano_is_west
+            ? rand($volcano_x + 2, $max_x)
+            : rand($min_x, $volcano_x - 2);
+
+        $tunnel_y = $volcano_is_north
+            ? rand($volcano_y + 2, $max_y)
+            : rand($min_y, $volcano_y - 2);
+
+        $spaces = $spaces->map(function ($space) use ($volcano_x, $volcano_y, $tunnel_x, $tunnel_y) {
+            $x = $space['x-index'];
+            $y = $space['y-index'];
+
+            if ($x === $tunnel_x && $y === $tunnel_y) {
+                $space['type'] = 'tunnel';
+            }
+
+            if ($x === $volcano_x && $y === $volcano_y) {
                 $space['type'] = 'volcano';
                 $explosion_count = rand(2, 4);
                 $space['explodes_on_rounds'] = collect(range(1, 28))->shuffle()->take($explosion_count)->toArray();
             }
 
-            if ($space['x-index'] === $random_x && ($space['y-index'] === $random_y + 1 || $space['y-index'] === $random_y - 1)) {
+            if ($x === $volcano_x && ($y === $volcano_y + 1 || $y === $volcano_y - 1)) {
                 $space['type'] = 'fertile_ashland';
             }
 
-            if ($space['y-index'] === $random_y && ($space['x-index'] === $random_x + 1 || $space['x-index'] === $random_x - 1)) {
+            if ($y === $volcano_y && ($x === $volcano_x + 1 || $x === $volcano_x - 1)) {
                 $space['type'] = 'fertile_ashland';
             }
 
@@ -99,6 +124,11 @@ class FarmMap extends BaseModifierClass
 
     public function frontendComponent(Player $player): array
     {
+        // dd([
+        //     'volcano' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'volcano')->first(),
+        //     'tunnel' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'tunnel')->first(),
+        // ]);
+
         if ($player->team_id === null) {
             return [];
         }
@@ -309,6 +339,15 @@ class FarmMap extends BaseModifierClass
     {
         if ($player_space === null) {
             return [];
+        }
+
+        if ($player_space['type'] === 'tunnel') {
+            // return all spaces, except the player's space
+            return collect($spaces)
+                ->filter(fn ($space) => $space['x-index'] !== $player_space['x-index'] || $space['y-index'] !== $player_space['y-index'])
+                ->mapWithKeys(function ($space) {
+                    return [chr(65 + $space['x-index']).($space['y-index'] + 1) => chr(65 + $space['x-index']).($space['y-index'] + 1)];
+                })->toArray();
         }
 
         $player_x = $player_space['x-index'];

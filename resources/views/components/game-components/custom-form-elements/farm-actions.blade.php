@@ -107,6 +107,7 @@
             'ash_heap' => 'Ash Heap',
             'fertile_ashland' => 'Fertile Ashland',
             'volcano' => 'Volcano',
+            'tunnel' => 'Secret Tunnel',
         } }})</x-heading>
         @if ($element['can_see_history'])
             <flux:link variant="ghost" class="text-sm" href="{{ route('games.mods', ['game' => $this->player->game, 'modifier' => $map_modifier_id]) }}">See space history</flux:link>
