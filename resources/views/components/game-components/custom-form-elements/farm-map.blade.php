@@ -148,8 +148,16 @@
         @php
             $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
             $isAccessibleSpace = !empty($selectedValue) && in_array($selectedValue, $element['accessible_spaces']);
+            $cost = 1;
+            $type = $element['spaces'][$selectedValue]['type'];
+            if ($type === 'mountain' || $type === 'swamp') {$cost += 1;}
+            $has_walls = false;
+            if ($has_walls) {$cost += 1;}
+            $current_space_has_road = $player_space['road_status']['owner_team_id'] !== null;
+            if ($current_space_has_road) {$cost -= 1;}
         @endphp
         @if($player_space)
+
             <x-button
                 wire:loading.attr="disabled"
                 wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-move"

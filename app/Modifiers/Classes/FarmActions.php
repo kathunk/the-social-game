@@ -85,7 +85,6 @@ class FarmActions extends BaseModifierClass
                 can_build_road: $this->canBuildRoad($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
-                field_seize_data: $this->seizePropertyData($player, $all_players_on_space, $this->allSkills(), $player_space['field_status']['level'], $player_space['field_status']['owner_team_id']),
                 silo_seize_data: $this->seizePropertyData($player, $all_players_on_space, $this->allSkills(), $player_space['silo_status']['level'], $player_space['silo_status']['owner_team_id']),
                 can_see_history: $this->canSeeHistory($player, $player_skills),
             )
@@ -484,6 +483,56 @@ class FarmActions extends BaseModifierClass
         $player_space = $this->playerSpace($player);
 
         PlayerBuiltRoad::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+            level: 1,
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function canBuildWall(array $player_skills, array $player_space, int $actions, array $ally_skills)
+    {
+        if ($player_skills['Builder'] < 1) {
+            return false;
+        }
+
+        if (($player_space['wall_status']['owner_team_id'] ?? null) !== null) {
+            return false;
+        }
+
+        $acceptable_types = ['grass', 'fertile_ashland', 'mountain', 'desert'];
+
+        if (! in_array($player_space['type'], $acceptable_types)) {
+            return false;
+        }
+
+        $action_cost = 4 - $player_skills['Builder'];
+
+        if ($actions < $action_cost) {
+            return false;
+        }
+
+        $ally_brute_level = $this->allySkillLevelOnSpace('Brute', $player_space, $ally_skills);
+
+        if (! $ally_brute_level || $ally_brute_level < 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function buildWall(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+
+        PlayerBuiltWall::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
             player_id: $player->id,

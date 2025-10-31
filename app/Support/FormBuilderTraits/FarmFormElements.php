@@ -11,7 +11,6 @@ trait FarmFormElements
         array $spaces,
         Player $player,
         array $accessible_spaces,
-        bool $can_move,
         array $scoutable_spaces,
         ?array $player_space = null,
     ) {
@@ -21,7 +20,6 @@ trait FarmFormElements
             'spaces' => $spaces,
             'player_space' => $player_space,
             'accessible_spaces' => $accessible_spaces,
-            'can_move' => $can_move,
             'property_name' => 'selected_space',
             'validation_rules' => 'required|in:'.implode(',', $accessible_spaces),
             'validation_messages' => ['required' => 'Space is required', 'in' => 'Space is invalid'],
@@ -46,7 +44,6 @@ trait FarmFormElements
         bool $can_build_road,
         Player $player,
         array $all_leader_ids,
-        array $field_seize_data,
         array $silo_seize_data,
         bool $can_see_history,
     ) {
@@ -67,22 +64,11 @@ trait FarmFormElements
             'can_build_road' => $can_build_road,
             'sprite_config' => $sprite_config,
             'leader_ids' => $all_leader_ids,
-            'field_seize_data' => $field_seize_data,
             'silo_seize_data' => $silo_seize_data,
             'can_see_history' => $can_see_history,
         ];
 
         if ($player_space['field_status']['level'] > 0) {
-
-            $seize_data_table = [
-                ['Defense from level', $player_space['field_status']['level'] - 1],
-                ['Defense from owner team', $field_seize_data['defense_power_from_defenders']],
-                ['Total defense', $field_seize_data['defense_power']],
-            ];
-
-            $defense_names = $field_seize_data['defender_names'] ? ' from '.$field_seize_data['defender_names'] : ' from players';
-            $defense_text = '🛡️ '.$field_seize_data['defense_power'].' defense: '.($player_space['field_status']['level'] - 1).' from level + '.$field_seize_data['defense_power_from_defenders'].$defense_names;
-
             $is_mature = $player_space['field_status']['stage'] === 'mature_1' || $player_space['field_status']['stage'] === 'mature_2' || $player_space['field_status']['stage'] === 'mature_3';
             $stage_display = str_starts_with($player_space['field_status']['stage'], 'mature_')
                 ? 'mature'
@@ -93,10 +79,6 @@ trait FarmFormElements
                 ->subtitle('📈 Level: '.$player_space['field_status']['level'])
                 ->subtitle('📜 Owner: '.Team::find($player_space['field_status']['owner_team_id'])->name)
                 ->subtitle('🌱 Stage: '.$stage_display)
-                ->subtitle($defense_text)
-                ->when($player_space['field_status']['owner_team_id'] !== $player->team_id, function ($builder) use ($field_seize_data) {
-                    $builder->subtitle('⚔️ '.$field_seize_data['attack_power_from_attackers'].' attack from: '.$field_seize_data['attacker_names']);
-                })
                 ->when($is_mature, function ($builder) use ($player_space, $can_harvest_field, $player_skills) {
                     $harvest_cost = match ($player_skills['Farmer']) {
                         0 => '💪💪💪',
@@ -111,11 +93,6 @@ trait FarmFormElements
                                 ->button('Harvest '.$harvest_cost, 'harvestField')
                                 ->endGroup();
                         });
-                })
-                ->when($field_seize_data['can_seize'], function ($builder) {
-                    $builder->buttonGroup()
-                        ->button('Seize 💪', 'seizeField')
-                        ->endGroup();
                 });
         }
 
