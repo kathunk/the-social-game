@@ -65,10 +65,6 @@ class PlayerJoinedFarmTeam extends Event
                     $space['field_status']['owner_team_id'] = $this->team_id;
                 }
 
-                if ($space['road_status']['owner_team_id'] === $this->requester_previous_team_id) {
-                    $space['road_status']['owner_team_id'] = $this->team_id;
-                }
-
                 return $space;
             })->toArray();
     }

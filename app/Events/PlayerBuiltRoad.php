@@ -57,7 +57,7 @@ class PlayerBuiltRoad extends Event
 
         // Space had no road
         $this->assert(
-            ($player_space['road_status']['owner_team_id'] ?? null) === null,
+            ($player_space['road_exists'] ?? false) === false,
             'Space already has a road',
         );
 
@@ -75,7 +75,7 @@ class PlayerBuiltRoad extends Event
 
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
-                $space['road_status']['owner_team_id'] = $this->team_id;
+                $space['road_exists'] = true;
                 $space['history'][] = [
                     'round_number' => $game->currentChallenge()->round_number,
                     'emoji' => '🛣️',

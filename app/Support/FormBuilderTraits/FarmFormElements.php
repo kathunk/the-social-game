@@ -12,6 +12,7 @@ trait FarmFormElements
         Player $player,
         array $accessible_spaces,
         array $scoutable_spaces,
+        int $actions,
         ?array $player_space = null,
     ) {
         $this->elements[] = [
@@ -24,6 +25,7 @@ trait FarmFormElements
             'validation_rules' => 'required|in:'.implode(',', $accessible_spaces),
             'validation_messages' => ['required' => 'Space is required', 'in' => 'Space is invalid'],
             'scoutable_spaces' => $scoutable_spaces,
+            'actions' => $actions,
         ];
 
         return $this;
@@ -212,9 +214,9 @@ trait FarmFormElements
         ];
 
         // Add road overlay if present
-        $road_status = $player_space['road_status'] ?? [];
-        if (! empty($road_status['level']) || ! empty($road_status['owner_team_id'])) {
-            $config['overlays'][] = $this->buildRoadOverlay($road_status);
+        $road_exists = $player_space['road_exists'] ?? [];
+        if ($road_exists) {
+            $config['overlays'][] = $this->buildRoadOverlay($road_exists);
         }
 
         // Add silo overlay if present
@@ -255,7 +257,7 @@ trait FarmFormElements
     /**
      * Build road overlay configuration
      */
-    protected function buildRoadOverlay(array $road_status): array
+    protected function buildRoadOverlay(bool $road_exists): array
     {
         // Road spans horizontally across the entire space
         return [

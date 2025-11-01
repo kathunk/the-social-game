@@ -453,7 +453,7 @@ class FarmActions extends BaseModifierClass
             return false;
         }
 
-        if (($player_space['road_status']['owner_team_id'] ?? null) !== null) {
+        if (($player_space['road_exists'] ?? false) === true) {
             return false;
         }
 

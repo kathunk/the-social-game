@@ -55,9 +55,13 @@ class FarmMap extends BaseModifierClass
                     'stage' => null,
                     'quantity' => 0,
                 ],
-                'road_status' => [
-                    'level' => null,
+                'road_exists' => false,
+                'walls_exist' => false,
+                'watchtower_exists' => false,
+                'trap_status' => [
                     'owner_team_id' => null,
+                    'level' => null,
+                    'status' => null,
                 ],
                 'silo_status' => [
                     'level' => null,
@@ -142,6 +146,7 @@ class FarmMap extends BaseModifierClass
             ->farmMap(
                 spaces: $this->modifier->modifier_data,
                 player: $player,
+                actions: $actions,
                 player_space: $player_space,
                 accessible_spaces: $accessible_spaces,
                 scoutable_spaces: $this->scoutableSpaces($player_space, $player_skills),
@@ -245,7 +250,10 @@ class FarmMap extends BaseModifierClass
                 $field_quantity = $space['field_status']['quantity'];
                 $silo_level = $space['silo_status']['level'];
                 $silo_amount = $space['silo_status']['amount'];
-                $road_level = $space['road_status']['level'];
+                $road_exists = $space['road_exists'];
+                $walls_exist = $space['walls_exist'];
+                $watchtower_exists = $space['watchtower_exists'];
+                $trap_status = $space['trap_status'];
 
                 if ($field_level) {
                     $field_owner = TeamState::load($space['field_status']['owner_team_id']);
@@ -267,11 +275,36 @@ class FarmMap extends BaseModifierClass
                     $silo_owner->addToScoreHistory('🌋', -$silo_amount, 'Volcano destroyed a level '.$silo_level.' silo with '.$silo_amount.' grain with it.');
                 }
 
-                if ($road_level) {
+                if ($road_exists) {
                     $space['history'][] = [
                         'round_number' => $game_state->currentChallenge()->round_number,
                         'emoji' => '🌋',
                         'message' => 'Volcano destroyed a road.',
+                    ];
+                }
+
+                if ($walls_exist) {
+                    $space['history'][] = [
+                        'round_number' => $game_state->currentChallenge()->round_number,
+                        'emoji' => '🌋',
+                        'message' => 'Volcano destroyed a wall.',
+                    ];
+                }
+
+                if ($watchtower_exists) {
+                    $space['history'][] = [
+                        'round_number' => $game_state->currentChallenge()->round_number,
+                        'emoji' => '🌋',
+                        'message' => 'Volcano destroyed a watchtower.',
+                    ];
+                }
+
+                if ($trap_status['owner_team_id'] !== null) {
+                    $trap_owner = TeamState::load($trap_status['owner_team_id']);
+                    $space['history'][] = [
+                        'round_number' => $game_state->currentChallenge()->round_number,
+                        'emoji' => '🌋',
+                        'message' => 'Volcano destroyed a trap owned by '.$trap_owner->name.'.',
                     ];
                 }
 
@@ -285,8 +318,12 @@ class FarmMap extends BaseModifierClass
                 $space['silo_status']['amount'] = 0;
                 $space['silo_status']['capacity'] = 0;
 
-                $space['road_status']['level'] = null;
-                $space['road_status']['owner_team_id'] = null;
+                $space['road_exists'] = false;
+                $space['walls_exist'] = false;
+                $space['watchtower_exists'] = false;
+                $space['trap_status']['owner_team_id'] = null;
+                $space['trap_status']['level'] = null;
+                $space['trap_status']['status'] = null;
             }
 
             if (! $explosion && $space['type'] === 'ash_heap') {
@@ -394,16 +431,46 @@ class FarmMap extends BaseModifierClass
             throw new \Exception('Space not found');
         }
 
+        $origin_space = $this->playerSpace($player);
+
         PlayerMovedInFarm::fire(
             game_id: $this->modifier->game_id,
             modifier_id: $this->modifier->id,
             player_id: $player->id,
             x_index: $x,
             y_index: $y,
+            origin_x_index: $origin_space['x-index'],
+            origin_y_index: $origin_space['y-index'],
+            origin_space_type: $origin_space['type'],
+            origin_space_has_walls: $origin_space['walls_exist'],
+            origin_space_has_road: $origin_space['road_exists'],
+            origin_space_has_field: $origin_space['field_status']['owner_team_id'] !== null,
+            destination_space_type: $space['type'],
+            destination_space_has_walls: $space['walls_exist'],
+            destination_space_has_road: $space['road_exists'],
+            destination_space_has_field: $space['field_status']['owner_team_id'] !== null,
         );
 
         Verbs::commit();
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public static function costToMove(array $origin_space, array $destination_space)
+    {
+        $cost = 1;
+
+        $cost += match ($destination_space['type']) {
+            'mountain', 'swamp' => 1,
+            default => 0,
+        } + match ($destination_space['walls_exist']) {
+            true => 1,
+            default => 0,
+        } + match ($origin_space['road_exists']) {
+            true => 1,
+            default => 0,
+        };
+
+        return max(0, $cost);
     }
 }

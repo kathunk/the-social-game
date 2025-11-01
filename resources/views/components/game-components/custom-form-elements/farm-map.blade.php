@@ -70,9 +70,7 @@
                 <div
                     style="{{ $border }} padding: 1px; min-height: 10px; display: flex; align-items: center; justify-content: center; {{ $bgColor }} cursor: pointer;"
                     wire:click="$set('round_properties.{{ \App\Modifiers\Classes\FarmMap::key() }}.{{ $element['property_name'] }}', '{{ $coordinate }}')"
-                    @if($isScoutable && $spaceData)
-                        x-on:click="selectedScoutSpace = {{ json_encode($spaceData) }}"
-                    @endif
+                    x-on:click="selectedScoutSpace = {{ $isScoutable && $spaceData ? json_encode($spaceData) : 'null' }}"
                 >
                     @if(isset($grid[$y][$x]))
                         @if($isPlayerSpace)
@@ -112,11 +110,11 @@
                         </tr>
                     </template>
 
-                    <template x-if="selectedScoutSpace.road_status?.level">
+                    <template x-if="selectedScoutSpace.road_exists">
                         <tr class="border-b">
                             <td class="py-1 px-2 font-semibold bg-gray-100">Road</td>
                             <td class="py-1 px-2">
-                                <div>Level: <span x-text="selectedScoutSpace.road_status.level"></span></div>
+                                <div>Level: <span x-text="selectedScoutSpace.road_exists"></span></div>
                             </td>
                         </tr>
                     </template>
@@ -149,12 +147,33 @@
             $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
             $isAccessibleSpace = !empty($selectedValue) && in_array($selectedValue, $element['accessible_spaces']);
             $cost = 1;
-            $type = $element['spaces'][$selectedValue]['type'];
-            if ($type === 'mountain' || $type === 'swamp') {$cost += 1;}
-            $has_walls = false;
-            if ($has_walls) {$cost += 1;}
-            $current_space_has_road = $player_space['road_status']['owner_team_id'] !== null;
-            if ($current_space_has_road) {$cost -= 1;}
+            $cost_suffix = '';
+
+            if (!empty($selectedValue)) {
+                $x = ord(strtoupper($selectedValue[0])) - 65;
+                $y = intval(substr($selectedValue, 1)) - 1;
+                $space = collect($element['spaces'])->filter(fn ($space) => $space['x-index'] === $x && $space['y-index'] === $y)->first();
+                $type = $space['type'];
+                if ($type === 'mountain' || $type === 'swamp') {$cost += 1;}
+                $has_walls = $player_space['walls_exist'];
+                if ($has_walls) {$cost += 1;}
+                $current_space_has_road = $player_space['road_exists'];
+                if ($current_space_has_road) {$cost -= 1;}
+                $cost_suffix = match ($cost) {
+                    1 => '💪',
+                    2 => '💪💪',
+                    3 => '💪💪💪',
+                    4 => '💪💪💪💪',
+                    5 => '💪💪💪💪💪',
+                    6 => '💪💪💪💪💪💪',
+                    7 => '💪💪💪💪💪💪💪',
+                    8 => '💪💪💪💪💪💪💪💪',
+                    9 => '💪💪💪💪💪💪💪💪💪',
+                    10 => '💪💪💪💪💪💪💪💪💪💪',
+                    default => '',
+                };
+                $can_afford_to_move = $element['actions'] >= $cost;
+            }
         @endphp
         @if($player_space)
 
@@ -163,9 +182,9 @@
                 wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-move"
                 variant="primary"
                 wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
-                :disabled="!$isAccessibleSpace"
+                :disabled="!$isAccessibleSpace || !$can_afford_to_move"
             >
-                💪 Move
+                {{ $cost_suffix }} Move
             </x-button>
         @else
             <x-button

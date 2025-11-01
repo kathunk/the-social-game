@@ -14,9 +14,33 @@ class PlayerMovedInFarm extends Event
 {
     use HasActivePlayer, HasGame, HasModifier;
 
+    public int $origin_x_index;
+
+    public int $origin_y_index;
+
+    public int $origin_space_type;
+
+    public bool $origin_space_has_walls;
+
+    public bool $origin_space_has_road;
+
+    public bool $origin_space_has_field;
+
     public int $x_index;
 
     public int $y_index;
+
+    public int $destination_space_type;
+
+    public bool $destination_space_has_walls;
+
+    public bool $destination_space_has_road;
+
+    public bool $destination_space_has_field;
+
+    // only used for computation
+
+    private int $action_cost = 1;
 
     public function validate()
     {
@@ -30,102 +54,23 @@ class PlayerMovedInFarm extends Event
 
         $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
 
-        // Player has actions
+        $this->action_cost += match ($this->destination_space_type) {
+            'mountain', 'swamp' => 1,
+            default => 0,
+        } + match ($this->destination_space_has_walls) {
+            true => 1,
+            default => 0,
+        } + match ($this->origin_space_has_road) {
+            true => 1,
+            default => 0,
+        };
+
+        $this->action_cost = max(0, $this->action_cost);
+
         $this->assert(
-            $player_actions > 0,
+            $player_actions >= $this->action_cost,
             'Player does not have enough actions to move',
         );
-
-        // Space is reachable from player space (needs to check for roads)
-        // $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
-        // $player_space = collect($map_state->modifier_data)
-        //     ->firstWhere(fn ($space) => in_array($this->player_id, $space['player_ids']));
-
-        // $this->assert(
-        //     $player_space !== null,
-        //     'Player is not currently on any space',
-        // );
-
-        // $accessible_spaces = $this->getAccessibleSpaces($player_space, $map_state->modifier_data);
-        // $target_coordinate = chr(65 + $this->x_index).($this->y_index + 1);
-
-        // $this->assert(
-        //     in_array($target_coordinate, $accessible_spaces),
-        //     'Space is not reachable from player\'s current position',
-        // );
-    }
-
-    protected function getAccessibleSpaces(array $player_space, array $spaces): array
-    {
-        $player_x = $player_space['x-index'];
-        $player_y = $player_space['y-index'];
-
-        $space_map = collect($spaces)->keyBy(function ($space) {
-            return $space['x-index'].','.$space['y-index'];
-        });
-
-        $player_has_road = ($player_space['road_status']['owner_team_id'] ?? null) !== null;
-
-        $immediate_adjacent = [
-            ['x' => $player_x + 1, 'y' => $player_y],
-            ['x' => $player_x - 1, 'y' => $player_y],
-            ['x' => $player_x, 'y' => $player_y + 1],
-            ['x' => $player_x, 'y' => $player_y - 1],
-        ];
-
-        $accessible = [];
-        $visited = [];
-
-        foreach ($immediate_adjacent as $adj) {
-            $adj_key = $adj['x'].','.$adj['y'];
-
-            if (! $space_map->has($adj_key)) {
-                continue;
-            }
-
-            $adj_space = $space_map->get($adj_key);
-            $accessible[$adj_key] = $adj;
-            $visited[$adj_key] = true;
-
-            if ($player_has_road && ($adj_space['road_status']['owner_team_id'] ?? null) !== null) {
-                $queue = [$adj];
-
-                while (! empty($queue)) {
-                    $current = array_shift($queue);
-                    $current_key = $current['x'].','.$current['y'];
-                    $current_space = $space_map->get($current_key);
-
-                    if (! $current_space || ($current_space['road_status']['owner_team_id'] ?? null) === null) {
-                        continue;
-                    }
-
-                    $road_adjacent = [
-                        ['x' => $current['x'] + 1, 'y' => $current['y']],
-                        ['x' => $current['x'] - 1, 'y' => $current['y']],
-                        ['x' => $current['x'], 'y' => $current['y'] + 1],
-                        ['x' => $current['x'], 'y' => $current['y'] - 1],
-                    ];
-
-                    foreach ($road_adjacent as $next) {
-                        $next_key = $next['x'].','.$next['y'];
-
-                        if (! isset($visited[$next_key]) && $space_map->has($next_key)) {
-                            $visited[$next_key] = true;
-                            $accessible[$next_key] = $next;
-
-                            $next_space = $space_map->get($next_key);
-                            if (($next_space['road_status']['owner_team_id'] ?? null) !== null) {
-                                $queue[] = $next;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return collect($accessible)->map(function ($coords) {
-            return chr(65 + $coords['x']).($coords['y'] + 1);
-        })->values()->toArray();
     }
 
     public function apply(GameState $game)
@@ -149,7 +94,7 @@ class PlayerMovedInFarm extends Event
                     return $data;
                 }
 
-                $data['actions'] = $data['actions'] - 1;
+                $data['actions'] = $data['actions'] - $this->action_cost;
 
                 return $data;
             })->toArray();
