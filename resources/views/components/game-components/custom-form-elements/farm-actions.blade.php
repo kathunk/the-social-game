@@ -60,38 +60,64 @@
             <div class="mt-4"></div>
             <x-heading class="mt-4">Other players on your space:</x-heading>
             <x-subheading>
-                <flux:table>
-                    <flux:table.columns>
-                        <flux:table.column>Name</flux:table.column>
-                        <flux:table.column>Team</flux:table.column>
-                    </flux:table.columns>
-                    <flux:table.rows>
-                        @foreach (collect($element['player_space']['player_ids'])->reject(fn ($id) => $id === $this->player->id) as $id)
-                            @php
-                                $other_player = App\Models\Player::find($id);
-                                $team = App\Models\Player::find($id)->team;
-                            @endphp
-                            <flux:table.row>
-                                <flux:table.cell>
-                                    <div class="flex items-center gap-1">
-                                        {{ $other_player->name }}
-                                        @if(collect($element['leader_ids'])->contains($id))
-                                            <x-icons.crown class="text-yellow-500 w-4 h-4" />
-                                        @endif
-                                    </div>
-                                </flux:table.cell>
-                                <flux:table.cell>
-                                    <div class="flex items-center gap-1">
-                                        {{ $team->name ?? 'No team' }}
-                                        @if($other_player->team_id === $this->player->team_id)
-                                            <flux:icon.user-group class="text-green-500 w-4 h-4" />
-                                        @endif
-                                    </div>
-                                </flux:table.cell>
-                            </flux:table.row>
-                        @endforeach
-                    </flux:table.rows>
-                </flux:table>
+                <div class="overflow-x-auto">
+                    <flux:table class="w-full">
+                        <flux:table.columns>
+                            <flux:table.column class="whitespace-normal break-words">Name</flux:table.column>
+                            <flux:table.column class="whitespace-normal break-words">Team</flux:table.column>
+                            @if(collect($element['pickpocketable_opponents'])->count() > 0)
+                                <flux:table.column class="whitespace-normal break-words"></flux:table.column>
+                            @endif
+                        </flux:table.columns>
+                        <flux:table.rows>
+                            @foreach (collect($element['player_space']['player_ids'])->reject(fn ($id) => $id === $this->player->id) as $id)
+                                @php
+                                    $other_player = App\Models\Player::find($id);
+                                    $team = App\Models\Player::find($id)->team;
+                                @endphp
+                                <flux:table.row>
+                                    <flux:table.cell class="whitespace-normal break-words align-top">
+                                        <div class="flex items-start gap-1 flex-wrap">
+                                            <span class="break-words">{{ $other_player->name }}</span>
+                                            @if(collect($element['leader_ids'])->contains($id))
+                                                <x-icons.crown class="text-yellow-500 w-4 h-4 flex-shrink-0" />
+                                            @endif
+                                        </div>
+                                    </flux:table.cell>
+                                        <flux:table.cell class="whitespace-normal break-words align-top">
+                                            <div class="flex items-start gap-1 flex-wrap">
+                                                <span class="break-words">{{ $team->name ?? 'No team' }}</span>
+                                                @if($other_player->team_id === $this->player->team_id)
+                                                    <flux:icon.user-group class="text-green-500 w-4 h-4 flex-shrink-0" />
+                                                @endif
+                                            </div>
+                                        </flux:table.cell>
+                                    @if($element['pickpocketable_opponents']->count() > 0)
+                                          @php
+                                            $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
+                                            $cost = 4 - $element['player_skills']['Thief'];
+                                            $can_afford_to_move = $element['actions'] >= $cost;
+                                            $cost_suffix = $cost > 0 ? '💪'.str_repeat('💪', $cost - 1) : '';
+                                        @endphp
+
+                                            <x-button
+                                                wire:loading.attr="disabled"
+                                                wire:key="button-{{ \App\Modifiers\Classes\FarmActions::key() }}-pickpocket"
+                                                variant="primary"
+                                                wire:click="callClassAction('pickpocket', 'modifier', '{{ \App\Modifiers\Classes\FarmActions::key() }}')"
+                                                :disabled="!$isAccessibleSpace || !$can_afford_to_move"
+                                            >
+                                                {{ $cost_suffix }} Move
+                                            </x-button>
+                                        <flux:table.cell class="whitespace-normal break-words align-top">
+                                            <flux:button variant="ghost" class="text-sm" wire:click="callClassAction('pickpocket', 'event', '{{ \App\::key() }}', {{ $other_player->id }})">Pickpocket</flux:button>
+                                        </flux:table.cell>
+                                    @endif
+                                </flux:table.row>
+                            @endforeach
+                        </flux:table.rows>
+                    </flux:table>
+                </div>
             </x-subheading>
         @endif
     </div>

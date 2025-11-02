@@ -89,6 +89,7 @@ class FarmActions extends BaseModifierClass
                 can_build_wall: $this->canBuildWall($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
                 can_build_trap: $this->canBuildTrap($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
                 can_build_watchtower: $this->canBuildWatchtower($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
+                pickpocketable_opponents: $this->pickpocketableOpponents($player, $player_skills, $player_space, $player_actions['actions'] ?? 0),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
                 silo_seize_data: $this->seizePropertyData($player, $all_players_on_space, $this->allSkills(), $player_space, $player_space['silo_status']['level'], $player_space['silo_status']['owner_team_id']),

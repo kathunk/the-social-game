@@ -2,8 +2,9 @@
 
 namespace App\Support\FormBuilderTraits;
 
-use App\Models\Player;
 use App\Models\Team;
+use App\Models\Player;
+use Illuminate\Support\Collection;
 
 trait FarmFormElements
 {
@@ -47,6 +48,7 @@ trait FarmFormElements
         bool $can_build_wall,
         bool $can_build_trap,
         bool $can_build_watchtower,
+        Collection $pickpocketable_opponents,
         Player $player,
         array $all_leader_ids,
         array $silo_seize_data,
@@ -74,6 +76,7 @@ trait FarmFormElements
             'leader_ids' => $all_leader_ids,
             'silo_seize_data' => $silo_seize_data,
             'can_see_history' => $can_see_history,
+            'pickpocketable_opponents' => $pickpocketable_opponents,
         ];
 
         if ($player_space['field_status']['level'] > 0) {

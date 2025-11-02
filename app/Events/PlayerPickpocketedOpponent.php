@@ -4,6 +4,7 @@ namespace App\Events;
 
 use Thunk\Verbs\Event;
 use App\States\GameState;
+use App\States\TeamState;
 use App\States\PlayerState;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasTeam;
@@ -129,6 +130,21 @@ class PlayerPickpocketedOpponent extends Event
 
                 return $data;
             })->toArray();
+
+        $thief_team = $this->state(TeamState::class);
+        $target_team = $target_state->team();
+
+        $thief_team->addToScoreHistory(
+            icon: '🦹',
+            points: $this->amount,
+            description: "One of you scoundrels pickpocketed " . $target_state->name,
+        );
+
+        $target_team->addToScoreHistory(
+            icon: '🦹',
+            points: -$this->amount,
+            description: "Some scoundrel pickpocketed " . $target_state->name,
+        );
     }
 
     public function handle()
