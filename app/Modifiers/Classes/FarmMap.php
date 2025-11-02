@@ -156,7 +156,7 @@ class FarmMap extends BaseModifierClass
 
     public function frontendComponentForDedicatedPage(Player $player): array
     {
-        $limit_of_rounds_to_show = match ($this->playerSkills($player)['Chronicler']) {
+        $limit_of_rounds_to_show = match ($this->playerSkills($player)['Scout']) {
             1 => 2,
             2 => 5,
             3 => null,
@@ -359,6 +359,10 @@ class FarmMap extends BaseModifierClass
 
         $scout_distance = $player_skills['Scout'] + 1;
 
+        if ($player_space['watchtower_exists']) {
+            $scout_distance = $scout_distance + 3;
+        }
+
         $player_x = $player_space['x-index'];
         $player_y = $player_space['y-index'];
 
@@ -437,18 +441,8 @@ class FarmMap extends BaseModifierClass
             game_id: $this->modifier->game_id,
             modifier_id: $this->modifier->id,
             player_id: $player->id,
-            x_index: $x,
-            y_index: $y,
-            origin_x_index: $origin_space['x-index'],
-            origin_y_index: $origin_space['y-index'],
-            origin_space_type: $origin_space['type'],
-            origin_space_has_walls: $origin_space['walls_exist'],
-            origin_space_has_road: $origin_space['road_exists'],
-            origin_space_has_field: $origin_space['field_status']['owner_team_id'] !== null,
-            destination_space_type: $space['type'],
-            destination_space_has_walls: $space['walls_exist'],
-            destination_space_has_road: $space['road_exists'],
-            destination_space_has_field: $space['field_status']['owner_team_id'] !== null,
+            origin_space: $origin_space,
+            destination_space: $space,
         );
 
         Verbs::commit();
@@ -456,8 +450,12 @@ class FarmMap extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public static function costToMove(array $origin_space, array $destination_space)
+    public static function costToMove(?array $origin_space = null, array $destination_space)
     {
+        if ($origin_space === null) {
+            return 0;
+        }
+
         $cost = 1;
 
         $cost += match ($destination_space['type']) {

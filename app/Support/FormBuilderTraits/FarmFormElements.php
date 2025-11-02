@@ -44,6 +44,9 @@ trait FarmFormElements
         bool $can_withdraw_silo,
         bool $can_deposit_silo,
         bool $can_build_road,
+        bool $can_build_wall,
+        bool $can_build_trap,
+        bool $can_build_watchtower,
         Player $player,
         array $all_leader_ids,
         array $silo_seize_data,
@@ -64,6 +67,9 @@ trait FarmFormElements
             'can_harvest_field' => $can_harvest_field,
             'can_build_silo' => $can_build_silo,
             'can_build_road' => $can_build_road,
+            'can_build_wall' => $can_build_wall,
+            'can_build_trap' => $can_build_trap,
+            'can_build_watchtower' => $can_build_watchtower,
             'sprite_config' => $sprite_config,
             'leader_ids' => $all_leader_ids,
             'silo_seize_data' => $silo_seize_data,
@@ -107,19 +113,14 @@ trait FarmFormElements
             $withdrawable = min($amount_in_silo, $player_capacity - $player_grain);
             $depositable = min($player_grain, $silo_capacity - $amount_in_silo);
 
-            $can_seize = $silo_seize_data['can_seize'];
-
-            $defense_names = $silo_seize_data['defender_names'] ? ' from '.$silo_seize_data['defender_names'] : ' from players';
-            $defense_text = '🛡️ '.$silo_seize_data['defense_power'].' defense: '.($player_space['silo_status']['level'] - 1).' from level + '.$silo_seize_data['defense_power_from_defenders'].$defense_names;
-
             $this->divider()
                 ->title('Silo')
                 ->subtitle('📈 Level: '.$player_space['silo_status']['level'])
                 ->subtitle('📜 Owner: '.Team::find($player_space['silo_status']['owner_team_id'])->name)
                 ->subtitle('🌾 Amount: '.$amount_in_silo.' / '.$silo_capacity)
-                ->subtitle($defense_text)
+                ->subtitle($silo_seize_data['defense_description'])
                 ->when($player_space['silo_status']['owner_team_id'] !== $player->team_id, function ($builder) use ($silo_seize_data) {
-                    $builder->subtitle('⚔️ '.$silo_seize_data['attack_power_from_attackers'].' attack from: '.$silo_seize_data['attacker_names']);
+                    $builder->subtitle($silo_seize_data['attack_description']);
                 })
                 ->when($can_withdraw_silo, function ($builder) use ($withdrawable) {
                     $this->select(
@@ -156,14 +157,14 @@ trait FarmFormElements
                         ->button('Upgrade 💪', 'upgradeSilo')
                         ->endGroup();
                 })
-                ->when($can_seize, function ($builder) {
+                ->when($silo_seize_data['can_seize'], function ($builder) {
                     $this->buttonGroup()
                         ->button('Seize 💪', 'seizeSilo')
                         ->endGroup();
                 });
         }
 
-        if ($can_plant_field || $can_build_silo || $can_build_road) {
+        if ($can_plant_field || $can_build_silo || $can_build_road || $can_build_wall || $can_build_trap || $can_build_watchtower) {
             $plant_cost = match ($player_skills['Farmer']) {
                 1 => '💪💪💪',
                 2 => '💪💪',
@@ -187,6 +188,15 @@ trait FarmFormElements
                 })
                 ->when($can_build_road, function ($builder) use ($build_cost) {
                     $builder->button('Build road '.$build_cost, 'buildRoad');
+                })
+                ->when($can_build_wall, function ($builder) use ($build_cost) {
+                    $builder->button('Build wall '.$build_cost, 'buildWall');
+                })
+                ->when($can_build_trap, function ($builder) use ($build_cost) {
+                    $builder->button('Build trap '.$build_cost, 'buildTrap');
+                })
+                ->when($can_build_watchtower, function ($builder) use ($build_cost) {
+                    $builder->button('Build watchtower '.$build_cost, 'buildWatchtower');
                 })
                 ->endGroup();
         }
@@ -213,10 +223,22 @@ trait FarmFormElements
             'overlays' => [],
         ];
 
+        // Add wall overlay if present (should be first for lowest z-index)
+        $walls_exist = $player_space['walls_exist'] ?? false;
+        if ($walls_exist) {
+            $config['overlays'][] = $this->buildWallOverlay($walls_exist);
+        }
+
         // Add road overlay if present
         $road_exists = $player_space['road_exists'] ?? [];
         if ($road_exists) {
             $config['overlays'][] = $this->buildRoadOverlay($road_exists);
+        }
+
+        // Add watchtower overlay if present
+        $watchtower_exists = $player_space['watchtower_exists'] ?? false;
+        if ($watchtower_exists) {
+            $config['overlays'][] = $this->buildWatchtowerOverlay($watchtower_exists);
         }
 
         // Add silo overlay if present
@@ -255,6 +277,24 @@ trait FarmFormElements
     }
 
     /**
+     * Build wall overlay configuration
+     */
+    protected function buildWallOverlay(bool $walls_exist): array
+    {
+        // Wall spans horizontally across the entire space, behind everything
+        return [
+            'type' => 'wall',
+            'x' => 0, // Start from left edge
+            'y' => 820, // Just above the road (road starts at 890)
+            'scaleX' => 16, // Stretch full width (1600 / 100)
+            'scaleY' => 0.6, // Thinner than road
+            'rotate' => 0,
+            'anchor' => 'top-left',
+            'z' => 1, // Behind everything except background
+        ];
+    }
+
+    /**
      * Build road overlay configuration
      */
     protected function buildRoadOverlay(bool $road_exists): array
@@ -269,6 +309,22 @@ trait FarmFormElements
             'rotate' => 0,
             'anchor' => 'top-left',
             'z' => 500, // Way above everything to ensure visibility
+        ];
+    }
+
+    /**
+     * Build watchtower overlay configuration
+     */
+    protected function buildWatchtowerOverlay(bool $watchtower_exists): array
+    {
+        return [
+            'type' => 'watchtower',
+            'x' => 30, // Far left, before the silo (which is at 80)
+            'y' => 650, // Tall tower extending upward
+            'scale' => 0.5,
+            'rotate' => 0,
+            'anchor' => 'bottom',
+            'z' => 16,
         ];
     }
 
@@ -374,17 +430,19 @@ trait FarmFormElements
             return [800, 500];
         }
 
-        // Other players arranged in a circle around the center
+        // Other players arranged in an ellipse, positioned lower than main player
+        // Wider horizontally, narrower vertically to keep them closer to the wall level
         $centerX = 800;
-        $centerY = 500;
-        $radius = 150; // Distance from center
+        $centerY = 580; // Much lower than main player (500)
+        $radiusX = 150; // Horizontal distance from center
+        $radiusY = 30; // Vertical distance from center (small for minimal variation)
 
-        // Calculate angle for this player (distribute evenly in a circle)
-        // Start from top and go clockwise
+        // Calculate angle for this player (distribute evenly in a semi-circle)
+        // Restrict to a smaller arc to minimize vertical spread
         $angle = ($index * 2 * M_PI / max(1, $index + 1)) - (M_PI / 2);
 
-        $x = $centerX + ($radius * cos($angle));
-        $y = $centerY + ($radius * sin($angle));
+        $x = $centerX + ($radiusX * cos($angle));
+        $y = $centerY + ($radiusY * sin($angle));
 
         return [round($x), round($y)];
     }

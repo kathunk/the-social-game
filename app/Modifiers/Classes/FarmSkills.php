@@ -36,7 +36,7 @@ class FarmSkills extends BaseModifierClass
         'builder' => [
             'name' => 'Builder',
             'level_1' => 'Build Roads, Silos, Watchtowers, and Traps',
-            'level_2' => 'Build larger, and spend fewer actions to build',
+            'level_2' => 'Build larger Silos, and spend fewer actions to build',
             'level_3' => 'Build larger Silos, and spend fewer actions to build',
             'long_description' => "You build the infrastructure your team will use to thrive. You can build Silos 
                 on your own, which your team can use to stockpile grain. When on a space with an ally Farmer, you 
@@ -69,7 +69,7 @@ class FarmSkills extends BaseModifierClass
             'name' => 'Thief',
             'level_1' => 'Pickpocket opponents',
             'level_2' => 'Spend fewer actions to pickpocket opponents',
-            'level_3' => 'Spend fewer actions to pickpocket opponents, and withdraw from opponents\' silos',
+            'level_3' => "Spend fewer actions to pickpocket opponents, and withdraw from opponents' silos",
             'long_description' => "You are a dirty rotten scoundrel. You can pickpocket opponents, and withdraw from
                 opponents' silos (unless there are walls in the way). When on a space with an ally Scout, you can 
                 hide away secret caches of grain invisible to other players. When on a space with an ally Farmer,

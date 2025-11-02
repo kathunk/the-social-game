@@ -149,30 +149,12 @@
             $cost = 1;
             $cost_suffix = '';
 
-            if (!empty($selectedValue)) {
+            if (!empty($selectedValue) && $player_space) {
                 $x = ord(strtoupper($selectedValue[0])) - 65;
                 $y = intval(substr($selectedValue, 1)) - 1;
-                $space = collect($element['spaces'])->filter(fn ($space) => $space['x-index'] === $x && $space['y-index'] === $y)->first();
-                $type = $space['type'];
-                if ($type === 'mountain' || $type === 'swamp') {$cost += 1;}
-                $has_walls = $player_space['walls_exist'];
-                if ($has_walls) {$cost += 1;}
-                $current_space_has_road = $player_space['road_exists'];
-                if ($current_space_has_road) {$cost -= 1;}
-                $cost_suffix = match ($cost) {
-                    1 => '💪',
-                    2 => '💪💪',
-                    3 => '💪💪💪',
-                    4 => '💪💪💪💪',
-                    5 => '💪💪💪💪💪',
-                    6 => '💪💪💪💪💪💪',
-                    7 => '💪💪💪💪💪💪💪',
-                    8 => '💪💪💪💪💪💪💪💪',
-                    9 => '💪💪💪💪💪💪💪💪💪',
-                    10 => '💪💪💪💪💪💪💪💪💪💪',
-                    default => '',
-                };
+                $cost = \App\Modifiers\Classes\FarmMap::costToMove($player_space, $grid[$y][$x]);
                 $can_afford_to_move = $element['actions'] >= $cost;
+                $cost_suffix = $cost > 0 ? '💪'.str_repeat('💪', $cost - 1) : '';
             }
         @endphp
         @if($player_space)

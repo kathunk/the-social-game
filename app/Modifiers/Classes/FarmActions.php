@@ -2,20 +2,23 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Events\PlayerBuiltRoad;
-use App\Events\PlayerBuiltSilo;
-use App\Events\PlayerDepositedToSilo;
-use App\Events\PlayerHarvestedField;
-use App\Events\PlayerPlantedField;
-use App\Events\PlayerSeizedFarmProperty;
-use App\Events\PlayerUpgradedSilo;
-use App\Events\PlayerWithdrewFromSilo;
 use App\Models\Player;
 use App\States\GameState;
-use App\States\ModifierState;
 use App\States\PlayerState;
-use Illuminate\Support\Collection;
+use App\States\ModifierState;
 use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerBuiltRoad;
+use App\Events\PlayerBuiltSilo;
+use App\Events\PlayerBuiltWalls;
+use App\Events\PlayerPlantedField;
+use App\Events\PlayerUpgradedSilo;
+use Illuminate\Support\Collection;
+use App\Events\PlayerHarvestedField;
+use App\Events\PlayerBuiltWatchtower;
+use App\Events\PlayerDepositedToSilo;
+use App\Events\PlayerWithdrewFromSilo;
+use App\Events\PlayerSeizedFarmProperty;
+use App\Events\PlayerPickpocketedOpponent;
 
 class FarmActions extends BaseModifierClass
 {
@@ -83,9 +86,12 @@ class FarmActions extends BaseModifierClass
                 can_withdraw_silo: $this->canWithdrawSilo($player, $player_space, $player_actions),
                 can_deposit_silo: $this->canDepositSilo($player, $player_space, $player_actions),
                 can_build_road: $this->canBuildRoad($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
+                can_build_wall: $this->canBuildWall($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
+                can_build_trap: $this->canBuildTrap($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
+                can_build_watchtower: $this->canBuildWatchtower($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
-                silo_seize_data: $this->seizePropertyData($player, $all_players_on_space, $this->allSkills(), $player_space['silo_status']['level'], $player_space['silo_status']['owner_team_id']),
+                silo_seize_data: $this->seizePropertyData($player, $all_players_on_space, $this->allSkills(), $player_space, $player_space['silo_status']['level'], $player_space['silo_status']['owner_team_id']),
                 can_see_history: $this->canSeeHistory($player, $player_skills),
             )
             ->build();
@@ -368,40 +374,37 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public function seizePropertyData(
+    public static function seizePropertyData(
         Player $player,
         Collection $players_on_space,
         array $all_skills,
+        array $player_space,
         ?int $property_level = null,
         ?int $property_owner_team_id = null
     ) {
         if ($property_level === null || $property_owner_team_id === null) {
             return [
-                'property_defense' => null,
-                'attack_power_from_attackers' => null,
-                'defense_power_from_defenders' => null,
-                'attack_power' => null,
-                'defense_power' => null,
+                'attack_description' => null,
+                'defense_description' => null,
                 'can_seize' => false,
             ];
         }
 
         $defenders = $players_on_space->filter(fn ($p) => $p->team_id === $property_owner_team_id);
         $defense_from_defenders = $defenders->sum(fn ($p) => $all_skills[$p->id]['skills']['Brute']);
-        $defense_power = $property_level - 1 + $defenders->sum(fn ($p) => $all_skills[$p->id]['skills']['Brute']);
+        $defense_from_level = $property_level - 1;
+        $defense_from_walls = $player_space['walls_exist'] ? 2 : 0;
+        $defense_power = $defense_from_level + $defense_from_walls + $defense_from_defenders;
 
         $attackers = $players_on_space->filter(fn ($p) => $p->team_id === $player->team_id);
         $attack_power = $attackers->sum(fn ($p) => $all_skills[$p->id]['skills']['Brute']);
 
+        $defense_description = '🛡️ '.$defense_power.' defense: '.$defense_from_level.' from level + '.$defense_from_walls.' from walls + '.$defense_from_defenders.' from defenders';
+
         return [
-            'property_defense' => $property_level - 1,
-            'attack_power_from_attackers' => $attack_power,
-            'defense_power_from_defenders' => $defense_from_defenders,
-            'attack_power' => $attack_power,
-            'defense_power' => $defense_power,
+            'attack_description' => 'Attack: '.$attack_power.' from '.$attackers->map(fn ($p) => $p->name)->implode(', '),
+            'defense_description' => $defense_description,
             'can_seize' => $attack_power > $defense_power,
-            'defender_names' => $defenders->map(fn ($p) => $p->name)->implode(', '),
-            'attacker_names' => $attackers->map(fn ($p) => $p->name)->implode(', '),
         ];
     }
 
@@ -419,27 +422,6 @@ class FarmActions extends BaseModifierClass
             property_type: 'silo',
             grain_transferred: $player_space['silo_status']['amount'],
             previous_owner_team_id: $player_space['silo_status']['owner_team_id'],
-        );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
-    }
-
-    public function seizeField(Player $player, array $params)
-    {
-        $player_space = $this->playerSpace($player);
-
-        PlayerSeizedFarmProperty::fire(
-            game_id: $player->game_id,
-            modifier_id: $this->modifier->id,
-            player_id: $player->id,
-            team_id: $player->team_id,
-            x_index: $player_space['x-index'],
-            y_index: $player_space['y-index'],
-            property_type: 'field',
-            grain_transferred: 0,
-            previous_owner_team_id: $player_space['field_status']['owner_team_id'],
         );
 
         Verbs::commit();
@@ -503,7 +485,7 @@ class FarmActions extends BaseModifierClass
             return false;
         }
 
-        if (($player_space['wall_status']['owner_team_id'] ?? null) !== null) {
+        if (($player_space['walls_exist'] ?? false) === true) {
             return false;
         }
 
@@ -532,14 +514,154 @@ class FarmActions extends BaseModifierClass
     {
         $player_space = $this->playerSpace($player);
 
-        PlayerBuiltWall::fire(
+        PlayerBuiltWalls::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
             player_id: $player->id,
             team_id: $player->team_id,
             x_index: $player_space['x-index'],
             y_index: $player_space['y-index'],
-            level: 1,
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function canBuildTrap(array $player_skills, array $player_space, int $actions, array $ally_skills)
+    {
+        if ($player_skills['Builder'] < 1) {
+            return false;
+        }
+
+        if (($player_space['trap_status']['level'] ?? false) !== null) {
+            return false;
+        }
+
+        $action_cost = 4 - $player_skills['Builder'];
+
+        if ($actions < $action_cost) {
+            return false;
+        }
+
+        $ally_thief_level = $this->allySkillLevelOnSpace('Thief', $player_space, $ally_skills);
+
+        if (! $ally_thief_level || $ally_thief_level < 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function buildTrap(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+
+        // PlayerBuiltTrap::fire(
+        //     game_id: $player->game_id,
+        //     modifier_id: $this->modifier->id,
+        //     player_id: $player->id,
+        //     team_id: $player->team_id,
+        //     x_index: $player_space['x-index'],
+        //     y_index: $player_space['y-index'],
+        //     level: 1,
+        // );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function canBuildWatchtower(array $player_skills, array $player_space, int $actions, array $ally_skills)
+    {
+        if ($player_skills['Builder'] < 1) {
+            return false;
+        }
+
+        if (($player_space['watchtower_exists'] ?? false) === true) {
+            return false;
+        }
+
+        $acceptable_types = ['grass', 'fertile_ashland', 'mountain', 'desert'];
+
+        if (! in_array($player_space['type'], $acceptable_types)) {
+            return false;
+        }
+
+        $action_cost = 4 - $player_skills['Builder'];
+
+        if ($actions < $action_cost) {
+            return false;
+        }
+
+        $ally_scout_level = $this->allySkillLevelOnSpace('Scout', $player_space, $ally_skills);
+
+        if (! $ally_scout_level || $ally_scout_level < 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function buildWatchtower(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+
+        PlayerBuiltWatchtower::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function pickpocketableOpponents(Player $player, array $player_skills, array $player_space, int $actions)
+    {
+        $thief_level = $player_skills['Thief'];
+
+        if ($thief_level < 1) {
+            return collect([]);
+        }
+
+        $action_cost = 4 - $thief_level;
+
+        if ($actions < $action_cost) {
+            return collect([]);
+        }
+
+        return collect($player_space['player_ids'])
+            ->filter(fn ($player_id) => $player_id !== $player->id)
+            ->map(fn ($player_id) => Player::find($player_id))
+            ->filter(fn ($p) => $p->team_id !== $player->team_id);
+    }
+
+    public function pickpocketOpponent(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+        $opponent_id = (int) $params['pickpocket_target_id'];
+
+        $player_capacity = $this->modifier->modifier_data[$player->id]['grain_capacity'];
+        $player_grain = $this->modifier->modifier_data[$player->id]['grain'];
+        $max_stealable = $player_capacity - $player_grain;
+        $opponent_grain = $this->modifier->modifier_data[$opponent_id]['grain'];
+
+        $amount = min($max_stealable, $opponent_grain);
+
+        PlayerPickpocketedOpponent::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            target_player_id: $opponent_id,
+            amount: $amount,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
         );
 
         Verbs::commit();
@@ -601,7 +723,6 @@ class FarmActions extends BaseModifierClass
 
     public function canSeeHistory(Player $player, array $player_skills)
     {
-        // return $player_skills['Chronicler'] > 0;
-        return false;
+        return $player_skills['Scout'] > 0;
     }
 }

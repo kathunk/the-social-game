@@ -14,58 +14,45 @@ class PlayerMovedInFarm extends Event
 {
     use HasActivePlayer, HasGame, HasModifier;
 
-    public int $origin_x_index;
+    public ?array $origin_space = null;
 
-    public int $origin_y_index;
-
-    public int $origin_space_type;
-
-    public bool $origin_space_has_walls;
-
-    public bool $origin_space_has_road;
-
-    public bool $origin_space_has_field;
-
-    public int $x_index;
-
-    public int $y_index;
-
-    public int $destination_space_type;
-
-    public bool $destination_space_has_walls;
-
-    public bool $destination_space_has_road;
-
-    public bool $destination_space_has_field;
+    public array $destination_space;
 
     // only used for computation
-
-    private int $action_cost = 1;
+    private int $action_cost = 0;
 
     public function validate()
     {
-        $game = $this->state(GameState::class);
-        $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
+        $farm_map_state = $this->state(GameState::class)->modifiers()->firstWhere('class_key', FarmMap::key());
+        $real_spaces = $farm_map_state->modifier_data;
+        $space_containing_player = collect($real_spaces)
+            ->filter(fn ($s) => in_array($this->player_id, $s['player_ids']))
+            ->first();
+
+        if ($this->origin_space === null) {
+            return;
+        }
 
         $this->assert(
-            isset($actions_state->modifier_data[$this->player_id]),
-            'Player actions have not been initialized',
+            $space_containing_player['x-index'] === $this->origin_space['x-index'] && $space_containing_player['y-index'] === $this->origin_space['y-index'],
+            'Player is not in the origin space',
         );
 
+        // the origin space is adjacent to the destination space, or the origin space is a tunnel
+        $origin_is_tunnel = $this->origin_space['type'] === 'tunnel';
+        $origin_is_adjacent_to_destination =
+            ($this->origin_space['x-index'] === $this->destination_space['x-index'] && abs($this->origin_space['y-index'] - $this->destination_space['y-index']) === 1) ||
+            ($this->origin_space['y-index'] === $this->destination_space['y-index'] && abs($this->origin_space['x-index'] - $this->destination_space['x-index']) === 1);
+
+        $this->assert(
+            $origin_is_tunnel || $origin_is_adjacent_to_destination,
+            'Origin space is not adjacent to destination space',
+        );
+
+        $actions_state = $this->state(GameState::class)->modifiers()->firstWhere('class_key', FarmActions::key());
         $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
 
-        $this->action_cost += match ($this->destination_space_type) {
-            'mountain', 'swamp' => 1,
-            default => 0,
-        } + match ($this->destination_space_has_walls) {
-            true => 1,
-            default => 0,
-        } + match ($this->origin_space_has_road) {
-            true => 1,
-            default => 0,
-        };
-
-        $this->action_cost = max(0, $this->action_cost);
+        $this->action_cost = max(0, FarmMap::costToMove($this->origin_space, $this->destination_space));
 
         $this->assert(
             $player_actions >= $this->action_cost,
@@ -78,7 +65,7 @@ class PlayerMovedInFarm extends Event
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
 
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) {
-            if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
+            if ($space['x-index'] === $this->destination_space['x-index'] && $space['y-index'] === $this->destination_space['y-index']) {
                 $space['player_ids'][] = $this->player_id;
             } else {
                 $space['player_ids'] = array_values(array_diff($space['player_ids'], [$this->player_id]));
