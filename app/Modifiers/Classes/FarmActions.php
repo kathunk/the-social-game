@@ -308,9 +308,9 @@ class FarmActions extends BaseModifierClass
         }
 
         $thief_has_enough_power = match($player_thief_level) {
-            1 => $seize_data['defense_power'] < 3,
-            2 => $seize_data['defense_power'] < 5,
-            3 => $seize_data['defense_power'] < 7,
+            1 => $seize_data['defense_power'] < 100,
+            2 => $seize_data['defense_power'] < 100,
+            3 => $seize_data['defense_power'] < 100,
             default => false,
         };
 

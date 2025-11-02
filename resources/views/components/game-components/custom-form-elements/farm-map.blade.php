@@ -28,9 +28,17 @@
     $scoutableSpacesMap = collect($element['scoutable_spaces'])->keyBy(function($space) {
         return $space['x-index'] . ',' . $space['y-index'];
     })->toArray();
+
+    // Create a map of player IDs to names for all players in the game
+    // Use strings as keys to avoid JavaScript number truncation with snowflake IDs
+    $allPlayerIds = collect($element['spaces'])->pluck('player_ids')->flatten()->unique();
+    $playerNames = $allPlayerIds->mapWithKeys(function($playerId) {
+        $player = \App\Models\Player::find($playerId);
+        return [(string)$playerId => $player ? $player->name : 'Unknown'];
+    })->toArray();
 @endphp
 
-<div x-data="{ selectedScoutSpace: null }">
+<div x-data="{ selectedScoutSpace: null, playerNames: @js($playerNames) }">
     <div style="display: grid; grid-template-columns: 30px repeat({{ $maxX + 1 }}, 1fr); gap: 4px;">
         <!-- Empty cell for top-left corner -->
         <div style="border: 1px solid #ccc; padding: 8px; min-height: 10px; display: flex; align-items: center; justify-content: center; background-color: #f5f5f5;">
@@ -66,6 +74,10 @@
                     $cursor = $isClickable ? 'cursor: pointer;' : '';
 
                     $spaceData = isset($grid[$y][$x]) ? $grid[$y][$x] : null;
+                    // Convert player_ids to strings to avoid JavaScript number truncation with snowflake IDs
+                    if ($spaceData && isset($spaceData['player_ids'])) {
+                        $spaceData['player_ids'] = array_map('strval', $spaceData['player_ids']);
+                    }
                 @endphp
                 <div
                     style="{{ $border }} padding: 1px; min-height: 10px; display: flex; align-items: center; justify-content: center; {{ $bgColor }} cursor: pointer;"
@@ -114,7 +126,25 @@
                         <tr class="border-b">
                             <td class="py-1 px-2 font-semibold bg-gray-100">Road</td>
                             <td class="py-1 px-2">
-                                <div>Level: <span x-text="selectedScoutSpace.road_exists"></span></div>
+                                <div>✅</div>
+                            </td>
+                        </tr>
+                    </template>
+
+                    <template x-if="selectedScoutSpace.watchtower_exists">
+                        <tr class="border-b">
+                            <td class="py-1 px-2 font-semibold bg-gray-100">Watchtower</td>
+                            <td class="py-1 px-2">
+                                <div>✅</div>
+                            </td>
+                        </tr>
+                    </template>
+
+                    <template x-if="selectedScoutSpace.walls_exist">
+                        <tr class="border-b">
+                            <td class="py-1 px-2 font-semibold bg-gray-100">Walls</td>
+                            <td class="py-1 px-2">
+                                <div>✅</div>
                             </td>
                         </tr>
                     </template>
@@ -134,7 +164,7 @@
                     <template x-if="selectedScoutSpace.player_ids && selectedScoutSpace.player_ids.length > 0">
                         <tr class="border-b">
                             <td class="py-1 px-2 font-semibold bg-gray-100">Players</td>
-                            <td class="py-1 px-2" x-text="selectedScoutSpace.player_ids.length + ' player(s)'"></td>
+                            <td class="py-1 px-2" x-text="selectedScoutSpace.player_ids.map(id => playerNames[id] || 'Unknown').join(', ')"></td>
                         </tr>
                     </template>
                 </tbody>

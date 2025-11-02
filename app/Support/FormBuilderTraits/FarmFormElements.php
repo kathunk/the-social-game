@@ -160,9 +160,16 @@ trait FarmFormElements
                         ->button('Upgrade 💪', 'upgradeSilo')
                         ->endGroup();
                 })
-                ->when($silo_seize_data['can_seize'], function ($builder) {
+                ->when($silo_seize_data['can_seize'], function ($builder) use ($player_skills) {
+                    $cost_prefix = match ($player_skills['Brute']) {
+                        1 => '💪💪💪',
+                        2 => '💪💪',
+                        3 => '💪',
+                        default => '',
+                    };
+
                     $this->buttonGroup()
-                        ->button('Seize 💪', 'seizeSilo')
+                        ->button($cost_prefix.' Seize', 'seizeSilo')
                         ->endGroup();
                 });
         }

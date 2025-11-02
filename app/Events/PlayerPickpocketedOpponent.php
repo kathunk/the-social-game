@@ -98,7 +98,6 @@ class PlayerPickpocketedOpponent extends Event
 
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game, $thief_state, $target_state) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
-                $space['silo_status']['amount'] -= $this->amount;
                 $space['history'][] = [
                     'round_number' => $game->currentChallenge()->round_number,
                     'emoji' => '🦹',
