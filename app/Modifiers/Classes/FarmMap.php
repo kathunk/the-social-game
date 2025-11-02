@@ -450,7 +450,7 @@ class FarmMap extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public static function costToMove(?array $origin_space = null, array $destination_space)
+    public static function costToMove(?array $origin_space, array $destination_space)
     {
         if ($origin_space === null) {
             return 0;

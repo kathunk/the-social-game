@@ -2,23 +2,23 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Player;
-use App\States\GameState;
-use App\States\PlayerState;
-use App\States\ModifierState;
-use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerBuiltRoad;
 use App\Events\PlayerBuiltSilo;
 use App\Events\PlayerBuiltWalls;
-use App\Events\PlayerPlantedField;
-use App\Events\PlayerUpgradedSilo;
-use Illuminate\Support\Collection;
-use App\Events\PlayerHarvestedField;
 use App\Events\PlayerBuiltWatchtower;
 use App\Events\PlayerDepositedToSilo;
-use App\Events\PlayerWithdrewFromSilo;
-use App\Events\PlayerSeizedFarmProperty;
+use App\Events\PlayerHarvestedField;
 use App\Events\PlayerPickpocketedOpponent;
+use App\Events\PlayerPlantedField;
+use App\Events\PlayerSeizedFarmProperty;
+use App\Events\PlayerUpgradedSilo;
+use App\Events\PlayerWithdrewFromSilo;
+use App\Models\Player;
+use App\States\GameState;
+use App\States\ModifierState;
+use App\States\PlayerState;
+use Illuminate\Support\Collection;
+use Thunk\Verbs\Facades\Verbs;
 
 class FarmActions extends BaseModifierClass
 {
@@ -73,10 +73,10 @@ class FarmActions extends BaseModifierClass
             ->toArray();
 
         $seize_data = $this->seizePropertyData(
-            $player, 
-            $all_players_on_space, 
-            $all_skills, 
-            $player_space, 
+            $player,
+            $all_players_on_space,
+            $all_skills,
+            $player_space,
             $player_space['silo_status']['level'],
             $player_space['silo_status']['owner_team_id']
         );
@@ -281,7 +281,7 @@ class FarmActions extends BaseModifierClass
 
     public function canWithdrawSilo(Player $player, array $player_space, array $player_actions, array $player_skills, array $seize_data)
     {
-        $player_thief_level = $player_skills['Thief'] > 0;
+        $player_thief_level = $player_skills['Thief'];
         $silo_belongs_to_player = $player_space['silo_status']['owner_team_id'] === $player->team_id;
         $silo_has_grain = $player_space['silo_status']['amount'] > 0;
         $player_is_at_capacity = ($player_actions['grain_capacity'] ?? 0) === ($player_actions['grain'] ?? 0);
@@ -307,10 +307,10 @@ class FarmActions extends BaseModifierClass
             return false;
         }
 
-        $thief_has_enough_power = match($player_thief_level) {
-            1 => $seize_data['defense_power'] < 100,
-            2 => $seize_data['defense_power'] < 100,
-            3 => $seize_data['defense_power'] < 100,
+        $thief_has_enough_power = match ($player_thief_level) {
+            1 => $seize_data['defense_power'] < 5,
+            2 => $seize_data['defense_power'] < 7,
+            3 => $seize_data['defense_power'] < 9,
             default => false,
         };
 

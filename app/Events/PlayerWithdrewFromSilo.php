@@ -8,8 +8,10 @@ use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasTeam;
 use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmMap;
+use App\Modifiers\Classes\FarmSkills;
 use App\States\GameState;
 use App\States\PlayerState;
+use App\States\TeamState;
 use Thunk\Verbs\Event;
 
 class PlayerWithdrewFromSilo extends Event
@@ -58,24 +60,35 @@ class PlayerWithdrewFromSilo extends Event
             'There is no silo in this space',
         );
 
-        // Silo is owned by player's team
-        $silo_owner = $player_space['silo_status']['owner_team_id'] ?? null;
-        $this->assert(
-            $silo_owner === $this->team_id,
-            'Silo is not owned by player\'s team',
-        );
-
         // Silo has enough grain to withdraw
         $silo_amount = $player_space['silo_status']['amount'];
         $this->assert(
             $silo_amount >= $this->amount,
             'Silo does not have enough grain (has '.$silo_amount.', trying to withdraw '.$this->amount.')',
         );
+
+        $silo_belongs_to_player = $player_space['silo_status']['owner_team_id'] === $this->team_id;
+
+        if ($silo_belongs_to_player) {
+            return;
+        }
+
+        $player_thief_level = $game->modifiers()->firstWhere('class_key', FarmSkills::key())->modifier_data[$this->player_id]['skills']['Thief'];
+
+        $this->assert(
+            $player_thief_level >= 1,
+            'Player must be a thief the withdraw grain from a silo they do not own',
+        );
     }
 
     public function apply(GameState $game)
     {
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
+        $player_state = $this->state(PlayerState::class);
+        $team_state = $this->state(TeamState::class);
+        $silo_data = collect($map_state->modifier_data)
+            ->filter(fn ($space) => $space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index)
+            ->first()['silo_status'];
 
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
@@ -101,10 +114,27 @@ class PlayerWithdrewFromSilo extends Event
 
                 return $data;
             })->toArray();
+
+        if ($silo_data['owner_team_id'] === $this->team_id) {
+            return;
+        }
+
+        $silo_owner_team = TeamState::load($silo_data['owner_team_id']);
+        $silo_owner_team->addToScoreHistory(
+            icon: '😈',
+            points: -$this->amount,
+            description: 'Some scoundrel withdrew '.$this->amount.' grain from your silo.',
+        );
+        $team_state->addToScoreHistory(
+            icon: '😈',
+            points: $this->amount,
+            description: 'A scoundrel on your team withdrew '.$this->amount.' grain from a silo you do not own.',
+        );
     }
 
     public function handle()
     {
         $this->game()->modifiers->each(fn ($modifier) => $modifier->updateModelWithStateData());
+        $this->game()->teams->each(fn ($team) => $team->updateModelWithStateData());
     }
 }

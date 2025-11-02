@@ -2,17 +2,17 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
+use App\Events\Traits\HasActivePlayer;
 use App\Events\Traits\HasGame;
-use App\Events\Traits\HasTeam;
 use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasTeam;
+use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmMap;
 use App\Modifiers\Classes\FarmSkills;
-use App\Events\Traits\HasActivePlayer;
-use App\Modifiers\Classes\FarmActions;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\TeamState;
+use Thunk\Verbs\Event;
 
 class PlayerPickpocketedOpponent extends Event
 {
@@ -133,12 +133,12 @@ class PlayerPickpocketedOpponent extends Event
         $thief_team = $this->state(TeamState::class);
         $target_team = $target_state->team();
 
-        $thief_team_description = "One of you scoundrels pickpocketed " . $target_state->name;
-        $target_team_description = "Some scoundrel pickpocketed " . $target_state->name;
+        $thief_team_description = 'One of you scoundrels pickpocketed '.$target_state->name;
+        $target_team_description = 'Some scoundrel pickpocketed '.$target_state->name;
 
         if ($this->amount === 0) {
-            $thief_team_description .= " but they had empty pockets.";
-            $target_team_description .= " but they had empty pockets.";
+            $thief_team_description .= ' but they had empty pockets.';
+            $target_team_description .= ' but they had empty pockets.';
         }
 
         $thief_team->addToScoreHistory(

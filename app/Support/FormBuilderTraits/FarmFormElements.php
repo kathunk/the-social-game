@@ -2,8 +2,8 @@
 
 namespace App\Support\FormBuilderTraits;
 
-use App\Models\Team;
 use App\Models\Player;
+use App\Models\Team;
 use Illuminate\Support\Collection;
 
 trait FarmFormElements

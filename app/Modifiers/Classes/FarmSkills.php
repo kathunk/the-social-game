@@ -67,11 +67,11 @@ class FarmSkills extends BaseModifierClass
         ],
         'thief' => [
             'name' => 'Thief',
-            'level_1' => 'Pickpocket opponents',
-            'level_2' => 'Spend fewer actions to pickpocket opponents',
-            'level_3' => "Spend fewer actions to pickpocket opponents, and withdraw from opposing silos",
+            'level_1' => 'Pickpocket opponents, and withdraw from opposing silos that have less than 5 defense.',
+            'level_2' => 'Spend fewer actions to pickpocket opponents, and withdraw from opposing silos that have less than 7 defense.',
+            'level_3' => 'Spend fewer actions to pickpocket opponents, and withdraw from opposing silos that have less than 9 defense.',
             'long_description' => "You are a dirty rotten scoundrel. You can pickpocket opponents, and withdraw from
-                opponents' silos (unless there are walls in the way). When on a space with an ally Scout, you can 
+                opponents' silos (unless there is too much defense). When on a space with an ally Scout, you can 
                 hide away secret caches of grain invisible to other players. When on a space with an ally Farmer,
                 you can harvest opponents' fields. When on a space with an ally Brute, you can burn opponents' 
                 fields",
