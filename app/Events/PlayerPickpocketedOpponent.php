@@ -94,7 +94,7 @@ class PlayerPickpocketedOpponent extends Event
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
 
         $thief_state = $this->state(PlayerState::class);
-        $target_state = $this->state(PlayerState::class, $this->target_player_id);
+        $target_state = PlayerState::load($this->target_player_id);
 
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game, $thief_state, $target_state) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
@@ -134,21 +134,31 @@ class PlayerPickpocketedOpponent extends Event
         $thief_team = $this->state(TeamState::class);
         $target_team = $target_state->team();
 
+        $thief_team_description = "One of you scoundrels pickpocketed " . $target_state->name;
+        $target_team_description = "Some scoundrel pickpocketed " . $target_state->name;
+
+        if ($this->amount === 0) {
+            $thief_team_description .= " but they had empty pockets.";
+            $target_team_description .= " but they had empty pockets.";
+        }
+
         $thief_team->addToScoreHistory(
             icon: '🦹',
             points: $this->amount,
-            description: "One of you scoundrels pickpocketed " . $target_state->name,
+            description: $thief_team_description,
         );
 
         $target_team->addToScoreHistory(
             icon: '🦹',
             points: -$this->amount,
-            description: "Some scoundrel pickpocketed " . $target_state->name,
+            description: $target_team_description,
         );
     }
 
     public function handle()
     {
         $this->game()->modifiers->each(fn ($modifier) => $modifier->updateModelWithStateData());
+
+        $this->game()->teams->each(fn ($team) => $team->updateModelWithStateData());
     }
 }

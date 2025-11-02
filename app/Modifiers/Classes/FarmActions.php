@@ -72,6 +72,15 @@ class FarmActions extends BaseModifierClass
             )
             ->toArray();
 
+        $seize_data = $this->seizePropertyData(
+            $player, 
+            $all_players_on_space, 
+            $all_skills, 
+            $player_space, 
+            $player_space['silo_status']['level'],
+            $player_space['silo_status']['owner_team_id']
+        );
+
         return $this->form()
             ->farmActions(
                 player_actions: $player_actions,
@@ -83,7 +92,7 @@ class FarmActions extends BaseModifierClass
                 can_build_silo: $this->canBuildSilo($player, $player_skills, $player_space),
                 silo_exists: $this->siloExists($player, $player_space),
                 can_upgrade_silo: $this->canUpgradeSilo($player, $player_skills, $player_space),
-                can_withdraw_silo: $this->canWithdrawSilo($player, $player_space, $player_actions),
+                can_withdraw_silo: $this->canWithdrawSilo($player, $player_space, $player_actions, $player_skills, $seize_data),
                 can_deposit_silo: $this->canDepositSilo($player, $player_space, $player_actions),
                 can_build_road: $this->canBuildRoad($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
                 can_build_wall: $this->canBuildWall($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
@@ -92,7 +101,7 @@ class FarmActions extends BaseModifierClass
                 pickpocketable_opponents: $this->pickpocketableOpponents($player, $player_skills, $player_space, $player_actions['actions'] ?? 0),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
-                silo_seize_data: $this->seizePropertyData($player, $all_players_on_space, $this->allSkills(), $player_space, $player_space['silo_status']['level'], $player_space['silo_status']['owner_team_id']),
+                silo_seize_data: $seize_data,
                 can_see_history: $this->canSeeHistory($player, $player_skills),
             )
             ->build();
@@ -270,11 +279,42 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public function canWithdrawSilo(Player $player, array $player_space, array $player_actions)
+    public function canWithdrawSilo(Player $player, array $player_space, array $player_actions, array $player_skills, array $seize_data)
     {
-        return ($player_actions['grain_capacity'] ?? 0) > ($player_actions['grain'] ?? 0)
-            && $player_space['silo_status']['amount'] > 0
-            && $player_space['silo_status']['owner_team_id'] === $player->team_id;
+        $player_thief_level = $player_skills['Thief'] > 0;
+        $silo_belongs_to_player = $player_space['silo_status']['owner_team_id'] === $player->team_id;
+        $silo_has_grain = $player_space['silo_status']['amount'] > 0;
+        $player_is_at_capacity = ($player_actions['grain_capacity'] ?? 0) === ($player_actions['grain'] ?? 0);
+        $silo_exists = $player_space['silo_status']['level'] > 0;
+
+        if (! $silo_exists) {
+            return false;
+        }
+
+        if ($player_is_at_capacity) {
+            return false;
+        }
+
+        if (! $silo_has_grain) {
+            return false;
+        }
+
+        if ($silo_belongs_to_player) {
+            return true;
+        }
+
+        if ($player_thief_level < 1) {
+            return false;
+        }
+
+        $thief_has_enough_power = match($player_thief_level) {
+            1 => $seize_data['defense_power'] < 3,
+            2 => $seize_data['defense_power'] < 5,
+            3 => $seize_data['defense_power'] < 7,
+            default => false,
+        };
+
+        return $thief_has_enough_power;
     }
 
     public function withdrawSilo(Player $player, array $params)
@@ -406,6 +446,8 @@ class FarmActions extends BaseModifierClass
             'attack_description' => 'Attack: '.$attack_power.' from '.$attackers->map(fn ($p) => $p->name)->implode(', '),
             'defense_description' => $defense_description,
             'can_seize' => $attack_power > $defense_power,
+            'attack_power' => $attack_power,
+            'defense_power' => $defense_power,
         ];
     }
 

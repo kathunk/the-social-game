@@ -465,7 +465,7 @@ class FarmMap extends BaseModifierClass
             true => 1,
             default => 0,
         } + match ($origin_space['road_exists']) {
-            true => 1,
+            true => -1,
             default => 0,
         };
 
