@@ -2,23 +2,25 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Models\Player;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\ModifierState;
+use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerBuiltRoad;
 use App\Events\PlayerBuiltSilo;
 use App\Events\PlayerBuiltWalls;
+use App\Events\PlayerBurnedField;
+use App\Events\PlayerPlantedField;
+use App\Events\PlayerUpgradedSilo;
+use Illuminate\Support\Collection;
+use App\Events\PlayerHarvestedField;
+use App\Events\PlayerBuiltTrapInFarm;
 use App\Events\PlayerBuiltWatchtower;
 use App\Events\PlayerDepositedToSilo;
-use App\Events\PlayerHarvestedField;
-use App\Events\PlayerPickpocketedOpponent;
-use App\Events\PlayerPlantedField;
-use App\Events\PlayerSeizedFarmProperty;
-use App\Events\PlayerUpgradedSilo;
 use App\Events\PlayerWithdrewFromSilo;
-use App\Models\Player;
-use App\States\GameState;
-use App\States\ModifierState;
-use App\States\PlayerState;
-use Illuminate\Support\Collection;
-use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerSeizedFarmProperty;
+use App\Events\PlayerPickpocketedOpponent;
 
 class FarmActions extends BaseModifierClass
 {
@@ -89,6 +91,7 @@ class FarmActions extends BaseModifierClass
                 farm_map: $this->farmMap()->modifier_data,
                 can_plant_field: $this->canPlantField($player, $player_skills, $player_space, $ally_skills),
                 can_harvest_field: $this->canHarvestField($player, $player_space, $player_actions, $player_skills, $ally_skills),
+                can_burn_field: $this->canBurnField($player, $player_space, $player_actions, $player_skills, $ally_skills),
                 can_build_silo: $this->canBuildSilo($player, $player_skills, $player_space),
                 silo_exists: $this->siloExists($player, $player_space),
                 can_upgrade_silo: $this->canUpgradeSilo($player, $player_skills, $player_space),
@@ -414,6 +417,50 @@ class FarmActions extends BaseModifierClass
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
+    
+    public function canBurnField(Player $player, array $player_space, array $player_actions, array $player_skills, array $ally_skills)
+    {
+        $owner_team_id = $player_space['field_status']['owner_team_id'];
+
+        if (! $owner_team_id || $owner_team_id === $player->team_id) {
+            return false;
+        }
+
+        $player_is_thief = $player_skills['Thief'] > 0;
+        $player_is_brute = $player_skills['Brute'] > 0;
+
+        $action_cost = 4 - max($player_skills['Thief'], $player_skills['Brute']);
+
+        if ($this->modifier->modifier_data[$player->id]['actions'] < $action_cost) {
+            return false;
+        }
+
+        $ally_thief_level = $this->allySkillLevelOnSpace('Thief', $player_space, $ally_skills);
+        $ally_brute_level = $this->allySkillLevelOnSpace('Brute', $player_space, $ally_skills);
+
+        $can_burn_field = ($player_is_thief && $ally_brute_level && $ally_brute_level > 0)
+            || ($player_is_brute && $ally_thief_level && $ally_thief_level > 0);
+
+        return $can_burn_field;
+    }
+
+    public function burnField(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+
+        PlayerBurnedField::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
 
     public static function seizePropertyData(
         Player $player,
@@ -577,7 +624,7 @@ class FarmActions extends BaseModifierClass
             return false;
         }
 
-        if (($player_space['trap_status']['level'] ?? false) !== null) {
+        if ($player_space['trap_status']['level'] !== null) {
             return false;
         }
 
@@ -600,15 +647,15 @@ class FarmActions extends BaseModifierClass
     {
         $player_space = $this->playerSpace($player);
 
-        // PlayerBuiltTrap::fire(
-        //     game_id: $player->game_id,
-        //     modifier_id: $this->modifier->id,
-        //     player_id: $player->id,
-        //     team_id: $player->team_id,
-        //     x_index: $player_space['x-index'],
-        //     y_index: $player_space['y-index'],
-        //     level: 1,
-        // );
+        PlayerBuiltTrapInFarm::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+            level: 1,
+        );
 
         Verbs::commit();
 

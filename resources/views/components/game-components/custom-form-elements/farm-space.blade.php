@@ -92,5 +92,10 @@
       <circle cx="50" cy="35" r="15" />
       <rect x="35" y="50" width="30" height="35" rx="8" />
     </symbol>
+
+    <!-- Trap -->
+    <symbol id="obj-trap" viewBox="0 0 512 512">
+      @include('components.game-components.custom-form-elements.farm-space-elements.trap')
+    </symbol>
   </defs>
 </svg>

@@ -241,6 +241,14 @@ class FarmMap extends BaseModifierClass
                 'quantity' => $new_field_quantity,
             ];
 
+            if ($space['trap_status']['status'] === 'sprung') {
+                $space['trap_status'] = [
+                    'level' => null,
+                    'owner_team_id' => null,
+                    'status' => null,
+                ];
+            }
+
             if (! in_array($space['type'], ['fertile_ashland', 'ash_heap'])) {
                 return $space;
             }

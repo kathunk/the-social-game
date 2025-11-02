@@ -2,13 +2,14 @@
 
 namespace App\Events;
 
-use App\Events\Traits\HasActivePlayer;
+use Thunk\Verbs\Event;
+use App\States\GameState;
+use App\States\PlayerState;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
-use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmMap;
-use App\States\GameState;
-use Thunk\Verbs\Event;
+use App\Events\Traits\HasActivePlayer;
+use App\Modifiers\Classes\FarmActions;
 
 class PlayerMovedInFarm extends Event
 {
@@ -64,15 +65,27 @@ class PlayerMovedInFarm extends Event
     {
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
 
-        $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) {
+        $player_team_id = $this->state(PlayerState::class)->team_id;
+
+        $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($player_team_id) {
             if ($space['x-index'] === $this->destination_space['x-index'] && $space['y-index'] === $this->destination_space['y-index']) {
                 $space['player_ids'][] = $this->player_id;
+
+                if ($space['trap_status']['status'] === 'set' && $space['trap_status']['owner_team_id'] !== $player_team_id) {
+                    $space['trap_status']['status'] = 'sprung';
+                }
             } else {
                 $space['player_ids'] = array_values(array_diff($space['player_ids'], [$this->player_id]));
             }
 
             return $space;
         })->toArray();
+
+        $trap_status = $this->destination_space['trap_status'];
+
+        if ($trap_status['status'] === 'set' && $trap_status['owner_team_id'] !== $player_team_id) {
+            $this->action_cost += $trap_status['level'];
+        }
 
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
         $actions_state->modifier_data = collect($actions_state->modifier_data)

@@ -39,6 +39,7 @@ trait FarmFormElements
         array $farm_map,
         bool $can_plant_field,
         bool $can_harvest_field,
+        bool $can_burn_field,
         bool $can_build_silo,
         bool $silo_exists,
         bool $can_upgrade_silo,
@@ -67,6 +68,7 @@ trait FarmFormElements
             'farm_map' => $farm_map,
             'can_plant_field' => $can_plant_field,
             'can_harvest_field' => $can_harvest_field,
+            'can_burn_field' => $can_burn_field,
             'can_build_silo' => $can_build_silo,
             'can_build_road' => $can_build_road,
             'can_build_wall' => $can_build_wall,
@@ -104,7 +106,21 @@ trait FarmFormElements
                                 ->button('Harvest '.$harvest_cost, 'harvestField')
                                 ->endGroup();
                         });
-                });
+                })
+                ->when($can_burn_field, function ($builder) use ($player_skills) {
+                    $burn_cost = 4 - max($player_skills['Thief'], $player_skills['Brute']);
+
+                    $burn_cost = match ($burn_cost) {
+                        1 => '💪',
+                        2 => '💪💪',
+                        3 => '💪💪💪',
+                        default => '',
+                    };
+
+                    $builder->buttonGroup()
+                        ->button('Burn '.$burn_cost, 'burnField')
+                        ->endGroup();
+                }); 
         }
 
         if ($silo_exists) {
@@ -172,6 +188,25 @@ trait FarmFormElements
                         ->button($cost_prefix.' Seize', 'seizeSilo')
                         ->endGroup();
                 });
+        }
+
+        if ($player_space['trap_status']['level'] > 0) {
+            
+
+
+
+            $this->divider()
+                ->title('Trap')
+                ->when($player_space['trap_status']['status'] === 'set', function ($builder) use ($player_space) {
+                    $builder
+                    ->subtitle('📈 Level: '.$player_space['trap_status']['level'] . ' (removes ' . $player_space['trap_status']['level'] . ' actions from opponent when triggered)')
+                    ->subtitle('📜 Owner: '.Team::find($player_space['trap_status']['owner_team_id'])->name)
+                    ->subtitle('🪤 Status: '.$player_space['trap_status']['status']);
+                }) 
+            ->when($player_space['trap_status']['status'] === 'sprung', function ($builder) use ($player_space) {
+                $builder
+                ->subtitle('Trap sprung, and will disappear after this round.');
+            });
         }
 
         if ($can_plant_field || $can_build_silo || $can_build_road || $can_build_wall || $can_build_trap || $can_build_watchtower) {
@@ -249,6 +284,12 @@ trait FarmFormElements
         $watchtower_exists = $player_space['watchtower_exists'] ?? false;
         if ($watchtower_exists) {
             $config['overlays'][] = $this->buildWatchtowerOverlay($watchtower_exists);
+        }
+
+        // Add trap overlay if present
+        $trap_exists = $player_space['trap_status']['level'] ?? false;
+        if ($trap_exists) {
+            $config['overlays'][] = $this->buildTrapOverlay($trap_exists);
         }
 
         // Add silo overlay if present
@@ -335,6 +376,22 @@ trait FarmFormElements
             'rotate' => 0,
             'anchor' => 'bottom',
             'z' => 16,
+        ];
+    }
+
+    /**
+     * Build trap overlay configuration
+     */
+    protected function buildTrapOverlay($trap_level): array
+    {
+        return [
+            'type' => 'trap',
+            'x' => -5, // Beyond the left edge, bottom area
+            'y' => 770, // Below the watchtower
+            'scale' => 0.19,
+            'rotate' => 0,
+            'anchor' => 'center',
+            'z' => 17,
         ];
     }
 
