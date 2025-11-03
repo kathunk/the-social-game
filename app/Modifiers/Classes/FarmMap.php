@@ -135,6 +135,7 @@ class FarmMap extends BaseModifierClass
         // dd([
         //     'volcano' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'volcano')->first(),
         //     'tunnel' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'tunnel')->first(),
+        //     'stash' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['stash_status']['player_owner_id'] === null && $space['stash_status']['amount'] > 0)->first(),
         // ]);
 
         if ($player->team_id === null) {

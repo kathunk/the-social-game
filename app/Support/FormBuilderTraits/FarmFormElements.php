@@ -214,10 +214,11 @@ trait FarmFormElements
         if ($can_see_stash) {
             $amount_in_stash = $player_space['stash_status']['amount'];
             $player_grain = $player_actions['grain'];
+            $stash_owner_player = Player::find($player_space['stash_status']['player_owner_id']);
 
             $this->divider()
                 ->title('Hidden stash')
-                ->subtitle('📜 Created by: '.Player::find($player_space['stash_status']['player_owner_id'])->name)
+                ->subtitle('📜 Created by: '.($stash_owner_player?->name ?: 'A brave wanderer'))
                 ->subtitle('🌾 Amount: '.$amount_in_stash)
                 ->when($player_space['stash_status']['amount'] > 0, function ($builder) {
                     $builder->buttonGroup()

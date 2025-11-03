@@ -88,7 +88,7 @@ class FarmActions extends BaseModifierClass
         );
 
         $stash_owner_player = Player::find($player_space['stash_status']['player_owner_id']);
-        $stash_owner_team = $stash_owner_player->team;
+        $stash_owner_team = $stash_owner_player?->team ?? null;
 
         return $this->form()
             ->farmActions(
@@ -426,7 +426,7 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public function canCreateStash(Player $player, array $player_space, int $player_actions, array $player_skills, array $ally_skills, Player $stash_owner_player, Team $stash_owner_team)
+    public function canCreateStash(Player $player, array $player_space, int $player_actions, array $player_skills, array $ally_skills, ?Player $stash_owner_player, ?Team $stash_owner_team)
     {
         $stash_exists = $player_space['stash_status']['amount'] > 0 || $player_space['stash_status']['player_owner_id'] !== null;
 
@@ -470,7 +470,7 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public function canSeeStash(Player $player, array $player_space, int $actions, array $player_skills, array $ally_skills, Player $stash_owner_player, Team $stash_owner_team)
+    public function canSeeStash(Player $player, array $player_space, int $actions, array $player_skills, array $ally_skills, ?Player $stash_owner_player, ?Team $stash_owner_team)
     {
         $stash_exists = $player_space['stash_status']['amount'] > 0 || $player_space['stash_status']['player_owner_id'] !== null;
 
@@ -478,7 +478,7 @@ class FarmActions extends BaseModifierClass
             return false;
         }
 
-        $stash_belongs_to_ally = $stash_owner_player->team_id === $player->team_id;
+        $stash_belongs_to_ally = $stash_owner_player?->team_id === $player->team_id;
 
         if ($stash_belongs_to_ally) {
             return true;
@@ -508,9 +508,9 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public function canDepositStash(Player $player, array $player_space, array $player_actions, Player $stash_owner_player, Team $stash_owner_team)
+    public function canDepositStash(Player $player, array $player_space, array $player_actions, ?Player $stash_owner_player, ?Team $stash_owner_team)
     {
-        if ($stash_owner_player->team_id !== $player->team_id) {
+        if ($stash_owner_player?->team_id !== $player->team_id) {
             return false;
         }
 

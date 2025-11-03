@@ -61,7 +61,12 @@ class PlayerTookFromStash extends Event
             ->filter(fn ($space) => $space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index)
             ->first()['stash_status'];
 
-        $stash_owner_player = PlayerState::load($stash_data['player_owner_id']);
+        $stash_owner_player_id = $stash_data['player_owner_id'];
+        if ($stash_owner_player_id) {
+            $stash_owner_player = PlayerState::load($stash_owner_player_id);
+        } else {
+            $stash_owner_player = null;
+        }
 
         $player_capacity = $player_data['grain_capacity'] - $player_data['grain'];
         $stash_amount = $stash_data['amount'];
@@ -93,7 +98,7 @@ class PlayerTookFromStash extends Event
                 return $data;
             })->toArray();
 
-        if ($stash_owner_player->team_id === $this->team_id) {
+        if ($stash_owner_player?->team_id === $this->team_id) {
             return;
         }
 
@@ -104,6 +109,10 @@ class PlayerTookFromStash extends Event
             points: $amount_to_take,
             description: $this->state(PlayerState::class)->name.' took '.$amount_to_take.' grain from a hidden stash.',
         );
+
+        if (! $stash_owner_player) {
+            return;
+        }
 
         $stash_owner_player->team()->addToScoreHistory(
             icon: '🤫',
