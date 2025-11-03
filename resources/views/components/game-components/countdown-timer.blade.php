@@ -6,7 +6,10 @@
 
 @if (Carbon\Carbon::parse($time) > now()->addMinutes(60))
     <div class="flex items-baseline space-x-1">
-        <span>{{ $type }}</span> <span>{{ Carbon\Carbon::parse($time)->diffForHumans() }}</span>
+        <span>{{ $type }}</span>
+        <flux:tooltip :content="Carbon\Carbon::parse($time)->format('m/d/Y g:i A')">
+            <span>{{ Carbon\Carbon::parse($time)->diffForHumans() }}</span>
+        </flux:tooltip>
     </div>
 @else
     <div
