@@ -53,8 +53,7 @@ class FarmSkills extends BaseModifierClass
             'long_description' => "You plant the fields that give your team grain. When on a space with an ally Brute 
                 (strong as an ox), you can plant fields in the mountains. When on a space with an ally Builder 
                 (experts in irrigation), you can plant fields in the desert. When on a space with an ally Thief and 
-                an opponent's field, you may harvest it. And when on a space with an ally Scout, you can move for 
-                free from spaces that contain fields.",
+                an opponent's field, you may harvest it.",
         ],
         'scout' => [
             'name' => 'Scout',
