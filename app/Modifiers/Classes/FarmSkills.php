@@ -155,6 +155,11 @@ class FarmSkills extends BaseModifierClass
     public function upgradeSkill(Player $player, array $params)
     {
         $selected_skill = $params['selected_skill_to_upgrade'];
+
+        if ($selected_skill === null) {
+            throw new \Exception('Selected skill is required');
+        }
+
         $current_level =
             $this->modifier->modifier_data[$player->id]['skills'][
                 $selected_skill
