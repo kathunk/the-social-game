@@ -13,7 +13,7 @@ use App\States\GameState;
 use App\States\PlayerState;
 use Thunk\Verbs\Event;
 
-class PlayerBuiltRoad extends Event
+class PlayerCreatedStash extends Event
 {
     use HasActivePlayer, HasGame, HasModifier, HasTeam;
 
@@ -27,17 +27,11 @@ class PlayerBuiltRoad extends Event
 
         // Player has actions
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
-
-        $this->assert(
-            isset($actions_state->modifier_data[$this->player_id]),
-            'Player actions have not been initialized',
-        );
-
         $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
 
         $this->assert(
             $player_actions > 0,
-            'Player does not have enough actions to build road',
+            'Player does not have enough actions to create stash',
         );
 
         // Player is in correct space
@@ -55,17 +49,9 @@ class PlayerBuiltRoad extends Event
             'Player is not on the specified space',
         );
 
-        // Space had no road
         $this->assert(
-            ($player_space['road_exists'] ?? false) === false,
-            'Space already has a road',
-        );
-
-        // Space was not swamp, mountain, volcano, or ash heap
-        $valid_types = ['grass', 'fertile_ashland', 'mountain', 'desert'];
-        $this->assert(
-            in_array($player_space['type'], $valid_types),
-            'Can only build road on '.implode(', ', $valid_types).', not '.$player_space['type'],
+            ($player_space['stash_status']['amount'] ?? null) === 0,
+            'Space already has a stash',
         );
     }
 
@@ -75,11 +61,12 @@ class PlayerBuiltRoad extends Event
 
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
-                $space['road_exists'] = true;
+                $space['stash_status']['player_owner_id'] = $this->player_id;
+                $space['stash_status']['amount'] = 0;
                 $space['history'][] = [
                     'round_number' => $game->currentChallenge()->round_number,
-                    'emoji' => '🛣️',
-                    'message' => $this->state(PlayerState::class)->name.' built a road',
+                    'emoji' => '🤫',
+                    'message' => $this->state(PlayerState::class)->name.' hid a stash',
                 ];
             }
 
@@ -96,8 +83,9 @@ class PlayerBuiltRoad extends Event
                     return $data;
                 }
 
-                $builder_level = $player_skills['Builder'];
-                $action_cost = 4 - $builder_level;
+                $thief_level = $player_skills['Thief'];
+                $scout_level = $player_skills['Scout'];
+                $action_cost = 4 - max($thief_level, $scout_level);
 
                 $data['actions'] = $data['actions'] - $action_cost;
 

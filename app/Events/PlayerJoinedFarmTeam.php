@@ -65,10 +65,6 @@ class PlayerJoinedFarmTeam extends Event
                     $space['field_status']['owner_team_id'] = $this->team_id;
                 }
 
-                if ($space['road_status']['owner_team_id'] === $this->requester_previous_team_id) {
-                    $space['road_status']['owner_team_id'] = $this->team_id;
-                }
-
                 return $space;
             })->toArray();
     }
@@ -79,6 +75,12 @@ class PlayerJoinedFarmTeam extends Event
         $requester = PlayerState::load($this->player_id);
 
         $amount_to_transfer = $this->player_grain;
+
+        $grain_in_stashes = collect($this->game()->modifiers()->firstWhere('class_key', FarmMap::key())->modifier_data)
+            ->filter(fn ($space) => $space['stash_status']['player_owner_id'] === $this->player_id)
+            ->sum(fn ($space) => $space['stash_status']['amount']);
+
+        $amount_to_transfer += $grain_in_stashes;
 
         if ($this->requester_previous_team_id !== null) {
             $previous_team = TeamState::load($this->requester_previous_team_id);

@@ -55,15 +55,23 @@ class FarmMap extends BaseModifierClass
                     'stage' => null,
                     'quantity' => 0,
                 ],
-                'road_status' => [
-                    'level' => null,
+                'road_exists' => false,
+                'walls_exist' => false,
+                'watchtower_exists' => false,
+                'trap_status' => [
                     'owner_team_id' => null,
+                    'level' => null,
+                    'status' => null,
                 ],
                 'silo_status' => [
                     'level' => null,
                     'owner_team_id' => null,
                     'amount' => 0,
                     'capacity' => 0,
+                ],
+                'stash_status' => [
+                    'player_owner_id' => null,
+                    'amount' => rand(1, 10) > 9 ? rand(1, 50) : 0,
                 ],
                 'history' => [
                     // [
@@ -127,6 +135,7 @@ class FarmMap extends BaseModifierClass
         // dd([
         //     'volcano' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'volcano')->first(),
         //     'tunnel' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'tunnel')->first(),
+        //     'stash' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['stash_status']['player_owner_id'] === null && $space['stash_status']['amount'] > 0)->first(),
         // ]);
 
         if ($player->team_id === null) {
@@ -142,9 +151,9 @@ class FarmMap extends BaseModifierClass
             ->farmMap(
                 spaces: $this->modifier->modifier_data,
                 player: $player,
+                actions: $actions,
                 player_space: $player_space,
                 accessible_spaces: $accessible_spaces,
-                can_move: $this->canMove($player, $actions),
                 scoutable_spaces: $this->scoutableSpaces($player_space, $player_skills),
             )
             ->build();
@@ -152,7 +161,7 @@ class FarmMap extends BaseModifierClass
 
     public function frontendComponentForDedicatedPage(Player $player): array
     {
-        $limit_of_rounds_to_show = match ($this->playerSkills($player)['Chronicler']) {
+        $limit_of_rounds_to_show = match ($this->playerSkills($player)['Scout']) {
             1 => 2,
             2 => 5,
             3 => null,
@@ -206,20 +215,23 @@ class FarmMap extends BaseModifierClass
         $modifier_state->modifier_data = collect($modifier_state->modifier_data)->map(function ($space) use ($explosion, $game_state) {
             $new_field_stage = match ($space['field_status']['stage'] ?? null) {
                 'seedlings' => 'sprouts',
-                'sprouts' => 'mature',
-                'mature' => 'rotted',
+                'sprouts' => 'mature_1',
+                'mature_1' => 'mature_2',
+                'mature_2' => 'mature_3',
+                'mature_3' => 'rotted',
                 'rotted' => null,
                 null => null,
             };
 
             $new_field_quantity = match ($new_field_stage) {
-                'sprouts' => 0,
-                'mature' => match ($space['field_status']['level']) {
+                'mature_1' => match ($space['field_status']['level']) {
                     1 => 5,
                     2 => 10,
                     3 => 15,
                 },
-                'rotted' => 0,
+                'mature_2' => $space['field_status']['quantity'],
+                'mature_3' => $space['field_status']['quantity'],
+                default => 0,
                 null => 0,
             };
 
@@ -234,6 +246,14 @@ class FarmMap extends BaseModifierClass
                 'quantity' => $new_field_quantity,
             ];
 
+            if (isset($space['trap_status']) && $space['trap_status']['status'] === 'sprung') {
+                $space['trap_status'] = [
+                    'level' => null,
+                    'owner_team_id' => null,
+                    'status' => null,
+                ];
+            }
+
             if (! in_array($space['type'], ['fertile_ashland', 'ash_heap'])) {
                 return $space;
             }
@@ -243,7 +263,10 @@ class FarmMap extends BaseModifierClass
                 $field_quantity = $space['field_status']['quantity'];
                 $silo_level = $space['silo_status']['level'];
                 $silo_amount = $space['silo_status']['amount'];
-                $road_level = $space['road_status']['level'];
+                $road_exists = $space['road_exists'];
+                $walls_exist = $space['walls_exist'];
+                $watchtower_exists = $space['watchtower_exists'];
+                $trap_status = $space['trap_status'];
 
                 if ($field_level) {
                     $field_owner = TeamState::load($space['field_status']['owner_team_id']);
@@ -265,11 +288,36 @@ class FarmMap extends BaseModifierClass
                     $silo_owner->addToScoreHistory('🌋', -$silo_amount, 'Volcano destroyed a level '.$silo_level.' silo with '.$silo_amount.' grain with it.');
                 }
 
-                if ($road_level) {
+                if ($road_exists) {
                     $space['history'][] = [
                         'round_number' => $game_state->currentChallenge()->round_number,
                         'emoji' => '🌋',
                         'message' => 'Volcano destroyed a road.',
+                    ];
+                }
+
+                if ($walls_exist) {
+                    $space['history'][] = [
+                        'round_number' => $game_state->currentChallenge()->round_number,
+                        'emoji' => '🌋',
+                        'message' => 'Volcano destroyed a wall.',
+                    ];
+                }
+
+                if ($watchtower_exists) {
+                    $space['history'][] = [
+                        'round_number' => $game_state->currentChallenge()->round_number,
+                        'emoji' => '🌋',
+                        'message' => 'Volcano destroyed a watchtower.',
+                    ];
+                }
+
+                if ($trap_status['owner_team_id'] !== null) {
+                    $trap_owner = TeamState::load($trap_status['owner_team_id']);
+                    $space['history'][] = [
+                        'round_number' => $game_state->currentChallenge()->round_number,
+                        'emoji' => '🌋',
+                        'message' => 'Volcano destroyed a trap owned by '.$trap_owner->name.'.',
                     ];
                 }
 
@@ -283,8 +331,12 @@ class FarmMap extends BaseModifierClass
                 $space['silo_status']['amount'] = 0;
                 $space['silo_status']['capacity'] = 0;
 
-                $space['road_status']['level'] = null;
-                $space['road_status']['owner_team_id'] = null;
+                $space['road_exists'] = false;
+                $space['walls_exist'] = false;
+                $space['watchtower_exists'] = false;
+                $space['trap_status']['owner_team_id'] = null;
+                $space['trap_status']['level'] = null;
+                $space['trap_status']['status'] = null;
             }
 
             if (! $explosion && $space['type'] === 'ash_heap') {
@@ -319,6 +371,10 @@ class FarmMap extends BaseModifierClass
         }
 
         $scout_distance = $player_skills['Scout'] + 1;
+
+        if ($player_space['watchtower_exists']) {
+            $scout_distance = $scout_distance + 3;
+        }
 
         $player_x = $player_space['x-index'];
         $player_y = $player_space['y-index'];
@@ -358,10 +414,6 @@ class FarmMap extends BaseModifierClass
             return $space['x-index'].','.$space['y-index'];
         });
 
-        // Check if player's current space has a road
-        $player_has_road = ($player_space['road_status']['owner_team_id'] ?? null) !== null;
-
-        // Get all spaces that are adjacent to player's current position
         $immediate_adjacent = [
             ['x' => $player_x + 1, 'y' => $player_y],
             ['x' => $player_x - 1, 'y' => $player_y],
@@ -369,82 +421,17 @@ class FarmMap extends BaseModifierClass
             ['x' => $player_x, 'y' => $player_y - 1],
         ];
 
-        $accessible = [];
-        $visited = [];
-
-        // For each immediately adjacent space
-        foreach ($immediate_adjacent as $adj) {
-            $adj_key = $adj['x'].','.$adj['y'];
-
-            if (! $space_map->has($adj_key)) {
-                continue;
-            }
-
-            $adj_space = $space_map->get($adj_key);
-
-            // Always add immediately adjacent spaces
-            $accessible[$adj_key] = $adj;
-            $visited[$adj_key] = true;
-
-            // Only explore road network if PLAYER's current space has a road AND adjacent space has a road
-            if ($player_has_road && ($adj_space['road_status']['owner_team_id'] ?? null) !== null) {
-                $queue = [$adj];
-
-                while (! empty($queue)) {
-                    $current = array_shift($queue);
-                    $current_key = $current['x'].','.$current['y'];
-                    $current_space = $space_map->get($current_key);
-
-                    if (! $current_space) {
-                        continue;
-                    }
-
-                    // Only continue if current space has a road
-                    if (($current_space['road_status']['owner_team_id'] ?? null) === null) {
-                        continue;
-                    }
-
-                    // Get spaces adjacent to this road space
-                    $road_adjacent = [
-                        ['x' => $current['x'] + 1, 'y' => $current['y']],
-                        ['x' => $current['x'] - 1, 'y' => $current['y']],
-                        ['x' => $current['x'], 'y' => $current['y'] + 1],
-                        ['x' => $current['x'], 'y' => $current['y'] - 1],
-                    ];
-
-                    foreach ($road_adjacent as $next) {
-                        $next_key = $next['x'].','.$next['y'];
-
-                        if (! isset($visited[$next_key]) && $space_map->has($next_key)) {
-                            $visited[$next_key] = true;
-                            $accessible[$next_key] = $next;
-
-                            $next_space = $space_map->get($next_key);
-
-                            // Only add to queue if it has a road (to continue exploring)
-                            if (($next_space['road_status']['owner_team_id'] ?? null) !== null) {
-                                $queue[] = $next;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Convert accessible spaces to pretty format
-        return collect($accessible)->mapWithKeys(function ($coords) {
+        // Convert immediate adjacent spaces to pretty format
+        return collect($immediate_adjacent)->mapWithKeys(function ($coords) use ($space_map) {
             $pretty = chr(65 + $coords['x']).($coords['y'] + 1);
+
+            $space = $space_map->get($coords['x'].','.$coords['y']);
 
             return [$pretty => $pretty];
         })->toArray();
     }
 
     // actions
-
-    public function canMove(Player $player, int $actions)
-    {
-        return $actions > 0;
-    }
 
     public function move(Player $player, array $params)
     {
@@ -461,16 +448,40 @@ class FarmMap extends BaseModifierClass
             throw new \Exception('Space not found');
         }
 
+        $origin_space = $this->playerSpace($player);
+
         PlayerMovedInFarm::fire(
             game_id: $this->modifier->game_id,
             modifier_id: $this->modifier->id,
             player_id: $player->id,
-            x_index: $x,
-            y_index: $y,
+            origin_space: $origin_space,
+            destination_space: $space,
         );
 
         Verbs::commit();
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public static function costToMove(?array $origin_space, array $destination_space)
+    {
+        if ($origin_space === null) {
+            return 0;
+        }
+
+        $cost = 1;
+
+        $cost += match ($destination_space['type']) {
+            'mountain', 'swamp' => 1,
+            default => 0,
+        } + match ($destination_space['walls_exist']) {
+            true => 1,
+            default => 0,
+        } + match ($origin_space['road_exists']) {
+            true => -1,
+            default => 0,
+        };
+
+        return max(0, $cost);
     }
 }

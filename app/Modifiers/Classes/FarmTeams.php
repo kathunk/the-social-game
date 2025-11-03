@@ -68,10 +68,10 @@ class FarmTeams extends BaseModifierClass
                         'Adamant' => 'Adamant', 'Adroit' => 'Adroit', 'Amatory' => 'Amatory', 'Animistic' => 'Animistic', 'Antic' => 'Antic', 'Arcadian' => 'Arcadian', 'Baleful' => 'Baleful', 'Bellicose' => 'Bellicose', 'Bilious' => 'Bilious', 'Boorish' => 'Boorish', 'Calamitous' => 'Calamitous', 'Caustic' => 'Caustic', 'Cerulean' => 'Cerulean', 'Comely' => 'Comely', 'Concomitant' => 'Concomitant', 'Contumacious' => 'Contumacious', 'Corpulent' => 'Corpulent', 'Crapulous' => 'Crapulous', 'Defamatory' => 'Defamatory', 'Didactic' => 'Didactic', 'Dilatory' => 'Dilatory', 'Dowdy' => 'Dowdy', 'Efficacious' => 'Efficacious', 'Effulgent' => 'Effulgent', 'Egregious' => 'Egregious', 'Endemic' => 'Endemic', 'Equanimous' => 'Equanimous', 'Execrable' => 'Execrable', 'Fastidious' => 'Fastidious', 'Feckless' => 'Feckless', 'Fecund' => 'Fecund', 'Friable' => 'Friable', 'Fulsome' => 'Fulsome', 'Garrulous' => 'Garrulous', 'Guileless' => 'Guileless', 'Gustatory' => 'Gustatory', 'Heuristic' => 'Heuristic', 'Histrionic' => 'Histrionic', 'Hubristic' => 'Hubristic', 'Incendiary' => 'Incendiary', 'Insidious' => 'Insidious', 'Insolent' => 'Insolent', 'Intransigent' => 'Intransigent', 'Inveterate' => 'Inveterate', 'Invidious' => 'Invidious', 'Irksome' => 'Irksome', 'Jejune' => 'Jejune', 'Jocular' => 'Jocular', 'Judicious' => 'Judicious', 'Lachrymose' => 'Lachrymose', 'Limpid' => 'Limpid', 'Loquacious' => 'Loquacious', 'Luminous' => 'Luminous', 'Mannered' => 'Mannered', 'Mendacious' => 'Mendacious', 'Meretricious' => 'Meretricious', 'Minatory' => 'Minatory', 'Mordant' => 'Mordant', 'Munificent' => 'Munificent', 'Nefarious' => 'Nefarious', 'Noxious' => 'Noxious', 'Obtuse' => 'Obtuse', 'Parsimonious' => 'Parsimonious', 'Pendulous' => 'Pendulous', 'Pernicious' => 'Pernicious', 'Pervasive' => 'Pervasive', 'Petulant' => 'Petulant', 'Platitudinous' => 'Platitudinous', 'Precipitate' => 'Precipitate', 'Propitious' => 'Propitious', 'Puckish' => 'Puckish', 'Querulous' => 'Querulous', 'Quiescent' => 'Quiescent', 'Rebarbative' => 'Rebarbative', 'Recalcitrant' => 'Recalcitrant', 'Redolent' => 'Redolent', 'Rhadamanthine' => 'Rhadamanthine', 'Risible' => 'Risible', 'Ruminative' => 'Ruminative', 'Sagacious' => 'Sagacious', 'Salubrious' => 'Salubrious', 'Sartorial' => 'Sartorial', 'Sclerotic' => 'Sclerotic', 'Serpentine' => 'Serpentine', 'Spasmodic' => 'Spasmodic', 'Strident' => 'Strident', 'Taciturn' => 'Taciturn', 'Tenacious' => 'Tenacious', 'Tremulous' => 'Tremulous', 'Trenchant' => 'Trenchant', 'Turbulent' => 'Turbulent', 'Turgid' => 'Turgid', 'Ubiquitous' => 'Ubiquitous', 'Uxorious' => 'Uxorious', 'Verdant' => 'Verdant', 'Voluble' => 'Voluble', 'Voracious' => 'Voracious', 'Wheedling' => 'Wheedling', 'Withering' => 'Withering', 'Zealous' => 'Zealous',
                     ],
                     placeholder: 'Select an adjective...',
-                    validation_rules: 'required|exists:teams,id',
+                    validation_rules: 'required|min:1',
                     validation_messages: [
                         'required' => 'Must select a team',
-                        'exists' => 'Must select a valid team',
+                        'min' => 'Must select an adjective',
                     ],
                 )
                 ->select(
@@ -81,10 +81,10 @@ class FarmTeams extends BaseModifierClass
                         'Bagpipes' => 'Bagpipes', 'Baboons' => 'Baboons', 'Bananapeels' => 'Bananapeels', 'Beanbags' => 'Beanbags', 'Bellybuttons' => 'Bellybuttons', 'Boomerangs' => 'Boomerangs', 'Burritos' => 'Burritos', 'Cabbagepatches' => 'Cabbagepatches', 'Cantalords' => 'Cantalords', 'Cantaloupes' => 'Cantaloupes', 'Cantankerbots' => 'Cantankerbots', 'Cheeseboards' => 'Cheeseboards', 'Clamdiggers' => 'Clamdiggers', 'Cobwebs' => 'Cobwebs', 'Corkscrews' => 'Corkscrews', 'Crumpets' => 'Crumpets', 'Cucumbers' => 'Cucumbers', 'Cummerbunds' => 'Cummerbunds', 'Cupholders' => 'Cupholders', 'Dingbats' => 'Dingbats', 'Dinguses' => 'Dinguses', 'Doilies' => 'Doilies', 'Doorknobs' => 'Doorknobs', 'Dustbunnies' => 'Dustbunnies', 'Eggplants' => 'Eggplants', 'Ferrets' => 'Ferrets', 'Flipflops' => 'Flipflops', 'Gazebos' => 'Gazebos', 'Gargoyles' => 'Gargoyles', 'Goblets' => 'Goblets', 'Gobstoppers' => 'Gobstoppers', 'Goobers' => 'Goobers', 'Grackles' => 'Grackles', 'Grapefruits' => 'Grapefruits', 'Gumballs' => 'Gumballs', 'Gumdrops' => 'Gumdrops', 'Haversacks' => 'Haversacks', 'Hedgehogs' => 'Hedgehogs', 'Hooligans' => 'Hooligans', 'Jackalopes' => 'Jackalopes', 'Jellybeans' => 'Jellybeans', 'Koozies' => 'Koozies', 'Kumquats' => 'Kumquats', 'Marionettes' => 'Marionettes', 'Marmosets' => 'Marmosets', 'Meatballs' => 'Meatballs', 'Meatloaves' => 'Meatloaves', 'Monocles' => 'Monocles', 'Mopeds' => 'Mopeds', 'Mousetraps' => 'Mousetraps', 'Muffintops' => 'Muffintops', 'Mudpies' => 'Mudpies', 'Nachos' => 'Nachos', 'Napkinrings' => 'Napkinrings', 'Pajamas' => 'Pajamas', 'Pancakelords' => 'Pancakelords', 'Pincushions' => 'Pincushions', 'Plums' => 'Plums', 'Platypuses' => 'Platypuses', 'Plungers' => 'Plungers', 'Pogoers' => 'Pogoers', 'Poptarts' => 'Poptarts', 'Poodles' => 'Poodles', 'Porcupines' => 'Porcupines', 'Poundcakes' => 'Poundcakes', 'Puddleducks' => 'Puddleducks', 'Puffballs' => 'Puffballs', 'Pumperdoodles' => 'Pumperdoodles', 'Pumpernickels' => 'Pumpernickels', 'Pretzels' => 'Pretzels', 'Shenanigans' => 'Shenanigans', 'Shoeboxes' => 'Shoeboxes', 'Shoelaces' => 'Shoelaces', 'Slinkies' => 'Slinkies', 'Skedaddlers' => 'Skedaddlers', 'Skunks' => 'Skunks', 'Snickerdoodles' => 'Snickerdoodles', 'Snorkels' => 'Snorkels', 'Spatulas' => 'Spatulas', 'Sporks' => 'Sporks', 'Sprinklers' => 'Sprinklers', 'Suitcases' => 'Suitcases', 'Taterlings' => 'Taterlings', 'Thumbtacks' => 'Thumbtacks', 'Toadstools' => 'Toadstools', 'Toasters' => 'Toasters', 'Toothbrushes' => 'Toothbrushes', 'Toothpicks' => 'Toothpicks', 'Trampolines' => 'Trampolines', 'Turnips' => 'Turnips', 'Turntables' => 'Turntables', 'Turtlenecks' => 'Turtlenecks', 'Typewriters' => 'Typewriters', 'Wafflebirds' => 'Wafflebirds', 'Wafflecones' => 'Wafflecones', 'Wafflesticks' => 'Wafflesticks', 'Weaselsnouts' => 'Weaselsnouts', 'Weenies' => 'Weenies', 'Whirligigs' => 'Whirligigs', 'Wombats' => 'Wombats', 'Yoyos' => 'Yoyos', 'Zucchinis' => 'Zucchinis',
                     ],
                     placeholder: 'Select a noun...',
-                    validation_rules: 'required|exists:teams,id',
+                    validation_rules: 'required|min:1',
                     validation_messages: [
                         'required' => 'Must select a team',
-                        'exists' => 'Must select a valid team',
+                        'min' => 'Must select a noun',
                     ],
                 )
                 ->buttonGroup()
@@ -331,6 +331,11 @@ class FarmTeams extends BaseModifierClass
 
     public function createTeam(Player $player, array $params)
     {
+        // if it is not a two word phrase, throw an exception
+        if (str_word_count($params['adjective'].' '.$params['noun']) !== 2) {
+            throw new \Exception('Team name must be a two word phrase.');
+        }
+
         $existing_team_names = $player->game->teams->pluck('name');
 
         if ($existing_team_names->contains($params['adjective'].' '.$params['noun'])) {

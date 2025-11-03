@@ -13,7 +13,7 @@ use App\States\GameState;
 use App\States\PlayerState;
 use Thunk\Verbs\Event;
 
-class PlayerBuiltRoad extends Event
+class PlayerBuiltWatchtower extends Event
 {
     use HasActivePlayer, HasGame, HasModifier, HasTeam;
 
@@ -33,12 +33,8 @@ class PlayerBuiltRoad extends Event
             'Player actions have not been initialized',
         );
 
-        $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
-
-        $this->assert(
-            $player_actions > 0,
-            'Player does not have enough actions to build road',
-        );
+        // @farmtodo ensure they have the actions for it
+        // @farmtodo ensure a scout ally is present
 
         // Player is in correct space
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
@@ -55,17 +51,16 @@ class PlayerBuiltRoad extends Event
             'Player is not on the specified space',
         );
 
-        // Space had no road
+        // Space had no watchtower
         $this->assert(
-            ($player_space['road_exists'] ?? false) === false,
-            'Space already has a road',
+            ($player_space['watchtower_exists'] ?? false) === false,
+            'Space already has a watchtower',
         );
 
-        // Space was not swamp, mountain, volcano, or ash heap
         $valid_types = ['grass', 'fertile_ashland', 'mountain', 'desert'];
         $this->assert(
             in_array($player_space['type'], $valid_types),
-            'Can only build road on '.implode(', ', $valid_types).', not '.$player_space['type'],
+            'Can only build watchtowers on '.implode(', ', $valid_types).', not '.$player_space['type'],
         );
     }
 
@@ -75,11 +70,11 @@ class PlayerBuiltRoad extends Event
 
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
-                $space['road_exists'] = true;
+                $space['watchtower_exists'] = true;
                 $space['history'][] = [
                     'round_number' => $game->currentChallenge()->round_number,
-                    'emoji' => '🛣️',
-                    'message' => $this->state(PlayerState::class)->name.' built a road',
+                    'emoji' => '🗼',
+                    'message' => $this->state(PlayerState::class)->name.' built a watchtower',
                 ];
             }
 

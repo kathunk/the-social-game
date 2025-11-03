@@ -30,8 +30,10 @@ class PlayerPlantedField extends Event
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
         $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
 
+        $action_cost = 4 - $this->level;
+
         $this->assert(
-            $player_actions > 0,
+            $player_actions >= $action_cost,
             'Player does not have enough actions to plant field',
         );
 
@@ -39,11 +41,6 @@ class PlayerPlantedField extends Event
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
         $player_space = collect($map_state->modifier_data)
             ->firstWhere(fn ($space) => in_array($this->player_id, $space['player_ids']));
-
-        $this->assert(
-            $player_space !== null,
-            'Player is not currently on any space',
-        );
 
         $this->assert(
             $player_space['x-index'] === $this->x_index && $player_space['y-index'] === $this->y_index,
@@ -66,11 +63,11 @@ class PlayerPlantedField extends Event
         );
 
         // Space was not swamp, volcano, or ash heap
-        $invalid_types = ['swamp', 'volcano', 'ash_heap'];
-        $this->assert(
-            ! in_array($player_space['type'], $invalid_types),
-            'Cannot plant field on '.$player_space['type'].' terrain',
-        );
+        // $invalid_types = ['swamp', 'volcano', 'ash_heap'];
+        // $this->assert(
+        //     ! in_array($player_space['type'], $invalid_types),
+        //     'Cannot plant field on '.$player_space['type'].' terrain',
+        // );
     }
 
     public function apply(GameState $game)
@@ -99,7 +96,9 @@ class PlayerPlantedField extends Event
                     return $data;
                 }
 
-                $data['actions'] = $data['actions'] - 1;
+                $action_cost = 4 - $this->level;
+
+                $data['actions'] = $data['actions'] - $action_cost;
 
                 return $data;
             })->toArray();

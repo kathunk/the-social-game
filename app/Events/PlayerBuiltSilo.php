@@ -8,6 +8,7 @@ use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasTeam;
 use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmMap;
+use App\Modifiers\Classes\FarmSkills;
 use App\States\GameState;
 use App\States\PlayerState;
 use Thunk\Verbs\Event;
@@ -93,14 +94,20 @@ class PlayerBuiltSilo extends Event
             return $space;
         })->toArray();
 
+        $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key())
+            ->modifier_data[$this->player_id]['skills'];
+
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
         $actions_state->modifier_data = collect($actions_state->modifier_data)
-            ->map(function ($data, $player_id) {
+            ->map(function ($data, $player_id) use ($player_skills) {
                 if ($player_id !== $this->player_id) {
                     return $data;
                 }
 
-                $data['actions'] = $data['actions'] - 1;
+                $builder_level = $player_skills['Builder'];
+                $action_cost = 4 - $builder_level;
+
+                $data['actions'] = $data['actions'] - $action_cost;
 
                 return $data;
             })->toArray();

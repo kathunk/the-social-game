@@ -8,12 +8,12 @@ use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasTeam;
 use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmMap;
-use App\Modifiers\Classes\FarmSkills;
 use App\States\GameState;
 use App\States\PlayerState;
+use App\States\TeamState;
 use Thunk\Verbs\Event;
 
-class PlayerBuiltRoad extends Event
+class PlayerDepositedToStash extends Event
 {
     use HasActivePlayer, HasGame, HasModifier, HasTeam;
 
@@ -21,27 +21,16 @@ class PlayerBuiltRoad extends Event
 
     public int $y_index;
 
+    public int $amount;
+
     public function validate()
     {
         $game = $this->state(GameState::class);
-
-        // Player has actions
+        $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
-
-        $this->assert(
-            isset($actions_state->modifier_data[$this->player_id]),
-            'Player actions have not been initialized',
-        );
-
-        $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
-
-        $this->assert(
-            $player_actions > 0,
-            'Player does not have enough actions to build road',
-        );
+        $player_data = $actions_state->modifier_data[$this->player_id];
 
         // Player is in correct space
-        $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
         $player_space = collect($map_state->modifier_data)
             ->firstWhere(fn ($space) => in_array($this->player_id, $space['player_ids']));
 
@@ -55,51 +44,48 @@ class PlayerBuiltRoad extends Event
             'Player is not on the specified space',
         );
 
-        // Space had no road
+        // Stash is in space
+        $stash_exists = $player_space['stash_status']['amount'] > 0 || $player_space['stash_status']['player_owner_id'] !== null;
         $this->assert(
-            ($player_space['road_exists'] ?? false) === false,
-            'Space already has a road',
-        );
-
-        // Space was not swamp, mountain, volcano, or ash heap
-        $valid_types = ['grass', 'fertile_ashland', 'mountain', 'desert'];
-        $this->assert(
-            in_array($player_space['type'], $valid_types),
-            'Can only build road on '.implode(', ', $valid_types).', not '.$player_space['type'],
+            $stash_exists,
+            'There is no stash in this space',
         );
     }
 
     public function apply(GameState $game)
     {
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
+        $player_state = $this->state(PlayerState::class);
+        $team_state = $this->state(TeamState::class);
+        $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
+        $player_data = $actions_state->modifier_data[$this->player_id];
+        $stash_data = collect($map_state->modifier_data)
+            ->filter(fn ($space) => $space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index)
+            ->first()['stash_status'];
+
+        $stash_owner_player = PlayerState::load($stash_data['player_owner_id']);
 
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
-                $space['road_exists'] = true;
+                $space['stash_status']['amount'] += $this->amount;
                 $space['history'][] = [
                     'round_number' => $game->currentChallenge()->round_number,
-                    'emoji' => '🛣️',
-                    'message' => $this->state(PlayerState::class)->name.' built a road',
+                    'emoji' => '📈',
+                    'message' => $this->state(PlayerState::class)->name.' hid '.$this->amount.' grain in a hidden stash',
                 ];
             }
 
             return $space;
         })->toArray();
 
-        $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key())
-            ->modifier_data[$this->player_id]['skills'];
-
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
         $actions_state->modifier_data = collect($actions_state->modifier_data)
-            ->map(function ($data, $player_id) use ($player_skills) {
+            ->map(function ($data, $player_id) {
                 if ($player_id !== $this->player_id) {
                     return $data;
                 }
 
-                $builder_level = $player_skills['Builder'];
-                $action_cost = 4 - $builder_level;
-
-                $data['actions'] = $data['actions'] - $action_cost;
+                $data['grain'] -= $this->amount;
 
                 return $data;
             })->toArray();
@@ -108,5 +94,6 @@ class PlayerBuiltRoad extends Event
     public function handle()
     {
         $this->game()->modifiers->each(fn ($modifier) => $modifier->updateModelWithStateData());
+        $this->game()->teams->each(fn ($team) => $team->updateModelWithStateData());
     }
 }

@@ -13,7 +13,7 @@ use App\States\GameState;
 use App\States\PlayerState;
 use Thunk\Verbs\Event;
 
-class PlayerBuiltRoad extends Event
+class PlayerBuiltTrapInFarm extends Event
 {
     use HasActivePlayer, HasGame, HasModifier, HasTeam;
 
@@ -21,23 +21,21 @@ class PlayerBuiltRoad extends Event
 
     public int $y_index;
 
+    public int $level;
+
     public function validate()
     {
         $game = $this->state(GameState::class);
 
         // Player has actions
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
-
-        $this->assert(
-            isset($actions_state->modifier_data[$this->player_id]),
-            'Player actions have not been initialized',
-        );
-
         $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
+        $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key())->modifier_data[$this->player_id]['skills'];
+        $action_cost = 4 - $player_skills['Builder'];
 
         $this->assert(
-            $player_actions > 0,
-            'Player does not have enough actions to build road',
+            $player_actions >= $action_cost,
+            'Player does not have enough actions to build trap',
         );
 
         // Player is in correct space
@@ -55,17 +53,18 @@ class PlayerBuiltRoad extends Event
             'Player is not on the specified space',
         );
 
-        // Space had no road
+        // Player builder level matches $this->level
+        $skills_state = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\FarmSkills::key());
+        $player_builder_level = $skills_state->modifier_data[$this->player_id]['skills']['Builder'];
+
         $this->assert(
-            ($player_space['road_exists'] ?? false) === false,
-            'Space already has a road',
+            $player_builder_level === $this->level,
+            'Trap level does not match player\'s Builder skill level',
         );
 
-        // Space was not swamp, mountain, volcano, or ash heap
-        $valid_types = ['grass', 'fertile_ashland', 'mountain', 'desert'];
         $this->assert(
-            in_array($player_space['type'], $valid_types),
-            'Can only build road on '.implode(', ', $valid_types).', not '.$player_space['type'],
+            ($player_space['trap_status']['level'] ?? null) === null || $player_space['trap_status']['level'] === 0,
+            'Space already has a trap',
         );
     }
 
@@ -75,11 +74,13 @@ class PlayerBuiltRoad extends Event
 
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
-                $space['road_exists'] = true;
+                $space['trap_status']['level'] = $this->level;
+                $space['trap_status']['owner_team_id'] = $this->team_id;
+                $space['trap_status']['status'] = 'set';
                 $space['history'][] = [
                     'round_number' => $game->currentChallenge()->round_number,
-                    'emoji' => '🛣️',
-                    'message' => $this->state(PlayerState::class)->name.' built a road',
+                    'emoji' => '🪤',
+                    'message' => $this->state(PlayerState::class)->name.' built a trap',
                 ];
             }
 

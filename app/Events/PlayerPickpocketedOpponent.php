@@ -14,7 +14,7 @@ use App\States\PlayerState;
 use App\States\TeamState;
 use Thunk\Verbs\Event;
 
-class PlayerWithdrewFromSilo extends Event
+class PlayerPickpocketedOpponent extends Event
 {
     use HasActivePlayer, HasGame, HasModifier, HasTeam;
 
@@ -24,12 +24,20 @@ class PlayerWithdrewFromSilo extends Event
 
     public int $amount;
 
+    public int $target_player_id;
+
+    // for computing only
+    public int $action_cost;
+
     public function validate()
     {
         $game = $this->state(GameState::class);
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
+        $skills_state = $game->modifiers()->firstWhere('class_key', FarmSkills::key());
         $player_data = $actions_state->modifier_data[$this->player_id];
+        $player_skills = $skills_state->modifier_data[$this->player_id]['skills'];
+        $target_player = PlayerState::load($this->target_player_id);
 
         // Player is in correct space
         $player_space = collect($map_state->modifier_data)
@@ -53,50 +61,47 @@ class PlayerWithdrewFromSilo extends Event
             'Player does not have enough capacity (has '.$player_grain.'/'.$player_capacity.', trying to withdraw '.$this->amount.')',
         );
 
-        // Silo is in space
-        $silo_level = $player_space['silo_status']['level'] ?? null;
+        // Opponent is on space
         $this->assert(
-            $silo_level !== null && $silo_level > 0,
-            'There is no silo in this space',
+            in_array($this->target_player_id, $player_space['player_ids']),
+            'Opponent is not on the same space',
         );
 
-        // Silo has enough grain to withdraw
-        $silo_amount = $player_space['silo_status']['amount'];
+        // Opponent is on a different team
         $this->assert(
-            $silo_amount >= $this->amount,
-            'Silo does not have enough grain (has '.$silo_amount.', trying to withdraw '.$this->amount.')',
+            $target_player->team_id !== $this->team_id,
+            'Opponent is on the same team',
         );
 
-        $silo_belongs_to_player = $player_space['silo_status']['owner_team_id'] === $this->team_id;
-
-        if ($silo_belongs_to_player) {
-            return;
-        }
-
-        $player_thief_level = $game->modifiers()->firstWhere('class_key', FarmSkills::key())->modifier_data[$this->player_id]['skills']['Thief'];
-
+        // Player has enough actions to pickpocket
+        $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
+        $this->action_cost = 4 - $player_skills['Thief'];
         $this->assert(
-            $player_thief_level >= 1,
-            'Player must be a thief the withdraw grain from a silo they do not own',
+            $player_actions >= $this->action_cost,
+            'Player does not have enough actions to pickpocket',
+        );
+
+        // opponent has that much grain
+        $target_grain = $actions_state->modifier_data[$this->target_player_id]['grain'];
+        $this->assert(
+            $target_grain >= $this->amount,
+            'Opponent does not have enough grain to pickpocket',
         );
     }
 
     public function apply(GameState $game)
     {
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
-        $player_state = $this->state(PlayerState::class);
-        $team_state = $this->state(TeamState::class);
-        $silo_data = collect($map_state->modifier_data)
-            ->filter(fn ($space) => $space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index)
-            ->first()['silo_status'];
 
-        $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
+        $thief_state = $this->state(PlayerState::class);
+        $target_state = PlayerState::load($this->target_player_id);
+
+        $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game, $thief_state, $target_state) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
-                $space['silo_status']['amount'] -= $this->amount;
                 $space['history'][] = [
                     'round_number' => $game->currentChallenge()->round_number,
-                    'emoji' => '📉',
-                    'message' => $this->state(PlayerState::class)->name.' withdrew '.$this->amount.' grain from silo',
+                    'emoji' => '🦹',
+                    'message' => $thief_state->name.' pickpocketed '.$target_state->name.' and stole '.$this->amount.' grain',
                 ];
             }
 
@@ -106,35 +111,53 @@ class PlayerWithdrewFromSilo extends Event
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
         $actions_state->modifier_data = collect($actions_state->modifier_data)
             ->map(function ($data, $player_id) {
-                if ($player_id !== $this->player_id) {
+                $is_thief = $player_id === $this->player_id;
+                $is_target = $player_id === $this->target_player_id;
+
+                if (! $is_thief && ! $is_target) {
                     return $data;
                 }
 
-                $data['grain'] += $this->amount;
+                if ($is_thief) {
+                    $data['grain'] += $this->amount;
+                    $data['actions'] -= $this->action_cost;
+                }
+
+                if ($is_target) {
+                    $data['grain'] -= $this->amount;
+                }
 
                 return $data;
             })->toArray();
 
-        if ($silo_data['owner_team_id'] === $this->team_id) {
-            return;
+        $thief_team = $this->state(TeamState::class);
+        $target_team = $target_state->team();
+
+        $thief_team_description = 'One of you scoundrels pickpocketed '.$target_state->name;
+        $target_team_description = 'Some scoundrel pickpocketed '.$target_state->name;
+
+        if ($this->amount === 0) {
+            $thief_team_description .= ' but they had empty pockets.';
+            $target_team_description .= ' but they had empty pockets.';
         }
 
-        $silo_owner_team = TeamState::load($silo_data['owner_team_id']);
-        $silo_owner_team->addToScoreHistory(
-            icon: '😈',
-            points: -$this->amount,
-            description: 'Some scoundrel withdrew '.$this->amount.' grain from your silo.',
-        );
-        $team_state->addToScoreHistory(
-            icon: '😈',
+        $thief_team->addToScoreHistory(
+            icon: '🦹',
             points: $this->amount,
-            description: 'A scoundrel on your team withdrew '.$this->amount.' grain from a silo you do not own.',
+            description: $thief_team_description,
+        );
+
+        $target_team->addToScoreHistory(
+            icon: '🦹',
+            points: -$this->amount,
+            description: $target_team_description,
         );
     }
 
     public function handle()
     {
         $this->game()->modifiers->each(fn ($modifier) => $modifier->updateModelWithStateData());
+
         $this->game()->teams->each(fn ($team) => $team->updateModelWithStateData());
     }
 }

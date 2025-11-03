@@ -6,7 +6,9 @@ use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasTeam;
+use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmMap;
+use App\Modifiers\Classes\FarmSkills;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
@@ -26,17 +28,22 @@ class PlayerSeizedFarmProperty extends Event
 
     public ?int $grain_transferred = null;
 
+    // for computation only
+
+    protected int $action_cost;
+
     public function validate()
     {
         $game = $this->state(GameState::class);
 
-        // Player has actions
-        $actions_state = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\FarmActions::key());
-        $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
+        $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key())->modifier_data[$this->player_id]['skills'];
+
+        $player_actions = $game->modifiers()->firstWhere('class_key', FarmActions::key())->modifier_data[$this->player_id]['actions'];
+        $this->action_cost = 4 - $player_skills['Brute'];
 
         $this->assert(
-            $player_actions > 0,
-            'Player does not have enough actions',
+            $player_actions['actions'] >= $this->action_cost,
+            'Player does not have enough actions to seize property',
         );
 
         // Player is in correct space
@@ -77,26 +84,6 @@ class PlayerSeizedFarmProperty extends Event
             $property_owner === $this->previous_owner_team_id,
             'Previous owner team ID does not match actual property owner',
         );
-
-        // Player (and teammates on space) have enough brute strength to seize property
-        $skills_state = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\FarmSkills::key());
-        $players_on_space = collect($player_space['player_ids'])
-            ->map(fn ($pid) => \App\States\PlayerState::load($pid));
-
-        $property_level = $player_space[$this->property_type.'_status']['level'];
-
-        // Calculate attack power (player's team members on space)
-        $attackers = $players_on_space->filter(fn ($p) => $p->team_id === $this->team_id);
-        $attack_power = $attackers->sum(fn ($p) => $skills_state->modifier_data[$p->id]['skills']['Brute']);
-
-        // Calculate defense power (property level + defenders' brute strength)
-        $defenders = $players_on_space->filter(fn ($p) => $p->team_id === $property_owner);
-        $defense_power = $property_level - 1 + $defenders->sum(fn ($p) => $skills_state->modifier_data[$p->id]['skills']['Brute']);
-
-        $this->assert(
-            $attack_power > $defense_power,
-            'Not enough brute strength to seize property (Attack: '.$attack_power.', Defense: '.$defense_power.')',
-        );
     }
 
     public function apply(GameState $game)
@@ -117,6 +104,23 @@ class PlayerSeizedFarmProperty extends Event
 
             return $space;
         })->toArray();
+
+        if (! isset($this->action_cost)) {
+            $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key())->modifier_data[$this->player_id]['skills'];
+            $this->action_cost = 4 - $player_skills['Brute'];
+        }
+
+        $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
+        $actions_state->modifier_data = collect($actions_state->modifier_data)
+            ->map(function ($data, $player_id) {
+                if ($player_id !== $this->player_id) {
+                    return $data;
+                }
+
+                $data['actions'] -= $this->action_cost;
+
+                return $data;
+            })->toArray();
 
         if (! $this->grain_transferred) {
             return;

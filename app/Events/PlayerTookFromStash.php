@@ -8,21 +8,18 @@ use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasTeam;
 use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmMap;
-use App\Modifiers\Classes\FarmSkills;
 use App\States\GameState;
 use App\States\PlayerState;
 use App\States\TeamState;
 use Thunk\Verbs\Event;
 
-class PlayerWithdrewFromSilo extends Event
+class PlayerTookFromStash extends Event
 {
     use HasActivePlayer, HasGame, HasModifier, HasTeam;
 
     public int $x_index;
 
     public int $y_index;
-
-    public int $amount;
 
     public function validate()
     {
@@ -45,39 +42,11 @@ class PlayerWithdrewFromSilo extends Event
             'Player is not on the specified space',
         );
 
-        // Player has enough capacity
-        $player_grain = $player_data['grain'];
-        $player_capacity = $player_data['grain_capacity'];
+        // Stash is in space
+        $stash_exists = $player_space['stash_status']['amount'] > 0 || $player_space['stash_status']['player_owner_id'] !== null;
         $this->assert(
-            $player_grain + $this->amount <= $player_capacity,
-            'Player does not have enough capacity (has '.$player_grain.'/'.$player_capacity.', trying to withdraw '.$this->amount.')',
-        );
-
-        // Silo is in space
-        $silo_level = $player_space['silo_status']['level'] ?? null;
-        $this->assert(
-            $silo_level !== null && $silo_level > 0,
-            'There is no silo in this space',
-        );
-
-        // Silo has enough grain to withdraw
-        $silo_amount = $player_space['silo_status']['amount'];
-        $this->assert(
-            $silo_amount >= $this->amount,
-            'Silo does not have enough grain (has '.$silo_amount.', trying to withdraw '.$this->amount.')',
-        );
-
-        $silo_belongs_to_player = $player_space['silo_status']['owner_team_id'] === $this->team_id;
-
-        if ($silo_belongs_to_player) {
-            return;
-        }
-
-        $player_thief_level = $game->modifiers()->firstWhere('class_key', FarmSkills::key())->modifier_data[$this->player_id]['skills']['Thief'];
-
-        $this->assert(
-            $player_thief_level >= 1,
-            'Player must be a thief the withdraw grain from a silo they do not own',
+            $stash_exists,
+            'There is no stash in this space',
         );
     }
 
@@ -86,17 +55,31 @@ class PlayerWithdrewFromSilo extends Event
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
         $player_state = $this->state(PlayerState::class);
         $team_state = $this->state(TeamState::class);
-        $silo_data = collect($map_state->modifier_data)
+        $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
+        $player_data = $actions_state->modifier_data[$this->player_id];
+        $stash_data = collect($map_state->modifier_data)
             ->filter(fn ($space) => $space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index)
-            ->first()['silo_status'];
+            ->first()['stash_status'];
 
-        $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
+        $stash_owner_player_id = $stash_data['player_owner_id'];
+        if ($stash_owner_player_id) {
+            $stash_owner_player = PlayerState::load($stash_owner_player_id);
+        } else {
+            $stash_owner_player = null;
+        }
+
+        $player_capacity = $player_data['grain_capacity'] - $player_data['grain'];
+        $stash_amount = $stash_data['amount'];
+
+        $amount_to_take = min($player_capacity, $stash_amount);
+
+        $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game, $amount_to_take) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
-                $space['silo_status']['amount'] -= $this->amount;
+                $space['stash_status']['amount'] -= $amount_to_take;
                 $space['history'][] = [
                     'round_number' => $game->currentChallenge()->round_number,
                     'emoji' => '📉',
-                    'message' => $this->state(PlayerState::class)->name.' withdrew '.$this->amount.' grain from silo',
+                    'message' => $this->state(PlayerState::class)->name.' took '.$amount_to_take.' grain from a hidden stash',
                 ];
             }
 
@@ -105,30 +88,36 @@ class PlayerWithdrewFromSilo extends Event
 
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
         $actions_state->modifier_data = collect($actions_state->modifier_data)
-            ->map(function ($data, $player_id) {
+            ->map(function ($data, $player_id) use ($amount_to_take) {
                 if ($player_id !== $this->player_id) {
                     return $data;
                 }
 
-                $data['grain'] += $this->amount;
+                $data['grain'] += $amount_to_take;
 
                 return $data;
             })->toArray();
 
-        if ($silo_data['owner_team_id'] === $this->team_id) {
+        if ($stash_owner_player?->team_id === $this->team_id) {
             return;
         }
 
-        $silo_owner_team = TeamState::load($silo_data['owner_team_id']);
-        $silo_owner_team->addToScoreHistory(
-            icon: '😈',
-            points: -$this->amount,
-            description: 'Some scoundrel withdrew '.$this->amount.' grain from your silo.',
+        $player_team = $this->state(TeamState::class);
+
+        $player_team->addToScoreHistory(
+            icon: '🤫',
+            points: $amount_to_take,
+            description: $this->state(PlayerState::class)->name.' took '.$amount_to_take.' grain from a hidden stash.',
         );
-        $team_state->addToScoreHistory(
-            icon: '😈',
-            points: $this->amount,
-            description: 'A scoundrel on your team withdrew '.$this->amount.' grain from a silo you do not own.',
+
+        if (! $stash_owner_player) {
+            return;
+        }
+
+        $stash_owner_player->team()->addToScoreHistory(
+            icon: '🤫',
+            points: -$amount_to_take,
+            description: $this->state(PlayerState::class)->name.' took '.$amount_to_take.' grain from a hidden stash.',
         );
     }
 

@@ -40,6 +40,18 @@
       @include('components.game-components.custom-form-elements.farm-space-elements.field')
     </symbol>
 
+    <symbol id="obj-field-mature_1" viewBox="0 0 880 880">
+      @include('components.game-components.custom-form-elements.farm-space-elements.field')
+    </symbol>
+
+    <symbol id="obj-field-mature_2" viewBox="0 0 880 880">
+      @include('components.game-components.custom-form-elements.farm-space-elements.field')
+    </symbol>
+
+    <symbol id="obj-field-mature_3" viewBox="0 0 880 880">
+      @include('components.game-components.custom-form-elements.farm-space-elements.field')
+    </symbol>
+
     <symbol id="obj-field-rotted" viewBox="0 0 880 880">
       @include('components.game-components.custom-form-elements.farm-space-elements.field')
     </symbol>
@@ -79,6 +91,16 @@
     <symbol id="obj-player" viewBox="0 0 100 100">
       <circle cx="50" cy="35" r="15" />
       <rect x="35" y="50" width="30" height="35" rx="8" />
+    </symbol>
+
+    <!-- Trap -->
+    <symbol id="obj-trap" viewBox="0 0 512 512">
+      @include('components.game-components.custom-form-elements.farm-space-elements.trap')
+    </symbol>
+
+    <!-- Wheat Sack / Stash -->
+    <symbol id="obj-wheat-sack" viewBox="0 0 467 512.504">
+      @include('components.game-components.custom-form-elements.farm-space-elements.stash')
     </symbol>
   </defs>
 </svg>

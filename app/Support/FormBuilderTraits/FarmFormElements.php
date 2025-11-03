@@ -4,6 +4,7 @@ namespace App\Support\FormBuilderTraits;
 
 use App\Models\Player;
 use App\Models\Team;
+use Illuminate\Support\Collection;
 
 trait FarmFormElements
 {
@@ -11,8 +12,8 @@ trait FarmFormElements
         array $spaces,
         Player $player,
         array $accessible_spaces,
-        bool $can_move,
         array $scoutable_spaces,
+        int $actions,
         ?array $player_space = null,
     ) {
         $this->elements[] = [
@@ -21,11 +22,11 @@ trait FarmFormElements
             'spaces' => $spaces,
             'player_space' => $player_space,
             'accessible_spaces' => $accessible_spaces,
-            'can_move' => $can_move,
             'property_name' => 'selected_space',
             'validation_rules' => 'required|in:'.implode(',', $accessible_spaces),
             'validation_messages' => ['required' => 'Space is required', 'in' => 'Space is invalid'],
             'scoutable_spaces' => $scoutable_spaces,
+            'actions' => $actions,
         ];
 
         return $this;
@@ -38,20 +39,27 @@ trait FarmFormElements
         array $farm_map,
         bool $can_plant_field,
         bool $can_harvest_field,
+        bool $can_burn_field,
         bool $can_build_silo,
         bool $silo_exists,
         bool $can_upgrade_silo,
         bool $can_withdraw_silo,
         bool $can_deposit_silo,
         bool $can_build_road,
+        bool $can_build_wall,
+        bool $can_build_trap,
+        bool $can_build_watchtower,
+        bool $can_create_stash,
+        bool $can_see_stash,
+        bool $can_deposit_stash,
+        Collection $pickpocketable_opponents,
         Player $player,
         array $all_leader_ids,
-        array $field_seize_data,
         array $silo_seize_data,
         bool $can_see_history,
     ) {
         // Generate sprite configuration for the player's current space
-        $sprite_config = $this->buildSpaceSpriteConfig($player_space, $player);
+        $sprite_config = $this->buildSpaceSpriteConfig($player_space, $player, $can_see_stash);
 
         $this->elements[] = [
             'type' => 'farm_actions',
@@ -63,46 +71,60 @@ trait FarmFormElements
             'farm_map' => $farm_map,
             'can_plant_field' => $can_plant_field,
             'can_harvest_field' => $can_harvest_field,
+            'can_burn_field' => $can_burn_field,
             'can_build_silo' => $can_build_silo,
             'can_build_road' => $can_build_road,
+            'can_build_wall' => $can_build_wall,
+            'can_build_trap' => $can_build_trap,
+            'can_build_watchtower' => $can_build_watchtower,
             'sprite_config' => $sprite_config,
             'leader_ids' => $all_leader_ids,
-            'field_seize_data' => $field_seize_data,
             'silo_seize_data' => $silo_seize_data,
             'can_see_history' => $can_see_history,
+            'pickpocketable_opponents' => $pickpocketable_opponents,
+            'can_create_stash' => $can_create_stash,
+            'can_see_stash' => $can_see_stash,
+            'can_deposit_stash' => $can_deposit_stash,
         ];
 
         if ($player_space['field_status']['level'] > 0) {
-
-            $seize_data_table = [
-                ['Defense from level', $player_space['field_status']['level'] - 1],
-                ['Defense from owner team', $field_seize_data['defense_power_from_defenders']],
-                ['Total defense', $field_seize_data['defense_power']],
-            ];
-
-            $defense_names = $field_seize_data['defender_names'] ? ' from '.$field_seize_data['defender_names'] : ' from players';
-            $defense_text = '🛡️ '.$field_seize_data['defense_power'].' defense: '.($player_space['field_status']['level'] - 1).' from level + '.$field_seize_data['defense_power_from_defenders'].$defense_names;
+            $is_mature = $player_space['field_status']['stage'] === 'mature_1' || $player_space['field_status']['stage'] === 'mature_2' || $player_space['field_status']['stage'] === 'mature_3';
+            $stage_display = str_starts_with($player_space['field_status']['stage'], 'mature_')
+                ? 'mature'
+                : $player_space['field_status']['stage'];
 
             $this->divider();
             $this->title('Field')
                 ->subtitle('📈 Level: '.$player_space['field_status']['level'])
                 ->subtitle('📜 Owner: '.Team::find($player_space['field_status']['owner_team_id'])->name)
-                ->subtitle('🌱 Stage: '.$player_space['field_status']['stage'])
-                ->subtitle($defense_text)
-                ->when($player_space['field_status']['owner_team_id'] !== $player->team_id, function ($builder) use ($field_seize_data) {
-                    $builder->subtitle('⚔️ '.$field_seize_data['attack_power_from_attackers'].' attack from: '.$field_seize_data['attacker_names']);
-                })
-                ->when($player_space['field_status']['stage'] === 'mature', function ($builder) use ($player_space, $can_harvest_field) {
+                ->subtitle('🌱 Stage: '.$stage_display)
+                ->when($is_mature, function ($builder) use ($player_space, $can_harvest_field, $player_skills) {
+                    $harvest_cost = match ($player_skills['Farmer']) {
+                        0 => '💪💪💪',
+                        1 => '💪💪',
+                        2 => '💪',
+                        3 => '',
+                        default => '',
+                    };
                     $builder->subtitle('🌾 Grain: '.$player_space['field_status']['quantity'])
-                        ->when($can_harvest_field, function ($builder) {
+                        ->when($can_harvest_field, function ($builder) use ($harvest_cost) {
                             $builder->buttonGroup()
-                                ->button('Harvest 💪', 'harvestField')
+                                ->button('Harvest '.$harvest_cost, 'harvestField')
                                 ->endGroup();
                         });
                 })
-                ->when($field_seize_data['can_seize'], function ($builder) {
+                ->when($can_burn_field, function ($builder) use ($player_skills) {
+                    $burn_cost = 4 - max($player_skills['Thief'], $player_skills['Brute']);
+
+                    $burn_cost = match ($burn_cost) {
+                        1 => '💪',
+                        2 => '💪💪',
+                        3 => '💪💪💪',
+                        default => '',
+                    };
+
                     $builder->buttonGroup()
-                        ->button('Seize 💪', 'seizeField')
+                        ->button('Burn '.$burn_cost, 'burnField')
                         ->endGroup();
                 });
         }
@@ -116,19 +138,14 @@ trait FarmFormElements
             $withdrawable = min($amount_in_silo, $player_capacity - $player_grain);
             $depositable = min($player_grain, $silo_capacity - $amount_in_silo);
 
-            $can_seize = $silo_seize_data['can_seize'];
-
-            $defense_names = $silo_seize_data['defender_names'] ? ' from '.$silo_seize_data['defender_names'] : ' from players';
-            $defense_text = '🛡️ '.$silo_seize_data['defense_power'].' defense: '.($player_space['silo_status']['level'] - 1).' from level + '.$silo_seize_data['defense_power_from_defenders'].$defense_names;
-
             $this->divider()
                 ->title('Silo')
                 ->subtitle('📈 Level: '.$player_space['silo_status']['level'])
                 ->subtitle('📜 Owner: '.Team::find($player_space['silo_status']['owner_team_id'])->name)
                 ->subtitle('🌾 Amount: '.$amount_in_silo.' / '.$silo_capacity)
-                ->subtitle($defense_text)
+                ->subtitle($silo_seize_data['defense_description'])
                 ->when($player_space['silo_status']['owner_team_id'] !== $player->team_id, function ($builder) use ($silo_seize_data) {
-                    $builder->subtitle('⚔️ '.$silo_seize_data['attack_power_from_attackers'].' attack from: '.$silo_seize_data['attacker_names']);
+                    $builder->subtitle($silo_seize_data['attack_description']);
                 })
                 ->when($can_withdraw_silo, function ($builder) use ($withdrawable) {
                     $this->select(
@@ -165,23 +182,109 @@ trait FarmFormElements
                         ->button('Upgrade 💪', 'upgradeSilo')
                         ->endGroup();
                 })
-                ->when($can_seize, function ($builder) {
+                ->when($silo_seize_data['can_seize'], function ($builder) use ($player_skills) {
+                    $cost_prefix = match ($player_skills['Brute']) {
+                        1 => '💪💪💪',
+                        2 => '💪💪',
+                        3 => '💪',
+                        default => '',
+                    };
+
                     $this->buttonGroup()
-                        ->button('Seize 💪', 'seizeSilo')
+                        ->button($cost_prefix.' Seize', 'seizeSilo')
                         ->endGroup();
                 });
         }
 
-        if ($can_plant_field || $can_build_silo || $can_build_road) {
+        if ($player_space['trap_status']['level'] > 0) {
+            $this->divider()
+                ->title('Trap')
+                ->when($player_space['trap_status']['status'] === 'set', function ($builder) use ($player_space) {
+                    $builder
+                        ->subtitle('📈 Level: '.$player_space['trap_status']['level'].' (removes '.$player_space['trap_status']['level'].' actions from opponent when triggered)')
+                        ->subtitle('📜 Owner: '.Team::find($player_space['trap_status']['owner_team_id'])->name)
+                        ->subtitle('🪤 Status: '.$player_space['trap_status']['status']);
+                })
+                ->when($player_space['trap_status']['status'] === 'sprung', function ($builder) {
+                    $builder
+                        ->subtitle('Trap sprung, and will disappear after this round.');
+                });
+        }
+
+        if ($can_see_stash) {
+            $amount_in_stash = $player_space['stash_status']['amount'];
+            $player_grain = $player_actions['grain'];
+            $stash_owner_player = Player::find($player_space['stash_status']['player_owner_id']);
+
+            $this->divider()
+                ->title('Hidden stash')
+                ->subtitle('📜 Created by: '.($stash_owner_player?->name ?: 'A brave wanderer'))
+                ->subtitle('🌾 Amount: '.$amount_in_stash)
+                ->when($player_space['stash_status']['amount'] > 0, function ($builder) {
+                    $builder->buttonGroup()
+                        ->button('Take stash', 'stealStash')
+                        ->endGroup();
+                })
+                ->when($can_deposit_stash, function ($builder) use ($player_grain) {
+                    $builder->select(
+                        label: 'Deposit amount',
+                        property_name: 'deposit_stash_amount',
+                        validation_rules: 'required|in:'.implode(',', collect(range(1, $player_grain))->toArray()),
+                        validation_messages: ['required' => 'Amount is required', 'numeric' => 'Amount must be a number', 'min' => 'Amount must be greater than 0'],
+                        options: collect(range(1, $player_grain))->mapWithKeys(function ($amount) {
+                            return [$amount => $amount];
+                        })->toArray(),
+                        placeholder: 'Select an amount...',
+                    )
+                        ->buttonGroup()
+                        ->button('Stash grain', 'depositStash')
+                        ->endGroup();
+                });
+        }
+
+        if ($can_plant_field || $can_build_silo || $can_build_road || $can_build_wall || $can_build_trap || $can_build_watchtower || $can_create_stash) {
+            $plant_cost = match ($player_skills['Farmer']) {
+                1 => '💪💪💪',
+                2 => '💪💪',
+                3 => '💪',
+                default => '',
+            };
+
+            $build_cost = match ($player_skills['Builder']) {
+                1 => '💪💪💪',
+                2 => '💪💪',
+                3 => '💪',
+                default => '',
+            };
+
+            $create_stash_cost = match (max($player_skills['Thief'], $player_skills['Scout'])) {
+                1 => '💪💪💪',
+                2 => '💪💪',
+                3 => '💪',
+                default => '',
+            };
+
             $this->buttonGroup()
-                ->when($can_plant_field, function ($builder) {
-                    $builder->button('Plant field 💪', 'plantField');
+                ->when($can_plant_field, function ($builder) use ($plant_cost) {
+                    $builder->button('Plant field '.$plant_cost, 'plantField');
                 })
-                ->when($can_build_silo, function ($builder) {
-                    $builder->button('Build silo 💪', 'buildSilo');
+                ->when($can_build_silo, function ($builder) use ($build_cost) {
+                    $builder->button('Build silo '.$build_cost, 'buildSilo');
                 })
-                ->when($can_build_road, function ($builder) {
-                    $builder->button('Build road 💪', 'buildRoad');
+                ->when($can_build_road, function ($builder) use ($build_cost) {
+                    $builder->button('Build road '.$build_cost, 'buildRoad');
+                })
+                ->when($can_build_wall, function ($builder) use ($build_cost) {
+                    $builder->button('Build wall '.$build_cost, 'buildWall');
+                })
+                ->when($can_build_trap, function ($builder) use ($build_cost) {
+                    $builder->button('Build trap '.$build_cost, 'buildTrap');
+                })
+                ->when($can_build_watchtower, function ($builder) use ($build_cost) {
+                    $builder->button('Build watchtower '.$build_cost, 'buildWatchtower');
+                })
+                ->when($can_create_stash, function ($builder) use ($create_stash_cost) {
+                    $builder->button('Create hidden stash '.$create_stash_cost, 'createStash');
                 })
                 ->endGroup();
         }
@@ -192,7 +295,7 @@ trait FarmFormElements
     /**
      * Build sprite configuration for a space
      */
-    protected function buildSpaceSpriteConfig(array $player_space, Player $player): array
+    protected function buildSpaceSpriteConfig(array $player_space, Player $player, bool $can_see_stash = false): array
     {
         if (empty($player_space)) {
             return [
@@ -208,16 +311,39 @@ trait FarmFormElements
             'overlays' => [],
         ];
 
+        // Add wall overlay if present (should be first for lowest z-index)
+        $walls_exist = $player_space['walls_exist'] ?? false;
+        if ($walls_exist) {
+            $config['overlays'][] = $this->buildWallOverlay($walls_exist);
+        }
+
         // Add road overlay if present
-        $road_status = $player_space['road_status'] ?? [];
-        if (! empty($road_status['level']) || ! empty($road_status['owner_team_id'])) {
-            $config['overlays'][] = $this->buildRoadOverlay($road_status);
+        $road_exists = $player_space['road_exists'] ?? [];
+        if ($road_exists) {
+            $config['overlays'][] = $this->buildRoadOverlay($road_exists);
+        }
+
+        // Add watchtower overlay if present
+        $watchtower_exists = $player_space['watchtower_exists'] ?? false;
+        if ($watchtower_exists) {
+            $config['overlays'][] = $this->buildWatchtowerOverlay($watchtower_exists);
+        }
+
+        // Add trap overlay if present
+        $trap_exists = $player_space['trap_status']['level'] ?? false;
+        if ($trap_exists) {
+            $config['overlays'][] = $this->buildTrapOverlay($trap_exists);
         }
 
         // Add silo overlay if present
         $silo_status = $player_space['silo_status'] ?? [];
         if (! empty($silo_status['owner_team_id'])) {
             $config['overlays'][] = $this->buildSiloOverlay($silo_status);
+        }
+
+        // Add wheat sack overlay if player can see stash
+        if ($can_see_stash) {
+            $config['overlays'][] = $this->buildWheatSackOverlay();
         }
 
         // Add field overlay if present
@@ -250,9 +376,27 @@ trait FarmFormElements
     }
 
     /**
+     * Build wall overlay configuration
+     */
+    protected function buildWallOverlay(bool $walls_exist): array
+    {
+        // Wall spans horizontally across the entire space, behind everything
+        return [
+            'type' => 'wall',
+            'x' => 0, // Start from left edge
+            'y' => 820, // Just above the road (road starts at 890)
+            'scaleX' => 16, // Stretch full width (1600 / 100)
+            'scaleY' => 0.6, // Thinner than road
+            'rotate' => 0,
+            'anchor' => 'top-left',
+            'z' => 1, // Behind everything except background
+        ];
+    }
+
+    /**
      * Build road overlay configuration
      */
-    protected function buildRoadOverlay(array $road_status): array
+    protected function buildRoadOverlay(bool $road_exists): array
     {
         // Road spans horizontally across the entire space
         return [
@@ -264,6 +408,38 @@ trait FarmFormElements
             'rotate' => 0,
             'anchor' => 'top-left',
             'z' => 500, // Way above everything to ensure visibility
+        ];
+    }
+
+    /**
+     * Build watchtower overlay configuration
+     */
+    protected function buildWatchtowerOverlay(bool $watchtower_exists): array
+    {
+        return [
+            'type' => 'watchtower',
+            'x' => 30, // Far left, before the silo (which is at 80)
+            'y' => 650, // Tall tower extending upward
+            'scale' => 0.5,
+            'rotate' => 0,
+            'anchor' => 'bottom',
+            'z' => 16,
+        ];
+    }
+
+    /**
+     * Build trap overlay configuration
+     */
+    protected function buildTrapOverlay($trap_level): array
+    {
+        return [
+            'type' => 'trap',
+            'x' => -5, // Beyond the left edge, bottom area
+            'y' => 770, // Below the watchtower
+            'scale' => 0.19,
+            'rotate' => 0,
+            'anchor' => 'center',
+            'z' => 17,
         ];
     }
 
@@ -280,6 +456,22 @@ trait FarmFormElements
             'rotate' => 0,
             'anchor' => 'bottom',
             'z' => 15,
+        ];
+    }
+
+    /**
+     * Build wheat sack overlay configuration
+     */
+    protected function buildWheatSackOverlay(): array
+    {
+        return [
+            'type' => 'wheat-sack',
+            'x' => 550, // Between silo (80) and players (700-900)
+            'y' => 650, // Ground level
+            'scale' => 0.2,
+            'rotate' => 0,
+            'anchor' => 'bottom',
+            'z' => 18,
         ];
     }
 
@@ -369,17 +561,19 @@ trait FarmFormElements
             return [800, 500];
         }
 
-        // Other players arranged in a circle around the center
+        // Other players arranged in an ellipse, positioned lower than main player
+        // Wider horizontally, narrower vertically to keep them closer to the wall level
         $centerX = 800;
-        $centerY = 500;
-        $radius = 150; // Distance from center
+        $centerY = 580; // Much lower than main player (500)
+        $radiusX = 150; // Horizontal distance from center
+        $radiusY = 30; // Vertical distance from center (small for minimal variation)
 
-        // Calculate angle for this player (distribute evenly in a circle)
-        // Start from top and go clockwise
+        // Calculate angle for this player (distribute evenly in a semi-circle)
+        // Restrict to a smaller arc to minimize vertical spread
         $angle = ($index * 2 * M_PI / max(1, $index + 1)) - (M_PI / 2);
 
-        $x = $centerX + ($radius * cos($angle));
-        $y = $centerY + ($radius * sin($angle));
+        $x = $centerX + ($radiusX * cos($angle));
+        $y = $centerY + ($radiusY * sin($angle));
 
         return [round($x), round($y)];
     }
