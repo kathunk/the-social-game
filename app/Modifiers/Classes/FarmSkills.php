@@ -120,7 +120,7 @@ class FarmSkills extends BaseModifierClass
                     ],
                 )
                     ->buttonGroup()
-                    ->button('Upgrade skill', 'upgradeSkill')
+                    ->button('Upgrade skill', 'upgradeSkill', ['selected_skill_to_upgrade'])
                     ->endGroup();
             })
             ->when(count($affordable_skills) === 0, function ($form) {
