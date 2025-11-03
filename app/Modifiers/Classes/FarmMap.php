@@ -69,6 +69,10 @@ class FarmMap extends BaseModifierClass
                     'amount' => 0,
                     'capacity' => 0,
                 ],
+                'stash_status' => [
+                    'owner_team_id' => null,
+                    'amount' => rand(1, 10) > 9 ? rand(1, 50) : 0,
+                ],
                 'history' => [
                     // [
                     // 'round_number' => 1,
@@ -241,7 +245,7 @@ class FarmMap extends BaseModifierClass
                 'quantity' => $new_field_quantity,
             ];
 
-            if ($space['trap_status']['status'] === 'sprung') {
+            if (isset($space['trap_status']) && $space['trap_status']['status'] === 'sprung') {
                 $space['trap_status'] = [
                     'level' => null,
                     'owner_team_id' => null,

@@ -63,6 +63,11 @@ class PlayerMovedInFarm extends Event
 
     public function apply(GameState $game)
     {
+        // this is just to handle old events :/
+        if (! isset($this->destination_space)) {
+            return;
+        }
+
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
 
         $player_team_id = $this->state(PlayerState::class)->team_id;

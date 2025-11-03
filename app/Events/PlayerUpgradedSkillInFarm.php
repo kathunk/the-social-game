@@ -60,6 +60,11 @@ class PlayerUpgradedSkillInFarm extends Event
 
     public function apply(ModifierState $modifier)
     {
+        // this is just to handle old events :/
+        if ($this->skill_name === 'Porter' || $this->skill_name === 'Tactician' || $this->skill_name === 'Strategist') {
+            return;
+        }
+
         $modifier->modifier_data = collect($modifier->modifier_data)
             ->map(function ($data, $player_id) {
                 if ($player_id !== $this->player_id) {
@@ -73,21 +78,6 @@ class PlayerUpgradedSkillInFarm extends Event
                 return $data;
             })
             ->toArray();
-
-        if ($this->skill_name === 'Porter') {
-            $game_state = $this->state(GameState::class);
-            $actions_state = $game_state->modifiers()->firstWhere('class_key', FarmActions::key());
-            $actions_state->modifier_data = collect($actions_state->modifier_data)
-                ->map(function ($data, $player_id) {
-                    if ($player_id !== $this->player_id) {
-                        return $data;
-                    }
-
-                    $data['grain_capacity'] = $data['grain_capacity'] + 5;
-
-                    return $data;
-                })->toArray();
-        }
     }
 
     public function handle()
