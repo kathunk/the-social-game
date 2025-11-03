@@ -97,5 +97,10 @@
     <symbol id="obj-trap" viewBox="0 0 512 512">
       @include('components.game-components.custom-form-elements.farm-space-elements.trap')
     </symbol>
+
+    <!-- Wheat Sack / Stash -->
+    <symbol id="obj-wheat-sack" viewBox="0 0 467 512.504">
+      @include('components.game-components.custom-form-elements.farm-space-elements.stash')
+    </symbol>
   </defs>
 </svg>

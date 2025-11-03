@@ -2,25 +2,29 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Player;
-use App\States\GameState;
-use App\States\PlayerState;
-use App\States\ModifierState;
-use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerBuiltRoad;
 use App\Events\PlayerBuiltSilo;
-use App\Events\PlayerBuiltWalls;
-use App\Events\PlayerBurnedField;
-use App\Events\PlayerPlantedField;
-use App\Events\PlayerUpgradedSilo;
-use Illuminate\Support\Collection;
-use App\Events\PlayerHarvestedField;
 use App\Events\PlayerBuiltTrapInFarm;
+use App\Events\PlayerBuiltWalls;
 use App\Events\PlayerBuiltWatchtower;
+use App\Events\PlayerBurnedField;
+use App\Events\PlayerCreatedStash;
 use App\Events\PlayerDepositedToSilo;
-use App\Events\PlayerWithdrewFromSilo;
-use App\Events\PlayerSeizedFarmProperty;
+use App\Events\PlayerDepositedToStash;
+use App\Events\PlayerHarvestedField;
 use App\Events\PlayerPickpocketedOpponent;
+use App\Events\PlayerPlantedField;
+use App\Events\PlayerSeizedFarmProperty;
+use App\Events\PlayerTookFromStash;
+use App\Events\PlayerUpgradedSilo;
+use App\Events\PlayerWithdrewFromSilo;
+use App\Models\Player;
+use App\Models\Team;
+use App\States\GameState;
+use App\States\ModifierState;
+use App\States\PlayerState;
+use Illuminate\Support\Collection;
+use Thunk\Verbs\Facades\Verbs;
 
 class FarmActions extends BaseModifierClass
 {
@@ -83,6 +87,9 @@ class FarmActions extends BaseModifierClass
             $player_space['silo_status']['owner_team_id']
         );
 
+        $stash_owner_player = Player::find($player_space['stash_status']['player_owner_id']);
+        $stash_owner_team = $stash_owner_player->team;
+
         return $this->form()
             ->farmActions(
                 player_actions: $player_actions,
@@ -101,6 +108,9 @@ class FarmActions extends BaseModifierClass
                 can_build_wall: $this->canBuildWall($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
                 can_build_trap: $this->canBuildTrap($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
                 can_build_watchtower: $this->canBuildWatchtower($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
+                can_create_stash: $this->canCreateStash($player, $player_space, $player_actions['actions'] ?? 0, $player_skills, $ally_skills, $stash_owner_player, $stash_owner_team),
+                can_see_stash: $this->canSeeStash($player, $player_space, $player_actions['actions'] ?? 0, $player_skills, $ally_skills, $stash_owner_player, $stash_owner_team),
+                can_deposit_stash: $this->canDepositStash($player, $player_space, $player_actions, $stash_owner_player, $stash_owner_team),
                 pickpocketable_opponents: $this->pickpocketableOpponents($player, $player_skills, $player_space, $player_actions['actions'] ?? 0),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
@@ -177,9 +187,7 @@ class FarmActions extends BaseModifierClass
 
     public function allySkillLevelOnSpace(string $skill, array $player_space, array $ally_skills)
     {
-        return collect($ally_skills)
-            ->filter(fn ($s) => $s['skills'][$skill] > 0)
-            ->max();
+        return collect($ally_skills)->max(fn ($s) => $s['skills'][$skill]);
     }
 
     // actions
@@ -417,7 +425,117 @@ class FarmActions extends BaseModifierClass
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
-    
+
+    public function canCreateStash(Player $player, array $player_space, int $player_actions, array $player_skills, array $ally_skills, Player $stash_owner_player, Team $stash_owner_team)
+    {
+        $stash_exists = $player_space['stash_status']['amount'] > 0 || $player_space['stash_status']['player_owner_id'] !== null;
+
+        if ($stash_exists) {
+            return false;
+        }
+
+        $player_is_thief = $player_skills['Thief'] > 0;
+        $player_is_scout = $player_skills['Scout'] > 0;
+
+        $action_cost = 4 - max($player_skills['Thief'], $player_skills['Scout']);
+
+        if ($this->modifier->modifier_data[$player->id]['actions'] < $action_cost) {
+            return false;
+        }
+
+        $ally_thief_level = $this->allySkillLevelOnSpace('Thief', $player_space, $ally_skills);
+        $ally_scout_level = $this->allySkillLevelOnSpace('Scout', $player_space, $ally_skills);
+
+        $can_create_stash = ($player_is_thief && $ally_scout_level && $ally_scout_level > 0)
+            || ($player_is_scout && $ally_thief_level && $ally_thief_level > 0);
+
+        return $can_create_stash;
+    }
+
+    public function createStash(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+
+        PlayerCreatedStash::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function canSeeStash(Player $player, array $player_space, int $actions, array $player_skills, array $ally_skills, Player $stash_owner_player, Team $stash_owner_team)
+    {
+        $stash_exists = $player_space['stash_status']['amount'] > 0 || $player_space['stash_status']['player_owner_id'] !== null;
+
+        if (! $stash_exists) {
+            return false;
+        }
+
+        $stash_belongs_to_ally = $stash_owner_player->team_id === $player->team_id;
+
+        if ($stash_belongs_to_ally) {
+            return true;
+        }
+
+        $player_is_worthy_scout = $player_skills['Scout'] === 3;
+        $ally_is_worthy_scout = $this->allySkillLevelOnSpace('Scout', $player_space, $ally_skills) === 3;
+
+        return $player_is_worthy_scout || $ally_is_worthy_scout;
+    }
+
+    public function stealStash(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+
+        PlayerTookFromStash::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function canDepositStash(Player $player, array $player_space, array $player_actions, Player $stash_owner_player, Team $stash_owner_team)
+    {
+        if ($stash_owner_player->team_id !== $player->team_id) {
+            return false;
+        }
+
+        return ($player_actions['grain'] ?? 0) > 0;
+    }
+
+    public function depositStash(Player $player, array $params)
+    {
+        $player_space = $this->playerSpace($player);
+
+        PlayerDepositedToStash::fire(
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            player_id: $player->id,
+            team_id: $player->team_id,
+            x_index: $player_space['x-index'],
+            y_index: $player_space['y-index'],
+            amount: (int) $params['deposit_stash_amount'],
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
     public function canBurnField(Player $player, array $player_space, array $player_actions, array $player_skills, array $ally_skills)
     {
         $owner_team_id = $player_space['field_status']['owner_team_id'];

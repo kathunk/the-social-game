@@ -5,7 +5,6 @@ namespace App\Events;
 use App\Events\Traits\HasActivePlayer;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
-use App\Modifiers\Classes\FarmActions;
 use App\Modifiers\Classes\FarmSkills;
 use App\States\GameState;
 use App\States\ModifierState;

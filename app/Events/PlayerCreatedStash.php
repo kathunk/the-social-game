@@ -13,7 +13,7 @@ use App\States\GameState;
 use App\States\PlayerState;
 use Thunk\Verbs\Event;
 
-class PlayerBurnedField extends Event
+class PlayerCreatedStash extends Event
 {
     use HasActivePlayer, HasGame, HasModifier, HasTeam;
 
@@ -27,14 +27,11 @@ class PlayerBurnedField extends Event
 
         // Player has actions
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
-        $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key());
-        $thief_skill = $player_skills->modifier_data[$this->player_id]['skills']['Thief'];
-        $brute_skill = $player_skills->modifier_data[$this->player_id]['skills']['Brute'];
-        $action_cost = 4 - max($thief_skill, $brute_skill);
+        $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
 
         $this->assert(
-            $actions_state->modifier_data[$this->player_id]['actions'] >= $action_cost,
-            'Player does not have enough actions to burn field',
+            $player_actions > 0,
+            'Player does not have enough actions to create stash',
         );
 
         // Player is in correct space
@@ -52,11 +49,9 @@ class PlayerBurnedField extends Event
             'Player is not on the specified space',
         );
 
-        // There is a field in the space
-        $field_level = $player_space['field_status']['level'] ?? null;
         $this->assert(
-            $field_level !== null,
-            'There is no field in this space',
+            ($player_space['stash_status']['amount'] ?? null) === 0,
+            'Space already has a stash',
         );
     }
 
@@ -64,21 +59,19 @@ class PlayerBurnedField extends Event
     {
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
 
-        $map_state->modifier_data = collect($map_state->modifier_data)
-            ->map(function ($space) use ($game) {
-                if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
-                    $space['field_status']['stage'] = null;
-                    $space['field_status']['level'] = null;
-                    $space['field_status']['owner_team_id'] = null;
-                    $space['history'][] = [
-                        'round_number' => $game->currentChallenge()->round_number,
-                        'emoji' => '🔥',
-                        'message' => $this->state(PlayerState::class)->name.' burned a field',
-                    ];
-                }
+        $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
+            if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
+                $space['stash_status']['player_owner_id'] = $this->player_id;
+                $space['stash_status']['amount'] = 0;
+                $space['history'][] = [
+                    'round_number' => $game->currentChallenge()->round_number,
+                    'emoji' => '🤫',
+                    'message' => $this->state(PlayerState::class)->name.' hid a stash',
+                ];
+            }
 
-                return $space;
-            })->toArray();
+            return $space;
+        })->toArray();
 
         $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key())
             ->modifier_data[$this->player_id]['skills'];
@@ -91,8 +84,8 @@ class PlayerBurnedField extends Event
                 }
 
                 $thief_level = $player_skills['Thief'];
-                $brute_level = $player_skills['Brute'];
-                $action_cost = 4 - max($thief_level, $brute_level);
+                $scout_level = $player_skills['Scout'];
+                $action_cost = 4 - max($thief_level, $scout_level);
 
                 $data['actions'] = $data['actions'] - $action_cost;
 
@@ -103,6 +96,5 @@ class PlayerBurnedField extends Event
     public function handle()
     {
         $this->game()->modifiers->each(fn ($modifier) => $modifier->updateModelWithStateData());
-        $this->team()->updateModelWithStateData();
     }
 }

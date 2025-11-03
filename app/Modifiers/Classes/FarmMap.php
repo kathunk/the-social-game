@@ -70,7 +70,7 @@ class FarmMap extends BaseModifierClass
                     'capacity' => 0,
                 ],
                 'stash_status' => [
-                    'owner_team_id' => null,
+                    'player_owner_id' => null,
                     'amount' => rand(1, 10) > 9 ? rand(1, 50) : 0,
                 ],
                 'history' => [

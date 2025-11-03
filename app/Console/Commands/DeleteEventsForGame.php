@@ -31,8 +31,9 @@ class DeleteEventsForGame extends Command
 
         // Verify the game exists
         $game = Game::find($gameId);
-        if (!$game) {
+        if (! $game) {
             $this->error("Game with ID {$gameId} not found.");
+
             return 1;
         }
 
@@ -43,11 +44,12 @@ class DeleteEventsForGame extends Command
         // Query the events that will be deleted
         // Use LIKE to search for the game_id in the JSON string
         $eventsCount = DB::table('verb_events')
-            ->where('data', 'LIKE', '%"game_id": ' . $gameId . '%')
+            ->where('data', 'LIKE', '%"game_id": '.$gameId.'%')
             ->count();
 
         if ($eventsCount === 0) {
             $this->info('No events found for this game.');
+
             return 0;
         }
 
@@ -57,15 +59,17 @@ class DeleteEventsForGame extends Command
         $this->newLine();
 
         // First confirmation
-        if (!$this->confirm('Are you absolutely sure you want to continue?', false)) {
+        if (! $this->confirm('Are you absolutely sure you want to continue?', false)) {
             $this->info('Operation cancelled.');
+
             return 0;
         }
 
         // Second confirmation
         $this->warn('This is your FINAL warning!');
-        if (!$this->confirm("Type 'yes' again to confirm deletion of {$eventsCount} events", false)) {
+        if (! $this->confirm("Type 'yes' again to confirm deletion of {$eventsCount} events", false)) {
             $this->info('Operation cancelled.');
+
             return 0;
         }
 
@@ -73,8 +77,9 @@ class DeleteEventsForGame extends Command
         $this->newLine();
         $confirmGameId = $this->ask("To proceed, please type the game ID ({$gameId}) exactly");
 
-        if ($confirmGameId !== (string)$gameId) {
+        if ($confirmGameId !== (string) $gameId) {
             $this->error('Game ID did not match. Operation cancelled.');
+
             return 1;
         }
 
@@ -82,7 +87,7 @@ class DeleteEventsForGame extends Command
         $this->warn('Deleting events...');
 
         $deletedCount = DB::table('verb_events')
-            ->where('data', 'LIKE', '%"game_id": ' . $gameId . '%')
+            ->where('data', 'LIKE', '%"game_id": '.$gameId.'%')
             ->delete();
 
         $this->newLine();
