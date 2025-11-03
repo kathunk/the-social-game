@@ -73,9 +73,7 @@ class FarmActions extends BaseModifierClass
         $all_skills = $this->allSkills();
         $player_skills = $all_skills[$player->id]['skills'];
         $ally_skills = collect($all_skills)
-            ->filter(fn ($skill_set, $player_id) => $allies_on_space->pluck('id')->contains($player_id)
-                && $player_id !== $player->id
-            )
+            ->filter(fn ($skill_set, $player_id) => $allies_on_space->pluck('id')->contains($player_id))
             ->toArray();
 
         $seize_data = $this->seizePropertyData(
