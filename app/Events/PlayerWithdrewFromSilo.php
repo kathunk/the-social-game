@@ -105,11 +105,19 @@ class PlayerWithdrewFromSilo extends Event
 
         $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
         $actions_state->modifier_data = collect($actions_state->modifier_data)
-            ->map(function ($data, $player_id) {
+            ->map(function ($data, $player_id) use ($game, $silo_data) {
                 if ($player_id !== $this->player_id) {
                     return $data;
                 }
 
+                $player_skills = $game->modifiers()->firstWhere('class_key', FarmSkills::key())
+                    ->modifier_data[$this->player_id]['skills'];
+                $silo_belongs_to_player = $silo_data['owner_team_id'] === $this->team_id;
+
+                $thief_cost = 4 - $player_skills['Thief'];
+                $action_cost = $silo_belongs_to_player ? 0 : $thief_cost;
+
+                $data['actions'] -= $action_cost;
                 $data['grain'] += $this->amount;
 
                 return $data;
