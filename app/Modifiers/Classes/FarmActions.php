@@ -844,11 +844,11 @@ class FarmActions extends BaseModifierClass
             return collect([]);
         }
 
-        $action_cost = 4 - $thief_level;
+        // $action_cost = 4 - $thief_level;
 
-        if ($actions < $action_cost) {
-            return collect([]);
-        }
+        // if ($actions < $action_cost) {
+        //     return collect([]);
+        // }
 
         return collect($player_space['player_ids'])
             ->filter(fn ($player_id) => $player_id !== $player->id)

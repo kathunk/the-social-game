@@ -26,9 +26,6 @@ class PlayerPickpocketedOpponent extends Event
 
     public int $target_player_id;
 
-    // for computing only
-    public int $action_cost;
-
     public function validate()
     {
         $game = $this->state(GameState::class);
@@ -73,14 +70,6 @@ class PlayerPickpocketedOpponent extends Event
             'Opponent is on the same team',
         );
 
-        // Player has enough actions to pickpocket
-        $player_actions = $actions_state->modifier_data[$this->player_id]['actions'];
-        $this->action_cost = 4 - $player_skills['Thief'];
-        $this->assert(
-            $player_actions >= $this->action_cost,
-            'Player does not have enough actions to pickpocket',
-        );
-
         // opponent has that much grain
         $target_grain = $actions_state->modifier_data[$this->target_player_id]['grain'];
         $this->assert(
@@ -120,7 +109,6 @@ class PlayerPickpocketedOpponent extends Event
 
                 if ($is_thief) {
                     $data['grain'] += $this->amount;
-                    $data['actions'] -= $this->action_cost;
                 }
 
                 if ($is_target) {
