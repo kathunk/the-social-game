@@ -100,7 +100,7 @@ class FarmActions extends BaseModifierClass
                 can_build_silo: $this->canBuildSilo($player, $player_skills, $player_space),
                 silo_exists: $this->siloExists($player, $player_space),
                 can_upgrade_silo: $this->canUpgradeSilo($player, $player_skills, $player_space),
-                can_withdraw_silo: $this->canWithdrawSilo($player, $player_space, $player_actions, $player_skills, $seize_data),
+                can_withdraw_silo: $this->canWithdrawSilo($player, $player_space, $player_actions, $player_skills, $seize_data, $all_players_on_space),
                 can_deposit_silo: $this->canDepositSilo($player, $player_space, $player_actions),
                 can_build_road: $this->canBuildRoad($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
                 can_build_wall: $this->canBuildWall($player_skills, $player_space, $player_actions['actions'] ?? 0, $ally_skills),
@@ -288,10 +288,11 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public function canWithdrawSilo(Player $player, array $player_space, array $player_actions, array $player_skills, array $seize_data)
+    public function canWithdrawSilo(Player $player, array $player_space, array $player_actions, array $player_skills, array $seize_data, Collection $all_players_on_space)
     {
         $player_thief_level = $player_skills['Thief'];
-        $silo_belongs_to_player = $player_space['silo_status']['owner_team_id'] === $player->team_id;
+        $owner_team_id = $player_space['silo_status']['owner_team_id'];
+        $silo_belongs_to_player = $owner_team_id === $player->team_id;
         $silo_has_grain = $player_space['silo_status']['amount'] > 0;
         $player_is_at_capacity = ($player_actions['grain_capacity'] ?? 0) === ($player_actions['grain'] ?? 0);
         $silo_exists = $player_space['silo_status']['level'] > 0;
@@ -316,14 +317,20 @@ class FarmActions extends BaseModifierClass
             return false;
         }
 
-        $thief_has_enough_power = match ($player_thief_level) {
-            1 => $seize_data['defense_power'] < 5,
-            2 => $seize_data['defense_power'] < 7,
-            3 => $seize_data['defense_power'] < 9,
-            default => false,
-        };
+        $actions_cost = 4 - $player_thief_level;
 
-        return $thief_has_enough_power;
+        if ($this->modifier->modifier_data[$player->id]['actions'] < $actions_cost) {
+            return false;
+        }
+
+        $rival_owners_are_on_space = $all_players_on_space->filter(fn ($p) => $p->team_id === $owner_team_id)
+            ->count() > 0;
+
+        if ($rival_owners_are_on_space) {
+            return false;
+        }
+
+        return true;
     }
 
     public function withdrawSilo(Player $player, array $params)
@@ -379,7 +386,7 @@ class FarmActions extends BaseModifierClass
         if (! $is_mature) {
             return false;
         }
-        
+
         $farmer_level = $player_skills['Farmer'];
         $action_cost = 3 - $farmer_level;
 
@@ -837,11 +844,11 @@ class FarmActions extends BaseModifierClass
             return collect([]);
         }
 
-        $action_cost = 4 - $thief_level;
+        // $action_cost = 4 - $thief_level;
 
-        if ($actions < $action_cost) {
-            return collect([]);
-        }
+        // if ($actions < $action_cost) {
+        //     return collect([]);
+        // }
 
         return collect($player_space['player_ids'])
             ->filter(fn ($player_id) => $player_id !== $player->id)

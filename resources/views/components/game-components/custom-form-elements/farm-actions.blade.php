@@ -93,20 +93,14 @@
                                             </div>
                                         </flux:table.cell>
                                     @if($element['pickpocketable_opponents']->contains($other_player))
-                                        @php
-                                            $cost = 4 - $element['player_skills']['Thief'];
-                                            $can_afford_to_pickpocket = $element['actions'] >= $cost;
-                                            $cost_suffix = $cost > 0 ? '💪'.str_repeat('💪', $cost - 1) : '';
-                                        @endphp
                                         <flux:table.cell class="whitespace-normal break-words align-top">
                                             <flux:button
                                                 variant="ghost"
                                                 size="xs"
                                                 class="text-xs"
                                                 wire:click="$set('round_properties.{{ \App\Modifiers\Classes\FarmActions::key() }}.pickpocket_target_id', '{{ $other_player->id }}'); $wire.callClassAction('pickpocketOpponent', 'modifier', '{{ \App\Modifiers\Classes\FarmActions::key() }}', null)"
-                                                :disabled="!$can_afford_to_pickpocket"
                                             >
-                                                {{ $cost_suffix }} Pickpocket
+                                                Pickpocket
                                             </flux:button>
                                         </flux:table.cell>
                                     @endif

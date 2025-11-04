@@ -134,6 +134,7 @@ trait FarmFormElements
             $silo_capacity = $player_space['silo_status']['capacity'];
             $player_grain = $player_actions['grain'];
             $player_capacity = $player_actions['grain_capacity'];
+            $silo_owner_team_id = $player_space['silo_status']['owner_team_id'];
 
             $withdrawable = min($amount_in_silo, $player_capacity - $player_grain);
             $depositable = min($player_grain, $silo_capacity - $amount_in_silo);
@@ -147,7 +148,21 @@ trait FarmFormElements
                 ->when($player_space['silo_status']['owner_team_id'] !== $player->team_id, function ($builder) use ($silo_seize_data) {
                     $builder->subtitle($silo_seize_data['attack_description']);
                 })
-                ->when($can_withdraw_silo, function ($builder) use ($withdrawable) {
+                ->when($can_withdraw_silo, function ($builder) use ($withdrawable, $silo_owner_team_id, $player, $player_skills) {
+                    $silo_belongs_to_player = $silo_owner_team_id === $player->team_id;
+
+                    $thief_cost = 4 - $player_skills['Thief'];
+
+                    $action_cost = $silo_belongs_to_player ? 0 : $thief_cost;
+
+                    $cost_suffix = match ($action_cost) {
+                        0 => '',
+                        1 => '💪',
+                        2 => '💪💪',
+                        3 => '💪💪💪',
+                        default => '',
+                    };
+
                     $this->select(
                         label: 'Withdraw amount',
                         property_name: 'withdraw_amount',
@@ -159,7 +174,7 @@ trait FarmFormElements
                         placeholder: 'Select an amount...',
                     )
                         ->buttonGroup()
-                        ->button('Withdraw', 'withdrawSilo')
+                        ->button('Withdraw '.$cost_suffix, 'withdrawSilo')
                         ->endGroup();
                 })
                 ->when($can_deposit_silo, function ($builder) use ($depositable) {
