@@ -374,10 +374,12 @@ class FarmActions extends BaseModifierClass
     public function canHarvestField(Player $player, array $player_space, array $player_actions, array $player_skills, array $ally_skills)
     {
         $stage = $player_space['field_status']['stage'] ?? null;
-        if (! $stage === 'mature_1' || $stage === 'mature_2' || $stage === 'mature_3') {
+
+        $is_mature = in_array($stage, ['mature_1', 'mature_2', 'mature_3']);
+        if (! $is_mature) {
             return false;
         }
-
+        
         $farmer_level = $player_skills['Farmer'];
         $action_cost = 3 - $farmer_level;
 
