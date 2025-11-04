@@ -12,7 +12,7 @@ class ResetPasswords extends Command
      *
      * @var string
      */
-    protected $signature = 'app:reset-passwords';
+    protected $signature = 'db:reset-passwords';
 
     /**
      * The console command description.
@@ -26,9 +26,6 @@ class ResetPasswords extends Command
      */
     public function handle()
     {
-        User::all()->each(function (User $user) {
-            $user->password = bcrypt('password');
-            $user->save();
-        });
+        User::query()->update(['password' => bcrypt('password')]);
     }
 }

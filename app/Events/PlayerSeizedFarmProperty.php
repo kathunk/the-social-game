@@ -42,7 +42,7 @@ class PlayerSeizedFarmProperty extends Event
         $this->action_cost = 4 - $player_skills['Brute'];
 
         $this->assert(
-            $player_actions['actions'] >= $this->action_cost,
+            $player_actions >= $this->action_cost,
             'Player does not have enough actions to seize property',
         );
 
