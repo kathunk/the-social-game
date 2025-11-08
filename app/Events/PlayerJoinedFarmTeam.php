@@ -80,6 +80,8 @@ class PlayerJoinedFarmTeam extends Event
             ->filter(fn ($space) => $space['stash_status']['player_owner_id'] === $this->player_id)
             ->sum(fn ($space) => $space['stash_status']['amount']);
 
+        $amount_to_transfer += $grain_in_stashes;
+
         if ($this->requester_previous_team_id !== null) {
             $previous_team = TeamState::load($this->requester_previous_team_id);
             $previous_team->player_ids = $previous_team->player_ids->reject(fn ($player_id) => $player_id === $this->player_id);
