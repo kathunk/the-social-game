@@ -88,7 +88,7 @@ class PlayerJoinedFarmTeam extends Event
         }
 
         if ($this->player_is_last_on_team) {
-            $amount_to_transfer += $previous_team->score() - $this->player_grain;
+            $amount_to_transfer += $previous_team->score() - $this->player_grain - $grain_in_stashes;
         }
 
         if ($this->requester_previous_team_id !== null) {
