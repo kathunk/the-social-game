@@ -239,7 +239,8 @@ class FarmActions extends BaseModifierClass
             && ($player_space['silo_status']['level'] ?? null) === null
             && $player_space['type'] !== 'swamp'
             && $player_space['type'] !== 'volcano'
-            && $player_space['type'] !== 'ash_heap';
+            && $player_space['type'] !== 'ash_heap'
+            && $player_space['type'] !== 'town';
     }
 
     public function buildSilo(Player $player, array $params)
@@ -750,6 +751,10 @@ class FarmActions extends BaseModifierClass
         }
 
         if ($player_space['trap_status']['level'] !== null) {
+            return false;
+        }
+
+        if ($player_space['type'] === 'town') {
             return false;
         }
 

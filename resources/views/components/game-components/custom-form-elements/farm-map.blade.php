@@ -36,6 +36,27 @@
         $player = \App\Models\Player::find($playerId);
         return [(string)$playerId => $player ? $player->name : 'Unknown'];
     })->toArray();
+
+    // Get unique types from visited spaces for the legend
+    $visitedTypes = collect($element['spaces'])
+        ->filter(fn($space) => isset($space['visited_by_player_ids']) && in_array($this->player->id, $space['visited_by_player_ids']))
+        ->pluck('type')
+        ->unique()
+        ->sort()
+        ->values();
+
+    // Map types to display names and colors
+    $typeInfo = [
+        'desert' => ['name' => 'Desert', 'color' => '#deb887'],
+        'grass' => ['name' => 'Grass', 'color' => '#228b22'],
+        'volcano' => ['name' => 'Volcano', 'color' => '#ff6347'],
+        'mountain' => ['name' => 'Mountain', 'color' => '#a9a9a9'],
+        'swamp' => ['name' => 'Swamp', 'color' => '#9acd32'],
+        'ash_heap' => ['name' => 'Ash Heap', 'color' => '#654321'],
+        'tunnel' => ['name' => 'Secret Tunnel', 'color' => '#000000'],
+        'town' => ['name' => 'Town', 'color' => '#7851a9'],
+        'fertile_ashland' => ['name' => 'Fertile Ashland', 'color' => '#8b7355'],
+    ];
 @endphp
 
 <div x-data="{ selectedScoutSpace: null, playerNames: @js($playerNames) }">
@@ -69,15 +90,35 @@
                     $isScoutable = collect($element['scoutable_spaces'])->contains(fn($space) => $space['x-index'] === $x && $space['y-index'] === $y);
                     $isClickable = $isAccessible || $isScoutable;
 
-                    $bgColor = $isPlayerSpace ? 'background-color: #fef3c7;' : ($isSelected ? 'background-color: #93c5fd;' : ($isAccessible ? 'background-color: #e5e7eb;' : ''));
-                    $border = $isSelected ? 'border: 3px solid #3b82f6;' : 'border: 1px solid #ccc;';
-                    $cursor = $isClickable ? 'cursor: pointer;' : '';
-
                     $spaceData = isset($grid[$y][$x]) ? $grid[$y][$x] : null;
                     // Convert player_ids to strings to avoid JavaScript number truncation with snowflake IDs
                     if ($spaceData && isset($spaceData['player_ids'])) {
                         $spaceData['player_ids'] = array_map('strval', $spaceData['player_ids']);
                     }
+
+                    // Check if player has visited this space
+                    $hasVisited = $spaceData && isset($spaceData['visited_by_player_ids']) && in_array($this->player->id, $spaceData['visited_by_player_ids']);
+
+                    // Set type-based color if visited
+                    $typeColor = '';
+                    if ($hasVisited && $spaceData) {
+                        $typeColor = match($spaceData['type']) {
+                            'desert' => 'background-color: #deb887;', // tan/burlywood
+                            'grass' => 'background-color: #228b22;', // forest green
+                            'volcano' => 'background-color: #ff6347;', // lava orange
+                            'mountain' => 'background-color: #a9a9a9;', // alpine stone gray
+                            'swamp' => 'background-color: #9acd32;', // yellowish-green toxic
+                            'ash_heap' => 'background-color: #654321;', // dark brown
+                            'tunnel' => 'background-color: #000000; color: #fff;', // pitch black with white text
+                            'town' => 'background-color: #7851a9;', // royal purple
+                            'fertile_ashland' => 'background-color: #8b7355;', // lighter brown
+                            default => '',
+                        };
+                    }
+
+                    $bgColor = $isSelected ? 'background-color: #93c5fd;' : $typeColor;
+                    $border = $isSelected ? 'border: 3px solid #3b82f6;' : 'border: 1px solid #ccc;';
+                    $cursor = $isClickable ? 'cursor: pointer;' : '';
                 @endphp
                 <div
                     style="{{ $border }} padding: 1px; min-height: 10px; display: flex; align-items: center; justify-content: center; {{ $bgColor }} cursor: pointer;"
@@ -97,6 +138,23 @@
             @endfor
         @endfor
     </div>
+
+    <!-- Terrain Type Legend -->
+    @if($visitedTypes->isNotEmpty())
+        <div class="mt-4 p-3 border border-gray-300 rounded bg-gray-50">
+            <h3 class="font-semibold mb-2 text-sm">Discovered Terrain Types:</h3>
+            <div class="flex flex-wrap gap-3">
+                @foreach($visitedTypes as $type)
+                    @if(isset($typeInfo[$type]))
+                        <div class="flex items-center gap-2">
+                            <div style="width: 24px; height: 24px; background-color: {{ $typeInfo[$type]['color'] }}; border: 1px solid #ccc; border-radius: 3px; {{ $type === 'tunnel' ? 'color: #fff;' : '' }}"></div>
+                            <span class="text-sm">{{ $typeInfo[$type]['name'] }}</span>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+    @endif
 
     <!-- Scoutable space information -->
     <div x-show="selectedScoutSpace !== null" class="mt-4 p-4 border border-gray-300 rounded bg-gray-50">

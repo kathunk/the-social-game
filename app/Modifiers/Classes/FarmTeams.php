@@ -2,20 +2,21 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Models\Game;
+use App\Models\Team;
+use App\Models\Player;
+use App\Events\TeamCreated;
+use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerMovedInFarm;
+use Illuminate\Support\Collection;
+use App\Events\PlayerJoinedFarmTeam;
 use App\Events\PlayerAbandonedFarmTeam;
 use App\Events\PlayerBootedFromFarmTeam;
-use App\Events\PlayerCanceledRequestToJoinFarmTeam;
-use App\Events\PlayerJoinedFarmTeam;
-use App\Events\PlayerPromotedToTeamLeaderInFarm;
 use App\Events\PlayerRequestedToJoinFarmTeam;
-use App\Events\TeamCreated;
+use App\Events\PlayerPromotedToTeamLeaderInFarm;
+use App\Events\PlayerCanceledRequestToJoinFarmTeam;
 use App\Events\TeamLeaderAcceptedRequestToJoinFarmTeam;
 use App\Events\TeamLeaderDeclinedRequestToJoinFarmTeam;
-use App\Models\Game;
-use App\Models\Player;
-use App\Models\Team;
-use Illuminate\Support\Collection;
-use Thunk\Verbs\Facades\Verbs;
 
 class FarmTeams extends BaseModifierClass
 {
@@ -365,6 +366,23 @@ class FarmTeams extends BaseModifierClass
             modifier_id: $this->modifier->id,
             player_grain: $grain,
         );
+
+        if (! $this->playerSpace($player)) {
+            $map_modifier = $this->farmMap();
+
+            $town_space = collect($map_modifier->modifier_data)
+                ->filter(fn ($space) => $space['type'] === 'town')
+                ->random();
+
+            PlayerMovedInFarm::fire(
+                game_id: $player->game_id,
+                modifier_id: $map_modifier->id,
+                player_id: $player->id,
+                origin_space: null,
+                destination_space: $town_space,
+            );
+        }
+
 
         Verbs::commit();
 

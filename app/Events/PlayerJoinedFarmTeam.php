@@ -103,8 +103,8 @@ class PlayerJoinedFarmTeam extends Event
         $this->player()->update([
             'team_id' => $this->team_id,
         ]);
-        $this->game()->teams()->each(fn ($t) => $t->updateModelWithStateData());
-        $this->game()->modifiers()->each(fn ($m) => $m->updateModelWithStateData());
+        $this->game()->teams->each(fn ($t) => $t->updateModelWithStateData());
+        $this->game()->modifiers->each(fn ($m) => $m->updateModelWithStateData());
 
         if ($this->player_is_last_on_team) {
             $previous_team = Team::find($this->requester_previous_team_id);
