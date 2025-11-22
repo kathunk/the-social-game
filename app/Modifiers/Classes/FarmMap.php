@@ -75,6 +75,7 @@ class FarmMap extends BaseModifierClass
                     'player_owner_id' => null,
                     'amount' => rand(1, 10) > 9 ? rand(1, 50) : 0,
                 ],
+                'npc' => null,
                 'visited_by_player_ids' => [],
                 'history' => [
                     // [
@@ -157,6 +158,7 @@ class FarmMap extends BaseModifierClass
 
             if ($x === $town_anchor_space['x-index'] && $y === $town_anchor_space['y-index']) {
                 $space['type'] = 'town';
+                $space['npc'] = 'professor';
             }
 
             if ($x === $town_anchor_space['x-index'] + 1 && $y === $town_anchor_space['y-index']) {
@@ -169,6 +171,7 @@ class FarmMap extends BaseModifierClass
 
             if ($x === $town_anchor_space['x-index'] + 1 && $y === $town_anchor_space['y-index'] + 1) {
                 $space['type'] = 'town';
+                $space['npc'] = 'broker';
             }
 
             return $space;

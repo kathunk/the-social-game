@@ -261,5 +261,18 @@
                 <use href="#obj-{{ $type }}" transform="{{ $transform }}" style="{{ $style }}" />
             @endif
         @endforeach
+
+        {{-- Professor NPC indicators --}}
+        @if(($element['player_space']['npc'] ?? null) === 'professor')
+            <!-- School emoji -->
+            <text x="200" y="750" font-size="200" text-anchor="middle">🏫</text>
+            <!-- Professor emoji -->
+            <text x="200" y="950" font-size="200" text-anchor="middle">👨‍🏫</text>
+        @elseif(($element['player_space']['npc'] ?? null) === 'broker')
+            <!-- Bank emoji -->
+            <text x="200" y="750" font-size="200" text-anchor="middle">🏦</text>
+            <!-- Money bag emoji -->
+            <text x="200" y="950" font-size="200" text-anchor="middle">💰</text>
+        @endif
     </svg>
 </div>

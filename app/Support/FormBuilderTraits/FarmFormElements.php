@@ -49,6 +49,7 @@ trait FarmFormElements
         bool $can_build_wall,
         bool $can_build_trap,
         bool $can_build_watchtower,
+        bool $can_reset_skills,
         bool $can_create_stash,
         bool $can_see_stash,
         bool $can_deposit_stash,
@@ -125,6 +126,17 @@ trait FarmFormElements
 
                     $builder->buttonGroup()
                         ->button('Burn '.$burn_cost, 'burnField')
+                        ->endGroup();
+                });
+        }
+
+        if ($player_space['npc'] === 'professor') {
+            $this->divider()
+                ->title('Welcome to the academy')
+                ->subtitle('In exchange for 20 grain, you can reset your skills, and reallocate your XP to other skills.')
+                ->when($can_reset_skills, function ($builder) {
+                    $builder->buttonGroup()
+                        ->button('Reset skills', 'resetSkills')
                         ->endGroup();
                 });
         }

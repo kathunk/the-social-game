@@ -209,58 +209,6 @@
         @endif
     </div>
 
-    <!-- Terrain Type Legend -->
-    @if($visitedTypes->isNotEmpty())
-        <div class="mt-4 p-3 border border-gray-300 rounded bg-gray-50">
-            <h3 class="font-semibold mb-2 text-sm">Discovered Terrain Types:</h3>
-            <div class="flex flex-wrap gap-3">
-                @foreach($visitedTypes as $type)
-                    @if(isset($typeInfo[$type]))
-                        <div class="flex items-center gap-2">
-                            <div style="width: 24px; height: 24px; background-color: {{ $typeInfo[$type]['color'] }}; border: 1px solid #ccc; border-radius: 3px; {{ $type === 'tunnel' ? 'color: #fff;' : '' }}"></div>
-                            <span class="text-sm">{{ $typeInfo[$type]['name'] }}</span>
-                        </div>
-                    @endif
-                @endforeach
-            </div>
-
-            <!-- Map Icons Legend -->
-            <h3 class="font-semibold mt-3 mb-2 text-sm">Map Icons:</h3>
-            <div class="flex flex-wrap gap-3">
-                @if($hasPlayerPosition)
-                    <div class="flex items-center gap-2">
-                        <flux:icon.user variant="micro" class="text-white" style="width: 16px; height: 16px; background-color: #333; padding: 2px; border-radius: 3px;"/>
-                        <span class="text-sm">Your Position</span>
-                    </div>
-                @endif
-                @if($hasFriendlyFields)
-                    <div class="flex items-center gap-2">
-                        <span style="font-size: 14px;">🌾</span>
-                        <span class="text-sm">Friendly Field</span>
-                    </div>
-                @endif
-                @if($hasFriendlySilos)
-                    <div class="flex items-center gap-2">
-                        <span style="font-size: 14px;">🏠</span>
-                        <span class="text-sm">Friendly Silo</span>
-                    </div>
-                @endif
-                @if($hasTeammatesOnMap)
-                    <div class="flex items-center gap-2">
-                        <flux:icon.user-group variant="micro" class="text-white" style="width: 16px; height: 16px; background-color: #333; padding: 2px; border-radius: 3px;"/>
-                        <span class="text-sm">Teammates</span>
-                    </div>
-                @endif
-                @if($hasScoutables)
-                    <div class="flex items-center gap-2">
-                        <flux:icon.eye variant="micro" style="width: 16px; height: 16px;"/>
-                        <span class="text-sm">Scoutable Space</span>
-                    </div>
-                @endif
-            </div>
-        </div>
-    @endif
-
     <!-- Scoutable space information -->
     <div x-show="selectedScoutSpace !== null" class="mt-4 p-4 border border-gray-300 rounded bg-gray-50">
         <h3 class="font-bold mb-2" x-text="selectedScoutSpace ? (String.fromCharCode(65 + selectedScoutSpace['x-index']) + (selectedScoutSpace['y-index'] + 1) + ' Information') : 'Space Information'"></h3>
@@ -334,5 +282,57 @@
             </table>
         </template>
     </div>
+
+    <!-- Terrain Type Legend -->
+    @if($visitedTypes->isNotEmpty())
+        <div class="mt-4 p-3 border border-gray-300 rounded bg-gray-50">
+            <h3 class="font-semibold mb-2 text-sm">Discovered Terrain Types:</h3>
+            <div class="flex flex-wrap gap-3">
+                @foreach($visitedTypes as $type)
+                    @if(isset($typeInfo[$type]))
+                        <div class="flex items-center gap-2">
+                            <div style="width: 24px; height: 24px; background-color: {{ $typeInfo[$type]['color'] }}; border: 1px solid #ccc; border-radius: 3px; {{ $type === 'tunnel' ? 'color: #fff;' : '' }}"></div>
+                            <span class="text-sm">{{ $typeInfo[$type]['name'] }}</span>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+
+            <!-- Map Icons Legend -->
+            <h3 class="font-semibold mt-3 mb-2 text-sm">Map Icons:</h3>
+            <div class="flex flex-wrap gap-3">
+                @if($hasPlayerPosition)
+                    <div class="flex items-center gap-2">
+                        <flux:icon.user variant="micro" class="text-white" style="width: 16px; height: 16px; background-color: #333; padding: 2px; border-radius: 3px;"/>
+                        <span class="text-sm">Your Position</span>
+                    </div>
+                @endif
+                @if($hasFriendlyFields)
+                    <div class="flex items-center gap-2">
+                        <span style="font-size: 14px;">🌾</span>
+                        <span class="text-sm">Friendly Field</span>
+                    </div>
+                @endif
+                @if($hasFriendlySilos)
+                    <div class="flex items-center gap-2">
+                        <span style="font-size: 14px;">🏠</span>
+                        <span class="text-sm">Friendly Silo</span>
+                    </div>
+                @endif
+                @if($hasTeammatesOnMap)
+                    <div class="flex items-center gap-2">
+                        <flux:icon.user-group variant="micro" class="text-white" style="width: 16px; height: 16px; background-color: #333; padding: 2px; border-radius: 3px;"/>
+                        <span class="text-sm">Teammates</span>
+                    </div>
+                @endif
+                @if($hasScoutables)
+                    <div class="flex items-center gap-2">
+                        <flux:icon.eye variant="micro" style="width: 16px; height: 16px;"/>
+                        <span class="text-sm">Scoutable Space</span>
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
 
 </div>

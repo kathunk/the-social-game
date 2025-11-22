@@ -2,29 +2,30 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Models\Team;
+use App\Models\Player;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\ModifierState;
+use Thunk\Verbs\Facades\Verbs;
 use App\Events\PlayerBuiltRoad;
 use App\Events\PlayerBuiltSilo;
-use App\Events\PlayerBuiltTrapInFarm;
 use App\Events\PlayerBuiltWalls;
-use App\Events\PlayerBuiltWatchtower;
 use App\Events\PlayerBurnedField;
 use App\Events\PlayerCreatedStash;
+use App\Events\PlayerPlantedField;
+use App\Events\PlayerUpgradedSilo;
+use Illuminate\Support\Collection;
+use App\Events\PlayerTookFromStash;
+use App\Events\PlayerHarvestedField;
+use App\Events\PlayerBuiltTrapInFarm;
+use App\Events\PlayerBuiltWatchtower;
 use App\Events\PlayerDepositedToSilo;
 use App\Events\PlayerDepositedToStash;
-use App\Events\PlayerHarvestedField;
-use App\Events\PlayerPickpocketedOpponent;
-use App\Events\PlayerPlantedField;
-use App\Events\PlayerSeizedFarmProperty;
-use App\Events\PlayerTookFromStash;
-use App\Events\PlayerUpgradedSilo;
 use App\Events\PlayerWithdrewFromSilo;
-use App\Models\Player;
-use App\Models\Team;
-use App\States\GameState;
-use App\States\ModifierState;
-use App\States\PlayerState;
-use Illuminate\Support\Collection;
-use Thunk\Verbs\Facades\Verbs;
+use App\Events\PlayerResetSkillsInFarm;
+use App\Events\PlayerSeizedFarmProperty;
+use App\Events\PlayerPickpocketedOpponent;
 
 class FarmActions extends BaseModifierClass
 {
@@ -110,6 +111,7 @@ class FarmActions extends BaseModifierClass
                 can_see_stash: $this->canSeeStash($player, $player_space, $player_actions['actions'] ?? 0, $player_skills, $ally_skills, $stash_owner_player, $stash_owner_team),
                 can_deposit_stash: $this->canDepositStash($player, $player_space, $player_actions, $stash_owner_player, $stash_owner_team),
                 pickpocketable_opponents: $this->pickpocketableOpponents($player, $player_skills, $player_space, $player_actions['actions'] ?? 0),
+                can_reset_skills: $this->canResetSkills($player_space, $player_actions),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
                 silo_seize_data: $seize_data,
@@ -887,6 +889,21 @@ class FarmActions extends BaseModifierClass
         Verbs::commit();
 
         return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
+
+    public function canResetSkills(array $player_space, array $player_actions)
+    {
+        return $player_space['npc'] === 'professor'
+            && $player_actions['grain'] >= 20;
+    }
+
+    public function resetSkills(Player $player, array $params)
+    {
+        PlayerResetSkillsInFarm::fire(
+            player_id: $player->id,
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+        );
     }
 
     // routines
