@@ -116,9 +116,17 @@
                         };
                     }
 
-                    $bgColor = $isSelected ? 'background-color: #93c5fd;' : $typeColor;
+                    $bgColor = $typeColor;
                     $border = $isSelected ? 'border: 3px solid #3b82f6;' : 'border: 1px solid #ccc;';
                     $cursor = $isClickable ? 'cursor: pointer;' : '';
+
+                    // Check for friendly structures
+                    $hasFriendlyField = $spaceData && ($spaceData['field_status']['owner_team_id'] ?? null) === $this->player->team_id && ($spaceData['field_status']['level'] ?? 0) > 0;
+                    $hasFriendlySilo = $spaceData && ($spaceData['silo_status']['owner_team_id'] ?? null) === $this->player->team_id && ($spaceData['silo_status']['level'] ?? 0) > 0;
+                    $hasTeammates = $spaceData && collect($spaceData['player_ids'] ?? [])->filter(function($pid) {
+                        $p = \App\Models\Player::find($pid);
+                        return $p && $p->id !== $this->player->id && $p->team_id === $this->player->team_id;
+                    })->isNotEmpty();
                 @endphp
                 <div
                     style="{{ $border }} padding: 1px; min-height: 10px; display: flex; align-items: center; justify-content: center; {{ $bgColor }} cursor: pointer;"
@@ -126,13 +134,25 @@
                     x-on:click="selectedScoutSpace = {{ $isScoutable && $spaceData ? json_encode($spaceData) : 'null' }}"
                 >
                     @if(isset($grid[$y][$x]))
-                        @if($isPlayerSpace)
-                            <flux:icon.user variant="micro"/>
-                        @elseif($isScoutable)
-                            <flux:icon.eye variant="micro"/>
-                        @endif
+                        <div style="display: flex; flex-direction: column; gap: 1px; align-items: center; justify-content: center; font-size: 10px;">
+                            @if($isPlayerSpace)
+                                <flux:icon.user variant="micro" class="text-white"/>
+                            @endif
+                            @if($hasFriendlyField)
+                                <span style="font-size: 10px;" title="Friendly Field">🌾</span>
+                            @endif
+                            @if($hasFriendlySilo)
+                                <span style="font-size: 10px;" title="Friendly Silo">🏠</span>
+                            @endif
+                            @if($hasTeammates)
+                                <flux:icon.user-group variant="micro" class="text-green-500"/>
+                            @endif
+                            @if($isScoutable && !$isPlayerSpace && !$hasFriendlyField && !$hasFriendlySilo && !$hasTeammates)
+                                <flux:icon.eye variant="micro"/>
+                            @endif
+                        </div>
                     @else
-                        <div style="color: #999;">Empty</div>
+                        <div style="color: #999; font-size: 8px;">Empty</div>
                     @endif
                 </div>
             @endfor
@@ -152,6 +172,31 @@
                         </div>
                     @endif
                 @endforeach
+            </div>
+
+            <!-- Map Icons Legend -->
+            <h3 class="font-semibold mt-3 mb-2 text-sm">Map Icons:</h3>
+            <div class="flex flex-wrap gap-3">
+                <div class="flex items-center gap-2">
+                    <flux:icon.user variant="micro" class="text-white" style="width: 16px; height: 16px; background-color: #333; padding: 2px; border-radius: 3px;"/>
+                    <span class="text-sm">Your Position</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span style="font-size: 14px;">🌾</span>
+                    <span class="text-sm">Friendly Field</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span style="font-size: 14px;">🏠</span>
+                    <span class="text-sm">Friendly Silo</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <flux:icon.user-group variant="micro" class="text-green-500" style="width: 16px; height: 16px;"/>
+                    <span class="text-sm">Teammates</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <flux:icon.eye variant="micro" style="width: 16px; height: 16px;"/>
+                    <span class="text-sm">Scoutable Space</span>
+                </div>
             </div>
         </div>
     @endif
