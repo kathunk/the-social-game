@@ -57,6 +57,18 @@
         'town' => ['name' => 'Town', 'color' => '#7851a9'],
         'fertile_ashland' => ['name' => 'Fertile Ashland', 'color' => '#8b7355'],
     ];
+
+    // Check what exists on the map for legend
+    $hasPlayerPosition = $player_space !== null;
+    $hasFriendlyFields = collect($element['spaces'])->contains(fn($s) => ($s['field_status']['owner_team_id'] ?? null) === $this->player->team_id && ($s['field_status']['level'] ?? 0) > 0);
+    $hasFriendlySilos = collect($element['spaces'])->contains(fn($s) => ($s['silo_status']['owner_team_id'] ?? null) === $this->player->team_id && ($s['silo_status']['level'] ?? 0) > 0);
+    $hasTeammatesOnMap = collect($element['spaces'])->contains(function($s) {
+        return collect($s['player_ids'] ?? [])->contains(function($pid) {
+            $p = \App\Models\Player::find($pid);
+            return $p && $p->id !== $this->player->id && $p->team_id === $this->player->team_id;
+        });
+    });
+    $hasScoutables = !empty($element['scoutable_spaces']);
 @endphp
 
 <div x-data="{ selectedScoutSpace: null, playerNames: @js($playerNames) }">
@@ -145,9 +157,9 @@
                                 <span style="font-size: 10px;" title="Friendly Silo">🏠</span>
                             @endif
                             @if($hasTeammates)
-                                <flux:icon.user-group variant="micro" class="text-green-500"/>
+                                <flux:icon.user-group variant="micro" class="text-white"/>
                             @endif
-                            @if($isScoutable && !$isPlayerSpace && !$hasFriendlyField && !$hasFriendlySilo && !$hasTeammates)
+                            @if($isScoutable)
                                 <flux:icon.eye variant="micro"/>
                             @endif
                         </div>
@@ -157,6 +169,44 @@
                 </div>
             @endfor
         @endfor
+    </div>
+
+    <!-- Move/Spawn Button -->
+    <div class="flex flex-wrap gap-2 mt-4 justify-end">
+        @php
+            $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
+            $isAccessibleSpace = !empty($selectedValue) && in_array($selectedValue, $element['accessible_spaces']);
+            $cost = 1;
+            $cost_suffix = '';
+            $can_afford_to_move = false;
+
+            if (!empty($selectedValue) && $player_space) {
+                $x = ord(strtoupper($selectedValue[0])) - 65;
+                $y = intval(substr($selectedValue, 1)) - 1;
+                $cost = \App\Modifiers\Classes\FarmMap::costToMove($player_space, $grid[$y][$x]);
+                $can_afford_to_move = $element['actions'] >= $cost;
+                $cost_suffix = $cost > 0 ? '💪'.str_repeat('💪', $cost - 1) : '';
+            }
+        @endphp
+        @if($player_space && $isAccessibleSpace && $can_afford_to_move)
+            <x-button
+                wire:loading.attr="disabled"
+                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-move"
+                variant="primary"
+                wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
+            >
+                {{ $cost_suffix }} Move
+            </x-button>
+        @elseif(!$player_space && !empty($selectedValue))
+            <x-button
+                wire:loading.attr="disabled"
+                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-spawn"
+                variant="primary"
+                wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
+            >
+                🏠 Spawn
+            </x-button>
+        @endif
     </div>
 
     <!-- Terrain Type Legend -->
@@ -177,26 +227,36 @@
             <!-- Map Icons Legend -->
             <h3 class="font-semibold mt-3 mb-2 text-sm">Map Icons:</h3>
             <div class="flex flex-wrap gap-3">
-                <div class="flex items-center gap-2">
-                    <flux:icon.user variant="micro" class="text-white" style="width: 16px; height: 16px; background-color: #333; padding: 2px; border-radius: 3px;"/>
-                    <span class="text-sm">Your Position</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span style="font-size: 14px;">🌾</span>
-                    <span class="text-sm">Friendly Field</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span style="font-size: 14px;">🏠</span>
-                    <span class="text-sm">Friendly Silo</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <flux:icon.user-group variant="micro" class="text-green-500" style="width: 16px; height: 16px;"/>
-                    <span class="text-sm">Teammates</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <flux:icon.eye variant="micro" style="width: 16px; height: 16px;"/>
-                    <span class="text-sm">Scoutable Space</span>
-                </div>
+                @if($hasPlayerPosition)
+                    <div class="flex items-center gap-2">
+                        <flux:icon.user variant="micro" class="text-white" style="width: 16px; height: 16px; background-color: #333; padding: 2px; border-radius: 3px;"/>
+                        <span class="text-sm">Your Position</span>
+                    </div>
+                @endif
+                @if($hasFriendlyFields)
+                    <div class="flex items-center gap-2">
+                        <span style="font-size: 14px;">🌾</span>
+                        <span class="text-sm">Friendly Field</span>
+                    </div>
+                @endif
+                @if($hasFriendlySilos)
+                    <div class="flex items-center gap-2">
+                        <span style="font-size: 14px;">🏠</span>
+                        <span class="text-sm">Friendly Silo</span>
+                    </div>
+                @endif
+                @if($hasTeammatesOnMap)
+                    <div class="flex items-center gap-2">
+                        <flux:icon.user-group variant="micro" class="text-white" style="width: 16px; height: 16px; background-color: #333; padding: 2px; border-radius: 3px;"/>
+                        <span class="text-sm">Teammates</span>
+                    </div>
+                @endif
+                @if($hasScoutables)
+                    <div class="flex items-center gap-2">
+                        <flux:icon.eye variant="micro" style="width: 16px; height: 16px;"/>
+                        <span class="text-sm">Scoutable Space</span>
+                    </div>
+                @endif
             </div>
         </div>
     @endif
@@ -275,42 +335,4 @@
         </template>
     </div>
 
-    <div class="flex flex-wrap gap-2 mt-4 justify-end">
-        @php
-            $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
-            $isAccessibleSpace = !empty($selectedValue) && in_array($selectedValue, $element['accessible_spaces']);
-            $cost = 1;
-            $cost_suffix = '';
-
-            if (!empty($selectedValue) && $player_space) {
-                $x = ord(strtoupper($selectedValue[0])) - 65;
-                $y = intval(substr($selectedValue, 1)) - 1;
-                $cost = \App\Modifiers\Classes\FarmMap::costToMove($player_space, $grid[$y][$x]);
-                $can_afford_to_move = $element['actions'] >= $cost;
-                $cost_suffix = $cost > 0 ? '💪'.str_repeat('💪', $cost - 1) : '';
-            }
-        @endphp
-        @if($player_space)
-
-            <x-button
-                wire:loading.attr="disabled"
-                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-move"
-                variant="primary"
-                wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
-                :disabled="!$isAccessibleSpace || !$can_afford_to_move"
-            >
-                {{ $cost_suffix }} Move
-            </x-button>
-        @else
-            <x-button
-                wire:loading.attr="disabled"
-                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-spawn"
-                variant="primary"
-                wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
-                :disabled="empty($selectedValue)"
-            >
-                🏠 Spawn
-            </x-button>
-        @endif
-    </div>
 </div>
