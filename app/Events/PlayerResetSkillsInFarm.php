@@ -2,14 +2,14 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\ModifierState;
+use App\Events\Traits\HasActivePlayer;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
-use App\Modifiers\Classes\FarmSkills;
-use App\Events\Traits\HasActivePlayer;
 use App\Modifiers\Classes\FarmActions;
+use App\Modifiers\Classes\FarmSkills;
+use App\States\GameState;
+use App\States\ModifierState;
+use Thunk\Verbs\Event;
 
 class PlayerResetSkillsInFarm extends Event
 {

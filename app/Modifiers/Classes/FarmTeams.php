@@ -2,21 +2,21 @@
 
 namespace App\Modifiers\Classes;
 
-use App\Models\Game;
-use App\Models\Team;
-use App\Models\Player;
-use App\Events\TeamCreated;
-use Thunk\Verbs\Facades\Verbs;
-use App\Events\PlayerMovedInFarm;
-use Illuminate\Support\Collection;
-use App\Events\PlayerJoinedFarmTeam;
 use App\Events\PlayerAbandonedFarmTeam;
 use App\Events\PlayerBootedFromFarmTeam;
-use App\Events\PlayerRequestedToJoinFarmTeam;
-use App\Events\PlayerPromotedToTeamLeaderInFarm;
 use App\Events\PlayerCanceledRequestToJoinFarmTeam;
+use App\Events\PlayerJoinedFarmTeam;
+use App\Events\PlayerMovedInFarm;
+use App\Events\PlayerPromotedToTeamLeaderInFarm;
+use App\Events\PlayerRequestedToJoinFarmTeam;
+use App\Events\TeamCreated;
 use App\Events\TeamLeaderAcceptedRequestToJoinFarmTeam;
 use App\Events\TeamLeaderDeclinedRequestToJoinFarmTeam;
+use App\Models\Game;
+use App\Models\Player;
+use App\Models\Team;
+use Illuminate\Support\Collection;
+use Thunk\Verbs\Facades\Verbs;
 
 class FarmTeams extends BaseModifierClass
 {
@@ -382,7 +382,6 @@ class FarmTeams extends BaseModifierClass
                 destination_space: $town_space,
             );
         }
-
 
         Verbs::commit();
 

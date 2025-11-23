@@ -2,14 +2,14 @@
 
 namespace App\Modifiers\Classes;
 
+use App\Events\PlayerMovedInFarm;
 use App\Models\Game;
 use App\Models\Player;
 use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
 use App\States\ModifierState;
+use App\States\PlayerState;
+use App\States\TeamState;
 use Thunk\Verbs\Facades\Verbs;
-use App\Events\PlayerMovedInFarm;
 
 class FarmMap extends BaseModifierClass
 {
@@ -87,27 +87,23 @@ class FarmMap extends BaseModifierClass
             ];
         });
 
-        $quadrant_1_spaces = $spaces->filter(fn ($space) => 
-            $space['x-index'] > 0
+        $quadrant_1_spaces = $spaces->filter(fn ($space) => $space['x-index'] > 0
             && $space['x-index'] < $spaces_per_row / 2 - 2
             && $space['y-index'] > 0
             && $space['y-index'] < $map_size / $spaces_per_row / 2 - 2
         );
-        $quadrant_2_spaces = $spaces->filter(fn ($space) => 
-            $space['x-index'] > $spaces_per_row / 2 + 1
+        $quadrant_2_spaces = $spaces->filter(fn ($space) => $space['x-index'] > $spaces_per_row / 2 + 1
             && $space['x-index'] < $spaces_per_row - 1
             && $space['y-index'] > 0
             && $space['y-index'] < $map_size / $spaces_per_row / 2 - 2
         );
 
-        $quadrant_3_spaces = $spaces->filter(fn ($space) => 
-            $space['x-index'] > 0
+        $quadrant_3_spaces = $spaces->filter(fn ($space) => $space['x-index'] > 0
             && $space['x-index'] < $spaces_per_row / 2 - 2
             && $space['y-index'] > $map_size / $spaces_per_row / 2 + 2
             && $space['y-index'] < $map_size - 1
         );
-        $quadrant_4_spaces = $spaces->filter(fn ($space) => 
-            $space['x-index'] > $spaces_per_row / 2 + 1
+        $quadrant_4_spaces = $spaces->filter(fn ($space) => $space['x-index'] > $spaces_per_row / 2 + 1
             && $space['x-index'] < $spaces_per_row - 1
             && $space['y-index'] > $map_size / $spaces_per_row / 2 + 2
             && $space['y-index'] < $map_size - 1
@@ -129,8 +125,7 @@ class FarmMap extends BaseModifierClass
             4 => $quadrant_4_spaces->random(),
         };
 
-        $town_anchor_space = $spaces->filter(fn ($space) => 
-            $space['x-index'] === ($spaces_per_row / 2) - 1
+        $town_anchor_space = $spaces->filter(fn ($space) => $space['x-index'] === ($spaces_per_row / 2) - 1
             && $space['y-index'] === $map_size / $spaces_per_row / 2
         )->first();
 
@@ -535,10 +530,12 @@ class FarmMap extends BaseModifierClass
         $cost += match ($destination_space['type']) {
             'mountain', 'swamp' => 1,
             default => 0,
-        } + match ($destination_space['walls_exist']) {
-            true => 1,
-            default => 0,
-        } + match ($origin_space['road_exists']) {
+        }
+        // + match ($destination_space['walls_exist']) {
+        //     true => 1,
+        //     default => 0,
+        // }
+        + match ($origin_space['road_exists']) {
             true => -1,
             default => 0,
         };

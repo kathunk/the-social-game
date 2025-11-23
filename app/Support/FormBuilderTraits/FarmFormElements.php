@@ -167,21 +167,23 @@ trait FarmFormElements
                 ->title('Victory points')
                 ->subtitle('Below is a list of teams and their victory points. You can only see this when you are on this space.')
                 ->table(
-                    headers: ['Team', 'Members', 'Points'], 
+                    headers: ['Team', 'Members', 'Points'],
                     rows: $teams->map(function ($team) use ($teams_modifier_data) {
                         return [
                             $team->name,
-                            $team->players->map(function ($p) use ($teams_modifier_data) {
-                                $leader_prefix = in_array($p->id, $teams_modifier_data['leaders']) 
-                                    ? '👑 ' 
-                                    : '';
-                                
-                                return $leader_prefix . $p->name;
-                            })->implode(', '),
+                            $team->players
+                                ->sortByDesc(fn ($p) => in_array($p->id, $teams_modifier_data['leaders']))
+                                ->map(function ($p) use ($teams_modifier_data) {
+                                    $leader_prefix = in_array($p->id, $teams_modifier_data['leaders'])
+                                        ? '👑 '
+                                        : '';
+
+                                    return $leader_prefix.$p->name;
+                                })->implode(', '),
                             $team->score,
                         ];
                     })->toArray()
-                );    
+                );
         }
 
         if ($silo_exists) {

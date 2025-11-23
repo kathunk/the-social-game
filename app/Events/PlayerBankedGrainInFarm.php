@@ -2,21 +2,21 @@
 
 namespace App\Events;
 
-use Thunk\Verbs\Event;
-use App\States\GameState;
-use App\States\TeamState;
-use App\States\PlayerState;
-use App\Events\Traits\HasGame;
-use App\Events\Traits\HasTeam;
-use App\Events\Traits\HasModifier;
-use App\Modifiers\Classes\FarmMap;
-use App\Events\Traits\HasChallenge;
 use App\Events\Traits\HasActivePlayer;
+use App\Events\Traits\HasChallenge;
+use App\Events\Traits\HasGame;
+use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasTeam;
 use App\Modifiers\Classes\FarmActions;
+use App\Modifiers\Classes\FarmMap;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\TeamState;
+use Thunk\Verbs\Event;
 
 class PlayerBankedGrainInFarm extends Event
 {
-    use HasActivePlayer, HasGame, HasModifier, HasTeam, HasChallenge;
+    use HasActivePlayer, HasChallenge, HasGame, HasModifier, HasTeam;
 
     public int $amount;
 

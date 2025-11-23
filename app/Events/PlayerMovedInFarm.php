@@ -81,7 +81,7 @@ class PlayerMovedInFarm extends Event
                 }
 
                 // Only add to visited array if not already visited
-                if (!in_array($this->player_id, $space['visited_by_player_ids'] ?? [])) {
+                if (! in_array($this->player_id, $space['visited_by_player_ids'] ?? [])) {
                     $space['visited_by_player_ids'][] = $this->player_id;
                 }
             } else {
