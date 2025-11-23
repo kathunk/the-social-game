@@ -6,6 +6,7 @@ use App\Events\PlayerAbandonedFarmTeam;
 use App\Events\PlayerBootedFromFarmTeam;
 use App\Events\PlayerCanceledRequestToJoinFarmTeam;
 use App\Events\PlayerJoinedFarmTeam;
+use App\Events\PlayerMovedInFarm;
 use App\Events\PlayerPromotedToTeamLeaderInFarm;
 use App\Events\PlayerRequestedToJoinFarmTeam;
 use App\Events\TeamCreated;
@@ -365,6 +366,22 @@ class FarmTeams extends BaseModifierClass
             modifier_id: $this->modifier->id,
             player_grain: $grain,
         );
+
+        if (! $this->playerSpace($player)) {
+            $map_modifier = $this->farmMap();
+
+            $town_space = collect($map_modifier->modifier_data)
+                ->filter(fn ($space) => $space['type'] === 'town')
+                ->random();
+
+            PlayerMovedInFarm::fire(
+                game_id: $player->game_id,
+                modifier_id: $map_modifier->id,
+                player_id: $player->id,
+                origin_space: null,
+                destination_space: $town_space,
+            );
+        }
 
         Verbs::commit();
 

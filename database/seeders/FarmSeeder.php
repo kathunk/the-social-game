@@ -33,7 +33,7 @@ class FarmSeeder extends Seeder
             max_players: 10000,
             is_public: true,
             players_can_join_late: false,
-            scoreboard_type: 'team',
+            scoreboard_type: 'hide_until_end',
         )->game_mode_id;
 
         $mode = GameMode::find($mode_id);

@@ -123,21 +123,21 @@ class PlayerWithdrewFromSilo extends Event
                 return $data;
             })->toArray();
 
-        if ($silo_data['owner_team_id'] === $this->team_id) {
-            return;
-        }
+        // if ($silo_data['owner_team_id'] === $this->team_id) {
+        //     return;
+        // }
 
-        $silo_owner_team = TeamState::load($silo_data['owner_team_id']);
-        $silo_owner_team->addToScoreHistory(
-            icon: '😈',
-            points: -$this->amount,
-            description: 'Some scoundrel withdrew '.$this->amount.' grain from your silo.',
-        );
-        $team_state->addToScoreHistory(
-            icon: '😈',
-            points: $this->amount,
-            description: 'A scoundrel on your team withdrew '.$this->amount.' grain from a silo you do not own.',
-        );
+        // $silo_owner_team = TeamState::load($silo_data['owner_team_id']);
+        // $silo_owner_team->addToScoreHistory(
+        //     icon: '😈',
+        //     points: -$this->amount,
+        //     description: 'Some scoundrel withdrew '.$this->amount.' grain from your silo.',
+        // );
+        // $team_state->addToScoreHistory(
+        //     icon: '😈',
+        //     points: $this->amount,
+        //     description: 'A scoundrel on your team withdrew '.$this->amount.' grain from a silo you do not own.',
+        // );
     }
 
     public function handle()

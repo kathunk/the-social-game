@@ -74,13 +74,9 @@ class PlayerJoinedFarmTeam extends Event
         $team->player_ids->push($this->player_id);
         $requester = PlayerState::load($this->player_id);
 
-        $amount_to_transfer = $this->player_grain;
-
         $grain_in_stashes = collect($this->game()->modifiers()->firstWhere('class_key', FarmMap::key())->modifier_data)
             ->filter(fn ($space) => $space['stash_status']['player_owner_id'] === $this->player_id)
             ->sum(fn ($space) => $space['stash_status']['amount']);
-
-        $amount_to_transfer += $grain_in_stashes;
 
         if ($this->requester_previous_team_id !== null) {
             $previous_team = TeamState::load($this->requester_previous_team_id);
@@ -88,14 +84,14 @@ class PlayerJoinedFarmTeam extends Event
         }
 
         if ($this->player_is_last_on_team) {
-            $amount_to_transfer += $previous_team->score() - $this->player_grain - $grain_in_stashes;
+            $amount_to_transfer = $previous_team->score();
         }
 
         if ($this->requester_previous_team_id !== null) {
-            $previous_team->addToScoreHistory('🫥', -$amount_to_transfer, $requester->name.' left team and took all their grain with them.');
+            $previous_team->addToScoreHistory('🫥', -$amount_to_transfer, $requester->name.' left team and took all their points with them.');
         }
 
-        $team->addToScoreHistory('👋', $amount_to_transfer, $requester->name.' joined team and brought '.$amount_to_transfer.' grain with them.');
+        $team->addToScoreHistory('👋', $amount_to_transfer, $requester->name.' joined team and brought '.$amount_to_transfer.' points with them.');
     }
 
     public function handle()
@@ -103,8 +99,8 @@ class PlayerJoinedFarmTeam extends Event
         $this->player()->update([
             'team_id' => $this->team_id,
         ]);
-        $this->game()->teams()->each(fn ($t) => $t->updateModelWithStateData());
-        $this->game()->modifiers()->each(fn ($m) => $m->updateModelWithStateData());
+        $this->game()->teams->each(fn ($t) => $t->updateModelWithStateData());
+        $this->game()->modifiers->each(fn ($m) => $m->updateModelWithStateData());
 
         if ($this->player_is_last_on_team) {
             $previous_team = Team::find($this->requester_previous_team_id);

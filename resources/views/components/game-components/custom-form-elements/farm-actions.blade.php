@@ -117,14 +117,15 @@
 
     <div class="mt-4 mb-2 flex justify-between">
         <x-heading>You are on {{ chr(65 + $element['player_space']['x-index']) }}{{ $element['player_space']['y-index'] + 1 }} ({{ match($element['player_space']['type']) {
-            'grass' => 'Grass',
+            'ash_heap' => 'Ash Heap',
             'desert' => 'Desert',
+            'fertile_ashland' => 'Fertile Ashland',
+            'grass' => 'Grass',
             'mountain' => 'Mountain',
             'swamp' => 'Swamp',
-            'ash_heap' => 'Ash Heap',
-            'fertile_ashland' => 'Fertile Ashland',
-            'volcano' => 'Volcano',
             'tunnel' => 'Secret Tunnel',
+            'town' => 'Town',
+            'volcano' => 'Volcano',
         } }})</x-heading>
         @if ($element['can_see_history'])
             <flux:link variant="ghost" class="text-sm" href="{{ route('games.mods', ['game' => $this->player->game, 'modifier' => $map_modifier_id]) }}">See space history</flux:link>
@@ -141,7 +142,11 @@
         class="w-full h-auto border border-gray-300 rounded-lg"
     >
         {{-- Background --}}
-        <use href="#bg-{{ $config['background'] ?? 'grass' }}" />
+        @if(($config['background'] ?? 'grass') === 'town')
+            <image href="{{ asset('images/farm/town.jpg') }}" x="{{ $minX }}" y="{{ $minY }}" width="{{ $vbWidth }}" height="{{ $vbHeight }}" preserveAspectRatio="xMidYMid slice" />
+        @else
+            <use href="#bg-{{ $config['background'] ?? 'grass' }}" />
+        @endif
 
         {{-- Overlays - Wall rendered directly (behind everything) --}}
         @if($overlays->contains('type', 'wall'))
@@ -256,5 +261,18 @@
                 <use href="#obj-{{ $type }}" transform="{{ $transform }}" style="{{ $style }}" />
             @endif
         @endforeach
+
+        {{-- Professor NPC indicators --}}
+        @if(($element['player_space']['npc'] ?? null) === 'professor')
+            <!-- School emoji -->
+            <text x="200" y="750" font-size="200" text-anchor="middle">🏫</text>
+            <!-- Professor emoji -->
+            <text x="200" y="950" font-size="200" text-anchor="middle">👨‍🏫</text>
+        @elseif(($element['player_space']['npc'] ?? null) === 'broker')
+            <!-- Bank emoji -->
+            <text x="200" y="750" font-size="200" text-anchor="middle">🏦</text>
+            <!-- Money bag emoji -->
+            <text x="200" y="950" font-size="200" text-anchor="middle">💰</text>
+        @endif
     </svg>
 </div>

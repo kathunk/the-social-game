@@ -79,6 +79,11 @@ class PlayerMovedInFarm extends Event
                 if ($space['trap_status']['status'] === 'set' && $space['trap_status']['owner_team_id'] !== $player_team_id) {
                     $space['trap_status']['status'] = 'sprung';
                 }
+
+                // Only add to visited array if not already visited
+                if (! in_array($this->player_id, $space['visited_by_player_ids'] ?? [])) {
+                    $space['visited_by_player_ids'][] = $this->player_id;
+                }
             } else {
                 $space['player_ids'] = array_values(array_diff($space['player_ids'], [$this->player_id]));
             }

@@ -98,27 +98,27 @@ class PlayerTookFromStash extends Event
                 return $data;
             })->toArray();
 
-        if ($stash_owner_player?->team_id === $this->team_id) {
-            return;
-        }
+        // if ($stash_owner_player?->team_id === $this->team_id) {
+        //     return;
+        // }
 
-        $player_team = $this->state(TeamState::class);
+        // $player_team = $this->state(TeamState::class);
 
-        $player_team->addToScoreHistory(
-            icon: '🤫',
-            points: $amount_to_take,
-            description: $this->state(PlayerState::class)->name.' took '.$amount_to_take.' grain from a hidden stash.',
-        );
+        // $player_team->addToScoreHistory(
+        //     icon: '🤫',
+        //     points: $amount_to_take,
+        //     description: $this->state(PlayerState::class)->name.' took '.$amount_to_take.' grain from a hidden stash.',
+        // );
 
-        if (! $stash_owner_player) {
-            return;
-        }
+        // if (! $stash_owner_player) {
+        //     return;
+        // }
 
-        $stash_owner_player->team()->addToScoreHistory(
-            icon: '🤫',
-            points: -$amount_to_take,
-            description: $this->state(PlayerState::class)->name.' took '.$amount_to_take.' grain from a hidden stash.',
-        );
+        // $stash_owner_player->team()->addToScoreHistory(
+        //     icon: '🤫',
+        //     points: -$amount_to_take,
+        //     description: $this->state(PlayerState::class)->name.' took '.$amount_to_take.' grain from a hidden stash.',
+        // );
     }
 
     public function handle()

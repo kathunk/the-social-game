@@ -118,28 +118,28 @@ class PlayerPickpocketedOpponent extends Event
                 return $data;
             })->toArray();
 
-        $thief_team = $this->state(TeamState::class);
-        $target_team = $target_state->team();
+        // $thief_team = $this->state(TeamState::class);
+        // $target_team = $target_state->team();
 
-        $thief_team_description = 'One of you scoundrels pickpocketed '.$target_state->name;
-        $target_team_description = 'Some scoundrel pickpocketed '.$target_state->name;
+        // $thief_team_description = 'One of you scoundrels pickpocketed '.$target_state->name;
+        // $target_team_description = 'Some scoundrel pickpocketed '.$target_state->name;
 
-        if ($this->amount === 0) {
-            $thief_team_description .= ' but they had empty pockets.';
-            $target_team_description .= ' but they had empty pockets.';
-        }
+        // if ($this->amount === 0) {
+        //     $thief_team_description .= ' but they had empty pockets.';
+        //     $target_team_description .= ' but they had empty pockets.';
+        // }
 
-        $thief_team->addToScoreHistory(
-            icon: '🦹',
-            points: $this->amount,
-            description: $thief_team_description,
-        );
+        // $thief_team->addToScoreHistory(
+        //     icon: '🦹',
+        //     points: $this->amount,
+        //     description: $thief_team_description,
+        // );
 
-        $target_team->addToScoreHistory(
-            icon: '🦹',
-            points: -$this->amount,
-            description: $target_team_description,
-        );
+        // $target_team->addToScoreHistory(
+        //     icon: '🦹',
+        //     points: -$this->amount,
+        //     description: $target_team_description,
+        // );
     }
 
     public function handle()

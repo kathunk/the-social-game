@@ -36,6 +36,39 @@
         $player = \App\Models\Player::find($playerId);
         return [(string)$playerId => $player ? $player->name : 'Unknown'];
     })->toArray();
+
+    // Get unique types from visited spaces for the legend
+    $visitedTypes = collect($element['spaces'])
+        ->filter(fn($space) => isset($space['visited_by_player_ids']) && in_array($this->player->id, $space['visited_by_player_ids']))
+        ->pluck('type')
+        ->unique()
+        ->sort()
+        ->values();
+
+    // Map types to display names and colors
+    $typeInfo = [
+        'desert' => ['name' => 'Desert', 'color' => '#deb887'],
+        'grass' => ['name' => 'Grass', 'color' => '#228b22'],
+        'volcano' => ['name' => 'Volcano', 'color' => '#ff6347'],
+        'mountain' => ['name' => 'Mountain', 'color' => '#a9a9a9'],
+        'swamp' => ['name' => 'Swamp', 'color' => '#9acd32'],
+        'ash_heap' => ['name' => 'Ash Heap', 'color' => '#654321'],
+        'tunnel' => ['name' => 'Secret Tunnel', 'color' => '#000000'],
+        'town' => ['name' => 'Town', 'color' => '#7851a9'],
+        'fertile_ashland' => ['name' => 'Fertile Ashland', 'color' => '#8b7355'],
+    ];
+
+    // Check what exists on the map for legend
+    $hasPlayerPosition = $player_space !== null;
+    $hasFriendlyFields = collect($element['spaces'])->contains(fn($s) => ($s['field_status']['owner_team_id'] ?? null) === $this->player->team_id && ($s['field_status']['level'] ?? 0) > 0);
+    $hasFriendlySilos = collect($element['spaces'])->contains(fn($s) => ($s['silo_status']['owner_team_id'] ?? null) === $this->player->team_id && ($s['silo_status']['level'] ?? 0) > 0);
+    $hasTeammatesOnMap = collect($element['spaces'])->contains(function($s) {
+        return collect($s['player_ids'] ?? [])->contains(function($pid) {
+            $p = \App\Models\Player::find($pid);
+            return $p && $p->id !== $this->player->id && $p->team_id === $this->player->team_id;
+        });
+    });
+    $hasScoutables = !empty($element['scoutable_spaces']);
 @endphp
 
 <div x-data="{ selectedScoutSpace: null, playerNames: @js($playerNames) }">
@@ -69,15 +102,43 @@
                     $isScoutable = collect($element['scoutable_spaces'])->contains(fn($space) => $space['x-index'] === $x && $space['y-index'] === $y);
                     $isClickable = $isAccessible || $isScoutable;
 
-                    $bgColor = $isPlayerSpace ? 'background-color: #fef3c7;' : ($isSelected ? 'background-color: #93c5fd;' : ($isAccessible ? 'background-color: #e5e7eb;' : ''));
-                    $border = $isSelected ? 'border: 3px solid #3b82f6;' : 'border: 1px solid #ccc;';
-                    $cursor = $isClickable ? 'cursor: pointer;' : '';
-
                     $spaceData = isset($grid[$y][$x]) ? $grid[$y][$x] : null;
                     // Convert player_ids to strings to avoid JavaScript number truncation with snowflake IDs
                     if ($spaceData && isset($spaceData['player_ids'])) {
                         $spaceData['player_ids'] = array_map('strval', $spaceData['player_ids']);
                     }
+
+                    // Check if player has visited this space
+                    $hasVisited = $spaceData && isset($spaceData['visited_by_player_ids']) && in_array($this->player->id, $spaceData['visited_by_player_ids']);
+
+                    // Set type-based color if visited
+                    $typeColor = '';
+                    if ($hasVisited && $spaceData) {
+                        $typeColor = match($spaceData['type']) {
+                            'desert' => 'background-color: #deb887;', // tan/burlywood
+                            'grass' => 'background-color: #228b22;', // forest green
+                            'volcano' => 'background-color: #ff6347;', // lava orange
+                            'mountain' => 'background-color: #a9a9a9;', // alpine stone gray
+                            'swamp' => 'background-color: #9acd32;', // yellowish-green toxic
+                            'ash_heap' => 'background-color: #654321;', // dark brown
+                            'tunnel' => 'background-color: #000000; color: #fff;', // pitch black with white text
+                            'town' => 'background-color: #7851a9;', // royal purple
+                            'fertile_ashland' => 'background-color: #8b7355;', // lighter brown
+                            default => '',
+                        };
+                    }
+
+                    $bgColor = $typeColor;
+                    $border = $isSelected ? 'border: 3px solid #3b82f6;' : 'border: 1px solid #ccc;';
+                    $cursor = $isClickable ? 'cursor: pointer;' : '';
+
+                    // Check for friendly structures
+                    $hasFriendlyField = $spaceData && ($spaceData['field_status']['owner_team_id'] ?? null) === $this->player->team_id && ($spaceData['field_status']['level'] ?? 0) > 0;
+                    $hasFriendlySilo = $spaceData && ($spaceData['silo_status']['owner_team_id'] ?? null) === $this->player->team_id && ($spaceData['silo_status']['level'] ?? 0) > 0;
+                    $hasTeammates = $spaceData && collect($spaceData['player_ids'] ?? [])->filter(function($pid) {
+                        $p = \App\Models\Player::find($pid);
+                        return $p && $p->id !== $this->player->id && $p->team_id === $this->player->team_id;
+                    })->isNotEmpty();
                 @endphp
                 <div
                     style="{{ $border }} padding: 1px; min-height: 10px; display: flex; align-items: center; justify-content: center; {{ $bgColor }} cursor: pointer;"
@@ -85,17 +146,67 @@
                     x-on:click="selectedScoutSpace = {{ $isScoutable && $spaceData ? json_encode($spaceData) : 'null' }}"
                 >
                     @if(isset($grid[$y][$x]))
-                        @if($isPlayerSpace)
-                            <flux:icon.user variant="micro"/>
-                        @elseif($isScoutable)
-                            <flux:icon.eye variant="micro"/>
-                        @endif
+                        <div style="display: flex; flex-direction: column; gap: 1px; align-items: center; justify-content: center; font-size: 10px;">
+                            @if($isPlayerSpace)
+                                <flux:icon.user variant="micro" class="text-white"/>
+                            @endif
+                            @if($hasFriendlyField)
+                                <span style="font-size: 14px;" title="Friendly Field">🌾</span>
+                            @endif
+                            @if($hasFriendlySilo)
+                                <span style="font-size: 14px;" title="Friendly Silo">🏠</span>
+                            @endif
+                            @if($hasTeammates)
+                                <flux:icon.user-group variant="micro" class="text-white"/>
+                            @endif
+                            @if($isScoutable)
+                                <flux:icon.eye variant="micro"/>
+                            @endif
+                        </div>
                     @else
-                        <div style="color: #999;">Empty</div>
+                        <div style="color: #999; font-size: 8px;">Empty</div>
                     @endif
                 </div>
             @endfor
         @endfor
+    </div>
+
+    <!-- Move/Spawn Button -->
+    <div class="flex flex-wrap gap-2 mt-4 justify-end">
+        @php
+            $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
+            $isAccessibleSpace = !empty($selectedValue) && in_array($selectedValue, $element['accessible_spaces']);
+            $cost = 1;
+            $cost_suffix = '';
+            $can_afford_to_move = false;
+
+            if (!empty($selectedValue) && $player_space) {
+                $x = ord(strtoupper($selectedValue[0])) - 65;
+                $y = intval(substr($selectedValue, 1)) - 1;
+                $cost = \App\Modifiers\Classes\FarmMap::costToMove($player_space, $grid[$y][$x]);
+                $can_afford_to_move = $element['actions'] >= $cost;
+                $cost_suffix = $cost > 0 ? '💪'.str_repeat('💪', $cost - 1) : '';
+            }
+        @endphp
+        @if($player_space && $isAccessibleSpace && $can_afford_to_move)
+            <x-button
+                wire:loading.attr="disabled"
+                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-move"
+                variant="primary"
+                wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
+            >
+                {{ $cost_suffix }} Move
+            </x-button>
+        @elseif(!$player_space && !empty($selectedValue))
+            <x-button
+                wire:loading.attr="disabled"
+                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-spawn"
+                variant="primary"
+                wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
+            >
+                🏠 Spawn
+            </x-button>
+        @endif
     </div>
 
     <!-- Scoutable space information -->
@@ -172,42 +283,56 @@
         </template>
     </div>
 
-    <div class="flex flex-wrap gap-2 mt-4 justify-end">
-        @php
-            $selectedValue = $this->round_properties[\App\Modifiers\Classes\FarmMap::key()][$element['property_name']] ?? null;
-            $isAccessibleSpace = !empty($selectedValue) && in_array($selectedValue, $element['accessible_spaces']);
-            $cost = 1;
-            $cost_suffix = '';
+    <!-- Terrain Type Legend -->
+    @if($visitedTypes->isNotEmpty())
+        <div class="mt-4 p-3 border border-gray-300 rounded bg-gray-50">
+            <h3 class="font-semibold mb-2 text-sm">Discovered Terrain Types:</h3>
+            <div class="flex flex-wrap gap-3">
+                @foreach($visitedTypes as $type)
+                    @if(isset($typeInfo[$type]))
+                        <div class="flex items-center gap-2">
+                            <div style="width: 24px; height: 24px; background-color: {{ $typeInfo[$type]['color'] }}; border: 1px solid #ccc; border-radius: 3px; {{ $type === 'tunnel' ? 'color: #fff;' : '' }}"></div>
+                            <span class="text-sm">{{ $typeInfo[$type]['name'] }}</span>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
 
-            if (!empty($selectedValue) && $player_space) {
-                $x = ord(strtoupper($selectedValue[0])) - 65;
-                $y = intval(substr($selectedValue, 1)) - 1;
-                $cost = \App\Modifiers\Classes\FarmMap::costToMove($player_space, $grid[$y][$x]);
-                $can_afford_to_move = $element['actions'] >= $cost;
-                $cost_suffix = $cost > 0 ? '💪'.str_repeat('💪', $cost - 1) : '';
-            }
-        @endphp
-        @if($player_space)
+            <!-- Map Icons Legend -->
+            <h3 class="font-semibold mt-3 mb-2 text-sm">Map Icons:</h3>
+            <div class="flex flex-wrap gap-3">
+                @if($hasPlayerPosition)
+                    <div class="flex items-center gap-2">
+                        <flux:icon.user variant="micro" class="text-white" style="width: 16px; height: 16px; background-color: #333; padding: 2px; border-radius: 3px;"/>
+                        <span class="text-sm">Your Position</span>
+                    </div>
+                @endif
+                @if($hasFriendlyFields)
+                    <div class="flex items-center gap-2">
+                        <span style="font-size: 18px;">🌾</span>
+                        <span class="text-sm">Friendly Field</span>
+                    </div>
+                @endif
+                @if($hasFriendlySilos)
+                    <div class="flex items-center gap-2">
+                        <span style="font-size: 18px;">🏠</span>
+                        <span class="text-sm">Friendly Silo</span>
+                    </div>
+                @endif
+                @if($hasTeammatesOnMap)
+                    <div class="flex items-center gap-2">
+                        <flux:icon.user-group variant="micro" class="text-white" style="width: 16px; height: 16px; background-color: #333; padding: 2px; border-radius: 3px;"/>
+                        <span class="text-sm">Teammates</span>
+                    </div>
+                @endif
+                @if($hasScoutables)
+                    <div class="flex items-center gap-2">
+                        <flux:icon.eye variant="micro" style="width: 16px; height: 16px;"/>
+                        <span class="text-sm">Scoutable Space</span>
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
 
-            <x-button
-                wire:loading.attr="disabled"
-                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-move"
-                variant="primary"
-                wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
-                :disabled="!$isAccessibleSpace || !$can_afford_to_move"
-            >
-                {{ $cost_suffix }} Move
-            </x-button>
-        @else
-            <x-button
-                wire:loading.attr="disabled"
-                wire:key="button-{{ \App\Modifiers\Classes\FarmMap::key() }}-spawn"
-                variant="primary"
-                wire:click="callClassAction('move', 'modifier', '{{ \App\Modifiers\Classes\FarmMap::key() }}', null)"
-                :disabled="empty($selectedValue)"
-            >
-                🏠 Spawn
-            </x-button>
-        @endif
-    </div>
 </div>

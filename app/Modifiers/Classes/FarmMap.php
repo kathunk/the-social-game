@@ -6,6 +6,8 @@ use App\Events\PlayerMovedInFarm;
 use App\Models\Game;
 use App\Models\Player;
 use App\States\GameState;
+use App\States\ModifierState;
+use App\States\PlayerState;
 use App\States\TeamState;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -71,8 +73,10 @@ class FarmMap extends BaseModifierClass
                 ],
                 'stash_status' => [
                     'player_owner_id' => null,
-                    'amount' => rand(1, 10) > 9 ? rand(1, 50) : 0,
+                    'amount' => rand(1, 10) > 9 ? rand(1, 20) : 0,
                 ],
+                'npc' => null,
+                'visited_by_player_ids' => [],
                 'history' => [
                     // [
                     // 'round_number' => 1,
@@ -83,45 +87,86 @@ class FarmMap extends BaseModifierClass
             ];
         });
 
-        $min_x = 1;
-        $max_x = $spaces_per_row - 1;
-        $min_y = 1;
-        $max_y = $map_size / $spaces_per_row - 1;
+        $quadrant_1_spaces = $spaces->filter(fn ($space) => $space['x-index'] > 0
+            && $space['x-index'] < $spaces_per_row / 2 - 2
+            && $space['y-index'] > 0
+            && $space['y-index'] < $map_size / $spaces_per_row / 2 - 2
+        );
+        $quadrant_2_spaces = $spaces->filter(fn ($space) => $space['x-index'] > $spaces_per_row / 2 + 1
+            && $space['x-index'] < $spaces_per_row - 1
+            && $space['y-index'] > 0
+            && $space['y-index'] < $map_size / $spaces_per_row / 2 - 2
+        );
 
-        $volcano_x = rand($min_x, $max_x);
-        $volcano_y = rand($min_y, $max_y);
+        $quadrant_3_spaces = $spaces->filter(fn ($space) => $space['x-index'] > 0
+            && $space['x-index'] < $spaces_per_row / 2 - 2
+            && $space['y-index'] > $map_size / $spaces_per_row / 2 + 2
+            && $space['y-index'] < $map_size - 1
+        );
+        $quadrant_4_spaces = $spaces->filter(fn ($space) => $space['x-index'] > $spaces_per_row / 2 + 1
+            && $space['x-index'] < $spaces_per_row - 1
+            && $space['y-index'] > $map_size / $spaces_per_row / 2 + 2
+            && $space['y-index'] < $map_size - 1
+        );
 
-        $volcano_is_west = $volcano_x < $max_x / 2;
-        $volcano_is_north = $volcano_y < $max_y / 2;
+        $volcano_quadrant = collect([1, 2, 3, 4])->random();
+        $volcano_space = match ($volcano_quadrant) {
+            1 => $quadrant_1_spaces->random(),
+            2 => $quadrant_2_spaces->random(),
+            3 => $quadrant_3_spaces->random(),
+            4 => $quadrant_4_spaces->random(),
+        };
 
-        $tunnel_x = $volcano_is_west
-            ? rand($volcano_x + 2, $max_x)
-            : rand($min_x, $volcano_x - 2);
+        $tunnel_quadrant = collect([1, 2, 3, 4])->reject(fn ($q) => $q === $volcano_quadrant)->random();
+        $tunnel_space = match ($tunnel_quadrant) {
+            1 => $quadrant_1_spaces->random(),
+            2 => $quadrant_2_spaces->random(),
+            3 => $quadrant_3_spaces->random(),
+            4 => $quadrant_4_spaces->random(),
+        };
 
-        $tunnel_y = $volcano_is_north
-            ? rand($volcano_y + 2, $max_y)
-            : rand($min_y, $volcano_y - 2);
+        $town_anchor_space = $spaces->filter(fn ($space) => $space['x-index'] === ($spaces_per_row / 2) - 1
+            && $space['y-index'] === $map_size / $spaces_per_row / 2
+        )->first();
 
-        $spaces = $spaces->map(function ($space) use ($volcano_x, $volcano_y, $tunnel_x, $tunnel_y) {
+        $spaces = $spaces->map(function ($space) use ($volcano_space, $tunnel_space, $town_anchor_space) {
             $x = $space['x-index'];
             $y = $space['y-index'];
 
-            if ($x === $tunnel_x && $y === $tunnel_y) {
+            if ($x === $tunnel_space['x-index'] && $y === $tunnel_space['y-index']) {
                 $space['type'] = 'tunnel';
             }
 
-            if ($x === $volcano_x && $y === $volcano_y) {
+            if ($x === $volcano_space['x-index'] && $y === $volcano_space['y-index']) {
                 $space['type'] = 'volcano';
                 $explosion_count = rand(2, 4);
                 $space['explodes_on_rounds'] = collect(range(1, 28))->shuffle()->take($explosion_count)->toArray();
             }
 
-            if ($x === $volcano_x && ($y === $volcano_y + 1 || $y === $volcano_y - 1)) {
+            if ($x === $volcano_space['x-index'] && ($y === $volcano_space['y-index'] + 1 || $y === $volcano_space['y-index'] - 1)) {
                 $space['type'] = 'fertile_ashland';
             }
 
-            if ($y === $volcano_y && ($x === $volcano_x + 1 || $x === $volcano_x - 1)) {
+            if ($y === $volcano_space['y-index'] && ($x === $volcano_space['x-index'] + 1 || $x === $volcano_space['x-index'] - 1)) {
                 $space['type'] = 'fertile_ashland';
+            }
+
+            if ($x === $town_anchor_space['x-index'] && $y === $town_anchor_space['y-index']) {
+                $space['type'] = 'town';
+                $space['npc'] = 'professor';
+            }
+
+            if ($x === $town_anchor_space['x-index'] + 1 && $y === $town_anchor_space['y-index']) {
+                $space['type'] = 'town';
+            }
+
+            if ($x === $town_anchor_space['x-index'] && $y === $town_anchor_space['y-index'] + 1) {
+                $space['type'] = 'town';
+            }
+
+            if ($x === $town_anchor_space['x-index'] + 1 && $y === $town_anchor_space['y-index'] + 1) {
+                $space['type'] = 'town';
+                $space['npc'] = 'broker';
             }
 
             return $space;
@@ -133,9 +178,10 @@ class FarmMap extends BaseModifierClass
     public function frontendComponent(Player $player): array
     {
         // dd([
-        //     'volcano' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'volcano')->first(),
-        //     'tunnel' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'tunnel')->first(),
-        //     'stash' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['stash_status']['player_owner_id'] === null && $space['stash_status']['amount'] > 0)->first(),
+        //     // 'volcano' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'volcano')->first(),
+        //     // 'tunnel' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'tunnel')->first(),
+        //     'town' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['type'] === 'town'),
+        //     // 'stash' => collect($this->modifier->modifier_data)->filter(fn ($space) => $space['stash_status']['player_owner_id'] === null && $space['stash_status']['amount'] > 0)->first(),
         // ]);
 
         if ($player->team_id === null) {
@@ -431,6 +477,16 @@ class FarmMap extends BaseModifierClass
         })->toArray();
     }
 
+    // events
+
+    public function onUserAdmittedToGame(
+        PlayerState $player_state,
+        GameState $game_state,
+        ModifierState $modifier_state,
+    ) {
+        $modifier_state->modifier_data['spaces_visited'][$player_state->id] = [];
+    }
+
     // actions
 
     public function move(Player $player, array $params)
@@ -465,7 +521,7 @@ class FarmMap extends BaseModifierClass
 
     public static function costToMove(?array $origin_space, array $destination_space)
     {
-        if ($origin_space === null) {
+        if ($origin_space === null || $destination_space['type'] === 'town') {
             return 0;
         }
 
@@ -474,10 +530,12 @@ class FarmMap extends BaseModifierClass
         $cost += match ($destination_space['type']) {
             'mountain', 'swamp' => 1,
             default => 0,
-        } + match ($destination_space['walls_exist']) {
-            true => 1,
-            default => 0,
-        } + match ($origin_space['road_exists']) {
+        }
+        // + match ($destination_space['walls_exist']) {
+        //     true => 1,
+        //     default => 0,
+        // }
+        + match ($origin_space['road_exists']) {
             true => -1,
             default => 0,
         };
