@@ -73,7 +73,7 @@ class FarmMap extends BaseModifierClass
                 ],
                 'stash_status' => [
                     'player_owner_id' => null,
-                    'amount' => rand(1, 10) > 9 ? rand(1, 50) : 0,
+                    'amount' => rand(1, 10) > 9 ? rand(1, 20) : 0,
                 ],
                 'npc' => null,
                 'visited_by_player_ids' => [],

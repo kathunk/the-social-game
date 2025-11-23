@@ -23,6 +23,7 @@ use App\Events\PlayerBuiltWatchtower;
 use App\Events\PlayerDepositedToSilo;
 use App\Events\PlayerDepositedToStash;
 use App\Events\PlayerWithdrewFromSilo;
+use App\Events\PlayerBankedGrainInFarm;
 use App\Events\PlayerResetSkillsInFarm;
 use App\Events\PlayerSeizedFarmProperty;
 use App\Events\PlayerPickpocketedOpponent;
@@ -95,6 +96,7 @@ class FarmActions extends BaseModifierClass
                 player_space: $player_space,
                 player_skills: $player_skills,
                 farm_map: $this->farmMap()->modifier_data,
+                teams_modifier_data: $this->farmTeams()->modifier_data,
                 can_plant_field: $this->canPlantField($player, $player_skills, $player_space, $ally_skills),
                 can_harvest_field: $this->canHarvestField($player, $player_space, $player_actions, $player_skills, $ally_skills),
                 can_burn_field: $this->canBurnField($player, $player_space, $player_actions, $player_skills, $ally_skills),
@@ -112,6 +114,7 @@ class FarmActions extends BaseModifierClass
                 can_deposit_stash: $this->canDepositStash($player, $player_space, $player_actions, $stash_owner_player, $stash_owner_team),
                 pickpocketable_opponents: $this->pickpocketableOpponents($player, $player_skills, $player_space, $player_actions['actions'] ?? 0),
                 can_reset_skills: $this->canResetSkills($player_space, $player_actions),
+                can_bank_grain: $this->canBankGrain($player_space, $player_actions),
                 player: $player,
                 all_leader_ids: $this->allLeaderIds()->toArray(),
                 silo_seize_data: $seize_data,
@@ -906,7 +909,27 @@ class FarmActions extends BaseModifierClass
         );
     }
 
-    // routines
+    public function canBankGrain(array $player_space, array $player_actions)
+    {
+        return $player_space['npc'] === 'broker'
+            && $player_actions['grain'] > 0;
+    }
+
+    public function bankGrain(Player $player, array $params)
+    {
+        PlayerBankedGrainInFarm::fire(
+            player_id: $player->id,
+            team_id: $player->team_id,
+            game_id: $player->game_id,
+            modifier_id: $this->modifier->id,
+            challenge_id: $player->game->currentChallenge->id,
+            amount: (int) $params['bank_amount'],
+        );
+
+        Verbs::commit();
+
+        return redirect()->route('game-dashboard', ['game' => $player->game]);
+    }
 
     public function initializePlayerActions(ModifierState $modifier_state, int $player_id)
     {

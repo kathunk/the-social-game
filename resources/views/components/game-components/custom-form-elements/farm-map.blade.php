@@ -151,10 +151,10 @@
                                 <flux:icon.user variant="micro" class="text-white"/>
                             @endif
                             @if($hasFriendlyField)
-                                <span style="font-size: 10px;" title="Friendly Field">🌾</span>
+                                <span style="font-size: 14px;" title="Friendly Field">🌾</span>
                             @endif
                             @if($hasFriendlySilo)
-                                <span style="font-size: 10px;" title="Friendly Silo">🏠</span>
+                                <span style="font-size: 14px;" title="Friendly Silo">🏠</span>
                             @endif
                             @if($hasTeammates)
                                 <flux:icon.user-group variant="micro" class="text-white"/>
@@ -309,13 +309,13 @@
                 @endif
                 @if($hasFriendlyFields)
                     <div class="flex items-center gap-2">
-                        <span style="font-size: 14px;">🌾</span>
+                        <span style="font-size: 18px;">🌾</span>
                         <span class="text-sm">Friendly Field</span>
                     </div>
                 @endif
                 @if($hasFriendlySilos)
                     <div class="flex items-center gap-2">
-                        <span style="font-size: 14px;">🏠</span>
+                        <span style="font-size: 18px;">🏠</span>
                         <span class="text-sm">Friendly Silo</span>
                     </div>
                 @endif

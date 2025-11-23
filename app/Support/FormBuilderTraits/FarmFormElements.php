@@ -33,10 +33,12 @@ trait FarmFormElements
     }
 
     public function farmActions(
+        bool $can_bank_grain,
         array $player_actions,
         array $player_space,
         array $player_skills,
         array $farm_map,
+        array $teams_modifier_data,
         bool $can_plant_field,
         bool $can_harvest_field,
         bool $can_burn_field,
@@ -139,6 +141,47 @@ trait FarmFormElements
                         ->button('Reset skills', 'resetSkills')
                         ->endGroup();
                 });
+        }
+
+        if ($player_space['npc'] === 'broker') {
+            $teams = $player->game->teams()->with('players')->get();
+
+            $this->divider()
+                ->title('Welcome to the grain exchange')
+                ->subtitle('Permanently bank your grain in exchange for victory points.')
+                ->when($can_bank_grain, function ($builder) use ($player_actions) {
+                    $builder
+                        ->select(
+                            label: 'Bank amount',
+                            property_name: 'bank_amount',
+                            validation_rules: 'required|in:'.implode(',', collect(range(1, $player_actions['grain']))->toArray()),
+                            validation_messages: ['required' => 'Amount is required', 'numeric' => 'Amount must be a number', 'min' => 'Amount must be greater than 0'],
+                            options: collect(range(1, $player_actions['grain']))->mapWithKeys(function ($amount) {
+                                return [$amount => $amount];
+                            })->toArray(),
+                        )->buttonGroup()
+                        ->button('Bank grain', 'bankGrain')
+                        ->endGroup();
+                })
+                ->divider()
+                ->title('Victory points')
+                ->subtitle('Below is a list of teams and their victory points. You can only see this when you are on this space.')
+                ->table(
+                    headers: ['Team', 'Members', 'Points'], 
+                    rows: $teams->map(function ($team) use ($teams_modifier_data) {
+                        return [
+                            $team->name,
+                            $team->players->map(function ($p) use ($teams_modifier_data) {
+                                $leader_prefix = in_array($p->id, $teams_modifier_data['leaders']) 
+                                    ? '👑 ' 
+                                    : '';
+                                
+                                return $leader_prefix . $p->name;
+                            })->implode(', '),
+                            $team->score,
+                        ];
+                    })->toArray()
+                );    
         }
 
         if ($silo_exists) {

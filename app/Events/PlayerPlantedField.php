@@ -73,7 +73,7 @@ class PlayerPlantedField extends Event
     public function apply(GameState $game)
     {
         $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
-
+        
         $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game) {
             if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
                 $space['field_status']['level'] = $this->level;

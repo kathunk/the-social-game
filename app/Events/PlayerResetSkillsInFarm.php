@@ -42,30 +42,24 @@ class PlayerResetSkillsInFarm extends Event
             })
             ->toArray();
 
-        $skills_state = $this->game()->modifiers()->firstWhere('class_key', FarmSkills::key());
+        $skills_state = $this->state(GameState::class)->modifiers()->firstWhere('class_key', FarmSkills::key());
+
         $skills_state->modifier_data = collect($skills_state->modifier_data)
             ->map(function ($data, $player_id) {
-                dd($data, $player_id);
                 if ($player_id !== $this->player_id) {
                     return $data;
                 }
 
-                dd($data);
-
-                $xp_regained = 0;
-
                 foreach ($data['skills'] as $skill_name => $skill_level) {
-                    $xp_regained += match ($skill_level) {
+                    $data['xp'] += match ($skill_level) {
                         0 => 0,
                         1 => 1,
                         2 => 4,
                         3 => 9,
                     };
+
+                    $data['skills'][$skill_name] = 0;
                 }
-
-                $data['skills'] = collect(FarmSkills::SKILLS)->mapWithKeys(fn ($skill) => [$skill['name'] => 0])->toArray();
-
-                $data['xp'] = $data['xp'] + $xp_regained;
 
                 return $data;
             })

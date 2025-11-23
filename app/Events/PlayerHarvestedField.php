@@ -141,11 +141,11 @@ class PlayerHarvestedField extends Event
             })->toArray();
     }
 
-    public function applyToTeam(TeamState $team)
-    {
-        $amount_to_harvest = min($this->field_quantity, $this->player_capacity - $this->player_grain);
-        $team->addToScoreHistory('🌾', $amount_to_harvest, $this->state(PlayerState::class)->name.' harvested '.$amount_to_harvest.' grain.');
-    }
+    // public function applyToTeam(TeamState $team)
+    // {
+    //     $amount_to_harvest = min($this->field_quantity, $this->player_capacity - $this->player_grain);
+    //     $team->addToScoreHistory('🌾', $amount_to_harvest, $this->state(PlayerState::class)->name.' harvested '.$amount_to_harvest.' grain.');
+    // }
 
     public function handle()
     {
