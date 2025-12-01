@@ -99,7 +99,7 @@ class FarmActions extends BaseModifierClass
                 teams_modifier_data: $this->farmTeams()->modifier_data,
                 can_plant_field: $this->canPlantField($player, $player_skills, $player_space, $ally_skills),
                 can_harvest_field: $this->canHarvestField($player, $player_space, $player_actions, $player_skills, $ally_skills),
-                can_burn_field: $this->canBurnField($player, $player_space, $player_actions, $player_skills, $ally_skills),
+                can_burn_field: $this->canBurnField($player, $player_space, $player_actions, $player_skills, $ally_skills, $all_players_on_space),
                 can_build_silo: $this->canBuildSilo($player, $player_skills, $player_space),
                 silo_exists: $this->siloExists($player, $player_space),
                 can_upgrade_silo: $this->canUpgradeSilo($player, $player_skills, $player_space),
@@ -549,7 +549,7 @@ class FarmActions extends BaseModifierClass
         return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
-    public function canBurnField(Player $player, array $player_space, array $player_actions, array $player_skills, array $ally_skills)
+    public function canBurnField(Player $player, array $player_space, array $player_actions, array $player_skills, array $ally_skills, Collection $all_players_on_space)
     {
         $owner_team_id = $player_space['field_status']['owner_team_id'];
 
@@ -563,6 +563,13 @@ class FarmActions extends BaseModifierClass
         $action_cost = 4 - max($player_skills['Thief'], $player_skills['Brute']);
 
         if ($this->modifier->modifier_data[$player->id]['actions'] < $action_cost) {
+            return false;
+        }
+
+        $rival_owners_are_on_space = $all_players_on_space->filter(fn ($p) => $p->team_id === $owner_team_id)
+            ->count() > 0;
+
+        if ($rival_owners_are_on_space) {
             return false;
         }
 
