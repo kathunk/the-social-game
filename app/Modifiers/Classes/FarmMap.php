@@ -477,16 +477,6 @@ class FarmMap extends BaseModifierClass
         })->toArray();
     }
 
-    // events
-
-    public function onUserAdmittedToGame(
-        PlayerState $player_state,
-        GameState $game_state,
-        ModifierState $modifier_state,
-    ) {
-        $modifier_state->modifier_data['spaces_visited'][$player_state->id] = [];
-    }
-
     // actions
 
     public function move(Player $player, array $params)
