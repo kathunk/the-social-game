@@ -790,6 +790,8 @@ class FarmActions extends BaseModifierClass
     {
         $player_space = $this->playerSpace($player);
 
+        $builder_level = $this->allSkills()[$player->id]['skills']['Builder'];
+
         PlayerBuiltTrapInFarm::fire(
             game_id: $player->game_id,
             modifier_id: $this->modifier->id,
@@ -797,7 +799,7 @@ class FarmActions extends BaseModifierClass
             team_id: $player->team_id,
             x_index: $player_space['x-index'],
             y_index: $player_space['y-index'],
-            level: 1,
+            level: $builder_level,
         );
 
         Verbs::commit();

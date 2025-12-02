@@ -53,10 +53,6 @@ class PlayerBuiltTrapInFarm extends Event
             'Player is not on the specified space',
         );
 
-        // Player builder level matches $this->level
-        $skills_state = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\FarmSkills::key());
-        $player_builder_level = $skills_state->modifier_data[$this->player_id]['skills']['Builder'];
-
         $this->assert(
             ($player_space['trap_status']['level'] ?? null) === null || $player_space['trap_status']['level'] === 0,
             'Space already has a trap',
