@@ -58,11 +58,6 @@ class PlayerBuiltTrapInFarm extends Event
         $player_builder_level = $skills_state->modifier_data[$this->player_id]['skills']['Builder'];
 
         $this->assert(
-            $player_builder_level === $this->level,
-            'Trap level does not match player\'s Builder skill level',
-        );
-
-        $this->assert(
             ($player_space['trap_status']['level'] ?? null) === null || $player_space['trap_status']['level'] === 0,
             'Space already has a trap',
         );
