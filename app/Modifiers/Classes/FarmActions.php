@@ -271,7 +271,8 @@ class FarmActions extends BaseModifierClass
     public function canUpgradeSilo(Player $player, array $player_skills, array $player_space)
     {
         return $this->modifier->modifier_data[$player->id]['actions'] > 0
-            && $player_skills['Builder'] > $player_space['silo_status']['level'];
+            && $player_skills['Builder'] > $player_space['silo_status']['level']
+            && $player_space['silo_status']['owner_team_id'] === $player->team_id;
     }
 
     public function upgradeSilo(Player $player, array $params)
