@@ -121,13 +121,6 @@ class PlayerSeizedFarmProperty extends Event
 
                 return $data;
             })->toArray();
-
-        if (! $this->grain_transferred) {
-            return;
-        }
-
-        $previous_owner_state->addToScoreHistory('😧', -$this->grain_transferred, $new_owner_state->name.' seized '.$this->property_type.' and took '.$this->grain_transferred.' grain.');
-        $new_owner_state->addToScoreHistory('😈', $this->grain_transferred, 'Seized '.$this->property_type.' from '.$previous_owner_state->name.' and gained '.$this->grain_transferred.' grain.');
     }
 
     public function handle()

@@ -330,8 +330,6 @@ class FarmMap extends BaseModifierClass
                         'emoji' => '🌋',
                         'message' => 'Volcano destroyed a level '.$silo_level.' silo with '.$silo_amount.' grain owned by '.$silo_owner->name.'.',
                     ];
-
-                    $silo_owner->addToScoreHistory('🌋', -$silo_amount, 'Volcano destroyed a level '.$silo_level.' silo with '.$silo_amount.' grain with it.');
                 }
 
                 if ($road_exists) {
