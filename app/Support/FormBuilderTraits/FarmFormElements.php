@@ -168,7 +168,7 @@ trait FarmFormElements
                 ->subtitle('Below is a list of teams and their victory points. You can only see this when you are on this space.')
                 ->table(
                     headers: ['Team', 'Members', 'Points'],
-                    rows: $teams->map(function ($team) use ($teams_modifier_data) {
+                    rows: $teams->sortByDesc(fn ($t) => $t->score)->map(function ($team) use ($teams_modifier_data) {
                         return [
                             $team->name,
                             $team->players
