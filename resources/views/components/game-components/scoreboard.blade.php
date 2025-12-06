@@ -1,5 +1,5 @@
-@props(['teams', 'players', 'type'])
-@if ($type === 'hide_until_end' && $this->game->status !== 'ended')
+@props(['teams', 'players', 'type', 'scoreboard_type'])
+@if ($scoreboard_type === 'hide_until_end' && $this->game->status !== 'ended')
 
 @else
 <div>

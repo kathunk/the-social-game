@@ -46,7 +46,12 @@
         @endforeach
     @endforeach
     @if ($this->showScoreboard)
-        <x-game-components.scoreboard :teams="$this->teams" :players="$this->players->filter(fn ($p) => $p->status === 'active')" :type="$this->template->scoreboard_type" />
+        <x-game-components.scoreboard 
+        :teams="$this->teams" 
+        :players="$this->players->filter(fn ($p) => $p->status === 'active')" 
+        :type="$this->template->type" 
+        :scoreboard_type="$this->gameMode->scoreboard_type"
+        />
     @else
         <x-card>
             <flux:heading>Scoreboard</flux:heading>
