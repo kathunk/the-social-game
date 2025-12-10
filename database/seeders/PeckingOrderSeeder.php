@@ -4,26 +4,28 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Challenges\Classes\IndividualChoosePointsOrHidden;
-use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
-use App\Challenges\Classes\IndividualDoubleTrouble;
-use App\Challenges\Classes\IndividualEquilibrium;
-use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
-use App\Challenges\Classes\IndividualFirstShallBeLast;
-use App\Challenges\Classes\IndividualGerrymander;
-use App\Challenges\Classes\IndividualHighScoreQuiz;
-use App\Challenges\Classes\IndividualHighTrustEnvironment;
-use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
-use App\Challenges\Classes\IndividualSpy;
-use App\Events\GameModeAdded;
-use App\Events\GameTemplateAdded;
 use App\Models\Game;
+use App\Models\User;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
-use App\Models\User;
+use App\Events\GameModeAdded;
+use Thunk\Verbs\Facades\Verbs;
 use App\Modifiers\Classes\Alms;
 use Illuminate\Database\Seeder;
-use Thunk\Verbs\Facades\Verbs;
+use App\Events\GameTemplateAdded;
+use Monolog\Handler\FirePHPHandler;
+use App\Challenges\Classes\IndividualSpy;
+use App\Modifiers\Classes\IndividualResignation;
+use App\Challenges\Classes\IndividualEquilibrium;
+use App\Challenges\Classes\IndividualGerrymander;
+use App\Challenges\Classes\IndividualDoubleTrouble;
+use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Challenges\Classes\IndividualFirstShallBeLast;
+use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
+use App\Challenges\Classes\IndividualChoosePointsOrHidden;
+use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
+use App\Challenges\Classes\IndividualHighTrustEnvironment;
+use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
 
 class PeckingOrderSeeder extends Seeder
 {
@@ -36,7 +38,7 @@ class PeckingOrderSeeder extends Seeder
             description: 'A popularity contest for horrible people.',
             pre_game_lobby_message: "<h1>A popularity contest for horrible people</h1><h3>Climb to the top of the ranks.</h3><p>Every round, you will upvote and downvote your opponents. But you will also take quizzes about how you expect the votes to turn out. When you are right, you'll accumulate secret points that are revealed at the end of the game. Outsmart your opponents to be at the top of the Pecking Order!</p>",
             type: 'individual',
-            min_players: 6,
+            min_players: 4,
             max_players: 12,
             is_public: true,
             players_can_join_late: true,
@@ -59,7 +61,7 @@ class PeckingOrderSeeder extends Seeder
                 ],
                 [
                     'challenge_keys' => [
-                        IndividualFewestHiddenPointQuiz::key(),
+                        IndividualFirstShallBeLast::key(),
                     ],
                     'duration' => 10,
                 ],
@@ -118,7 +120,7 @@ class PeckingOrderSeeder extends Seeder
                     'duration' => 10,
                 ],
             ],
-            modifiers: [Alms::key()],
+            modifiers: [IndividualResignation::key()],
             players_can_join_late: false,
         )->game_template_id;
 
@@ -136,7 +138,7 @@ class PeckingOrderSeeder extends Seeder
 
         $game->refresh();
 
-        $users = User::where('email', '!=', 'john@thunk.dev')->take(11)->get();
+        $users = User::where('email', '!=', 'john@thunk.dev')->take(3)->get();
 
         foreach ($users as $user) {
             $user->requestToJoinGame($game);

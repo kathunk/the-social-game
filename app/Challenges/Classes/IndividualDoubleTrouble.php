@@ -14,7 +14,7 @@ class IndividualDoubleTrouble extends BaseChallengeClass implements SupportsPeck
 
     const NAME = 'Double Trouble';
 
-    const DESCRIPTION = 'All ballots count double this round. However, you cash in 2 hidden points (if you have them) to block all downvotes you receive.';
+    const DESCRIPTION = 'All ballots count double this round. However, you may take -2 hidden points to block all downvotes you receive.';
 
     const TYPE = 'individual';
 
@@ -36,14 +36,12 @@ class IndividualDoubleTrouble extends BaseChallengeClass implements SupportsPeck
         $has_bought_immunity = in_array($player->id, $this->challenge->challenge_data['immune_player_ids']);
         $has_voted = $this->hasVoted($player);
 
-        $can_afford_immunity = $player->hidden_score > 1;
-
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
             ->when($has_bought_immunity, fn ($form) => $form->subtitle('🛡️ You have bought immunity.')
             )
-            ->when(! $has_bought_immunity && $can_afford_immunity, fn ($form) => $form
+            ->when(! $has_bought_immunity, fn ($form) => $form
                 ->buttonGroup()
                 ->button('Buy immunity', 'buy_immunity')
                 ->endGroup()

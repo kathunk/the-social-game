@@ -41,8 +41,8 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
         $score_gap = $players->max(fn ($p) => $p->score) - $players->min(fn ($p) => $p->score);
 
         $description = strtr(self::DESCRIPTION, [
-            '{([# of points separating 1st and last] + [# of players])/2}' => ($score_gap + $player_count) / 2,
-            '{# of players / 3}' => $player_count / 3,
+            '{([# of points separating 1st and last] + [# of players])/2}' => (int) (($score_gap + $player_count) / 2),
+            '{# of players / 3}' => (int) ($player_count / 3),
         ]);
 
         return $this->form()
@@ -91,11 +91,11 @@ class IndividualFirstShallBeLast extends BaseChallengeClass implements SupportsP
         $min_pre_vote_score = $game_state->players()->min(fn ($p) => $p->score());
         $pre_vote_score_gap = $max_pre_vote_score - $min_pre_vote_score;
         $player_count = $game_state->player_ids->count();
-        $point_reward = ($pre_vote_score_gap + $player_count) / 2;
+        $point_reward = (int) (($pre_vote_score_gap + $player_count) / 2);
 
         $votes = $this->challenge_state->challenge_data['votes'];
 
-        $votes_to_ignore = $player_count / 3;
+        $votes_to_ignore = (int) ($player_count / 3);
 
         $game_state->players()->each(function ($player) use ($votes, $votes_to_ignore) {
             $has_bought_security = in_array($player->id, $this->challenge_state->challenge_data['secure_player_ids']);
