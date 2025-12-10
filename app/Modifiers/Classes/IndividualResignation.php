@@ -85,7 +85,5 @@ class IndividualResignation extends BaseModifierClass
             points: $player->score,
             hidden_points: $player->hidden_score - $player->score
         );
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 }

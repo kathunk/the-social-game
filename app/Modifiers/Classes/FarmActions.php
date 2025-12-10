@@ -26,7 +26,6 @@ use App\States\GameState;
 use App\States\ModifierState;
 use App\States\PlayerState;
 use Illuminate\Support\Collection;
-use Thunk\Verbs\Facades\Verbs;
 
 class FarmActions extends BaseModifierClass
 {
@@ -231,10 +230,6 @@ class FarmActions extends BaseModifierClass
             y_index: $player_space['y-index'],
             level: $player_skills['Farmer'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canBuildSilo(Player $player, array $player_skills, array $player_space)
@@ -262,10 +257,6 @@ class FarmActions extends BaseModifierClass
             y_index: $player_space['y-index'],
             level: $player_skills['Builder'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canUpgradeSilo(Player $player, array $player_skills, array $player_space)
@@ -289,10 +280,6 @@ class FarmActions extends BaseModifierClass
             y_index: $player_space['y-index'],
             level: $player_skills['Builder'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canWithdrawSilo(Player $player, array $player_space, array $player_actions, array $player_skills, array $seize_data, Collection $all_players_on_space)
@@ -353,10 +340,6 @@ class FarmActions extends BaseModifierClass
             y_index: $player_space['y-index'],
             amount: (int) $params['withdraw_amount'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canDepositSilo(Player $player, array $player_space, array $player_actions)
@@ -379,10 +362,6 @@ class FarmActions extends BaseModifierClass
             y_index: $player_space['y-index'],
             amount: (int) $params['deposit_amount'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canHarvestField(Player $player, array $player_space, array $player_actions, array $player_skills, array $ally_skills)
@@ -434,10 +413,6 @@ class FarmActions extends BaseModifierClass
             player_capacity: $mod_data['grain_capacity'],
             player_grain: $mod_data['grain'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canCreateStash(Player $player, array $player_space, int $player_actions, array $player_skills, array $ally_skills, ?Player $stash_owner_player, ?Team $stash_owner_team)
@@ -478,10 +453,6 @@ class FarmActions extends BaseModifierClass
             x_index: $player_space['x-index'],
             y_index: $player_space['y-index'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canSeeStash(Player $player, array $player_space, int $actions, array $player_skills, array $ally_skills, ?Player $stash_owner_player, ?Team $stash_owner_team)
@@ -516,10 +487,6 @@ class FarmActions extends BaseModifierClass
             x_index: $player_space['x-index'],
             y_index: $player_space['y-index'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canDepositStash(Player $player, array $player_space, array $player_actions, ?Player $stash_owner_player, ?Team $stash_owner_team)
@@ -544,10 +511,6 @@ class FarmActions extends BaseModifierClass
             y_index: $player_space['y-index'],
             amount: (int) $params['deposit_stash_amount'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canBurnField(Player $player, array $player_space, array $player_actions, array $player_skills, array $ally_skills, Collection $all_players_on_space)
@@ -595,10 +558,6 @@ class FarmActions extends BaseModifierClass
             x_index: $player_space['x-index'],
             y_index: $player_space['y-index'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public static function seizePropertyData(
@@ -652,10 +611,6 @@ class FarmActions extends BaseModifierClass
             grain_transferred: $player_space['silo_status']['amount'],
             previous_owner_team_id: $player_space['silo_status']['owner_team_id'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canBuildRoad(array $player_skills, array $player_space, int $actions, array $ally_skills)
@@ -702,10 +657,6 @@ class FarmActions extends BaseModifierClass
             y_index: $player_space['y-index'],
             level: 1,
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canBuildWall(array $player_skills, array $player_space, int $actions, array $ally_skills)
@@ -751,10 +702,6 @@ class FarmActions extends BaseModifierClass
             x_index: $player_space['x-index'],
             y_index: $player_space['y-index'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canBuildTrap(array $player_skills, array $player_space, int $actions, array $ally_skills)
@@ -801,10 +748,6 @@ class FarmActions extends BaseModifierClass
             y_index: $player_space['y-index'],
             level: $builder_level,
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canBuildWatchtower(array $player_skills, array $player_space, int $actions, array $ally_skills)
@@ -850,10 +793,6 @@ class FarmActions extends BaseModifierClass
             x_index: $player_space['x-index'],
             y_index: $player_space['y-index'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function pickpocketableOpponents(Player $player, array $player_skills, array $player_space, int $actions)
@@ -898,10 +837,6 @@ class FarmActions extends BaseModifierClass
             x_index: $player_space['x-index'],
             y_index: $player_space['y-index'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function canResetSkills(array $player_space, array $player_actions)
@@ -935,16 +870,12 @@ class FarmActions extends BaseModifierClass
             challenge_id: $player->game->currentChallenge->id,
             amount: (int) $params['bank_amount'],
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public function initializePlayerActions(ModifierState $modifier_state, int $player_id)
     {
         $modifier_state->modifier_data[$player_id] = [
-            'actions' => 10,
+            'actions' => 100,
             'action_limit' => 20,
             'actions_gained_per_round' => 10,
             'grain' => 0,

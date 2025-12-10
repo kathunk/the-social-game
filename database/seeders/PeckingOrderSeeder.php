@@ -4,28 +4,25 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Models\Game;
-use App\Models\User;
-use App\Models\GameMode;
-use App\Models\GameTemplate;
-use App\Events\GameModeAdded;
-use Thunk\Verbs\Facades\Verbs;
-use App\Modifiers\Classes\Alms;
-use Illuminate\Database\Seeder;
-use App\Events\GameTemplateAdded;
-use Monolog\Handler\FirePHPHandler;
-use App\Challenges\Classes\IndividualSpy;
-use App\Modifiers\Classes\IndividualResignation;
-use App\Challenges\Classes\IndividualEquilibrium;
-use App\Challenges\Classes\IndividualGerrymander;
-use App\Challenges\Classes\IndividualDoubleTrouble;
-use App\Challenges\Classes\IndividualHighScoreQuiz;
-use App\Challenges\Classes\IndividualFirstShallBeLast;
-use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
 use App\Challenges\Classes\IndividualChoosePointsOrHidden;
 use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
+use App\Challenges\Classes\IndividualDoubleTrouble;
+use App\Challenges\Classes\IndividualEquilibrium;
+use App\Challenges\Classes\IndividualFirstShallBeLast;
+use App\Challenges\Classes\IndividualGerrymander;
+use App\Challenges\Classes\IndividualHighScoreQuiz;
 use App\Challenges\Classes\IndividualHighTrustEnvironment;
-use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
+use App\Challenges\Classes\IndividualMostHiddenPointQuiz;
+use App\Challenges\Classes\IndividualSpy;
+use App\Events\GameModeAdded;
+use App\Events\GameTemplateAdded;
+use App\Models\Game;
+use App\Models\GameMode;
+use App\Models\GameTemplate;
+use App\Models\User;
+use App\Modifiers\Classes\IndividualResignation;
+use Illuminate\Database\Seeder;
+use Thunk\Verbs\Facades\Verbs;
 
 class PeckingOrderSeeder extends Seeder
 {

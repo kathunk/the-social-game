@@ -215,17 +215,31 @@ class GameDashboard extends Component
         }
     }
 
+    protected function getComputedPropertiesToClear(): array
+    {
+        return [
+            'user',
+            'players',
+            'player',
+            'is_game_admin',
+            'teams',
+            'current_team',
+            'challenge',
+            'modifiers',
+            'challengeHandler',
+            'template',
+            'showScoreboard',
+            'socialLink',
+            'gameMode',
+            'footerMessage',
+            'postGameMessage',
+        ];
+    }
+
     #[On('challenge-complete')]
     public function refreshChallenge()
     {
         // @todo this is a hack to refresh the challenge, but it's not the best way to do it
-        // return redirect()->route('game-dashboard', ['game' => $this->game]);
-
-        // unset($this->challenge);
-        // unset($this->challenge_handler);
-        // unset($this->challenge_component);
-
-        // $this->initializeProperties();
     }
 
     public function joinTeam()
