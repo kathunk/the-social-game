@@ -85,8 +85,5 @@ class IndividualResignation extends BaseModifierClass
             points: $player->score,
             hidden_points: $player->hidden_score - $player->score
         );
-
-        // No need to redirect - HandlesClassActions trait will commit
-        // and call softRefresh() to update the component in-place
     }
 }
