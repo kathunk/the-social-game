@@ -6,10 +6,7 @@ use App\Events\PlayerMovedInFarm;
 use App\Models\Game;
 use App\Models\Player;
 use App\States\GameState;
-use App\States\ModifierState;
-use App\States\PlayerState;
 use App\States\TeamState;
-use Thunk\Verbs\Facades\Verbs;
 
 class FarmMap extends BaseModifierClass
 {
@@ -501,10 +498,6 @@ class FarmMap extends BaseModifierClass
             origin_space: $origin_space,
             destination_space: $space,
         );
-
-        Verbs::commit();
-
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
     }
 
     public static function costToMove(?array $origin_space, array $destination_space)

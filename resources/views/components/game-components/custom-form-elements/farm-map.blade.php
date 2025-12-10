@@ -69,10 +69,16 @@
         });
     });
     $hasScoutables = !empty($element['scoutable_spaces']);
+
+    // Create a unique key that changes when player position changes to force full re-render
+    $mapKey = 'farm-map-' . ($player_space ? $player_space['x-index'] . '-' . $player_space['y-index'] : 'no-position');
 @endphp
 
-<div x-data="{ selectedScoutSpace: null, playerNames: @js($playerNames) }">
-    <div style="display: grid; grid-template-columns: 30px repeat({{ $maxX + 1 }}, 1fr); gap: 4px;">
+<div
+    x-data="{ selectedScoutSpace: null, playerNames: @js($playerNames) }"
+    x-on:component-refreshed.window="selectedScoutSpace = null"
+>
+    <div wire:key="{{ $mapKey }}" style="display: grid; grid-template-columns: 30px repeat({{ $maxX + 1 }}, 1fr); gap: 4px;">
         <!-- Empty cell for top-left corner -->
         <div style="border: 1px solid #ccc; padding: 8px; min-height: 10px; display: flex; align-items: center; justify-content: center; background-color: #f5f5f5;">
         </div>
@@ -141,6 +147,7 @@
                     })->isNotEmpty();
                 @endphp
                 <div
+                    wire:key="farm-map-cell-{{ $x }}-{{ $y }}"
                     style="{{ $border }} padding: 1px; min-height: 10px; display: flex; align-items: center; justify-content: center; {{ $bgColor }} cursor: pointer;"
                     wire:click="$set('round_properties.{{ \App\Modifiers\Classes\FarmMap::key() }}.{{ $element['property_name'] }}', '{{ $coordinate }}')"
                     x-on:click="selectedScoutSpace = {{ $isScoutable && $spaceData ? json_encode($spaceData) : 'null' }}"
