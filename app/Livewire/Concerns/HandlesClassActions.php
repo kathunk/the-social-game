@@ -141,46 +141,6 @@ trait HandlesClassActions
         throw new \Exception("No modifier found for class_key: {$class_key}");
     }
 
-    protected function updateComponentsAfterAction(
-        string $type,
-        string $class_key
-    ): void {
-        if ($type === 'challenge') {
-            $this->challenge_component = $this->game->currentChallenge
-                ?->fresh()
-                ->handler()
-                ->frontendComponent($this->player->fresh());
-        }
-
-        if ($type === 'modifier') {
-            $modifier = $this->game
-                ->fresh()
-                ->modifiers()
-                ->where('class_key', $class_key)
-                ->first();
-
-            if ($modifier) {
-                $this->round_properties[$modifier->class_key] =
-                    $modifier
-                        ->handler()
-                        ?->propertiesForLivewire($this->player->fresh()) ?? [];
-
-                $this->validation_rules[$modifier->class_key] =
-                    $modifier
-                        ->handler()
-                        ?->validationRulesForLivewire($this->player->fresh()) ??
-                    [];
-
-                if (isset($this->modifier_components)) {
-                    $this->modifier_components[$modifier->class_key] = $modifier
-                        ->fresh()
-                        ->handler()
-                        ->frontendComponent($this->player->fresh());
-                }
-            }
-        }
-    }
-
     public function softRefresh()
     {
         Verbs::commit();
