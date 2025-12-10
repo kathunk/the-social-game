@@ -70,20 +70,19 @@ trait HandlesClassActions
             $this->validate($filtered_rules, $filtered_messages);
         }
 
-        // try {
-        $response = $handler->{$action}(
-            $this->player,
-            $params['round_properties']
-        );
-        // } catch (\Exception $e) {
-        //     $this->addError('action_error', $e->getMessage());
+        try {
+            $response = $handler->{$action}(
+                $this->player,
+                $params['round_properties']
+            );
+        } catch (\Exception $e) {
+            $this->addError('action_error', $e->getMessage());
 
-        //     return;
-        // }
+            return;
+        }
 
         Verbs::commit();
 
-        // Do a complete component refresh
         $this->softRefresh();
 
         return $response instanceof \Illuminate\Http\RedirectResponse ||
@@ -182,42 +181,27 @@ trait HandlesClassActions
         }
     }
 
-    /**
-     * Perform a complete component refresh after Verbs events have been committed.
-     * Components can override getComputedPropertiesToClear() to specify which
-     * computed properties should be cleared before re-initializing.
-     */
     public function softRefresh()
     {
-        // Commit is handled by callClassAction, but safe to call again (idempotent)
         Verbs::commit();
 
-        // Refresh the main game model from database
         if (isset($this->game)) {
             $this->game = $this->game->fresh();
         }
 
-        // Clear computed property caches so they re-fetch with fresh data
         foreach ($this->getComputedPropertiesToClear() as $property) {
             unset($this->{$property});
         }
 
-        // Re-initialize component properties if method exists
         if (method_exists($this, 'initializeProperties')) {
             $this->initializeProperties();
         }
 
-        // Clear any validation errors from previous state
         $this->resetValidation();
 
-        // Dispatch browser event to reset Alpine.js state
         $this->dispatch('component-refreshed');
     }
 
-    /**
-     * Override this method to specify which computed properties should be
-     * cleared during softRefresh(). Default is an empty array.
-     */
     protected function getComputedPropertiesToClear(): array
     {
         return [];
