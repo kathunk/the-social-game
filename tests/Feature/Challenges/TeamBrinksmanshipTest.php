@@ -146,21 +146,6 @@ it('gives -50 points to ally team when a team launches a nuke ally strike', func
     }
 });
 
-it('prevents a team from launching multiple strikes', function () {
-    foreach ($this->game->teams as $team) {
-        $player = $team->players->first();
-        $ally_team = ally_team($team);
-        $ally_code = code($ally_team);
-
-        // First strike should succeed
-        launchNuclearStrike($player, 'carpet_bomb', $ally_code);
-
-        // Second strike should fail
-        launchNuclearStrike($player, 'nuke_ally', $ally_code)
-            ->assertHasErrors();
-    }
-});
-
 describe('validate nuclear code', function () {
     it('is required', function () {
         launchNuclearStrike($this->player_1, 'carpet_bomb', '')

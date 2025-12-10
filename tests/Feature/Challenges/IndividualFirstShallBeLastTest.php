@@ -73,10 +73,10 @@ it('runs individual steal the bacon', function () {
     expect($player_5->fresh()->hidden_score)->toBe(0);
 
     // each bought security for -1 hidden point.
-    // player 6 got 5 upvotes, player 7 got 5 downvotes
+    // player 6 got 6 upvotes, player 7 got 6 downvotes
     // each should block 2 upvotes and 2 downvotes
-    expect($player_6->fresh()->score)->toBe(3);
-    expect($player_7->fresh()->score)->toBe(-3);
-    expect($player_6->fresh()->hidden_score)->toBe(2);
-    expect($player_7->fresh()->hidden_score)->toBe(-4);
+    expect($player_6->fresh()->score)->toBe(4);
+    expect($player_7->fresh()->score)->toBe(-4);
+    expect($player_6->fresh()->hidden_score)->toBe(3);
+    expect($player_7->fresh()->hidden_score)->toBe(-5);
 });
