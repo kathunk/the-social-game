@@ -41,6 +41,14 @@ class User extends Authenticatable
         'current_player_id',
         'is_super_admin',
         'subscribed_to_newsletter',
+        'phone_number',
+        'default_discord_webhook',
+        'notification_preferences',
+        'telegram_chat_id',
+        'telegram_username',
+        'telegram_verification_token',
+        'telegram_connected_at',
+        'push_subscriptions',
     ];
 
     /**
@@ -52,6 +60,9 @@ class User extends Authenticatable
 
     protected $casts = [
         'is_super_admin' => 'boolean',
+        'notification_preferences' => 'array',
+        'telegram_connected_at' => 'datetime',
+        'push_subscriptions' => 'array',
     ];
 
     /**
@@ -249,5 +260,42 @@ class User extends Authenticatable
     public function getHasActiveGameAttribute(): bool
     {
         return $this->games->where('status', 'active')->isNotEmpty();
+    }
+
+    public function wantsNotificationFor(string $event): bool
+    {
+        return $this->notification_preferences[$event] ?? false;
+    }
+
+    public function wantsNotificationVia(string $type): bool
+    {
+        return $this->notification_preferences[$type] ?? false;
+    }
+
+    public function wantsNotifications()
+    {
+        return $this->wantsNotificationVia('notify_via_email') ||
+            $this->wantsNotificationVia('notify_via_sms') ||
+            $this->wantsNotificationVia('notify_via_discord') ||
+            $this->wantsNotificationVia('notify_via_telegram') ||
+            $this->wantsNotificationVia('notify_via_browser');
+    }
+
+    public function hasNotificationContactConfigured(): bool
+    {
+        return ! empty($this->phone_number) ||
+            ! empty($this->default_discord_webhook) ||
+            ! empty($this->telegram_chat_id) ||
+            ! empty($this->push_subscriptions);
+    }
+
+    public function hasTelegramConnected(): bool
+    {
+        return ! empty($this->telegram_chat_id);
+    }
+
+    public function hasPushSubscriptions(): bool
+    {
+        return ! empty($this->push_subscriptions);
     }
 }

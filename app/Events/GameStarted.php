@@ -4,8 +4,11 @@ namespace App\Events;
 
 use App\Events\Traits\HasGame;
 use App\Models\Game;
+use App\Notifications\GameStartedNotification;
 use App\States\GameState;
+use Illuminate\Support\Facades\Log;
 use Thunk\Verbs\Event;
+use Thunk\Verbs\Facades\Verbs;
 
 class GameStarted extends Event
 {
@@ -46,6 +49,16 @@ class GameStarted extends Event
 
         $game->modifiers->each(function ($modifier) {
             $modifier->updateModelWithStateData();
+        });
+
+        Verbs::unlessReplaying(function () use ($game) {
+            $this->game()->players->each(function ($player) use ($game) {
+                $user = $player->user;
+
+                if ($user->wantsNotificationFor('notify_on_game_start')) {
+                    $user->notify(new GameStartedNotification($game));
+                }
+            });
         });
     }
 }

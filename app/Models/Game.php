@@ -373,7 +373,7 @@ class Game extends Model
 
     public function getUrlAttribute(): string
     {
-        return route('pre-game-lobby', $this->id);
+        return route('game-dashboard', $this->id);
     }
 
     public function end()
