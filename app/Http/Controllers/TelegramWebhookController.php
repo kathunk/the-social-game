@@ -15,7 +15,6 @@ class TelegramWebhookController extends Controller
 
     public function handle(Request $request)
     {
-        // Verify webhook secret
         $secret = $request->header('X-Telegram-Bot-Api-Secret-Token');
         if ($secret !== config('services.telegram.webhook_secret')) {
             return response('Unauthorized', 401);
@@ -32,18 +31,11 @@ class TelegramWebhookController extends Controller
         $text = $message['text'] ?? '';
         $username = $message['from']['username'] ?? null;
 
-        Log::info('Telegram webhook received', [
-            'chat_id' => $chatId,
-            'text' => $text,
-            'username' => $username,
-        ]);
-
-        // Handle /start command with verification token
         if (str_starts_with($text, '/start ')) {
             $token = trim(str_replace('/start ', '', $text));
             $this->handleVerification($chatId, $token, $username);
         }
-        // Handle plain /start
+
         elseif ($text === '/start') {
             $this->telegram->sendMessage(
                 $chatId,
@@ -78,11 +70,5 @@ class TelegramWebhookController extends Controller
             $chatId,
             "✅ Your Telegram account has been successfully connected! You'll now receive game notifications here."
         );
-
-        Log::info('Telegram account connected', [
-            'user_id' => $user->id,
-            'chat_id' => $chatId,
-            'username' => $username,
-        ]);
     }
 }
