@@ -4,5 +4,8 @@
 
 Make your first move. Good luck 😈
 
-<button href="{{ route('game-dashboard', ['game' => $game]) }}">View Game</button>
+@component('mail::button', ['url' => route('game-dashboard', ['game' => $game])])
+View Game
+@endcomponent
+
 @endcomponent
