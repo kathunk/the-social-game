@@ -44,6 +44,11 @@ class User extends Authenticatable
         'phone_number',
         'default_discord_webhook',
         'notification_preferences',
+        'telegram_chat_id',
+        'telegram_username',
+        'telegram_verification_token',
+        'telegram_connected_at',
+        'push_subscriptions',
     ];
 
     /**
@@ -56,6 +61,8 @@ class User extends Authenticatable
     protected $casts = [
         'is_super_admin' => 'boolean',
         'notification_preferences' => 'array',
+        'telegram_connected_at' => 'datetime',
+        'push_subscriptions' => 'array',
     ];
 
     /**
@@ -271,11 +278,52 @@ class User extends Authenticatable
     {
         return $this->wantsNotificationVia('notify_via_email') ||
             $this->wantsNotificationVia('notify_via_sms') ||
-            $this->wantsNotificationVia('notify_via_discord');
+            $this->wantsNotificationVia('notify_via_discord') ||
+            $this->wantsNotificationVia('notify_via_telegram') ||
+            $this->wantsNotificationVia('notify_via_browser');
     }
 
     public function hasNotificationContactConfigured(): bool
     {
-        return ! empty($this->phone_number) || ! empty($this->default_discord_webhook);
+        return ! empty($this->phone_number) ||
+            ! empty($this->default_discord_webhook) ||
+            ! empty($this->telegram_chat_id) ||
+            ! empty($this->push_subscriptions);
+    }
+
+    public function hasTelegramConnected(): bool
+    {
+        return ! empty($this->telegram_chat_id);
+    }
+
+    public function hasPushSubscriptions(): bool
+    {
+        return ! empty($this->push_subscriptions);
+    }
+
+    public function addPushSubscription(array $subscription): void
+    {
+        $subscriptions = $this->push_subscriptions ?? [];
+
+        // Check if subscription already exists
+        $exists = collect($subscriptions)->contains(function ($sub) use ($subscription) {
+            return $sub['endpoint'] === $subscription['endpoint'];
+        });
+
+        if (! $exists) {
+            $subscriptions[] = $subscription;
+            $this->push_subscriptions = $subscriptions;
+            $this->save();
+        }
+    }
+
+    public function removePushSubscription(string $endpoint): void
+    {
+        $subscriptions = collect($this->push_subscriptions ?? [])->filter(function ($sub) use ($endpoint) {
+            return $sub['endpoint'] !== $endpoint;
+        })->values()->toArray();
+
+        $this->push_subscriptions = $subscriptions;
+        $this->save();
     }
 }

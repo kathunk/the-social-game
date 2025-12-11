@@ -4,6 +4,9 @@ namespace App\Notifications\Channels;
 
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
+use Vonage\Client;
+use Vonage\Client\Credentials\Basic;
+use Vonage\SMS\Message\SMS;
 
 class SmsChannel
 {
@@ -19,32 +22,45 @@ class SmsChannel
         $phoneNumber = $notifiable->phone_number;
 
         if (! $phoneNumber) {
-            Log::warning('SMS notification attempted but no phone number configured', [
-                'user_id' => $notifiable->id,
-            ]);
 
             return;
         }
 
         $message = $notification->toSms($notifiable);
 
-        Log::info('SMS notification channel called', [
-            'user_id' => $notifiable->id,
-            'phone_number' => $phoneNumber,
-            'message' => $message,
-        ]);
+        try {
 
-        // TODO: Integrate with actual SMS service (Twilio, AWS SNS, etc.)
-        // For now, we'll just log it
-        Log::info('SMS notification would be sent (not implemented yet)', [
-            'user_id' => $notifiable->id,
-            'phone_number' => $phoneNumber,
-            'message' => $message,
-        ]);
+            $client = new Client(
+                new Basic(
+                    config('services.vonage.key'),
+                    config('services.vonage.secret')
+                )
+            );
 
-        // Example integration with a service:
-        // You would replace this with actual SMS service calls
-        // For example, with Twilio:
-        // Twilio::message($phoneNumber, $message);
+            $response = $client->sms()->send(
+                new SMS(
+                    $phoneNumber,
+                    config('services.vonage.sms_from'),
+                    $message
+                )
+            );
+
+            $responseMessage = $response->current();
+
+            if ($responseMessage->getStatus() == 0) {
+            } else {
+                Log::error('SMS notification failed', [
+                    'user_id' => $notifiable->id,
+                    'status' => $responseMessage->getStatus(),
+                    'error' => $responseMessage->getStatus(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('SMS notification exception', [
+                'user_id' => $notifiable->id,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
     }
 }

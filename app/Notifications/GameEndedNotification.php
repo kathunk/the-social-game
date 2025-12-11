@@ -6,7 +6,7 @@ use App\Models\Game;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class GameStartedNotification extends Notification
+class GameEndedNotification extends Notification
 {
     public function __construct(
         public Game $game
@@ -18,10 +18,6 @@ class GameStartedNotification extends Notification
 
         if ($notifiable->wantsNotificationVia('notify_via_email')) {
             $channels[] = 'mail';
-        }
-
-        if ($notifiable->wantsNotificationVia('notify_via_sms') && $notifiable->phone_number) {
-            $channels[] = 'sms';
         }
 
         if ($notifiable->wantsNotificationVia('notify_via_discord') && $notifiable->default_discord_webhook) {
@@ -42,27 +38,22 @@ class GameStartedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("{$this->game->name} is afoot!")
-            ->markdown('emails.game-started', [
+            ->subject("{$this->game->name} has ended!")
+            ->markdown('emails.game-ended', [
                 'game' => $this->game,
             ]);
-    }
-
-    public function toSms(object $notifiable): string
-    {
-        return "{$this->game->name} is afoot! Make your first move. Good luck 😈";
     }
 
     public function toDiscord(object $notifiable): array
     {
         return [
-            'content' => "**{$this->game->name} is afoot!**",
+            'content' => "🏆 **Game Ended!**",
             'embeds' => [
                 [
                     'title' => $this->game->name,
-                    'description' => "Make your first move. Good luck 😈",
+                    'description' => "The game has ended! Check out the final results and see how you did!",
                     'url' => $this->game->url,
-                    'color' => 0x00ff00,
+                    'color' => 0xffd700,
                     'timestamp' => now()->toIso8601String(),
                 ],
             ],
@@ -71,16 +62,17 @@ class GameStartedNotification extends Notification
 
     public function toTelegram(object $notifiable): string
     {
-        return "🎮 <b>{$this->game->name} is afoot!</b>\n\n" .
-               "Make your first move. Good luck 😈\n\n" .
+        return "🏆 <b>Game Ended!</b>\n\n" .
+               "{$this->game->name}\n\n" .
+               "The game has ended! Check out the final results and see how you did!\n\n" .
                "View game: {$this->game->url}";
     }
 
     public function toWebPush(object $notifiable): array
     {
         return [
-            'title' => "{$this->game->name} is afoot!",
-            'body' => "Make your first move. Good luck 😈",
+            'title' => 'Game Ended!',
+            'body' => "{$this->game->name} has ended! Check out the final results and see how you did!",
             'icon' => '/favicon.ico',
             'url' => $this->game->url,
         ];

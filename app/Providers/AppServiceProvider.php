@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Notifications\Channels\DiscordChannel;
 use App\Notifications\Channels\SmsChannel;
+use App\Notifications\Channels\TelegramChannel;
+use App\Notifications\Channels\WebPushChannel;
 use App\Observers\SubscriptionObserver;
 use App\Rules\NuclearCode;
 use Illuminate\Notifications\ChannelManager;
@@ -33,6 +35,14 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->make(ChannelManager::class)->extend('sms', function () {
             return new SmsChannel();
+        });
+
+        $this->app->make(ChannelManager::class)->extend('telegram', function () {
+            return $this->app->make(TelegramChannel::class);
+        });
+
+        $this->app->make(ChannelManager::class)->extend('webpush', function () {
+            return $this->app->make(WebPushChannel::class);
         });
 
         // Configure social providers

@@ -1,17 +1,9 @@
 @component('mail::message')
 
-![The Social Game]({{ url('/images/OG.png') }})
+# {{ $game->name }} is afoot!
 
-# {{ $game->name }} has started!
+Make your first move. Good luck 😈
 
-{{ $game->name }} has started!
+<x-button href="{{ route('game-dashboard', ['game' => $game]) }}">View Game</x-button>
 
-@component('mail::button', ['url' => $game->url])
-View Game
-@endcomponent
-
-Jump in, the water is warm!
-
-Thanks,<br>
-{{ config('app.name') }}
 @endcomponent

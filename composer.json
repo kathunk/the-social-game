@@ -22,6 +22,7 @@
         "livewire/flux-pro": "^2.1",
         "livewire/livewire": "^3.6",
         "livewire/volt": "^1.7.0",
+        "minishlink/web-push": "^9.0",
         "phpdocumentor/reflection-docblock": "^5.6",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "socialiteproviders/apple": "^5.7",

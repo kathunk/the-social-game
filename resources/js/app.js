@@ -1,5 +1,6 @@
 import './echo'
 import sort from '@alpinejs/sort'
+import { PushNotifications } from './push-notifications'
 
 // If Alpine is already on window, register immediately.
 // Otherwise, wait for Livewire/Flux to boot Alpine.
@@ -22,3 +23,6 @@ document.addEventListener('visibilitychange', () => {
     window.Livewire?.all()?.forEach(c => c.$refresh());
   }
 });
+
+// Initialize push notifications
+window.pushNotifications = new PushNotifications();
