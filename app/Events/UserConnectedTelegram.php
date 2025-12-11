@@ -2,24 +2,24 @@
 
 namespace App\Events;
 
-use App\Models\User;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use App\Events\Traits\HasUser;
 use Thunk\Verbs\Event;
 
 class UserConnectedTelegram extends Event
 {
-    #[StateId(User::class)]
-    public int $user_id;
+    use HasUser;
 
     public string $telegram_chat_id;
 
     public ?string $telegram_username;
 
-    public function apply(User $user)
+    public function handle()
     {
-        $user->telegram_chat_id = $this->telegram_chat_id;
-        $user->telegram_username = $this->telegram_username;
-        $user->telegram_verification_token = null;
-        $user->telegram_connected_at = $this->created_at;
+        $this->user()->update([
+            'telegram_chat_id' => $this->telegram_chat_id,
+            'telegram_username' => $this->telegram_username,
+            'telegram_verification_token' => null,
+            'telegram_connected_at' => now(),
+        ]);
     }
 }

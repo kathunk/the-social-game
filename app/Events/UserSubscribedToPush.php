@@ -2,19 +2,18 @@
 
 namespace App\Events;
 
-use App\Models\User;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use App\Events\Traits\HasUser;
 use Thunk\Verbs\Event;
 
 class UserSubscribedToPush extends Event
 {
-    #[StateId(User::class)]
-    public int $user_id;
+    use HasUser;
 
     public array $subscription;
 
-    public function apply(User $user)
+    public function handle()
     {
+        $user = $this->user();
         $subscriptions = $user->push_subscriptions ?? [];
 
         $exists = collect($subscriptions)->contains(function ($sub) {
@@ -23,7 +22,9 @@ class UserSubscribedToPush extends Event
 
         if (! $exists) {
             $subscriptions[] = $this->subscription;
-            $user->push_subscriptions = $subscriptions;
+            $user->update([
+                'push_subscriptions' => $subscriptions,
+            ]);
         }
     }
 }

@@ -2,24 +2,26 @@
 
 namespace App\Events;
 
-use App\Models\User;
-use Thunk\Verbs\Attributes\Autodiscovery\StateId;
+use App\Events\Traits\HasUser;
 use Thunk\Verbs\Event;
 
 class UserUnsubscribedFromPush extends Event
 {
-    #[StateId(User::class)]
-    public int $user_id;
+    use HasUser;
 
     public string $endpoint;
 
-    public function apply(User $user)
+    public function handle()
     {
+        $user = $this->user();
+
         $subscriptions = collect($user->push_subscriptions ?? [])
             ->filter(fn ($sub) => $sub['endpoint'] !== $this->endpoint)
             ->values()
             ->toArray();
 
-        $user->push_subscriptions = $subscriptions;
+        $user->update([
+            'push_subscriptions' => $subscriptions,
+        ]);
     }
 }
