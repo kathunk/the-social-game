@@ -12,6 +12,21 @@ class GameEndedNotification extends Notification
         public Game $game
     ) {}
 
+    public function headline(): string
+    {
+        return "🏆 {$this->game->name} has ended!";
+    }
+
+    public function body(): string
+    {
+        return "The game has concluded! Check out the final results and see how you did.";
+    }
+
+    public function url(): string
+    {
+        return route('game-dashboard', ['game' => $this->game]);
+    }
+
     public function via(object $notifiable): array
     {
         $channels = [];
@@ -38,7 +53,9 @@ class GameEndedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("{$this->game->name} has ended!")
+            ->subject($this->headline())
+            ->line($this->body())
+            ->action('View Game', $this->url())
             ->markdown('emails.game-ended', [
                 'game' => $this->game,
             ]);
@@ -47,11 +64,11 @@ class GameEndedNotification extends Notification
     public function toDiscord(object $notifiable): array
     {
         return [
-            'content' => '🏆 **Game Ended!**',
+            'content' => "**{$this->headline()}**",
             'embeds' => [
                 [
                     'title' => $this->game->name,
-                    'description' => 'The game has ended! Check out the final results and see how you did!',
+                    'description' => $this->body(),
                     'url' => $this->game->url,
                     'color' => 0xFFD700,
                     'timestamp' => now()->toIso8601String(),
@@ -62,17 +79,16 @@ class GameEndedNotification extends Notification
 
     public function toTelegram(object $notifiable): string
     {
-        return "🏆 <b>Game Ended!</b>\n\n".
-               "{$this->game->name}\n\n".
-               "The game has ended! Check out the final results and see how you did!\n\n".
+        return "<b>{$this->headline()}</b>\n\n".
+               "{$this->body()}\n\n".
                "View game: {$this->game->url}";
     }
 
     public function toWebPush(object $notifiable): array
     {
         return [
-            'title' => 'Game Ended!',
-            'body' => "{$this->game->name} has ended! Check out the final results and see how you did!",
+            'title' => $this->headline(),
+            'body' => $this->body(),
             'icon' => '/favicon.ico',
             'url' => $this->game->url,
         ];

@@ -15,14 +15,15 @@ class PushSubscriptionController extends Controller
             'keys.auth' => 'required|string',
         ]);
 
-        $user = Auth::user();
-
         $subscription = [
             'endpoint' => $validated['endpoint'],
             'keys' => $validated['keys'],
         ];
 
-        $user->addPushSubscription($subscription);
+        \App\Events\UserSubscribedToPush::fire(
+            user_id: Auth::id(),
+            subscription: $subscription
+        );
 
         return response()->json(['success' => true]);
     }
@@ -33,7 +34,10 @@ class PushSubscriptionController extends Controller
             'endpoint' => 'required|string',
         ]);
 
-        Auth::user()->removePushSubscription($validated['endpoint']);
+        \App\Events\UserUnsubscribedFromPush::fire(
+            user_id: Auth::id(),
+            endpoint: $validated['endpoint']
+        );
 
         return response()->json(['success' => true]);
     }

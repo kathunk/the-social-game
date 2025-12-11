@@ -66,13 +66,13 @@ class ChallengeStartedNotification extends Notification
 
         if ($isFinalChallenge) {
             return [
-                'content' => "🏁 **Final Round!**",
+                'content' => "🏁 **Final Round: {$this->game->name}**",
                 'embeds' => [
                     [
                         'title' => $this->game->name,
-                        'description' => "This is the final round: {$this->challenge->handler()::NAME}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.",
+                        'description' => "This is the final round!\n\nThe challenge ends {$this->challenge->ends_at->diffForHumans()}.",
                         'url' => $this->game->url,
-                        'color' => 0xff0000, // Red color for final round
+                        'color' => 0xff0000,
                         'timestamp' => now()->toIso8601String(),
                     ],
                 ],
@@ -80,13 +80,13 @@ class ChallengeStartedNotification extends Notification
         }
 
         return [
-            'content' => "**New Challenge Started: {$this->challenge->handler()::NAME}!**",
+            'content' => "**A new challenge has begun!**",
             'embeds' => [
                 [
                     'title' => $this->game->name,
-                    'description' => "A new challenge has begun: {$this->challenge->handler()::NAME}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.",
+                    'description' => "The next challenge starts now: {$this->challenge->handler()::NAME}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.",
                     'url' => $this->game->url,
-                    'color' => 0x0000ff, // Blue color
+                    'color' => 0x0000ff,
                     'timestamp' => now()->toIso8601String(),
                 ],
             ],
@@ -98,15 +98,14 @@ class ChallengeStartedNotification extends Notification
         $isFinalChallenge = $this->isFinalChallenge();
 
         if ($isFinalChallenge) {
-            return "🏁 <b>Final Round!</b>\n\n" .
-                   "{$this->game->name}\n\n" .
-                   "This is the final round! Make your final moves and give it your all!\n\n" .
+            return "🏁 <b>Final Round: {$this->game->name}</b>\n\n" .
+                   "This is the final round!\n\n" .
+                   "The challenge ends {$this->challenge->ends_at->diffForHumans()}.\n\n" .
                    "View game: {$this->game->url}";
         }
 
-        return "🎯 <b>New Challenge Started!</b>\n\n" .
-               "{$this->game->name}\n\n" .
-               "A new challenge has begun! Check it out and make your moves.\n\n" .
+        return "<b>A new challenge has begun!</b>\n\n" .
+               "The next challenge starts now: {$this->challenge->handler()::NAME}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.\n\n" .
                "View game: {$this->game->url}";
     }
 
@@ -116,16 +115,16 @@ class ChallengeStartedNotification extends Notification
 
         if ($isFinalChallenge) {
             return [
-                'title' => 'Final Round!',
-                'body' => "This is the final round of {$this->game->name}! Make your final moves and give it your all!",
+                'title' => "🏁 Final Round: {$this->game->name}",
+                'body' => "This is the final round! The challenge ends {$this->challenge->ends_at->diffForHumans()}.",
                 'icon' => '/favicon.ico',
                 'url' => $this->game->url,
             ];
         }
 
         return [
-            'title' => 'New Challenge Started!',
-            'body' => "A new challenge has begun in {$this->game->name}! Check it out and make your moves.",
+            'title' => 'A new challenge has begun!',
+            'body' => "The next challenge starts now: {$this->challenge->handler()::NAME}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.",
             'icon' => '/favicon.ico',
             'url' => $this->game->url,
         ];

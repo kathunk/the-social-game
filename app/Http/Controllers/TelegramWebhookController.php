@@ -59,12 +59,11 @@ class TelegramWebhookController extends Controller
             return;
         }
 
-        // Connect the account
-        $user->telegram_chat_id = $chatId;
-        $user->telegram_username = $username;
-        $user->telegram_verification_token = null;
-        $user->telegram_connected_at = now();
-        $user->save();
+        \App\Events\UserConnectedTelegram::fire(
+            user_id: $user->id,
+            telegram_chat_id: $chatId,
+            telegram_username: $username
+        );
 
         $this->telegram->sendMessage(
             $chatId,
