@@ -79,12 +79,14 @@ class ChallengeStartedNotification extends Notification
             ];
         }
 
+        $challengeName = $this->challenge->handler()::NAME;
+
         return [
             'content' => "**A new challenge has begun!**",
             'embeds' => [
                 [
                     'title' => $this->game->name,
-                    'description' => "The next challenge starts now: {$this->challenge->handler()::NAME}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.",
+                    'description' => "The next challenge starts now: {$challengeName}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.",
                     'url' => $this->game->url,
                     'color' => 0x0000ff,
                     'timestamp' => now()->toIso8601String(),
@@ -104,8 +106,10 @@ class ChallengeStartedNotification extends Notification
                    "View game: {$this->game->url}";
         }
 
+        $challengeName = $this->challenge->handler()::NAME;
+
         return "<b>A new challenge has begun!</b>\n\n" .
-               "The next challenge starts now: {$this->challenge->handler()::NAME}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.\n\n" .
+               "The next challenge starts now: {$challengeName}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.\n\n" .
                "View game: {$this->game->url}";
     }
 
@@ -122,9 +126,11 @@ class ChallengeStartedNotification extends Notification
             ];
         }
 
+        $challengeName = $this->challenge->handler()::NAME;
+
         return [
             'title' => 'A new challenge has begun!',
-            'body' => "The next challenge starts now: {$this->challenge->handler()::NAME}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.",
+            'body' => "The next challenge starts now: {$challengeName}. The challenge ends {$this->challenge->ends_at->diffForHumans()}.",
             'icon' => '/favicon.ico',
             'url' => $this->game->url,
         ];
