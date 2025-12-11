@@ -71,7 +71,7 @@ class GameStartedNotification extends Notification
 
     public function toTelegram(object $notifiable): string
     {
-        return "🎮 <b>{$this->game->name} is afoot!</b>\n\n".
+        return "<b>{$this->game->name} is afoot!</b>\n\n".
                "Make your first move. Good luck 😈\n\n".
                "View game: {$this->game->url}";
     }

@@ -344,6 +344,7 @@ new class extends Component {
                         @endif
                     </div>
 
+                    {{--
                     <!-- Browser Push Notifications -->
                     <div x-data="{
                         browserSupported: ('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window),
@@ -406,6 +407,7 @@ new class extends Component {
                             </flux:button>
                         @endif
                     </div>
+                    --}}
                 </div>
 
                 <!-- Notification Events -->
