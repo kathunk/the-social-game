@@ -4,6 +4,5 @@
 
 Make your first move. Good luck 😈
 
-<x-button href="{{ route('game-dashboard', ['game' => $game]) }}">View Game</x-button>
-
+<button href="{{ route('game-dashboard', ['game' => $game]) }}">View Game</button>
 @endcomponent
