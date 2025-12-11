@@ -298,30 +298,4 @@ class User extends Authenticatable
     {
         return ! empty($this->push_subscriptions);
     }
-
-    public function addPushSubscription(array $subscription): void
-    {
-        $subscriptions = $this->push_subscriptions ?? [];
-
-        // Check if subscription already exists
-        $exists = collect($subscriptions)->contains(function ($sub) use ($subscription) {
-            return $sub['endpoint'] === $subscription['endpoint'];
-        });
-
-        if (! $exists) {
-            $subscriptions[] = $subscription;
-            $this->push_subscriptions = $subscriptions;
-            $this->save();
-        }
-    }
-
-    public function removePushSubscription(string $endpoint): void
-    {
-        $subscriptions = collect($this->push_subscriptions ?? [])->filter(function ($sub) use ($endpoint) {
-            return $sub['endpoint'] !== $endpoint;
-        })->values()->toArray();
-
-        $this->push_subscriptions = $subscriptions;
-        $this->save();
-    }
 }
