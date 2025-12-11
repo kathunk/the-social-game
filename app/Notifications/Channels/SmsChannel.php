@@ -48,13 +48,7 @@ class SmsChannel
             $responseMessage = $response->current();
 
             if ($responseMessage->getStatus() == 0) {
-            } else {
-                Log::error('SMS notification failed', [
-                    'user_id' => $notifiable->id,
-                    'status' => $responseMessage->getStatus(),
-                    'error' => $responseMessage->getStatus(),
-                ]);
-            }
+            } 
         } catch (\Exception $e) {
             Log::error('SMS notification exception', [
                 'user_id' => $notifiable->id,

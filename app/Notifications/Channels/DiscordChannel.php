@@ -24,13 +24,6 @@ class DiscordChannel
 
         try {
             $response = Http::post($webhookUrl, $message);
-
-            if (! $response->successful()) {
-                Log::error('Discord notification failed', [
-                    'user_id' => $notifiable->id,
-                    'status' => $response->status(),
-                ]);
-            }
         } catch (\Exception $e) {
             Log::error('Discord notification failed', [
                 'user_id' => $notifiable->id,

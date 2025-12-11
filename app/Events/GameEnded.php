@@ -29,34 +29,14 @@ class GameEnded extends Event
 
         Verbs::unlessReplaying(function () use ($game) {
             $this->game()->players()->each(function ($player) use ($game) {
-                // Skip players who have resigned
                 if ($player->status === 'resigned') {
-                    Log::debug('Skipping notification for resigned player', [
-                        'user_id' => $player->user->id,
-                        'player_id' => $player->id,
-                        'game_id' => $game->id,
-                    ]);
-
                     return;
                 }
 
                 $user = $player->user;
 
-                // Check if user wants notifications for this specific event
                 if ($user->wantsNotificationFor('notify_on_game_end')) {
-                    Log::info('Sending game ended notification', [
-                        'user_id' => $user->id,
-                        'game_id' => $game->id,
-                        'game_name' => $game->name,
-                    ]);
-
                     $user->notify(new GameEndedNotification($game));
-                } else {
-                    Log::debug('User does not want notifications for game_ended', [
-                        'user_id' => $user->id,
-                        'game_id' => $game->id,
-                        'preferences' => $user->notification_preferences,
-                    ]);
                 }
             });
         });
