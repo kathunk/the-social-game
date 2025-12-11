@@ -305,7 +305,7 @@ new class extends Component {
                                             ✓ Telegram Connected
                                         </flux:text>
                                         <flux:text class="text-sm text-green-600 dark:text-green-400 mt-1">
-                                            Connected as @{{ $telegram_username ?? 'Unknown' }}
+                                            Connected as {{ '@' . ($telegram_username ?? 'Unknown') }}
                                         </flux:text>
                                     </div>
                                     <flux:button
