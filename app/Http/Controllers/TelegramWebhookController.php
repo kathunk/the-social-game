@@ -47,7 +47,7 @@ class TelegramWebhookController extends Controller
         elseif ($text === '/start') {
             $this->telegram->sendMessage(
                 $chatId,
-                "👋 Welcome! To connect your account, please use the link from your profile settings."
+                '👋 Welcome! To connect your account, please use the link from your profile settings.'
             );
         }
 
@@ -61,7 +61,7 @@ class TelegramWebhookController extends Controller
         if (! $user) {
             $this->telegram->sendMessage(
                 $chatId,
-                "❌ Invalid verification code. Please generate a new one from your profile settings."
+                '❌ Invalid verification code. Please generate a new one from your profile settings.'
             );
 
             return;

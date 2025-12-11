@@ -70,6 +70,7 @@ class ChallengeStarted extends Event
                         'player_id' => $player->id,
                         'challenge_id' => $challenge->id,
                     ]);
+
                     return;
                 }
 

@@ -36,6 +36,7 @@ class GameEnded extends Event
                         'player_id' => $player->id,
                         'game_id' => $game->id,
                     ]);
+
                     return;
                 }
 

@@ -47,13 +47,13 @@ class GameEndedNotification extends Notification
     public function toDiscord(object $notifiable): array
     {
         return [
-            'content' => "🏆 **Game Ended!**",
+            'content' => '🏆 **Game Ended!**',
             'embeds' => [
                 [
                     'title' => $this->game->name,
-                    'description' => "The game has ended! Check out the final results and see how you did!",
+                    'description' => 'The game has ended! Check out the final results and see how you did!',
                     'url' => $this->game->url,
-                    'color' => 0xffd700,
+                    'color' => 0xFFD700,
                     'timestamp' => now()->toIso8601String(),
                 ],
             ],
@@ -62,9 +62,9 @@ class GameEndedNotification extends Notification
 
     public function toTelegram(object $notifiable): string
     {
-        return "🏆 <b>Game Ended!</b>\n\n" .
-               "{$this->game->name}\n\n" .
-               "The game has ended! Check out the final results and see how you did!\n\n" .
+        return "🏆 <b>Game Ended!</b>\n\n".
+               "{$this->game->name}\n\n".
+               "The game has ended! Check out the final results and see how you did!\n\n".
                "View game: {$this->game->url}";
     }
 

@@ -60,9 +60,9 @@ class GameStartedNotification extends Notification
             'embeds' => [
                 [
                     'title' => $this->game->name,
-                    'description' => "Make your first move. Good luck 😈",
+                    'description' => 'Make your first move. Good luck 😈',
                     'url' => $this->game->url,
-                    'color' => 0x00ff00,
+                    'color' => 0x00FF00,
                     'timestamp' => now()->toIso8601String(),
                 ],
             ],
@@ -71,8 +71,8 @@ class GameStartedNotification extends Notification
 
     public function toTelegram(object $notifiable): string
     {
-        return "🎮 <b>{$this->game->name} is afoot!</b>\n\n" .
-               "Make your first move. Good luck 😈\n\n" .
+        return "🎮 <b>{$this->game->name} is afoot!</b>\n\n".
+               "Make your first move. Good luck 😈\n\n".
                "View game: {$this->game->url}";
     }
 
@@ -80,7 +80,7 @@ class GameStartedNotification extends Notification
     {
         return [
             'title' => "{$this->game->name} is afoot!",
-            'body' => "Make your first move. Good luck 😈",
+            'body' => 'Make your first move. Good luck 😈',
             'icon' => '/favicon.ico',
             'url' => $this->game->url,
         ];

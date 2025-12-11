@@ -27,7 +27,6 @@ class TelegramChannel
 
         $message = $notification->toTelegram($notifiable);
 
-
         $success = $this->telegram->sendMessage($chatId, $message);
 
         if ($success) {

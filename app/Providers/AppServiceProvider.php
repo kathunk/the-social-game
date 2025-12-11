@@ -30,11 +30,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Register custom notification channels
         $this->app->make(ChannelManager::class)->extend('discord', function () {
-            return new DiscordChannel();
+            return new DiscordChannel;
         });
 
         $this->app->make(ChannelManager::class)->extend('sms', function () {
-            return new SmsChannel();
+            return new SmsChannel;
         });
 
         $this->app->make(ChannelManager::class)->extend('telegram', function () {

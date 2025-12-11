@@ -262,8 +262,6 @@ class User extends Authenticatable
         return $this->games->where('status', 'active')->isNotEmpty();
     }
 
-
-
     public function wantsNotificationFor(string $event): bool
     {
         return $this->notification_preferences[$event] ?? false;

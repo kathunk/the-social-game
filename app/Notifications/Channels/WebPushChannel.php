@@ -27,7 +27,6 @@ class WebPushChannel
 
         $payload = $notification->toWebPush($notifiable);
 
-
         $results = $this->webPush->sendToMultiple($subscriptions, $payload);
 
         // Remove failed subscriptions
