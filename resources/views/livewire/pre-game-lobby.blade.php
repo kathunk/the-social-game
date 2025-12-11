@@ -77,6 +77,7 @@
                     <x-button href="{{ $this->game->social_links[0] }}" target="_blank">Join game chat</x-button>
                 </div>
             @endif
+            <flux:text class="mt-4">Manage notifications preferences in your <flux:link variant="ghost" href="{{ route('settings.profile') }}">user profile</flux:link></flux:text>
         </x-card>
     @endif
 

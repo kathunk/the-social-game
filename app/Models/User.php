@@ -41,6 +41,9 @@ class User extends Authenticatable
         'current_player_id',
         'is_super_admin',
         'subscribed_to_newsletter',
+        'phone_number',
+        'default_discord_webhook',
+        'notification_preferences',
     ];
 
     /**
@@ -52,6 +55,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'is_super_admin' => 'boolean',
+        'notification_preferences' => 'array',
     ];
 
     /**
@@ -249,5 +253,29 @@ class User extends Authenticatable
     public function getHasActiveGameAttribute(): bool
     {
         return $this->games->where('status', 'active')->isNotEmpty();
+    }
+
+
+
+    public function wantsNotificationFor(string $event): bool
+    {
+        return $this->notification_preferences[$event] ?? false;
+    }
+
+    public function wantsNotificationVia(string $type): bool
+    {
+        return $this->notification_preferences[$type] ?? false;
+    }
+
+    public function wantsNotifications()
+    {
+        return $this->wantsNotificationVia('notify_via_email') ||
+            $this->wantsNotificationVia('notify_via_sms') ||
+            $this->wantsNotificationVia('notify_via_discord');
+    }
+
+    public function hasNotificationContactConfigured(): bool
+    {
+        return ! empty($this->phone_number) || ! empty($this->default_discord_webhook);
     }
 }
