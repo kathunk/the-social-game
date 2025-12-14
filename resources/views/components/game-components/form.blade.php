@@ -73,18 +73,15 @@
                     <div class="flex flex-wrap gap-2 mt-4 justify-end" x-data="{confirmation: false}">
                         @foreach ($element['buttons'] as $btn)
                             @if($btn['danger'])
-                                <x-button @click="confirmation = true" x-show="!confirmation" variant="danger">
+                                <x-button @click="confirmation = true" variant="danger">
                                     {{ $btn['label'] }}
                                 </x-button>
-                                <x-button
-                                    x-show="confirmation"
-                                    wire:loading.attr="disabled"
-                                    wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"
-                                    variant="danger"
-                                    wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}', {{ json_encode($form) }})"
-                                >
-                                    Are you sure?
-                                </x-button>
+                                <x-modal.confirmation
+                                    :class_key="$class_key"
+                                    :action="$btn['action']"
+                                    :type="$type"
+                                    :form="$form"
+                                />
                             @else
                                 <x-button
                                     wire:loading.attr="disabled"
