@@ -9,7 +9,6 @@
 ])
 
 <div
-    x-dialog
     x-cloak
     x-show="{{ $modal }}"
     @keyup.escape.window="{{ $modal }} && ({{ $modal }} = false)"
@@ -17,7 +16,6 @@
 >
     {{-- Overlay --}}
     <div
-        x-dialog:overlay
         x-transition.opacity
         class="fixed inset-0 bg-black/50"
     ></div>
