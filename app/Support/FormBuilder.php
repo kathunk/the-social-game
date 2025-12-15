@@ -21,8 +21,12 @@ class FormBuilder
         //
     }
 
-    public function button(string $label, string $action, array $properties_to_validate = [], ?bool $danger = false): static
-    {
+    public function button(
+        string $label,
+        string $action,
+        array $properties_to_validate = [],
+        null|bool|array $has_confirmation = null,
+    ): static {
         $target_class = $this->challenge_class ?? $this->modifier_class;
 
         // @todo ensure that the properties to validate are valid properties of the target class
@@ -66,7 +70,7 @@ class FormBuilder
             'label' => $label,
             'action' => $action,
             'properties_to_validate' => $properties_to_validate,
-            'danger' => $danger,
+            'has_confirmation' => $has_confirmation,
         ];
 
         if ($this->currentGroup !== null) {

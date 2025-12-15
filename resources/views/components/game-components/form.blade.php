@@ -70,17 +70,24 @@
                     @endif
                     @break
                 @case('button_group')
-                    <div class="flex flex-wrap gap-2 mt-4 justify-end" x-data="{confirmation: false}">
+                    <div
+                        x-data="{ confirmation: false }"
+                        class="flex flex-wrap gap-2 mt-4 justify-end"
+                    >
                         @foreach ($element['buttons'] as $btn)
-                            @if($btn['danger'])
+                            @if(isset($btn['has_confirmation']))
+                                @php
+                                    $modal = $btn['has_confirmation'];
+                                    $heading = isset($modal['heading']) ? $modal['heading'] : null;
+                                    $subheading = isset($modal['subheading']) ? $modal['subheading'] : null;
+                                @endphp
+
                                 <x-button @click="confirmation = true" variant="danger">
                                     {{ $btn['label'] }}
                                 </x-button>
-                                <x-modal.confirmation
-                                    :class_key="$class_key"
-                                    :action="$btn['action']"
-                                    :type="$type"
-                                    :form="$form"
+
+                                <x-modal.confirmation :heading="$heading" :subheading="$subheading" {{-- dynamic text --}}
+                                    :action="$btn['action']" :type="$type" :class_key="$class_key" :form="$form" {{-- `callClassAction`--}}
                                 />
                             @else
                                 <x-button
