@@ -24,30 +24,23 @@
         @foreach ($form['elements'] as $element)
             @if ($element['type'] === 'hideable')
                 <div x-data="{ show: false}">
-                    <x-button
-                        variant="ghost"
-                        x-on:click="show = !show"
-                        class="flex items-center gap-2"
-                    >
-                        {{ $element['trigger']['text'] }}
+                    <div class="flex justify-end">
+                        <x-button
+                            variant="ghost"
+                            @click="show = !show"
+                            class="flex items-center gap-2"
+                        >
+                            <span x-show="!show">{{ isset($element['trigger']) ? $element['trigger']['more_text'] : 'more' }}</span>
+                            <span x-cloak x-show="show">{{ isset($element['trigger']) ? $element['trigger']['less_text'] : 'less' }}</span>
 
-                        @if ($element['trigger']['show_caret'])
-                            <flux:icon.chevron-down
-                                x-show="!show"
-                                variant="mini"
-                                class="size-3 text-aim-super-black stroke-5"
-                            />
-                            <flux:icon.chevron-up
-                                x-show="show"
-                                x-cloak
-                                variant="mini"
-                                class="size-3 text-aim-super-black stroke-5"
-                            />
-                        @endif
-                    </x-button>
+                            @if (isset($element['trigger']) ? $element['trigger']['show_caret'] : true)
+                                <x-toggle />
+                            @endif
+                        </x-button>
+                    </div>
 
                     @if($element['hidden'])
-                        <div x-show="show" x-cloak class="flex flex-col gap-4">
+                        <div x-show="show" x-cloak class="w-full flex flex-col gap-4">
                             @foreach($element['hidden'] as $hidden)
                                 <x-form-elements :element="$hidden" :form="$form" :type="$type" :class_key="$class_key" />
                             @endforeach

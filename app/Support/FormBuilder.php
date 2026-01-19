@@ -215,14 +215,18 @@ class FormBuilder
         return $this;
     }
 
-    public function trigger(bool $show_caret = true, $text = 'Show More')
-    {
+    public function trigger(
+        bool $show_caret = true,
+        string $more_text = 'Show More',
+        string $less_text = 'Show Less'
+    ) {
         $isHideable = isset($this->hideable);
 
         if ($isHideable) {
             $this->hideable['trigger'] = [
                 'show_caret' => $show_caret,
-                'text' => $text
+                'more_text' => $more_text,
+                'less_text' => $less_text,
             ];
         }
 
