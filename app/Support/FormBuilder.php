@@ -18,15 +18,38 @@ class FormBuilder
 
     protected ?int $poll_interval = null;
 
-    protected ?array $currentGroup = null;
-
-    protected ?array $hideable = null;
+    protected array $group = [];
 
     public function __construct(
         public ?BaseChallengeClass $challenge_class = null,
         public ?BaseModifierClass $modifier_class = null,
     ) {
         //
+    }
+
+    protected function getCurrentGroup(): ?array
+    {
+        return !empty($this->group)
+            ? $this->group[count($this->group) - 1]
+            : null;
+    }
+
+    protected function setCurrentGroup(array $group): void
+    {
+        if (empty($this->group)) {
+            throw new \RuntimeException('Cannot set current group: stack is empty');
+        }
+        $this->group[count($this->group) - 1] = $group;
+    }
+
+    protected function addGroup(array $group): void
+    {
+        $this->group[] = $group;
+    }
+
+    protected function latestGroup(): ?array
+    {
+        return array_pop($this->group);
     }
 
     public function button(string $label, string $action, array $properties_to_validate = []): static
@@ -76,30 +99,31 @@ class FormBuilder
             'properties_to_validate' => $properties_to_validate,
         ];
 
-        if (isset($this->currentGroup['buttons'])) {
-            $this->currentGroup['buttons'][] = $button;
-        } else {
-            $this->elements[] = $button;
-        }
+        $this->addToElements($button);
 
         return $this;
     }
 
     public function buttonGroup(): static
     {
-        $this->currentGroup = [
+        $this->addGroup([
             'type' => 'button_group',
             'buttons' => [],
-        ];
+        ]);
 
         return $this;
     }
 
     public function endGroup(): static
     {
-        if ($this->currentGroup !== null) {
-            $this->addToElements($this->currentGroup);
-            $this->currentGroup = null;
+        $group = $this->latestGroup();
+
+        if ($group !== null && $group['type'] === 'button_group') {
+            $this->addToElements($group);
+        } elseif ($group !== null) {
+            // Wrong context type, push it back
+            $this->addGroup($group);
+            throw new \RuntimeException('endGroup() called but current context is not a button_group');
         }
 
         return $this;
@@ -210,7 +234,11 @@ class FormBuilder
 
     public function hideable()
     {
-        $this->hideable = ['type' => 'hideable'];
+        $this->addGroup([
+            'type' => 'hideable',
+            'trigger' => null,
+            'hidden' => null,
+        ]);
 
         return $this;
     }
@@ -220,14 +248,16 @@ class FormBuilder
         string $more_text = 'Show More',
         string $less_text = 'Show Less'
     ) {
-        $isHideable = isset($this->hideable);
+        $group = $this->getCurrentGroup();
 
-        if ($isHideable) {
-            $this->hideable['trigger'] = [
+        if ($group !== null && $group['type'] === 'hideable') {
+            $group['trigger'] = [
                 'show_caret' => $show_caret,
                 'more_text' => $more_text,
                 'less_text' => $less_text,
             ];
+            // Update the group in the stack
+            $this->setCurrentGroup($group);
         }
 
         return $this;
@@ -235,20 +265,37 @@ class FormBuilder
 
     public function hidden()
     {
-        $isHideable = isset($this->hideable);
+        $group = $this->getCurrentGroup();
 
-        if ($isHideable) {
-            $this->hideable['hidden'] = [];
-        };
+        if ($group !== null && $group['type'] === 'hideable') {
+            $group['hidden'] = [];
+            // Update the group in the stack
+            $this->setCurrentGroup($group);
+        }
 
         return $this;
     }
 
     public function endHideable()
     {
-        if ($this->hideable !== null) {
-            $this->elements[] = $this->hideable;
-            $this->hideable = null;
+        $group = $this->latestGroup();
+
+        if ($group !== null && $group['type'] === 'hideable') {
+            $hideable = ['type' => 'hideable'];
+
+            if (isset($group['trigger'])) {
+                $hideable['trigger'] = $group['trigger'];
+            }
+
+            if (isset($group['hidden'])) {
+                $hideable['hidden'] = $group['hidden'];
+            }
+
+            $this->addToElements($hideable);
+        } elseif ($group !== null) {
+            // Wrong context type, push it back
+            $this->addGroup($group);
+            throw new \RuntimeException('endHideable() called but current context is not a hideable');
         }
 
         return $this;
@@ -256,12 +303,22 @@ class FormBuilder
 
     protected function addToElements(array $element): void
     {
-        $isHidden = isset($this->hideable['hidden']);
+        $group = $this->getCurrentGroup();
 
-        if ($isHidden) {
-            $this->hideable['hidden'][] = $element;
-        } else {
+        if ($group === null) {
+            // No active context, add to root elements
             $this->elements[] = $element;
+            return;
+        }
+
+        if ($group['type'] === 'button_group' && $element['type'] === 'button') {
+            $group['buttons'][] = $element;
+            $this->setCurrentGroup($group);
+        } elseif ($group['type'] === 'hideable' && isset($group['hidden'])) {
+            $group['hidden'][] = $element;
+            $this->setCurrentGroup($group);
+        } else {
+            throw new \RuntimeException('Attempt to add element to unknown group');
         }
     }
 
@@ -287,8 +344,9 @@ class FormBuilder
 
     public function build(): array
     {
-        if ($this->currentGroup !== null) {
-            throw new \RuntimeException('You must call endGroup() before build()');
+        if (!empty($this->group)) {
+            $groupTypes = array_map(fn($ctx) => $ctx['type'], $this->group);
+            throw new \RuntimeException('You must close all open contexts before build(). Open contexts: '.implode(', ', $groupTypes));
         }
 
         $result = [
