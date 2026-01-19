@@ -29,46 +29,50 @@ class IndividualResignation extends BaseModifierClass
         return $this->form()
             ->title('Had enough?')
             ->subtitle('You can resign at any time.')
-            ->select(
-                property_name: 'points_beneficiary_id',
-                options: $players
-                    ->mapWithKeys(fn ($p) => [$p->id => $p->name])
-                    ->toArray(),
-                label: 'Who will you give your '.$points.' points to?',
-                placeholder: 'Select a player...',
-                validation_rules: 'required|in:'.
-                    implode(',', $players->pluck('id')->toArray()),
-                validation_messages: [
-                    'required' => 'Must select a player',
-                    'in' => 'Must select a valid player',
-                ]
-            )
-            ->select(
-                property_name: 'hidden_points_beneficiary_id',
-                options: $players
-                    ->mapWithKeys(fn ($p) => [$p->id => $p->name])
-                    ->toArray(),
-                label: 'Who will you give your '.
-                    $hidden.
-                    ' hidden points to?',
-                placeholder: 'Select a player...',
-                validation_rules: 'required|in:'.
-                    implode(',', $players->pluck('id')->toArray()),
-                validation_messages: [
-                    'required' => 'Must select a player',
-                    'in' => 'Must select a valid player',
-                ]
-            )
-            ->buttonGroup()
-            ->button(
-                label: 'Resign',
-                action: 'resign',
-                properties_to_validate: [
-                    'points_beneficiary_id',
-                    'hidden_points_beneficiary_id',
-                ]
-            )
-            ->endGroup()
+                ->hideable()
+                    ->trigger('show more')
+                    ->hidden()
+                         ->select(
+                            property_name: 'points_beneficiary_id',
+                            options: $players
+                                ->mapWithKeys(fn ($p) => [$p->id => $p->name])
+                                ->toArray(),
+                            label: 'Who will you give your '.$points.' points to?',
+                            placeholder: 'Select a player...',
+                            validation_rules: 'required|in:'.
+                                implode(',', $players->pluck('id')->toArray()),
+                            validation_messages: [
+                                'required' => 'Must select a player',
+                                'in' => 'Must select a valid player',
+                            ]
+                        )
+                        ->select(
+                            property_name: 'hidden_points_beneficiary_id',
+                            options: $players
+                                ->mapWithKeys(fn ($p) => [$p->id => $p->name])
+                                ->toArray(),
+                            label: 'Who will you give your '.
+                                $hidden.
+                                ' hidden points to?',
+                            placeholder: 'Select a player...',
+                            validation_rules: 'required|in:'.
+                                implode(',', $players->pluck('id')->toArray()),
+                            validation_messages: [
+                                'required' => 'Must select a player',
+                                'in' => 'Must select a valid player',
+                            ]
+                        )
+                        ->buttonGroup()
+                        ->button(
+                            label: 'Resign',
+                            action: 'resign',
+                            properties_to_validate: [
+                                'points_beneficiary_id',
+                                'hidden_points_beneficiary_id',
+                            ]
+                        )
+                        ->endGroup()
+                ->endHideable()
             ->build();
     }
 

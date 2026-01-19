@@ -20,6 +20,8 @@ class FormBuilder
 
     protected ?array $currentGroup = null;
 
+    protected ?array $hideable = null;
+
     public function __construct(
         public ?BaseChallengeClass $challenge_class = null,
         public ?BaseModifierClass $modifier_class = null,
@@ -74,12 +76,6 @@ class FormBuilder
             'properties_to_validate' => $properties_to_validate,
         ];
 
-        $isHidden = isset($this->currentGroup['hidden']);
-
-        if ($isHidden) {
-            $this->currentGroup['hidden']['button'] = $button ?? 'Button';
-        }
-
         if (isset($this->currentGroup['buttons'])) {
             $this->currentGroup['buttons'][] = $button;
         } else {
@@ -102,7 +98,7 @@ class FormBuilder
     public function endGroup(): static
     {
         if ($this->currentGroup !== null) {
-            $this->elements[] = $this->currentGroup;
+            $this->addToElements($this->currentGroup);
             $this->currentGroup = null;
         }
 
@@ -117,7 +113,7 @@ class FormBuilder
         ?string $label = null,
         ?string $placeholder = null,
     ): static {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'input',
             'property_name' => $property_name,
             'label' => $label,
@@ -125,7 +121,7 @@ class FormBuilder
             'validation_rules' => $validation_rules,
             'validation_messages' => $validation_messages,
             'size' => $size,
-        ];
+        ]);
 
         return $this;
     }
@@ -139,7 +135,7 @@ class FormBuilder
         ?string $placeholder = null,
         ?bool $searchable = true,
     ): static {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'select',
             'label' => $label,
             'options' => $options,
@@ -148,7 +144,7 @@ class FormBuilder
             'validation_messages' => $validation_messages,
             'placeholder' => $placeholder,
             'searchable' => $searchable,
-        ];
+        ]);
 
         return $this;
     }
@@ -160,7 +156,7 @@ class FormBuilder
         string $validation_rules,
         array $validation_messages,
     ): static {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'radio_group',
             'label' => $label,
             'options' => $options,
@@ -176,57 +172,55 @@ class FormBuilder
             'property_name' => $property_name,
             'validation_rules' => $validation_rules,
             'validation_messages' => $validation_messages,
-        ];
+        ]);
 
         return $this;
     }
 
     public function title(string $text): static
     {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'title',
             'text' => $text,
-        ];
+        ]);
 
         return $this;
     }
 
     public function subtitle(string $text): static
     {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'subtitle',
             'text' => $text,
-        ];
+        ]);
 
         return $this;
     }
 
     public function table(array $headers, array $rows): static
     {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'table',
             'headers' => $headers,
             'rows' => $rows,
-        ];
+        ]);
 
         return $this;
     }
 
     public function hideable()
     {
-        $this->currentGroup = [
-            'type' => 'hideable',
-        ];
+        $this->hideable = ['type' => 'hideable'];
 
         return $this;
     }
 
     public function trigger(bool $show_caret = true, $text = 'Show More')
     {
-        $isHideable = ($this->currentGroup['type'] ?? null) === 'hideable';
+        $isHideable = isset($this->hideable);
 
         if ($isHideable) {
-            $this->currentGroup['trigger'] = [
+            $this->hideable['trigger'] = [
                 'show_caret' => $show_caret,
                 'text' => $text
             ];
@@ -237,47 +231,52 @@ class FormBuilder
 
     public function hidden()
     {
-        $isHideable = ($this->currentGroup['type'] ?? null) === 'hideable';
+        $isHideable = isset($this->hideable);
 
         if ($isHideable) {
-            $this->currentGroup['hidden'] = [];
+            $this->hideable['hidden'] = [];
         };
-
-        return $this;
-    }
-
-    public function heading($text)
-    {
-        $isHidden = isset($this->currentGroup['hidden']);
-
-        if ($isHidden) {
-            $this->currentGroup['hidden']['heading'] = $text ?? 'Heading';
-        }
 
         return $this;
     }
 
     public function endHideable()
     {
-        return $this->endGroup();
+        if ($this->hideable !== null) {
+            $this->elements[] = $this->hideable;
+            $this->hideable = null;
+        }
+
+        return $this;
+    }
+
+    protected function addToElements(array $element): void
+    {
+        $isHidden = isset($this->hideable['hidden']);
+
+        if ($isHidden) {
+            $this->hideable['hidden'][] = $element;
+        } else {
+            $this->elements[] = $element;
+        }
     }
 
     public function divider(): static
     {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'divider',
-        ];
+        ]);
 
         return $this;
     }
 
     public function image(string $url, ?string $alt = null): static
     {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'image',
             'url' => $url,
             'alt' => $alt,
-        ];
+        ]);
 
         return $this;
     }
