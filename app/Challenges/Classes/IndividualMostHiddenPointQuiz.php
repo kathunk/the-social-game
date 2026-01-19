@@ -84,11 +84,6 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
             ->build();
     }
 
-    public function thing(Player $player, array $params)
-    {
-        dump('thing!');
-    }
-
     public function go_invisible(Player $player, array $params)
     {
         PlayerBecameInvisible::fire(
