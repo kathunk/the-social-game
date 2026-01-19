@@ -121,14 +121,57 @@
                 @case('radio_group')
                     <flux:radio.group label="{{ $element['label'] }}" variant="cards" class="flex-col" wire:model="round_properties.{{ $class_key }}.{{ $element['property_name'] }}">
                         @foreach ($element['options'] as $option)
-                            <flux:radio 
-                                value="{{ $option['value'] }}" 
-                                label="{{ $option['label'] }}" 
-                                description="{{ $option['description'] }}" 
+                            <flux:radio
+                                value="{{ $option['value'] }}"
+                                label="{{ $option['label'] }}"
+                                description="{{ $option['description'] }}"
                                 :disabled="$option['disabled']"
                             />
                         @endforeach
                     </flux:radio.group>
+                    @break
+                @case('hideable')
+                    <div x-data="{ show: false}" class="mt-4">
+                        <x-button
+                            variant="ghost"
+                            x-on:click="show = !show"
+                            class="flex items-center gap-2"
+                        >
+                            {{ $element['trigger']['text'] }}
+
+                            @if ($element['trigger']['show_caret'])
+                                <flux:icon.chevron-down
+                                    x-show="!show"
+                                    variant="mini"
+                                    class="size-3 text-aim-super-black stroke-5"
+                                />
+                                <flux:icon.chevron-up
+                                    x-show="show"
+                                    x-cloak
+                                    variant="mini"
+                                    class="size-3 text-aim-super-black stroke-5"
+                                />
+                            @endif
+                        </x-button>
+
+                        @if($element['hidden'])
+                            <div x-show="show" x-cloak class="flex flex-col gap-4">
+                                <div>{{ $element['hidden']['heading'] }}</div>
+
+                                @if($btn = $element['hidden']['button'])
+                                    <x-button
+                                        class="flex w-fit"
+                                        wire:loading.attr="disabled"
+                                        wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"
+                                        variant="primary"
+                                        wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}', {{ json_encode($form) }})"
+                                    >
+                                        {{ $btn['label'] }}
+                                    </x-button>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
                     @break
             @endswitch
         @endforeach

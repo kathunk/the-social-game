@@ -49,6 +49,12 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
         return $this->form()
             ->title(self::NAME)
             ->subtitle(self::DESCRIPTION)
+            ->hideable()
+                ->trigger('show more')
+                ->hidden()
+                    ->heading('yo')
+                    ->button('do it', 'thing')
+            ->endHideable()
             ->when(! $is_invisible, fn ($form) => $form->buttonGroup()
                 ->button('Go invisible', 'go_invisible')
                 ->endGroup()
@@ -82,6 +88,11 @@ class IndividualMostHiddenPointQuiz extends BaseChallengeClass implements Suppor
             )
             )
             ->build();
+    }
+
+    public function thing(Player $player, array $params)
+    {
+        dump('thing!');
     }
 
     public function go_invisible(Player $player, array $params)

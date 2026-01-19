@@ -74,7 +74,13 @@ class FormBuilder
             'properties_to_validate' => $properties_to_validate,
         ];
 
-        if ($this->currentGroup !== null) {
+        $isHidden = isset($this->currentGroup['hidden']);
+
+        if ($isHidden) {
+            $this->currentGroup['hidden']['button'] = $button ?? 'Button';
+        }
+
+        if (isset($this->currentGroup['buttons'])) {
             $this->currentGroup['buttons'][] = $button;
         } else {
             $this->elements[] = $button;
@@ -204,6 +210,56 @@ class FormBuilder
         ];
 
         return $this;
+    }
+
+    public function hideable()
+    {
+        $this->currentGroup = [
+            'type' => 'hideable',
+        ];
+
+        return $this;
+    }
+
+    public function trigger(bool $show_caret = true, $text = 'Show More')
+    {
+        $isHideable = ($this->currentGroup['type'] ?? null) === 'hideable';
+
+        if ($isHideable) {
+            $this->currentGroup['trigger'] = [
+                'show_caret' => $show_caret,
+                'text' => $text
+            ];
+        }
+
+        return $this;
+    }
+
+    public function hidden()
+    {
+        $isHideable = ($this->currentGroup['type'] ?? null) === 'hideable';
+
+        if ($isHideable) {
+            $this->currentGroup['hidden'] = [];
+        };
+
+        return $this;
+    }
+
+    public function heading($text)
+    {
+        $isHidden = isset($this->currentGroup['hidden']);
+
+        if ($isHidden) {
+            $this->currentGroup['hidden']['heading'] = $text ?? 'Heading';
+        }
+
+        return $this;
+    }
+
+    public function endHideable()
+    {
+        return $this->endGroup();
     }
 
     public function divider(): static
