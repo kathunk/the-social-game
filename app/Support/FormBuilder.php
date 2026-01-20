@@ -39,6 +39,7 @@ class FormBuilder
         if (empty($this->group)) {
             throw new \RuntimeException('Cannot set current group: stack is empty');
         }
+
         $this->group[count($this->group) - 1] = $group;
     }
 
@@ -47,7 +48,7 @@ class FormBuilder
         $this->group[] = $group;
     }
 
-    protected function latestGroup(): ?array
+    protected function removeCurrentGroup()
     {
         return array_pop($this->group);
     }
@@ -116,14 +117,13 @@ class FormBuilder
 
     public function endGroup(): static
     {
-        $group = $this->latestGroup();
+        $group = $this->getCurrentGroup();
 
-        if ($group !== null && $group['type'] === 'button_group') {
+        if (isset($group['type'])) {
+            $this->removeCurrentGroup();
             $this->addToElements($group);
         } elseif ($group !== null) {
-            // Wrong context type, push it back
-            $this->addGroup($group);
-            throw new \RuntimeException('endGroup() called but current context is not a button_group');
+            throw new \RuntimeException('endGroup() failed for ' . print_r($group, true));
         }
 
         return $this;
@@ -250,13 +250,12 @@ class FormBuilder
     ) {
         $group = $this->getCurrentGroup();
 
-        if ($group !== null && $group['type'] === 'hideable') {
+        if (isset($group['type']) && $group['type'] === 'hideable') {
             $group['trigger'] = [
                 'show_caret' => $show_caret,
                 'more_text' => $more_text,
                 'less_text' => $less_text,
             ];
-            // Update the group in the stack
             $this->setCurrentGroup($group);
         }
 
@@ -267,9 +266,8 @@ class FormBuilder
     {
         $group = $this->getCurrentGroup();
 
-        if ($group !== null && $group['type'] === 'hideable') {
+        if (isset($group['type']) && $group['type'] === 'hideable') {
             $group['hidden'] = [];
-            // Update the group in the stack
             $this->setCurrentGroup($group);
         }
 
@@ -278,27 +276,7 @@ class FormBuilder
 
     public function endHideable()
     {
-        $group = $this->latestGroup();
-
-        if ($group !== null && $group['type'] === 'hideable') {
-            $hideable = ['type' => 'hideable'];
-
-            if (isset($group['trigger'])) {
-                $hideable['trigger'] = $group['trigger'];
-            }
-
-            if (isset($group['hidden'])) {
-                $hideable['hidden'] = $group['hidden'];
-            }
-
-            $this->addToElements($hideable);
-        } elseif ($group !== null) {
-            // Wrong context type, push it back
-            $this->addGroup($group);
-            throw new \RuntimeException('endHideable() called but current context is not a hideable');
-        }
-
-        return $this;
+        return $this->endGroup();
     }
 
     protected function addToElements(array $element): void
@@ -318,7 +296,7 @@ class FormBuilder
             $group['hidden'][] = $element;
             $this->setCurrentGroup($group);
         } else {
-            throw new \RuntimeException('Attempt to add element to unknown group');
+            throw new \RuntimeException('Attempt to add element to unknown group' . print_r($group, true));
         }
     }
 
