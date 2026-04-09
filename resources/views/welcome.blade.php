@@ -73,7 +73,49 @@
             </div>
         </div>
         <div class="max-w-xl mx-auto">
-            <x-marketing-component />
+            <section class="text-center px-6 py-8">
+                <h1 class="text-3xl md:text-4xl font-bold mb-3">Free games for friends</h1>
+                <p class="text-lg opacity-90 leading-relaxed">
+                    Create social games and invite as many friends as you want. From quick 30-minute parties to week-long adventures.
+                </p>
+                <div class="flex justify-center gap-3 mt-6">
+                    @auth
+                        <a href="{{ url('/dashboard') }}" class="inline-block bg-white text-bold-orange font-bold py-3 px-6 rounded-xl hover:scale-105 transition-transform">
+                            Open dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('register') }}" class="inline-block bg-white text-bold-orange font-bold py-3 px-6 rounded-xl hover:scale-105 transition-transform">
+                            Create an account
+                        </a>
+                        <a href="{{ route('login') }}" class="inline-block border-2 border-white text-white font-bold py-3 px-6 rounded-xl hover:bg-white/10 transition-colors">
+                            Log in
+                        </a>
+                    @endauth
+                </div>
+            </section>
+
+            <div class="flex items-center justify-center mb-12 px-4">
+                <div class="w-full max-w-2xl mx-auto space-y-4">
+                    <div class="relative w-full" style="padding-bottom: 177.78%;">
+                        <iframe
+                            src="https://www.instagram.com/p/C_tU-L1PSzv/embed"
+                            frameborder="0"
+                            scrolling="no"
+                            allowtransparency="true"
+                            class="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg">
+                        </iframe>
+                    </div>
+                    <div class="relative w-full" style="padding-bottom: 177.78%;">
+                        <iframe
+                            src="https://www.instagram.com/p/DNBjKMDuHhB/embed"
+                            frameborder="0"
+                            scrolling="no"
+                            allowtransparency="true"
+                            class="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
 
             <section class="m-8 text-xs opacity-80 leading-relaxed">
                 <h2 class="font-semibold tracking-wide uppercase text-[11px] mb-2">Privacy Policy</h2>

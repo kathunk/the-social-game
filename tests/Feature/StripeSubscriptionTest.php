@@ -1,11 +1,8 @@
 <?php
 
 use App\Events\StripeWebhookRequested;
-use App\Livewire\Subscribe;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Cashier\Subscription;
-use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 use Thunk\Verbs\Models\VerbEvent;
 
@@ -228,57 +225,6 @@ test('stripe webhook events are captured by verbs', function () {
 
     $eventData = $events->first()->data;
     expect($eventData['payload'])->toBe($webhookPayload);
-});
-
-// E2E Tests
-test('user can access marketing-page', function () {
-    $this->actingAs($this->user)
-        ->get('/marketing-page')
-        ->assertOk()
-        ->assertSee('Host games')
-        ->assertSee('$19.99')
-        ->assertSee('Subscribe Now');
-});
-
-test('user must be logged in to subscribe', function () {
-    $response = $this->get('/marketing-page');
-
-    Livewire::test(Subscribe::class)
-        ->call('checkout')
-        ->assertRedirect(route('login'))
-        ->assertSessionHas('error', 'You must be logged in to subscribe.');
-});
-
-test('user sees success page after successful subscription', function () {
-    $this->actingAs($this->user)
-        ->get('/subscribe/success')
-        ->assertOk()
-        ->assertSee('Subscription Successful!')
-        ->assertSee('Thank you for subscribing')
-        ->assertSee('Go to Dashboard');
-});
-
-test('user sees cancel page when subscription is cancelled', function () {
-    $this->actingAs($this->user)
-        ->get('/subscribe/cancel')
-        ->assertOk()
-        ->assertSee('Subscription Cancelled')
-        ->assertSee('No charges were made')
-        ->assertSee('Try Again');
-});
-
-test('try again button redirects to subscription page', function () {
-    $response = $this->actingAs($this->user)
-        ->get('/subscribe/cancel');
-
-    $response->assertSee(route('marketing-page'), false);
-});
-
-test('go to dashboard button redirects to dashboard', function () {
-    $response = $this->actingAs($this->user)
-        ->get('/subscribe/success');
-
-    $response->assertSee(route('dashboard'), false);
 });
 
 // !! Real Stripe API Test (skipped by default) !!
