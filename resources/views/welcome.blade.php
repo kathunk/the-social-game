@@ -112,7 +112,7 @@
                     </h1>
 
                     <p class="text-lg md:text-xl opacity-90 max-w-xl md:max-w-none leading-relaxed mb-8 mx-auto md:mx-0 animate-fade-in-up delay-200">
-                        Play on your phone with 4 friends or 400. No download. Web-based and free.
+                        Play on your phone with 1 friend or 1000. No download. Web-based and free.
                     </p>
 
                     <div class="flex flex-col sm:flex-row gap-3 justify-center md:justify-start animate-fade-in-up delay-300">
