@@ -15,6 +15,7 @@ use App\Events\MorningRoutine\PlayerStartedCleaning;
 use App\Events\MorningRoutine\PlayerTookReward;
 use App\Models\Player;
 use App\States\GameState;
+use Illuminate\Support\Facades\Cache;
 use Thunk\Verbs\Facades\Verbs;
 
 class MorningRoutineRound extends BaseChallengeClass
@@ -120,22 +121,31 @@ class MorningRoutineRound extends BaseChallengeClass
 
     public function enterRoom(Player $player, array $params): void
     {
-        $room = $params['room'] ?? null;
+        $this->withChallengeLock(function () use ($player, $params) {
+            $room = $params['room'] ?? null;
 
-        $this->assertNotCleaning($player);
+            $this->assertNotCleaning($player);
 
-        PlayerEnteredRoom::fire(
-            game_id: $player->game_id,
-            challenge_id: $this->challenge->id,
-            player_id: $player->id,
-            room: $room,
-        );
+            PlayerEnteredRoom::fire(
+                game_id: $player->game_id,
+                challenge_id: $this->challenge->id,
+                player_id: $player->id,
+                room: $room,
+            );
 
-        Verbs::commit();
-        event(new GameUpdatedForReverb($player->game->fresh()));
+            Verbs::commit();
+            event(new GameUpdatedForReverb($player->game->fresh()));
+        });
     }
 
     public function exitRoom(Player $player, array $params): void
+    {
+        $this->withChallengeLock(function () use ($player, $params) {
+            $this->doExitRoom($player, $params);
+        });
+    }
+
+    protected function doExitRoom(Player $player, array $params): void
     {
         $data = $this->challenge->challenge_data;
         $current = $data['player_locations'][$player->id] ?? 'hallway';
@@ -198,95 +208,105 @@ class MorningRoutineRound extends BaseChallengeClass
 
     public function takeReward(Player $player, array $params): void
     {
-        $reward_key = $params['reward_key'] ?? null;
-        $room = $this->challenge->challenge_data['player_locations'][$player->id] ?? null;
+        $this->withChallengeLock(function () use ($player, $params) {
+            $reward_key = $params['reward_key'] ?? null;
+            $room = $this->challenge->challenge_data['player_locations'][$player->id] ?? null;
 
-        if ($room === null || $room === 'hallway') {
-            throw new \RuntimeException('You must be in a room to take a reward.');
-        }
+            if ($room === null || $room === 'hallway') {
+                throw new \RuntimeException('You must be in a room to take a reward.');
+            }
 
-        PlayerTookReward::fire(
-            game_id: $player->game_id,
-            challenge_id: $this->challenge->id,
-            player_id: $player->id,
-            room: $room,
-            reward_key: $reward_key,
-        );
+            PlayerTookReward::fire(
+                game_id: $player->game_id,
+                challenge_id: $this->challenge->id,
+                player_id: $player->id,
+                room: $room,
+                reward_key: $reward_key,
+            );
 
-        Verbs::commit();
-        event(new GameUpdatedForReverb($player->game->fresh()));
+            Verbs::commit();
+            event(new GameUpdatedForReverb($player->game->fresh()));
+        });
     }
 
     public function startCleaning(Player $player, array $params): void
     {
-        $room = $this->challenge->challenge_data['player_locations'][$player->id] ?? null;
+        $this->withChallengeLock(function () use ($player) {
+            $room = $this->challenge->challenge_data['player_locations'][$player->id] ?? null;
 
-        if ($room === null || $room === 'hallway') {
-            throw new \RuntimeException('You must be in a room to clean it.');
-        }
+            if ($room === null || $room === 'hallway') {
+                throw new \RuntimeException('You must be in a room to clean it.');
+            }
 
-        PlayerStartedCleaning::fire(
-            game_id: $player->game_id,
-            challenge_id: $this->challenge->id,
-            player_id: $player->id,
-            room: $room,
-            started_at: now()->timestamp,
-        );
+            PlayerStartedCleaning::fire(
+                game_id: $player->game_id,
+                challenge_id: $this->challenge->id,
+                player_id: $player->id,
+                room: $room,
+                started_at: now()->timestamp,
+            );
 
-        Verbs::commit();
-        event(new GameUpdatedForReverb($player->game->fresh()));
+            Verbs::commit();
+            event(new GameUpdatedForReverb($player->game->fresh()));
+        });
     }
 
     public function stopCleaning(Player $player, array $params): void
     {
-        $cleaning = $this->challenge->challenge_data['cleaning_state'][$player->id] ?? null;
+        $this->withChallengeLock(function () use ($player) {
+            $cleaning = $this->challenge->challenge_data['cleaning_state'][$player->id] ?? null;
 
-        if ($cleaning === null) {
-            throw new \RuntimeException('You are not cleaning.');
-        }
+            if ($cleaning === null) {
+                throw new \RuntimeException('You are not cleaning.');
+            }
 
-        PlayerCleanedRoom::fire(
-            game_id: $player->game_id,
-            challenge_id: $this->challenge->id,
-            player_id: $player->id,
-            room: $cleaning['room'],
-            finished_at: now()->timestamp,
-        );
+            PlayerCleanedRoom::fire(
+                game_id: $player->game_id,
+                challenge_id: $this->challenge->id,
+                player_id: $player->id,
+                room: $cleaning['room'],
+                finished_at: now()->timestamp,
+            );
 
-        Verbs::commit();
-        event(new GameUpdatedForReverb($player->game->fresh()));
+            Verbs::commit();
+            event(new GameUpdatedForReverb($player->game->fresh()));
+        });
     }
 
     public function queueForRoom(Player $player, array $params): void
     {
-        $room = $params['room'] ?? null;
+        $this->withChallengeLock(function () use ($player, $params) {
+            $room = $params['room'] ?? null;
 
-        $this->assertNotCleaning($player);
+            $this->assertNotCleaning($player);
 
-        PlayerQueuedForRoom::fire(
-            game_id: $player->game_id,
-            challenge_id: $this->challenge->id,
-            player_id: $player->id,
-            room: $room,
-        );
+            PlayerQueuedForRoom::fire(
+                game_id: $player->game_id,
+                challenge_id: $this->challenge->id,
+                player_id: $player->id,
+                room: $room,
+            );
 
-        Verbs::commit();
-        event(new GameUpdatedForReverb($player->game->fresh()));
+            Verbs::commit();
+            event(new GameUpdatedForReverb($player->game->fresh()));
+        });
     }
 
     public function leaveQueue(Player $player, array $params): void
     {
-        $room = $params['room'] ?? null;
+        $this->withChallengeLock(function () use ($player, $params) {
+            $room = $params['room'] ?? null;
 
-        PlayerLeftQueue::fire(
-            game_id: $player->game_id,
-            challenge_id: $this->challenge->id,
-            player_id: $player->id,
-            room: $room,
-        );
+            PlayerLeftQueue::fire(
+                game_id: $player->game_id,
+                challenge_id: $this->challenge->id,
+                player_id: $player->id,
+                room: $room,
+            );
 
-        Verbs::commit();
-        event(new GameUpdatedForReverb($player->game->fresh()));
+            Verbs::commit();
+            event(new GameUpdatedForReverb($player->game->fresh()));
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -298,6 +318,32 @@ class MorningRoutineRound extends BaseChallengeClass
         $cleaning = $this->challenge->challenge_data['cleaning_state'][$player->id] ?? null;
         if ($cleaning !== null) {
             throw new \RuntimeException('Stop cleaning before moving.');
+        }
+    }
+
+    /**
+     * Serialize action handlers for a single challenge to prevent race
+     * conditions (e.g. two players entering the same room at the same time).
+     *
+     * Acquires a per-challenge cache lock and refreshes the challenge model
+     * inside the lock so the action sees the latest state.
+     */
+    protected function withChallengeLock(callable $callback)
+    {
+        $lock = Cache::lock("morning-routine:challenge:{$this->challenge->id}", 5);
+
+        if (! $lock->block(3)) {
+            throw new \RuntimeException('The room is busy. Try again in a moment.');
+        }
+
+        try {
+            // Refresh the challenge model so any state changes from the
+            // previous lock holder are visible to this action.
+            $this->challenge = $this->challenge->fresh();
+
+            return $callback();
+        } finally {
+            $lock->release();
         }
     }
 }
