@@ -21,7 +21,7 @@ class PlayerCleanedRoom extends Event
 
     public function validate()
     {
-        $data = $this->challenge()->challenge_data;
+        $data = $this->state(ChallengeState::class)->challenge_data;
         $cleaning = $data['cleaning_state'][$this->player_id] ?? null;
 
         $this->assert($cleaning !== null, 'Player is not cleaning.');

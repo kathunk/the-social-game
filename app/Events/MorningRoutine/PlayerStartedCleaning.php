@@ -19,7 +19,7 @@ class PlayerStartedCleaning extends Event
 
     public function validate()
     {
-        $data = $this->challenge()->challenge_data;
+        $data = $this->state(ChallengeState::class)->challenge_data;
         $location = $data['player_locations'][$this->player_id] ?? 'hallway';
 
         $this->assert($location === $this->room, 'You must be in the room to clean it.');

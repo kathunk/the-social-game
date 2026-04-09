@@ -16,8 +16,8 @@ class PlayerExitedRoom extends Event
 
     public function validate()
     {
-        $locations = $this->challenge()->challenge_data['player_locations'] ?? [];
-        $current = $locations[$this->player_id] ?? 'hallway';
+        $data = $this->state(ChallengeState::class)->challenge_data;
+        $current = $data['player_locations'][$this->player_id] ?? 'hallway';
 
         $this->assert($current !== 'hallway', 'Player is already in the hallway.');
     }

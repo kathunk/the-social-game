@@ -75,11 +75,20 @@ trait MorningRoutineFormElements
                         'name' => $reward->name,
                         'points' => $reward->points,
                         'mess' => $reward->mess,
+                        'effect_description' => $reward->effect_description,
                         'has_effect' => $reward->hasEffect(),
                     ];
                 }
             }
         }
+
+        // Filter toasts to only the recent ones (last 15 seconds) so they don't
+        // pile up forever in challenge_data
+        $now_ts = now()->timestamp;
+        $recent_toasts = collect($toasts)
+            ->filter(fn ($t) => ($now_ts - ($t['created_at'] ?? 0)) <= 15)
+            ->values()
+            ->all();
 
         $already_took_in_current_room = $current_location !== 'hallway'
             && in_array($current_location, $player_taken_in_rooms[$player->id] ?? [], true);
@@ -111,7 +120,7 @@ trait MorningRoutineFormElements
             'seconds_per_mess_clean' => $seconds_per_mess_clean,
             'player_points' => $player_points[$player->id] ?? 0,
             'player_penalties' => $player_penalties[$player->id] ?? 0,
-            'toasts' => $toasts,
+            'toasts' => $recent_toasts,
             'player_name' => $player->name,
         ];
 

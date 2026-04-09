@@ -48,9 +48,6 @@ class PlayerBusted extends Event
         $challenge->challenge_data['player_penalties'][$this->busted_player_id] =
             ($challenge->challenge_data['player_penalties'][$this->busted_player_id] ?? 0) + $penalty;
 
-        // Reset room mess (the mess "leaves" with the busted player)
-        $challenge->challenge_data['room_mess'][$this->room] = 0;
-
         // Add toast notifications
         $now = now()->timestamp;
         $challenge->challenge_data['toasts'][$this->busted_player_id][] = [

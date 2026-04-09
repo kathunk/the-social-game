@@ -25,7 +25,10 @@ class PlayerEnteredRoom extends Event
             'Invalid room.'
         );
 
-        $locations = $this->challenge()->challenge_data['player_locations'] ?? [];
+        // Read from state (not model) so events fired earlier in the same batch
+        // are visible to validation
+        $data = $this->state(ChallengeState::class)->challenge_data;
+        $locations = $data['player_locations'] ?? [];
         $current = $locations[$this->player_id] ?? 'hallway';
 
         $this->assert($current === 'hallway', 'Player must be in the hallway to enter a room.');

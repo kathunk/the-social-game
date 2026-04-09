@@ -17,7 +17,7 @@ class PlayerLeftQueue extends Event
 
     public function validate()
     {
-        $data = $this->challenge()->challenge_data;
+        $data = $this->state(ChallengeState::class)->challenge_data;
         $queued = $data['room_queues'][$this->room] ?? null;
 
         $this->assert($queued === $this->player_id, 'You are not queued for this room.');

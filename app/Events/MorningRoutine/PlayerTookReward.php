@@ -24,7 +24,7 @@ class PlayerTookReward extends Event
         $this->assert($reward !== null, 'Unknown reward.');
         $this->assert($reward->room === $this->room, 'Reward does not belong to this room.');
 
-        $data = $this->challenge()->challenge_data;
+        $data = $this->state(ChallengeState::class)->challenge_data;
 
         $location = $data['player_locations'][$this->player_id] ?? 'hallway';
         $this->assert($location === $this->room, 'You must be in the room to take a reward.');

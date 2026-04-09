@@ -39,13 +39,10 @@
         cleaningElapsed: 0,
         cleaningInterval: null,
         rewards: @js($rewardFlavorMap),
-        shownToastIds: new Set(),
-        visibleToasts: [],
+        currentRoomMess: {{ $currentRoomMess }},
 
         init() {
             this.startCleaningTicker();
-            this.processToasts(@js($toasts));
-            // Watch for new toasts on each refresh
             this.$watch('cleaningStartedAt', () => this.startCleaningTicker());
         },
 
@@ -66,19 +63,11 @@
         },
 
         get cleaningProgressMess() {
-            return Math.floor(this.cleaningElapsed / this.secondsPerMess);
+            return Math.min(Math.floor(this.cleaningElapsed / this.secondsPerMess), this.currentRoomMess);
         },
 
-        processToasts(toastList) {
-            for (const t of toastList) {
-                const id = t.created_at + ':' + t.type;
-                if (this.shownToastIds.has(id)) continue;
-                this.shownToastIds.add(id);
-                this.visibleToasts.push({...t, id});
-                setTimeout(() => {
-                    this.visibleToasts = this.visibleToasts.filter(v => v.id !== id);
-                }, 5000);
-            }
+        get displayMess() {
+            return Math.max(0, this.currentRoomMess - this.cleaningProgressMess);
         },
 
         takeReward(rewardKey) {
@@ -127,24 +116,45 @@
             this.$wire.callClassAction('stopCleaning', 'challenge', '{{ $classKey }}', {{ Js::from($this->challenge_component) }});
         }
     }"
-    x-init="processToasts(@js($toasts))"
     class="relative"
 >
-    {{-- TOAST NOTIFICATIONS --}}
+    {{-- TOAST NOTIFICATIONS - rendered per-toast with localStorage dedupe --}}
     <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none">
-        <template x-for="toast in visibleToasts" :key="toast.id">
+        @foreach ($toasts as $toast)
+            @php
+                $toastId = $toast['created_at'].'-'.$toast['type'].'-'.md5($toast['message'] ?? '');
+                $toastClass = match ($toast['type']) {
+                    'busted' => 'bg-red-500 text-white',
+                    'busted_someone' => 'bg-green-500 text-white',
+                    'junk_drawer' => 'bg-purple-500 text-white',
+                    default => 'bg-gray-700 text-white',
+                };
+            @endphp
             <div
+                wire:key="toast-{{ $toastId }}"
+                x-data="{
+                    visible: false,
+                    init() {
+                        const seen = new Set(JSON.parse(localStorage.getItem('mr_shown_toasts') || '[]'));
+                        if (seen.has('{{ $toastId }}')) return;
+                        seen.add('{{ $toastId }}');
+                        localStorage.setItem('mr_shown_toasts', JSON.stringify([...seen].slice(-100)));
+                        this.visible = true;
+                        setTimeout(() => this.visible = false, 5000);
+                    }
+                }"
+                x-show="visible"
                 x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 -translate-y-4"
                 x-transition:enter-end="opacity-100 translate-y-0"
-                class="rounded-lg shadow-lg px-4 py-3 text-sm font-medium pointer-events-auto"
-                :class="{
-                    'bg-red-500 text-white': toast.type === 'busted',
-                    'bg-green-500 text-white': toast.type === 'busted_someone',
-                }"
-                x-text="toast.message"
-            ></div>
-        </template>
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-end="opacity-0"
+                class="rounded-lg shadow-lg px-4 py-3 text-sm font-medium pointer-events-auto {{ $toastClass }}"
+                style="display:none"
+            >
+                {{ $toast['message'] }}
+            </div>
+        @endforeach
     </div>
 
     {{-- REWARD REVEAL ANIMATION --}}
@@ -300,14 +310,14 @@
                 <p class="text-xs text-gray-500">{{ $currentRoomHeader }}</p>
             </div>
 
-            {{-- Room mess meter --}}
+            {{-- Room mess meter (live: decreases as you clean) --}}
             <div class="rounded-lg border border-orange-200 bg-orange-50 p-3">
                 <div class="flex items-center justify-between mb-1">
                     <span class="text-xs font-medium text-orange-700">Room mess</span>
-                    <span class="text-xs font-bold text-orange-800">{{ $currentRoomMess }}</span>
+                    <span class="text-xs font-bold text-orange-800" x-text="displayMess"></span>
                 </div>
                 <div class="h-2 w-full overflow-hidden rounded-full bg-orange-100">
-                    <div class="h-full bg-orange-500 transition-all" style="width: {{ min(100, $currentRoomMess * 10) }}%"></div>
+                    <div class="h-full bg-orange-500 transition-all" :style="`width: ${Math.min(100, displayMess * 10)}%`"></div>
                 </div>
             </div>
 
@@ -330,7 +340,7 @@
                                 <span x-text="cleaningElapsed + 's'"></span>
                             </div>
                             <div class="h-2 w-full overflow-hidden rounded-full bg-blue-100">
-                                <div class="h-full bg-blue-500 transition-all" :style="`width: ${Math.min(100, (cleaningProgressMess / {{ $currentRoomMess }}) * 100)}%`"></div>
+                                <div class="h-full bg-blue-500 transition-all" :style="`width: ${Math.min(100, (cleaningProgressMess / Math.max(1, currentRoomMess)) * 100)}%`"></div>
                             </div>
                             <button
                                 @click="stopCleaning()"
@@ -348,7 +358,7 @@
             @if ($canTakeRewardHere && count($roomRewards) > 0)
                 <div class="space-y-2">
                     <div class="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Take an action
+                        Choose one item for your morning routine
                         @if ($hasExtraRewardFlag)
                             <span class="ml-1 rounded-full bg-purple-100 px-2 py-0.5 text-xxs font-semibold text-purple-700">Bonus pick</span>
                         @endif
@@ -359,21 +369,21 @@
                             wire:loading.attr="disabled"
                             class="w-full rounded-lg border-2 border-gray-200 bg-white hover:border-yellow-400 hover:bg-yellow-50 px-4 py-3 text-left transition-all"
                         >
-                            <div class="flex items-center justify-between">
-                                <span class="font-semibold text-sm">{{ $reward['name'] }}</span>
-                                <div class="flex gap-1">
-                                    <span class="rounded-full bg-green-100 px-2 py-0.5 text-xxs font-semibold text-green-700">
-                                        +{{ $reward['points'] }} pts
-                                    </span>
-                                    <span class="rounded-full bg-orange-100 px-2 py-0.5 text-xxs font-semibold text-orange-700">
-                                        +{{ $reward['mess'] }} mess
-                                    </span>
-                                    @if ($reward['has_effect'])
-                                        <span class="rounded-full bg-purple-100 px-2 py-0.5 text-xxs font-semibold text-purple-700">
-                                            ✨
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="font-semibold text-sm">{{ $reward['name'] }}</span>
+                                    <div class="flex gap-1 shrink-0">
+                                        <span class="rounded-full bg-green-100 px-2 py-0.5 text-xxs font-semibold text-green-700">
+                                            +{{ $reward['points'] }} pts
                                         </span>
-                                    @endif
+                                        <span class="rounded-full bg-orange-100 px-2 py-0.5 text-xxs font-semibold text-orange-700">
+                                            +{{ $reward['mess'] }} mess
+                                        </span>
+                                    </div>
                                 </div>
+                                @if (! empty($reward['effect_description']))
+                                    <p class="text-xxs text-purple-700 italic">{{ $reward['effect_description'] }}</p>
+                                @endif
                             </div>
                         </button>
                     @endforeach

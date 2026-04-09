@@ -18,13 +18,12 @@ class PlayerQueuedForRoom extends Event
 
     public function validate()
     {
-        $data = $this->challenge()->challenge_data;
+        $data = $this->state(ChallengeState::class)->challenge_data;
         $location = $data['player_locations'][$this->player_id] ?? 'hallway';
 
         $this->assert($location === 'hallway', 'You must be in the hallway to queue.');
         $this->assert(($data['room_queues'][$this->room] ?? null) === null, 'That room is already queued.');
 
-        // Confirm the room is occupied (otherwise just enter directly)
         $occupant = collect($data['player_locations'] ?? [])
             ->first(fn ($loc) => $loc === $this->room);
         $this->assert($occupant !== null, 'That room is empty - just enter it.');

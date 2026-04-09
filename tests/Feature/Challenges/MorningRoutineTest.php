@@ -172,7 +172,8 @@ it('busts a player who exits a messy room with someone queued', function () {
 
     $challenge->refresh();
     expect($challenge->challenge_data['player_penalties'][$players[0]->id])->toBe(5);
-    expect($challenge->challenge_data['room_mess']['kitchen'])->toBe(0);
+    // Mess persists after a bust - only cleaning removes it
+    expect($challenge->challenge_data['room_mess']['kitchen'])->toBe(5);
     expect($challenge->challenge_data['toasts'][$players[0]->id])->not->toBeEmpty();
     expect($challenge->challenge_data['toasts'][$players[1]->id])->not->toBeEmpty();
 });
