@@ -98,13 +98,10 @@
 
         <div class="relative z-10 max-w-6xl mx-auto px-6">
             <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-                {{-- Left: logo + gaggle stack --}}
-                <div class="flex flex-col items-center md:items-end animate-fade-in-up">
-                    <div class="w-full max-w-xs sm:max-w-sm md:max-w-full">
+                {{-- Left: just the logo rectangle --}}
+                <div class="flex justify-center md:justify-end animate-fade-in-up">
+                    <div class="w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px]">
                         <x-icons.big-logo class="w-full h-auto" />
-                    </div>
-                    <div class="w-full max-w-sm sm:max-w-md md:max-w-full -mt-2">
-                        <x-icons.gaggle class="w-full h-auto" />
                     </div>
                 </div>
 
@@ -280,7 +277,7 @@
                         <span class="text-xl leading-none">🩸</span>
                         <div>
                             <div class="font-bold text-sm">Blood Oaths</div>
-                            <div class="text-sm opacity-70">A variant where you can secretly ally with one player. Trust no one.</div>
+                            <div class="text-sm opacity-70">A variant where you can secretly ally with one player. Sniff out secret alliances with your one true friend.</div>
                         </div>
                     </div>
                     <div class="flex items-start gap-3">
@@ -294,7 +291,7 @@
 
                 <div class="mt-6 flex gap-2 flex-wrap">
                     <span class="text-xs font-semibold bg-zinc-100 rounded-full px-3 py-1">4–12 players</span>
-                    <span class="text-xs font-semibold bg-zinc-100 rounded-full px-3 py-1">~20 minutes</span>
+                    <span class="text-xs font-semibold bg-zinc-100 rounded-full px-3 py-1">~30 minutes</span>
                     <span class="text-xs font-semibold bg-zinc-100 rounded-full px-3 py-1">Strategy</span>
                 </div>
             </div>
