@@ -4,7 +4,7 @@
   class="rounded-lg p-3 md:p-4 bg-gradient-to-b from-green-200 via-yellow-100 to-red-100"
   wire:ignore
   x-data="{
-    path: 'round_properties.{{ App\Challenges\Classes\TierListGuess::key() }}.{{ $element['property_name'] }}',
+    path: 'round_properties.{{ App\Challenges\TierList\TierListGuess::key() }}.{{ $element['property_name'] }}',
     order: [],
     letterAt(n) {
       const code = 65 + n + (n >= 4 ? 1 : 0) // skip 'E'
