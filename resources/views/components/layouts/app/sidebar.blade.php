@@ -20,7 +20,6 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Games')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Home') }}</flux:navlist.item>
-                    <flux:navlist.item icon="plus" :href="route('create-game')" :current="request()->routeIs('create-game')" wire:navigate>{{ __('New Game') }}</flux:navlist.item>
                     @if ($user?->is_super_admin)
                         <flux:navlist.item icon="cog" :href="route('game-modes.index')" :current="request()->routeIs('game-modes.index')" wire:navigate>{{ __('Manage Game Modes') }}</flux:navlist.item>
                         <flux:navlist.item icon="puzzle-piece" :href="route('game-components.index')" :current="request()->routeIs('game-components.index')" wire:navigate>{{ __('All Components') }}</flux:navlist.item>
