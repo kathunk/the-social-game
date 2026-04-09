@@ -8,6 +8,8 @@
     $hallwayPlayers = $element['hallway_players'];
     $roomRewards = $element['room_rewards'];
     $alreadyTookInCurrentRoom = $element['already_took_in_current_room'];
+    $canTakeRewardHere = $element['can_take_reward_here'];
+    $hasExtraRewardFlag = $element['has_extra_reward_flag'];
     $cleaningState = $element['cleaning_state'];
     $secondsPerMessClean = $element['seconds_per_mess_clean'];
     $playerPoints = $element['player_points'];
@@ -343,9 +345,14 @@
             @endif
 
             {{-- Available rewards --}}
-            @if (! $alreadyTookInCurrentRoom && count($roomRewards) > 0)
+            @if ($canTakeRewardHere && count($roomRewards) > 0)
                 <div class="space-y-2">
-                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wide">Take an action</div>
+                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                        Take an action
+                        @if ($hasExtraRewardFlag)
+                            <span class="ml-1 rounded-full bg-purple-100 px-2 py-0.5 text-xxs font-semibold text-purple-700">Bonus pick</span>
+                        @endif
+                    </div>
                     @foreach ($roomRewards as $reward)
                         <button
                             x-on:click="takeReward('{{ $reward['key'] }}')"
@@ -371,7 +378,7 @@
                         </button>
                     @endforeach
                 </div>
-            @elseif ($alreadyTookInCurrentRoom)
+            @elseif (! $canTakeRewardHere)
                 <div class="rounded-lg bg-gray-50 border border-gray-200 p-3 text-center text-xs text-gray-500">
                     You've already taken an action here.
                 </div>

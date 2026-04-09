@@ -4,6 +4,7 @@ namespace App\Challenges\MorningRoutine\Rewards;
 
 use App\Challenges\MorningRoutine\Rewards\Effects\AnarchistsCookbookEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\BossSuitEffect;
+use App\Challenges\MorningRoutine\Rewards\Effects\CoffeeEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\CompostBinEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\EnergyDrinkEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\EnforcersDonutEffect;
@@ -13,11 +14,13 @@ use App\Challenges\MorningRoutine\Rewards\Effects\HolyRobesEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\HousekeepingHandbookEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\IntermittentFastingEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\JanitorsUniformEffect;
+use App\Challenges\MorningRoutine\Rewards\Effects\JunkDrawerEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\LibrarianSweaterEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\LuckySocksEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\MirrorEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\MolassesEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\MonocleEffect;
+use App\Challenges\MorningRoutine\Rewards\Effects\OatmealEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\TrapDoorsForDummiesEffect;
 use App\Challenges\MorningRoutine\Rewards\Effects\WhiteLinenSuitEffect;
 
@@ -111,6 +114,16 @@ class RewardRegistry
 
             // KITCHEN
             new Reward(
+                key: 'coffee',
+                room: 'kitchen',
+                name: 'Coffee',
+                flavor: 'The socially acceptable drug of choice.',
+                points: 0,
+                mess: 2,
+                effect_description: 'You may take an additional reward from the study.',
+                effect_class: CoffeeEffect::class,
+            ),
+            new Reward(
                 key: 'compost_bin',
                 room: 'kitchen',
                 name: 'Compost Bin',
@@ -149,6 +162,16 @@ class RewardRegistry
                 mess: 0,
             ),
             new Reward(
+                key: 'junk_drawer',
+                room: 'kitchen',
+                name: 'Junk drawer',
+                flavor: 'Sauce packets, dead batteries, and keys to nowhere.',
+                points: 0,
+                mess: 0,
+                effect_description: 'Get a random kitchen reward not in this game.',
+                effect_class: JunkDrawerEffect::class,
+            ),
+            new Reward(
                 key: 'molasses',
                 room: 'kitchen',
                 name: 'Molasses',
@@ -165,6 +188,8 @@ class RewardRegistry
                 flavor: 'A healthy breakfast that runs right through you.',
                 points: 1,
                 mess: 3,
+                effect_description: 'You may take an additional reward from the bathroom.',
+                effect_class: OatmealEffect::class,
             ),
 
             // LAUNDRY

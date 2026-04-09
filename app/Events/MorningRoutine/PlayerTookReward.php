@@ -36,7 +36,13 @@ class PlayerTookReward extends Event
         $this->assert(! isset($taken[$this->reward_key]), 'Reward has already been taken.');
 
         $taken_in_rooms = $data['player_taken_in_rooms'][$this->player_id] ?? [];
-        $this->assert(! in_array($this->room, $taken_in_rooms, true), 'You already took a reward in this room.');
+        $already_took = in_array($this->room, $taken_in_rooms, true);
+        $has_extra = ($data['active_effects'][$this->player_id]["extra_reward_{$this->room}"] ?? false) === true;
+
+        $this->assert(
+            ! $already_took || $has_extra,
+            'You already took a reward in this room.'
+        );
     }
 
     public function apply(ChallengeState $challenge)
@@ -50,8 +56,16 @@ class PlayerTookReward extends Event
             fn ($k) => $k !== $this->reward_key,
         ));
 
-        // Add room to player's taken-in list
-        $challenge->challenge_data['player_taken_in_rooms'][$this->player_id][] = $this->room;
+        // Track room as taken-in (only once - duplicates are not added on extra rewards)
+        $taken_in_rooms = $challenge->challenge_data['player_taken_in_rooms'][$this->player_id] ?? [];
+        $already_took = in_array($this->room, $taken_in_rooms, true);
+
+        if ($already_took) {
+            // Consume the one-shot extra-reward flag
+            unset($challenge->challenge_data['active_effects'][$this->player_id]["extra_reward_{$this->room}"]);
+        } else {
+            $challenge->challenge_data['player_taken_in_rooms'][$this->player_id][] = $this->room;
+        }
 
         // Award points
         $challenge->challenge_data['player_points'][$this->player_id] =

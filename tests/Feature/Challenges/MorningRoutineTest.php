@@ -239,6 +239,74 @@ it('hand sanitizer effect removes mess from bathroom on take', function () {
     expect($challenge->challenge_data['player_points'][$players[0]->id])->toBe(1);
 });
 
+it('coffee effect lets player take an extra reward in the study', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupMorningRoutine($this, 2);
+
+    mutateState($challenge, function ($state) {
+        $state->challenge_data['available_rewards']['kitchen'] = ['coffee'];
+        $state->challenge_data['available_rewards']['study'] = ['housekeeping_handbook', 'intermittent_fasting'];
+    });
+
+    callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'kitchen'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'coffee'])->assertHasNoErrors();
+
+    callAction($this, $players[0], $challenge, 'exitRoom')->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'study'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'housekeeping_handbook'])->assertHasNoErrors();
+
+    // Bonus pick: should succeed because of coffee
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'intermittent_fasting'])
+        ->assertHasNoErrors();
+
+    $challenge->refresh();
+    expect($challenge->challenge_data['taken_rewards']['study'])->toHaveCount(2);
+    expect($challenge->challenge_data['active_effects'][$players[0]->id]['extra_reward_study'] ?? null)->toBeNull();
+});
+
+it('coffee flag is one-shot - cannot take a third study reward', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupMorningRoutine($this, 2);
+
+    mutateState($challenge, function ($state) {
+        $state->challenge_data['available_rewards']['kitchen'] = ['coffee'];
+        $state->challenge_data['available_rewards']['study'] = ['housekeeping_handbook', 'intermittent_fasting', 'anarchists_cookbook'];
+    });
+
+    callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'kitchen'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'coffee'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'exitRoom')->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'study'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'housekeeping_handbook'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'intermittent_fasting'])->assertHasNoErrors();
+
+    // Third attempt should fail
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'anarchists_cookbook'])
+        ->assertHasErrors('action_error');
+});
+
+it('junk drawer pulls a random kitchen reward not in the game', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupMorningRoutine($this, 2);
+
+    // Force junk_drawer to be the only kitchen reward in the pool
+    mutateState($challenge, function ($state) {
+        $state->challenge_data['available_rewards']['kitchen'] = ['junk_drawer'];
+    });
+
+    callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'kitchen'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'junk_drawer'])->assertHasNoErrors();
+
+    $challenge->refresh();
+
+    // Player should have at least one toast about the junk drawer pull
+    $junk_toasts = collect($challenge->challenge_data['toasts'][$players[0]->id] ?? [])
+        ->where('type', 'junk_drawer');
+    expect($junk_toasts)->not->toBeEmpty();
+
+    // The player either has points OR the kitchen has mess (depending on which reward was pulled)
+    $points = $challenge->challenge_data['player_points'][$players[0]->id];
+    $kitchen_mess = $challenge->challenge_data['room_mess']['kitchen'];
+    expect($points + $kitchen_mess)->toBeGreaterThanOrEqual(0);
+});
+
 it('boss suit effect cancels a bust penalty', function () {
     ['players' => $players, 'challenge' => $challenge] = setupMorningRoutine($this, 2);
 

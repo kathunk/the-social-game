@@ -84,6 +84,13 @@ trait MorningRoutineFormElements
         $already_took_in_current_room = $current_location !== 'hallway'
             && in_array($current_location, $player_taken_in_rooms[$player->id] ?? [], true);
 
+        // Check for an "extra reward" flag (e.g. from coffee/oatmeal) that lets the
+        // player take one more reward in the current room
+        $has_extra_reward = $current_location !== 'hallway'
+            && (($active_effects["extra_reward_{$current_location}"] ?? false) === true);
+
+        $can_take_reward_here = ! $already_took_in_current_room || $has_extra_reward;
+
         // Cleaning state for current player
         $current_cleaning = $cleaning_state[$player->id] ?? null;
 
@@ -98,6 +105,8 @@ trait MorningRoutineFormElements
             'hallway_players' => $hallway_players,
             'room_rewards' => $room_rewards,
             'already_took_in_current_room' => $already_took_in_current_room,
+            'can_take_reward_here' => $can_take_reward_here,
+            'has_extra_reward_flag' => $has_extra_reward,
             'cleaning_state' => $current_cleaning,
             'seconds_per_mess_clean' => $seconds_per_mess_clean,
             'player_points' => $player_points[$player->id] ?? 0,
