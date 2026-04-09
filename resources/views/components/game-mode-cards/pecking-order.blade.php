@@ -5,35 +5,15 @@
         return;
     }
 
-    // Sort variants in a stable order with the canonical "Pecking Order" first.
-    $sorted = $modes->sortBy(function ($mode) {
-        $name = mb_strtolower($mode->name);
-        return match (true) {
-            str_contains($name, 'pecking')      => 0,
-            str_contains($name, 'blood')        => 1,
-            str_contains($name, 'king maker')   => 2,
-            str_contains($name, 'pyramid')      => 3,
-            default                              => 9,
-        };
-    })->values();
-
-    // Variant descriptions and emoji
-    $variantMeta = [
-        'pecking' => ['emoji' => '🐔', 'tagline' => 'The classic. Vote your friends up or down. Predict the votes for hidden points.'],
-        'blood'   => ['emoji' => '🩸', 'tagline' => 'Secretly ally with one player. Sniff out other alliances to score.'],
-        'king'    => ['emoji' => '👑', 'tagline' => 'Resign early to give your points away. Anoint a king or nuke your enemies.'],
-        'pyramid' => ['emoji' => '🔺', 'tagline' => 'Recruit, refer, get in early. A pyramid scheme that can\'t go wrong.'],
-    ];
-
-    $metaFor = function ($mode) use ($variantMeta) {
-        $name = mb_strtolower($mode->name);
-        foreach ($variantMeta as $key => $meta) {
-            if (str_contains($name, $key)) {
-                return $meta;
-            }
-        }
-        return ['emoji' => '🎯', 'tagline' => $mode->description ?? ''];
-    };
+    // Resolve variant metadata for each mode via the registry, then sort by
+    // the variant's declared display order.
+    $modesWithMeta = $modes
+        ->map(fn ($mode) => [
+            'mode' => $mode,
+            'meta' => \App\Support\GameModeCardRegistry::variantMetaForMode('pecking-order', $mode),
+        ])
+        ->sortBy(fn ($entry) => $entry['meta']['sort'])
+        ->values();
 @endphp
 
 <div class="rounded-2xl bg-zinc-900 text-pale p-5 shadow-sm">
@@ -53,8 +33,11 @@
     </div>
 
     <div class="space-y-2">
-        @foreach ($sorted as $mode)
-            @php $meta = $metaFor($mode); @endphp
+        @foreach ($modesWithMeta as $entry)
+            @php
+                $mode = $entry['mode'];
+                $meta = $entry['meta'];
+            @endphp
             <button
                 wire:click="startGameFromMode('{{ $mode->id }}')"
                 wire:loading.attr="disabled"

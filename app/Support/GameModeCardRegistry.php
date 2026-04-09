@@ -24,6 +24,10 @@ use Illuminate\Support\Collection;
 class GameModeCardRegistry
 {
     /**
+     * Per-variant metadata for families that have multiple variants
+     * (e.g. the pecking-order family). Each variant has its own keywords,
+     * emoji, tagline, and a sort weight controlling display order.
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function families(): array
@@ -34,14 +38,72 @@ class GameModeCardRegistry
                 'keywords' => ['hottake', 'tierlist'],
                 'component' => 'game-mode-cards.hot-takes',
                 'sort' => 10,
+                'variants' => [],
             ],
             [
                 'slug' => 'pecking-order',
                 'keywords' => ['peckingorder', 'bloodoath', 'kingmaker', 'pyramidscheme'],
                 'component' => 'game-mode-cards.pecking-order',
                 'sort' => 20,
+                'variants' => [
+                    [
+                        'keywords' => ['peckingorder'],
+                        'emoji' => '🐔',
+                        'tagline' => 'The classic. Vote your friends up or down. Predict the votes for hidden points.',
+                        'sort' => 0,
+                    ],
+                    [
+                        'keywords' => ['bloodoath', 'oath'],
+                        'emoji' => '🩸',
+                        'tagline' => 'Secretly ally with one player. Sniff out other alliances to score.',
+                        'sort' => 1,
+                    ],
+                    [
+                        'keywords' => ['kingmaker', 'king', 'maker', 'crown'],
+                        'emoji' => '👑',
+                        'tagline' => 'Resign early to give your points away. Anoint a king or nuke your enemies.',
+                        'sort' => 2,
+                    ],
+                    [
+                        'keywords' => ['pyramidscheme', 'pyramid', 'scheme'],
+                        'emoji' => '🔺',
+                        'tagline' => 'Recruit, refer, get in early. A pyramid scheme that can\'t go wrong.',
+                        'sort' => 3,
+                    ],
+                ],
             ],
         ];
+    }
+
+    /**
+     * Look up the variant metadata for a mode within a family. Returns the
+     * default fallback if no variant matches.
+     *
+     * @return array{emoji: string, tagline: string, sort: int}
+     */
+    public static function variantMetaForMode(string $familySlug, GameMode $mode): array
+    {
+        $family = collect(self::families())->firstWhere('slug', $familySlug);
+
+        if (! $family || empty($family['variants'])) {
+            return ['emoji' => '🎯', 'tagline' => $mode->description ?? '', 'sort' => 99];
+        }
+
+        $normalizedName = self::normalize($mode->name);
+
+        foreach ($family['variants'] as $variant) {
+            foreach ($variant['keywords'] as $keyword) {
+                if (str_contains($normalizedName, self::normalize($keyword))) {
+                    return [
+                        'emoji' => $variant['emoji'],
+                        'tagline' => $variant['tagline'],
+                        'sort' => $variant['sort'] ?? 99,
+                    ];
+                }
+            }
+        }
+
+        return ['emoji' => '🎯', 'tagline' => $mode->description ?? '', 'sort' => 99];
     }
 
     /**
