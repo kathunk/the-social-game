@@ -2,6 +2,7 @@
 
 namespace App\Events\MorningRoutine;
 
+use App\Challenges\MorningRoutine\MorningRoutineRound;
 use App\Challenges\MorningRoutine\Rewards\RewardRegistry;
 use App\Events\Traits\HasActivePlayer;
 use App\Events\Traits\HasChallenge;
@@ -10,50 +11,47 @@ use App\Models\Challenge;
 use App\States\ChallengeState;
 use Thunk\Verbs\Event;
 
-class PlayerEnteredRoom extends Event
+class PlayerCleanedRoom extends Event
 {
     use HasActivePlayer, HasChallenge, HasGame;
 
     public string $room;
 
-    public bool $from_queue = false;
+    public int $finished_at;
 
     public function validate()
     {
-        $this->assert(
-            in_array($this->room, ['bathroom', 'laundry', 'study', 'kitchen']),
-            'Invalid room.'
-        );
+        $data = $this->challenge()->challenge_data;
+        $cleaning = $data['cleaning_state'][$this->player_id] ?? null;
 
-        $locations = $this->challenge()->challenge_data['player_locations'] ?? [];
-        $current = $locations[$this->player_id] ?? 'hallway';
-
-        $this->assert($current === 'hallway', 'Player must be in the hallway to enter a room.');
-
-        $occupant = collect($locations)->first(fn ($loc) => $loc === $this->room);
-        $this->assert($occupant === null, 'Room is already occupied.');
+        $this->assert($cleaning !== null, 'Player is not cleaning.');
+        $this->assert($cleaning['room'] === $this->room, 'Player is cleaning a different room.');
     }
 
     public function apply(ChallengeState $challenge)
     {
-        $challenge->challenge_data['player_locations'][$this->player_id] = $this->room;
+        $cleaning = $challenge->challenge_data['cleaning_state'][$this->player_id];
+        $elapsed = max(0, $this->finished_at - $cleaning['started_at']);
+        $mess_to_remove = (int) floor($elapsed / MorningRoutineRound::SECONDS_PER_MESS_CLEAN);
 
-        // If from queue, clear the queue
-        if ($this->from_queue) {
-            $challenge->challenge_data['room_queues'][$this->room] = null;
-        }
+        $current_mess = $challenge->challenge_data['room_mess'][$this->room] ?? 0;
+        $mess_removed = min($mess_to_remove, $current_mess);
 
-        // Dispatch onPlayerEnteredRoom hook for all taken rewards
+        $challenge->challenge_data['room_mess'][$this->room] = $current_mess - $mess_removed;
+        unset($challenge->challenge_data['cleaning_state'][$this->player_id]);
+
+        // Dispatch onRoomCleaned hook for all players' active rewards
         foreach ($challenge->challenge_data['taken_rewards'] ?? [] as $r => $rewards_in_room) {
             foreach ($rewards_in_room as $reward_key => $taker_id) {
                 $reward = RewardRegistry::find($reward_key);
                 if ($reward && $reward->hasEffect()) {
                     $effect_class = $reward->effect_class;
                     $effect = new $effect_class;
-                    $challenge->challenge_data = $effect->onPlayerEnteredRoom(
+                    $challenge->challenge_data = $effect->onRoomCleaned(
                         taker_id: (int) $taker_id,
-                        entering_player_id: $this->player_id,
+                        cleaning_player_id: $this->player_id,
                         room: $this->room,
+                        mess_removed: $mess_removed,
                         challenge_data: $challenge->challenge_data,
                     );
                 }
