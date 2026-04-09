@@ -45,30 +45,36 @@ class GameModeCardRegistry
                 'keywords' => ['peckingorder', 'bloodoath', 'kingmaker', 'pyramidscheme'],
                 'component' => 'game-mode-cards.pecking-order',
                 'sort' => 20,
+                // Variants are matched in array order, so put the most-specific
+                // ones FIRST. The plain "Pecking Order" variant goes last so a
+                // mode named "Pecking Order: Blood Oaths" matches "bloodoath"
+                // before it falls through to "peckingorder".
+                //
+                // IMPORTANT: keywords must NOT be substrings of "peckingorder".
+                // "king" and "maker" both appear inside "pecKINGorderMAKER" - so
+                // they would falsely match the canonical Pecking Order itself.
+                // Stick to compound keywords like "kingmaker", "bloodoath",
+                // "pyramidscheme", or unique words like "crown".
                 'variants' => [
                     [
-                        'keywords' => ['peckingorder'],
-                        'emoji' => '🐔',
-                        'tagline' => 'The classic. Vote your friends up or down. Predict the votes for hidden points.',
-                        'sort' => 0,
-                    ],
-                    [
-                        'keywords' => ['bloodoath', 'oath'],
+                        'keywords' => ['bloodoath'],
                         'emoji' => '🩸',
-                        'tagline' => 'Secretly ally with one player. Sniff out other alliances to score.',
                         'sort' => 1,
                     ],
                     [
-                        'keywords' => ['kingmaker', 'king', 'maker', 'crown'],
+                        'keywords' => ['kingmaker', 'crown'],
                         'emoji' => '👑',
-                        'tagline' => 'Resign early to give your points away. Anoint a king or nuke your enemies.',
                         'sort' => 2,
                     ],
                     [
-                        'keywords' => ['pyramidscheme', 'pyramid', 'scheme'],
+                        'keywords' => ['pyramidscheme', 'pyramid'],
                         'emoji' => '🔺',
-                        'tagline' => 'Recruit, refer, get in early. A pyramid scheme that can\'t go wrong.',
                         'sort' => 3,
+                    ],
+                    [
+                        'keywords' => ['peckingorder'],
+                        'emoji' => '🐔',
+                        'sort' => 0,
                     ],
                 ],
             ],
@@ -76,17 +82,18 @@ class GameModeCardRegistry
     }
 
     /**
-     * Look up the variant metadata for a mode within a family. Returns the
-     * default fallback if no variant matches.
+     * Look up the variant metadata for a mode within a family. Returns just
+     * the emoji and sort weight; the card uses $mode->description for the
+     * subtitle so it always reflects what was set in prod.
      *
-     * @return array{emoji: string, tagline: string, sort: int}
+     * @return array{emoji: string, sort: int}
      */
     public static function variantMetaForMode(string $familySlug, GameMode $mode): array
     {
         $family = collect(self::families())->firstWhere('slug', $familySlug);
 
         if (! $family || empty($family['variants'])) {
-            return ['emoji' => '🎯', 'tagline' => $mode->description ?? '', 'sort' => 99];
+            return ['emoji' => '🎯', 'sort' => 99];
         }
 
         $normalizedName = self::normalize($mode->name);
@@ -96,14 +103,13 @@ class GameModeCardRegistry
                 if (str_contains($normalizedName, self::normalize($keyword))) {
                     return [
                         'emoji' => $variant['emoji'],
-                        'tagline' => $variant['tagline'],
                         'sort' => $variant['sort'] ?? 99,
                     ];
                 }
             }
         }
 
-        return ['emoji' => '🎯', 'tagline' => $mode->description ?? '', 'sort' => 99];
+        return ['emoji' => '🎯', 'sort' => 99];
     }
 
     /**
