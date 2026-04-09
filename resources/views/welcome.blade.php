@@ -96,40 +96,46 @@
             @endfor
         </div>
 
-        <div class="relative z-10 max-w-4xl mx-auto px-6 text-center">
-            <div class="w-full max-w-xs sm:max-w-sm mx-auto mb-2 animate-fade-in-up">
-                <x-icons.big-logo class="w-full h-auto" />
-            </div>
+        <div class="relative z-10 max-w-6xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                {{-- Left: logo + gaggle stack --}}
+                <div class="flex flex-col items-center md:items-end animate-fade-in-up">
+                    <div class="w-full max-w-xs sm:max-w-sm md:max-w-full">
+                        <x-icons.big-logo class="w-full h-auto" />
+                    </div>
+                    <div class="w-full max-w-sm sm:max-w-md md:max-w-full -mt-2">
+                        <x-icons.gaggle class="w-full h-auto" />
+                    </div>
+                </div>
 
-            <div class="w-full max-w-sm sm:max-w-md mx-auto mb-8 animate-fade-in-up delay-100">
-                <x-icons.gaggle class="w-full h-auto" />
-            </div>
+                {{-- Right: headline + CTAs --}}
+                <div class="text-center md:text-left">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 animate-fade-in-up delay-100">
+                        Smart social games<br />for groups of any size.
+                    </h1>
 
-            <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4 animate-fade-in-up delay-200">
-                Smart social games<br />for groups of any size.
-            </h1>
+                    <p class="text-lg md:text-xl opacity-90 max-w-xl md:max-w-none leading-relaxed mb-8 mx-auto md:mx-0 animate-fade-in-up delay-200">
+                        Play on your phone with 4 friends or 400. No download. Web-based and free.
+                    </p>
 
-            <p class="text-lg md:text-xl opacity-90 max-w-2xl mx-auto leading-relaxed mb-8 animate-fade-in-up delay-300">
-                Like <span class="font-semibold">Jackbox</span>, but smarter, web-based, and totally free.
-                Play with 4 friends or 400 — on your phone, no app to install.
-            </p>
-
-            <div class="flex flex-col sm:flex-row gap-3 justify-center animate-fade-in-up delay-300">
-                @auth
-                    <a href="{{ url('/dashboard') }}"
-                       class="inline-block bg-white text-bold-orange font-bold py-4 px-8 rounded-xl hover:scale-105 transition-transform animate-pulse-glow">
-                        Open dashboard
-                    </a>
-                @else
-                    <a href="{{ route('register') }}"
-                       class="inline-block bg-white text-bold-orange font-bold py-4 px-8 rounded-xl hover:scale-105 transition-transform animate-pulse-glow">
-                        Create a free account
-                    </a>
-                    <a href="{{ route('login') }}"
-                       class="inline-block border-2 border-white/40 hover:border-white text-white font-bold py-4 px-8 rounded-xl transition-colors">
-                        Log in
-                    </a>
-                @endauth
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center md:justify-start animate-fade-in-up delay-300">
+                        @auth
+                            <a href="{{ url('/dashboard') }}"
+                               class="inline-block bg-white text-bold-orange font-bold py-4 px-8 rounded-xl hover:scale-105 transition-transform animate-pulse-glow">
+                                Open dashboard
+                            </a>
+                        @else
+                            <a href="{{ route('register') }}"
+                               class="inline-block bg-white text-bold-orange font-bold py-4 px-8 rounded-xl hover:scale-105 transition-transform animate-pulse-glow">
+                                Create a free account
+                            </a>
+                            <a href="{{ route('login') }}"
+                               class="inline-block border-2 border-white/40 hover:border-white text-white font-bold py-4 px-8 rounded-xl transition-colors">
+                                Log in
+                            </a>
+                        @endauth
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -156,25 +162,22 @@
     </section>
 
     <!-- TIER LIST GAME SHOWCASE -->
-    <section class="relative bg-pale text-zinc-900 py-16 lg:py-24">
+    <section class="relative bg-bold-orange text-pale py-16 lg:py-24">
         <div class="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
             <div class="order-2 md:order-1">
-                <div class="inline-block bg-bold-orange/10 text-bold-orange text-xs font-bold uppercase tracking-wide rounded-full px-3 py-1 mb-4">
-                    Game mode
-                </div>
                 <h2 class="text-3xl md:text-4xl font-bold mb-4 leading-tight">Tier List</h2>
-                <p class="text-base md:text-lg opacity-80 mb-4 leading-relaxed">
-                    Build your perfect tier list across categories your friends suggest. Then guess how
-                    <em>they</em> ranked theirs. The closer your guess, the more you score.
+                <p class="text-base md:text-lg opacity-90 mb-4 leading-relaxed">
+                    Build your perfect tier list. Then guess how <em>your friends</em> ranked theirs.
+                    The closer your guess, the more you score.
                 </p>
-                <p class="text-base md:text-lg opacity-80 leading-relaxed">
-                    It's part trivia, part empathy test. You'll learn things about your friends you didn't know,
-                    and discover that you really don't know your friends at all.
+                <p class="text-base md:text-lg opacity-90 leading-relaxed">
+                    Start arguments about why velvet is an A-tier texture, or why Newsies should not be
+                    on anyone's top movie list.
                 </p>
                 <div class="mt-6 flex gap-2 flex-wrap">
-                    <span class="text-xs font-semibold bg-zinc-100 rounded-full px-3 py-1">2–10 players</span>
-                    <span class="text-xs font-semibold bg-zinc-100 rounded-full px-3 py-1">~15 minutes</span>
-                    <span class="text-xs font-semibold bg-zinc-100 rounded-full px-3 py-1">Drag &amp; drop</span>
+                    <span class="text-xs font-semibold bg-white/15 rounded-full px-3 py-1">2–10 players</span>
+                    <span class="text-xs font-semibold bg-white/15 rounded-full px-3 py-1">~15 minutes</span>
+                    <span class="text-xs font-semibold bg-white/15 rounded-full px-3 py-1">Drag &amp; drop</span>
                 </div>
             </div>
 
@@ -214,18 +217,15 @@
         </div>
     </section>
 
-    {{-- diagonal divider --}}
-    <div class="h-8 bg-pale" style="clip-path: polygon(0 0, 100% 0, 100% 100%, 0 50%);"></div>
-
     <!-- PECKING ORDER GAME SHOWCASE -->
-    <section class="relative bg-bold-orange text-pale py-16 lg:py-24">
+    <section class="relative bg-pale text-zinc-900 py-16 lg:py-24">
         <div class="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
             <div>
                 {{-- Mock screenshot of pecking order voting --}}
                 <div class="phone-frame animate-float-slow" style="animation-delay: 1s;">
                     <div class="p-3 bg-white text-zinc-900">
                         <div class="text-center mb-3">
-                            <div class="text-xs font-bold text-faded-gray uppercase tracking-wide">Round 3 of 11</div>
+                            <div class="text-xs font-bold text-zinc-400 uppercase tracking-wide">Round 3 of 11</div>
                             <div class="text-sm font-semibold mt-1">Cast your votes</div>
                         </div>
 
@@ -265,65 +265,62 @@
             </div>
 
             <div>
-                <div class="inline-block bg-white/15 text-white text-xs font-bold uppercase tracking-wide rounded-full px-3 py-1 mb-4">
-                    Game mode &nbsp;·&nbsp; 3 variants
-                </div>
                 <h2 class="text-3xl md:text-4xl font-bold mb-4 leading-tight">Pecking Order</h2>
-                <p class="text-base md:text-lg opacity-90 mb-4 leading-relaxed">
+                <p class="text-base md:text-lg opacity-80 mb-4 leading-relaxed">
                     Each round, you upvote and downvote your opponents — but you also predict how
                     everyone <em>else</em> will vote. Outsmart the room and you'll quietly accumulate hidden points
                     that get revealed at the end.
                 </p>
-                <p class="text-base md:text-lg opacity-90 leading-relaxed">
-                    Pure social warfare. A popularity contest for horrible people.
+                <p class="text-base md:text-lg opacity-80 leading-relaxed">
+                    A popularity contest for the truly devious.
                 </p>
 
-                <div class="mt-6 space-y-2">
+                <div class="mt-6 space-y-3">
                     <div class="flex items-start gap-3">
                         <span class="text-xl leading-none">🩸</span>
                         <div>
                             <div class="font-bold text-sm">Blood Oaths</div>
-                            <div class="text-sm opacity-80">A variant where you can secretly ally with one player. Trust no one.</div>
+                            <div class="text-sm opacity-70">A variant where you can secretly ally with one player. Trust no one.</div>
                         </div>
                     </div>
                     <div class="flex items-start gap-3">
-                        <span class="text-xl leading-none">🔺</span>
+                        <span class="text-xl leading-none">👑</span>
                         <div>
-                            <div class="font-bold text-sm">Pyramid Scheme</div>
-                            <div class="text-sm opacity-80">A variant about referrals, recruitment, and getting in early.</div>
+                            <div class="font-bold text-sm">King Maker</div>
+                            <div class="text-sm opacity-70">Resign early to give your points away — anoint a new king or nuke your opponents. Great for large groups.</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-6 flex gap-2 flex-wrap">
-                    <span class="text-xs font-semibold bg-white/15 rounded-full px-3 py-1">4–12 players</span>
-                    <span class="text-xs font-semibold bg-white/15 rounded-full px-3 py-1">~20 minutes</span>
-                    <span class="text-xs font-semibold bg-white/15 rounded-full px-3 py-1">Strategy</span>
+                    <span class="text-xs font-semibold bg-zinc-100 rounded-full px-3 py-1">4–12 players</span>
+                    <span class="text-xs font-semibold bg-zinc-100 rounded-full px-3 py-1">~20 minutes</span>
+                    <span class="text-xs font-semibold bg-zinc-100 rounded-full px-3 py-1">Strategy</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- "MORE COMING" + FINAL CTA -->
-    <section class="bg-pale text-zinc-900 py-16 lg:py-24">
+    <section class="bg-bold-orange text-pale py-16 lg:py-24">
         <div class="max-w-3xl mx-auto px-6 text-center">
             <h2 class="text-2xl md:text-3xl font-bold mb-3">And there's more cooking.</h2>
-            <p class="text-base md:text-lg opacity-70 mb-8 leading-relaxed">
+            <p class="text-base md:text-lg opacity-90 mb-8 leading-relaxed">
                 We have a growing roster of game modes — short ones for parties, long ones for conferences,
                 and weird experiments in between. New games drop on a regular cadence.
             </p>
 
             @auth
                 <a href="{{ url('/dashboard') }}"
-                   class="inline-block bg-bold-orange text-white font-bold py-4 px-8 rounded-xl hover:scale-105 transition-transform">
+                   class="inline-block bg-white text-bold-orange font-bold py-4 px-8 rounded-xl hover:scale-105 transition-transform">
                     Open dashboard →
                 </a>
             @else
                 <a href="{{ route('register') }}"
-                   class="inline-block bg-bold-orange text-white font-bold py-4 px-8 rounded-xl hover:scale-105 transition-transform">
+                   class="inline-block bg-white text-bold-orange font-bold py-4 px-8 rounded-xl hover:scale-105 transition-transform">
                     Create a free account →
                 </a>
-                <p class="mt-4 text-xs opacity-60">No credit card. No app. No nonsense.</p>
+                <p class="mt-4 text-xs opacity-80">No credit card. No app. No nonsense.</p>
             @endauth
         </div>
     </section>
