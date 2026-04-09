@@ -56,9 +56,10 @@ it('dispatches a Kit unsubscribe job when a user unsubscribes from the newslette
     });
 });
 
-it('KitService::subscribe posts to the Kit form subscriber endpoint', function () {
+it('KitService::subscribe creates the subscriber and adds to the form', function () {
     Http::fake([
-        'api.kit.com/v4/forms/12345/subscribers' => Http::response(['subscriber' => ['id' => 1]], 200),
+        'api.kit.com/v4/subscribers' => Http::response(['subscriber' => ['id' => 999]], 201),
+        'api.kit.com/v4/forms/12345/subscribers/999' => Http::response(['subscriber' => ['id' => 999]], 201),
     ]);
 
     $service = new KitService;
@@ -67,11 +68,27 @@ it('KitService::subscribe posts to the Kit form subscriber endpoint', function (
     expect($result)->toBeTrue();
 
     Http::assertSent(function ($request) {
-        return $request->url() === 'https://api.kit.com/v4/forms/12345/subscribers'
+        return $request->url() === 'https://api.kit.com/v4/subscribers'
+            && $request->method() === 'POST'
             && $request['email_address'] === 'test@example.com'
             && $request['first_name'] === 'Test User'
             && $request->hasHeader('X-Kit-Api-Key', 'kit_test_key');
     });
+
+    Http::assertSent(function ($request) {
+        return $request->url() === 'https://api.kit.com/v4/forms/12345/subscribers/999'
+            && $request->method() === 'POST';
+    });
+});
+
+it('KitService::subscribe returns false if create succeeds but add-to-form fails', function () {
+    Http::fake([
+        'api.kit.com/v4/subscribers' => Http::response(['subscriber' => ['id' => 999]], 201),
+        'api.kit.com/v4/forms/12345/subscribers/999' => Http::response(['error' => 'nope'], 404),
+    ]);
+
+    $service = new KitService;
+    expect($service->subscribe('test@example.com'))->toBeFalse();
 });
 
 it('KitService gracefully no-ops when not configured', function () {
@@ -90,9 +107,9 @@ it('KitService gracefully no-ops when not configured', function () {
     Http::assertNothingSent();
 });
 
-it('KitService::subscribe returns false on Kit API failure', function () {
+it('KitService::subscribe returns false when create-subscriber fails', function () {
     Http::fake([
-        'api.kit.com/v4/forms/12345/subscribers' => Http::response(['error' => 'bad'], 422),
+        'api.kit.com/v4/subscribers' => Http::response(['error' => 'bad'], 422),
     ]);
 
     $service = new KitService;
