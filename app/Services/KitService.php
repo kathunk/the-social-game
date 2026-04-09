@@ -28,8 +28,14 @@ class KitService
     }
 
     /**
-     * Add a subscriber to the configured Kit form.
-     * Returns true on success, false on failure.
+     * Add a subscriber to the configured Kit form. This is a two-step flow:
+     * 1. Create (or look up) the subscriber via POST /v4/subscribers - returns
+     *    the subscriber id. This call is idempotent: re-posting the same email
+     *    returns 200 with the existing subscriber.
+     * 2. Add the subscriber to the form via
+     *    POST /v4/forms/{form_id}/subscribers/{subscriber_id}
+     *
+     * Returns true on success, false on any failure.
      */
     public function subscribe(string $email, ?string $firstName = null): bool
     {
@@ -39,23 +45,47 @@ class KitService
             return false;
         }
 
-        $payload = ['email_address' => $email];
-
+        // Step 1: create / upsert the subscriber
+        $createPayload = ['email_address' => $email];
         if ($firstName) {
-            $payload['first_name'] = $firstName;
+            $createPayload['first_name'] = $firstName;
         }
 
-        $response = Http::withHeaders([
-            'X-Kit-Api-Key' => $this->apiKey,
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->post(self::BASE_URL."/forms/{$this->formId}/subscribers", $payload);
+        $createResponse = $this->client()->post(self::BASE_URL.'/subscribers', $createPayload);
 
-        if ($response->failed()) {
-            Log::warning('KitService::subscribe failed', [
+        if ($createResponse->failed()) {
+            Log::warning('KitService::subscribe create failed', [
                 'email' => $email,
-                'status' => $response->status(),
-                'body' => $response->body(),
+                'status' => $createResponse->status(),
+                'body' => $createResponse->body(),
+            ]);
+
+            return false;
+        }
+
+        $subscriberId = $createResponse->json('subscriber.id');
+
+        if (! $subscriberId) {
+            Log::warning('KitService::subscribe got no subscriber id back', [
+                'email' => $email,
+                'body' => $createResponse->body(),
+            ]);
+
+            return false;
+        }
+
+        // Step 2: add the subscriber to the form
+        $addResponse = $this->client()->post(
+            self::BASE_URL."/forms/{$this->formId}/subscribers/{$subscriberId}"
+        );
+
+        if ($addResponse->failed()) {
+            Log::warning('KitService::subscribe add-to-form failed', [
+                'email' => $email,
+                'subscriber_id' => $subscriberId,
+                'form_id' => $this->formId,
+                'status' => $addResponse->status(),
+                'body' => $addResponse->body(),
             ]);
 
             return false;
@@ -64,10 +94,18 @@ class KitService
         return true;
     }
 
+    protected function client()
+    {
+        return Http::withHeaders([
+            'X-Kit-Api-Key' => $this->apiKey,
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ]);
+    }
+
     /**
      * Unsubscribe a subscriber by email.
-     * Kit's v4 API requires looking up the subscriber id first, then
-     * calling the unsubscribe endpoint on that id.
+     * Looks up the subscriber id by email, then calls the unsubscribe endpoint.
      */
     public function unsubscribe(string $email): bool
     {
@@ -77,10 +115,7 @@ class KitService
             return false;
         }
 
-        $lookup = Http::withHeaders([
-            'X-Kit-Api-Key' => $this->apiKey,
-            'Accept' => 'application/json',
-        ])->get(self::BASE_URL.'/subscribers', ['email_address' => $email]);
+        $lookup = $this->client()->get(self::BASE_URL.'/subscribers', ['email_address' => $email]);
 
         if ($lookup->failed()) {
             Log::warning('KitService::unsubscribe lookup failed', [
@@ -99,10 +134,7 @@ class KitService
             return true;
         }
 
-        $response = Http::withHeaders([
-            'X-Kit-Api-Key' => $this->apiKey,
-            'Accept' => 'application/json',
-        ])->post(self::BASE_URL."/subscribers/{$subscriberId}/unsubscribe");
+        $response = $this->client()->post(self::BASE_URL."/subscribers/{$subscriberId}/unsubscribe");
 
         if ($response->failed()) {
             Log::warning('KitService::unsubscribe failed', [
