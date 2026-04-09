@@ -126,6 +126,19 @@
     }"
     class="relative"
 >
+    {{-- ACTION ERROR BANNER --}}
+    @error('action_error')
+        <div
+            x-data="{ visible: true }"
+            x-init="setTimeout(() => visible = false, 4000)"
+            x-show="visible"
+            x-transition
+            class="fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-lg shadow-lg bg-amber-500 text-white px-4 py-3 text-sm font-medium"
+        >
+            {{ $message }}
+        </div>
+    @enderror
+
     {{-- TOAST NOTIFICATIONS - rendered per-toast with localStorage dedupe --}}
     <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none">
         @foreach ($toasts as $toast)

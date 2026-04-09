@@ -76,6 +76,10 @@ trait HandlesClassActions
                 $params['round_properties']
             );
         } catch (\Exception $e) {
+            // Refresh UI even on failure so the player sees the actual current
+            // state (e.g. the room they tried to enter is now occupied).
+            // softRefresh() resets validation, so we add the error AFTER it.
+            $this->softRefresh();
             $this->addError('action_error', $e->getMessage());
 
             return;
