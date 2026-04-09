@@ -167,7 +167,7 @@
     <section class="relative bg-bold-orange text-pale py-16 lg:py-24">
         <div class="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
             <div class="order-2 md:order-1">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4 leading-tight">Tier List</h2>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 leading-tight">Hot Takes</h2>
                 <p class="text-base md:text-lg opacity-90 mb-4 leading-relaxed">
                     Build your perfect tier list. Then guess how <em>your friends</em> ranked theirs.
                     The closer your guess, the more you score.
