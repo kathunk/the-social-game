@@ -46,15 +46,13 @@ class GameModeCardRegistry
                 'component' => 'game-mode-cards.pecking-order',
                 'sort' => 20,
                 // Variants are matched in array order, so put the most-specific
-                // ones FIRST. The plain "Pecking Order" variant goes last so a
-                // mode named "Pecking Order: Blood Oaths" matches "bloodoath"
-                // before it falls through to "peckingorder".
+                // ones FIRST. Any mode in this family that doesn't match a
+                // specific variant (e.g. the canonical base game, regardless of
+                // what it's named) gets the family fallback below.
                 //
                 // IMPORTANT: keywords must NOT be substrings of "peckingorder".
                 // "king" and "maker" both appear inside "pecKINGorderMAKER" - so
                 // they would falsely match the canonical Pecking Order itself.
-                // Stick to compound keywords like "kingmaker", "bloodoath",
-                // "pyramidscheme", or unique words like "crown".
                 'variants' => [
                     [
                         'keywords' => ['bloodoath'],
@@ -76,6 +74,12 @@ class GameModeCardRegistry
                         'emoji' => '🐔',
                         'sort' => 0,
                     ],
+                ],
+                // Fallback for modes in the family that don't match any
+                // variant keyword. Treats them as the base game.
+                'fallback_variant' => [
+                    'emoji' => '🐔',
+                    'sort' => 0,
                 ],
             ],
         ];
@@ -107,6 +111,15 @@ class GameModeCardRegistry
                     ];
                 }
             }
+        }
+
+        // Family-level fallback - any mode in the family that didn't match
+        // a specific variant keyword gets the "base" treatment.
+        if (isset($family['fallback_variant'])) {
+            return [
+                'emoji' => $family['fallback_variant']['emoji'] ?? '🎯',
+                'sort' => $family['fallback_variant']['sort'] ?? 99,
+            ];
         }
 
         return ['emoji' => '🎯', 'sort' => 99];
