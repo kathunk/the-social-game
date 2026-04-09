@@ -132,6 +132,11 @@
                             </a>
                         @endauth
                     </div>
+
+                    <p class="mt-4 text-xs opacity-70 animate-fade-in-up delay-300">
+                        made by
+                        <a href="https://catacombian.com" target="_blank" rel="noopener noreferrer" class="underline hover:opacity-100">Catacombian Games</a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -148,12 +153,12 @@
             <div>
                 <div class="text-3xl mb-2">🎯</div>
                 <h3 class="font-bold text-base mb-1">Built for groups</h3>
-                <p class="text-sm opacity-70 leading-relaxed">From a 4-player game night to a 400-person conference. Same site, no friction.</p>
+                <p class="text-sm opacity-70 leading-relaxed">From a 2-player game night date to a 400-person conference. Same site, no friction.</p>
             </div>
             <div>
                 <div class="text-3xl mb-2">⏱️</div>
                 <h3 class="font-bold text-base mb-1">Short or long</h3>
-                <p class="text-sm opacity-70 leading-relaxed">Quick 10-minute rounds, or week-long campaigns. Pick your vibe.</p>
+                <p class="text-sm opacity-70 leading-relaxed">Quick 5-minute games, or week-long campaigns.</p>
             </div>
         </div>
     </section>
