@@ -11,8 +11,11 @@ use Illuminate\Support\Collection;
  *
  * Each entry describes:
  *  - slug:        the family identifier
- *  - mode_names:  game mode names that belong to this family (case-insensitive
- *                 match against GameMode::name)
+ *  - keywords:    substrings that indicate a mode belongs to this family.
+ *                 Match is case-insensitive and ignores spaces/punctuation,
+ *                 so "Blood Oaths", "BloodOath", and "blood-oath" all match
+ *                 the keyword "bloodoath". Pick keywords specific enough that
+ *                 they won't accidentally match unrelated game modes.
  *  - component:   blade component name (under x-game-mode-cards.*) to render
  *  - sort:        display order (lower = first)
  *
@@ -28,17 +31,27 @@ class GameModeCardRegistry
         return [
             [
                 'slug' => 'hot-takes',
-                'mode_names' => ['Hot Takes', 'Tier List'],
+                'keywords' => ['hottake', 'tierlist'],
                 'component' => 'game-mode-cards.hot-takes',
                 'sort' => 10,
             ],
             [
                 'slug' => 'pecking-order',
-                'mode_names' => ['Pecking Order', 'Blood Oaths', 'King Maker', 'Pyramid Scheme'],
+                'keywords' => ['peckingorder', 'bloodoath', 'kingmaker', 'pyramidscheme'],
                 'component' => 'game-mode-cards.pecking-order',
                 'sort' => 20,
             ],
         ];
+    }
+
+    /**
+     * Normalize a string for comparison: lowercase, ASCII-only, alphanumerics.
+     * "Blood Oaths!" -> "bloodoaths"
+     * "King-Maker"   -> "kingmaker"
+     */
+    protected static function normalize(string $value): string
+    {
+        return preg_replace('/[^a-z0-9]/', '', mb_strtolower($value));
     }
 
     /**
@@ -63,9 +76,11 @@ class GameModeCardRegistry
 
         foreach (self::families() as $family) {
             $matched = $modes->filter(function (GameMode $mode) use ($family) {
-                return collect($family['mode_names'])
-                    ->map(fn ($n) => mb_strtolower($n))
-                    ->contains(mb_strtolower($mode->name));
+                $normalizedName = self::normalize($mode->name);
+
+                return collect($family['keywords'])
+                    ->map(fn ($k) => self::normalize($k))
+                    ->contains(fn ($keyword) => str_contains($normalizedName, $keyword));
             });
 
             if ($matched->isEmpty()) {
