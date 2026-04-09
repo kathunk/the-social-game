@@ -73,4 +73,9 @@ return [
         'bot_username' => env('TELEGRAM_BOT_USERNAME'),
         'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
     ],
+
+    'kit' => [
+        'api_key' => env('KIT_API_KEY'),
+        'form_id' => env('KIT_FORM_ID'),
+    ],
 ];

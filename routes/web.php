@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\LaraconRedirectController;
 use App\Http\Controllers\SecretAllianceRedirectController;
 use App\Http\Controllers\SecretCodeRedirectController;
@@ -13,7 +12,6 @@ use App\Livewire\GameModesListPage;
 use App\Livewire\Home;
 use App\Livewire\ManageGameModePage;
 use App\Livewire\ManageGameTemplatePage;
-use App\Livewire\MarketingPage;
 use App\Livewire\ModifierConfigurationPage;
 use App\Livewire\PlayerPage;
 use App\Livewire\PreGameLobby;
@@ -32,8 +30,6 @@ Route::get('/laracon', [LaraconRedirectController::class, 'handle'])
 Route::missing(new MissingGameHandler)->group(function () {
     Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');
 });
-
-Route::get('/marketing-page', MarketingPage::class)->name('marketing-page');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -60,10 +56,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('{game_mode}/game-templates/{game_template}', ManageGameTemplatePage::class)->name('game-templates.show');
     Route::get('/games/{game}/mods/{modifier}', SecretsPage::class)->name('games.mods');
 
-    Route::prefix('subscribe')->name('subscribe.')->group(function () {
-        Route::get('success', [CheckoutController::class, 'success'])->name('success');
-        Route::get('cancel', [CheckoutController::class, 'cancel'])->name('cancel');
-    });
     Route::get('/games/{game}/modifier-configurations', ModifierConfigurationPage::class)->name('games.modifier-configurations');
     Route::get('/secret-code', [SecretCodeRedirectController::class, 'handle'])
         ->name('secret-code.shortcut');
