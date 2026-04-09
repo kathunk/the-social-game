@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\PeckingOrder\IndividualStealTheBacon;
+use App\Challenges\PeckingOrder\IndividualStealTheBacon;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

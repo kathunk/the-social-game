@@ -1,10 +1,10 @@
 <?php
 
-use App\Challenges\Classes\PeckingOrder\IndividualBloodOathHunterQuiz;
-use App\Challenges\Classes\IndividualFiller;
+use App\Challenges\PeckingOrder\IndividualBloodOathHunterQuiz;
+use App\Challenges\IndividualFiller;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
-use App\Modifiers\Classes\PeckingOrder\BloodOaths;
+use App\Modifiers\PeckingOrder\BloodOaths;
 use Illuminate\Support\Facades\Date;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;

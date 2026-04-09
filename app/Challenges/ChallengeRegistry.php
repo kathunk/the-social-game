@@ -2,7 +2,6 @@
 
 namespace App\Challenges;
 
-use App\Challenges\Classes\BaseChallengeClass;
 use App\Models\Challenge;
 use App\States\ChallengeState;
 use Illuminate\Support\Facades\File;
@@ -17,10 +16,10 @@ class ChallengeRegistry
             return self::$map;
         }
 
-        $classes = collect(File::allFiles(app_path('Challenges/Classes')))
+        $classes = collect(File::allFiles(app_path('Challenges')))
             ->map(function ($file) {
                 $relative = $file->getRelativePathname();
-                $class = 'App\\Challenges\\Classes\\'.str_replace(['/', '.php'], ['\\', ''], $relative);
+                $class = 'App\\Challenges\\'.str_replace(['/', '.php'], ['\\', ''], $relative);
 
                 if (! class_exists($class)) {
                     return null;

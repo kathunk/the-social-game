@@ -6,9 +6,9 @@ use App\Events\Traits\HasActivePlayer;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasTeam;
-use App\Modifiers\Classes\Farm\FarmActions;
-use App\Modifiers\Classes\Farm\FarmMap;
-use App\Modifiers\Classes\Farm\FarmSkills;
+use App\Modifiers\Farm\FarmActions;
+use App\Modifiers\Farm\FarmMap;
+use App\Modifiers\Farm\FarmSkills;
 use App\States\GameState;
 use Thunk\Verbs\Event;
 

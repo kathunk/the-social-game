@@ -1,8 +1,8 @@
 <?php
 
-use App\Challenges\Classes\Laracon2025\TeamWarmUp;
+use App\Challenges\Laracon2025\TeamWarmUp;
 use App\Livewire\GameDashboard;
-use App\Modifiers\Classes\Laracon2025\TeamRecruiter;
+use App\Modifiers\Laracon2025\TeamRecruiter;
 use Livewire\Features\SupportTesting\Testable as LivewireTest;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;

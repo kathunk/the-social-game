@@ -1,7 +1,7 @@
 <?php
 
-use App\Challenges\Classes\PeckingOrder\IndividualLowScoreQuiz;
-use App\Challenges\Classes\PeckingOrder\PyramidScheme;
+use App\Challenges\PeckingOrder\IndividualLowScoreQuiz;
+use App\Challenges\PeckingOrder\PyramidScheme;
 use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);

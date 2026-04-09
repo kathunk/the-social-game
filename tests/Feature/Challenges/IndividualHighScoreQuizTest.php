@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\PeckingOrder\IndividualHighScoreQuiz;
+use App\Challenges\PeckingOrder\IndividualHighScoreQuiz;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

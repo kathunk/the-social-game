@@ -17,7 +17,7 @@ class PlayerPromotedToTeamLeaderInFarm extends Event
     public function validate()
     {
         $game = $this->state(GameState::class);
-        $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\Farm\FarmTeams::key());
+        $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Farm\FarmTeams::key());
         $player = $this->state(\App\States\PlayerState::class);
 
         // Check if this is the initial team leader assignment (team has no leader yet)

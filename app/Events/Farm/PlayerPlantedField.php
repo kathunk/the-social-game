@@ -6,8 +6,8 @@ use App\Events\Traits\HasActivePlayer;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasTeam;
-use App\Modifiers\Classes\Farm\FarmActions;
-use App\Modifiers\Classes\Farm\FarmMap;
+use App\Modifiers\Farm\FarmActions;
+use App\Modifiers\Farm\FarmMap;
 use App\States\GameState;
 use App\States\PlayerState;
 use Thunk\Verbs\Event;
@@ -48,7 +48,7 @@ class PlayerPlantedField extends Event
         );
 
         // $this->level matches player's farmer level
-        $skills_state = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\Farm\FarmSkills::key());
+        $skills_state = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Farm\FarmSkills::key());
         $player_farmer_level = $skills_state->modifier_data[$this->player_id]['skills']['Farmer'];
 
         $this->assert(

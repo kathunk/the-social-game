@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use App\Events\Laracon2025\SecretCodesAddedToModifier;
 use App\Models\Game;
-use App\Modifiers\Classes\Laracon2025\TeamSecretCodes;
+use App\Modifiers\Laracon2025\TeamSecretCodes;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Component;

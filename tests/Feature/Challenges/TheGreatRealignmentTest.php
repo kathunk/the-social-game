@@ -1,7 +1,7 @@
 <?php
 
-use App\Challenges\Classes\TeamFiller;
-use App\Challenges\Classes\Laracon2025\TheGreatRealignment;
+use App\Challenges\TeamFiller;
+use App\Challenges\Laracon2025\TheGreatRealignment;
 use App\Livewire\GameDashboard;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;

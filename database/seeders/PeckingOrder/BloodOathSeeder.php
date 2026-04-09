@@ -4,18 +4,18 @@ namespace Database\Seeders\PeckingOrder;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Challenges\Classes\PeckingOrder\IndividualBloodOathHunterQuiz;
-use App\Challenges\Classes\PeckingOrder\IndividualDoubleTrouble;
-use App\Challenges\Classes\PeckingOrder\IndividualHighScoreQuiz;
-use App\Challenges\Classes\PeckingOrder\IndividualOathQuiz;
-use App\Challenges\Classes\PeckingOrder\IndividualOathSpy;
+use App\Challenges\PeckingOrder\IndividualBloodOathHunterQuiz;
+use App\Challenges\PeckingOrder\IndividualDoubleTrouble;
+use App\Challenges\PeckingOrder\IndividualHighScoreQuiz;
+use App\Challenges\PeckingOrder\IndividualOathQuiz;
+use App\Challenges\PeckingOrder\IndividualOathSpy;
 use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\User;
-use App\Modifiers\Classes\PeckingOrder\BloodOaths;
+use App\Modifiers\PeckingOrder\BloodOaths;
 use Illuminate\Database\Seeder;
 use Thunk\Verbs\Facades\Verbs;
 

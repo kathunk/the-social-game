@@ -1,11 +1,11 @@
 <?php
 
-use App\Challenges\Classes\TierList\TierListConstructionPhase;
-use App\Challenges\Classes\TierList\TierListGuess;
+use App\Challenges\TierList\TierListConstructionPhase;
+use App\Challenges\TierList\TierListGuess;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use App\Models\Game;
-use App\Modifiers\Classes\TierList\TierListModifier;
+use App\Modifiers\TierList\TierListModifier;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 

@@ -7,7 +7,7 @@ use App\Events\Traits\HasModifier;
 use App\Events\Traits\HasPlayer;
 use App\Events\Traits\HasTeam;
 use App\Models\Team;
-use App\Modifiers\Classes\Farm\FarmMap;
+use App\Modifiers\Farm\FarmMap;
 use App\States\GameState;
 use App\States\ModifierState;
 use App\States\PlayerState;

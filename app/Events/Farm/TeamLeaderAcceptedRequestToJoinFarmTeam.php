@@ -19,7 +19,7 @@ class TeamLeaderAcceptedRequestToJoinFarmTeam extends Event
     public function validate()
     {
         $game = $this->state(GameState::class);
-        $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\Farm\FarmTeams::key());
+        $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Farm\FarmTeams::key());
 
         // Player was leader of team
         $team_leader_id = $teams_modifier->modifier_data['leaders'][$this->team_id] ?? null;

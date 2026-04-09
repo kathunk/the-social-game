@@ -5,7 +5,7 @@ namespace App\Challenges\Support\PeckingOrder;
 use App\Challenges\Support\PeckingOrder\SupportsPeckingOrderBallots;
 use App\Events\PeckingOrder\PlayerSubmittedPeckingOrderBallot;
 use App\Models\Player;
-use App\Modifiers\Classes\PeckingOrder\BloodOaths;
+use App\Modifiers\PeckingOrder\BloodOaths;
 use App\States\GameState;
 use App\States\PlayerState;
 use Thunk\Verbs\Facades\Verbs;

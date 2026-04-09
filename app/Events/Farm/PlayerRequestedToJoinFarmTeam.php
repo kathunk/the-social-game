@@ -17,7 +17,7 @@ class PlayerRequestedToJoinFarmTeam extends Event
     public function validate()
     {
         $game = $this->state(GameState::class);
-        $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\Farm\FarmTeams::key());
+        $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Farm\FarmTeams::key());
 
         // Player was not already on team
         $player = $this->state(\App\States\PlayerState::class);
@@ -27,7 +27,7 @@ class PlayerRequestedToJoinFarmTeam extends Event
         );
 
         // Player is on space with team leader
-        $map_state = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\Farm\FarmMap::key());
+        $map_state = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Farm\FarmMap::key());
         $player_space = collect($map_state->modifier_data)
             ->firstWhere(fn ($space) => in_array($this->player_id, $space['player_ids']));
 

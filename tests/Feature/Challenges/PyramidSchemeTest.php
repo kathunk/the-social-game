@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\PeckingOrder\PyramidScheme;
+use App\Challenges\PeckingOrder\PyramidScheme;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Features\SupportTesting\Testable as LivewireTest;

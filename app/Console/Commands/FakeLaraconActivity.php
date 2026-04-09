@@ -7,7 +7,7 @@ use App\Jobs\ResignFakePlayerFromLaraconGame;
 use App\Jobs\TakeChallengeActionInFakeLaraconGame;
 use App\Models\Game;
 use App\Models\Modifier;
-use App\Modifiers\Classes\Laracon2025\TeamSecretAlliance;
+use App\Modifiers\Laracon2025\TeamSecretAlliance;
 use Illuminate\Console\Command;
 use Thunk\Verbs\Facades\Verbs;
 

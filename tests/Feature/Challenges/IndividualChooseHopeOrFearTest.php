@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\PeckingOrder\IndividualChooseHopeOrFear;
+use App\Challenges\PeckingOrder\IndividualChooseHopeOrFear;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

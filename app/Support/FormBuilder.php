@@ -2,10 +2,10 @@
 
 namespace App\Support;
 
-use App\Challenges\Classes\BaseChallengeClass;
+use App\Challenges\BaseChallengeClass;
 use App\Challenges\Support\PeckingOrder\SupportsPeckingOrderBallots;
 use App\Challenges\Support\Laracon2025\SupportsTeamSwaps;
-use App\Modifiers\Classes\BaseModifierClass;
+use App\Modifiers\BaseModifierClass;
 use App\Support\FormBuilderTraits\Farm\FarmFormElements;
 use App\Support\FormBuilderTraits\TierList\TierListFormElements;
 use Illuminate\Support\Collection;

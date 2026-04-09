@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\Laracon2025\StayOnMessage;
+use App\Challenges\Laracon2025\StayOnMessage;
 use App\Livewire\GameDashboard;
 use Livewire\Features\SupportTesting\Testable as LivewireTest;
 use Livewire\Livewire;

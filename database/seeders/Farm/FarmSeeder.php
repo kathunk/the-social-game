@@ -4,17 +4,17 @@ namespace Database\Seeders\Farm;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Challenges\Classes\Farm\FarmRound;
+use App\Challenges\Farm\FarmRound;
 use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\User;
-use App\Modifiers\Classes\Farm\FarmActions;
-use App\Modifiers\Classes\Farm\FarmMap;
-use App\Modifiers\Classes\Farm\FarmSkills;
-use App\Modifiers\Classes\Farm\FarmTeams;
+use App\Modifiers\Farm\FarmActions;
+use App\Modifiers\Farm\FarmMap;
+use App\Modifiers\Farm\FarmSkills;
+use App\Modifiers\Farm\FarmTeams;
 use Illuminate\Database\Seeder;
 use Thunk\Verbs\Facades\Verbs;
 

@@ -4,15 +4,15 @@ namespace Database\Seeders\TierList;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Challenges\Classes\TierList\TierListConstructionPhase;
-use App\Challenges\Classes\TierList\TierListGuess;
+use App\Challenges\TierList\TierListConstructionPhase;
+use App\Challenges\TierList\TierListGuess;
 use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
 use App\Models\Game;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\User;
-use App\Modifiers\Classes\TierList\TierListModifier;
+use App\Modifiers\TierList\TierListModifier;
 use Illuminate\Database\Seeder;
 use Thunk\Verbs\Facades\Verbs;
 

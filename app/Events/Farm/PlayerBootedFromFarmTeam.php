@@ -23,7 +23,7 @@ class PlayerBootedFromFarmTeam extends Event
     public function validate()
     {
         $game = $this->state(GameState::class);
-        $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Classes\Farm\FarmTeams::key());
+        $teams_modifier = $game->modifiers()->firstWhere('class_key', \App\Modifiers\Farm\FarmTeams::key());
 
         // Player was on team
         $player = $this->state(PlayerState::class);

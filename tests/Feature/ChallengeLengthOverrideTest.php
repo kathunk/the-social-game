@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualFiller;
+use App\Challenges\IndividualFiller;
 use App\Livewire\PreGameLobby;
 use Illuminate\Support\Facades\Date;
 use Livewire\Livewire;

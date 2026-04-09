@@ -6,7 +6,7 @@ use App\Events\Traits\HasChallenge;
 use App\Events\Traits\HasGame;
 use App\Events\Traits\HasPlayer;
 use App\Models\Challenge;
-use App\Modifiers\Classes\PeckingOrder\BloodOaths;
+use App\Modifiers\PeckingOrder\BloodOaths;
 use App\States\ChallengeState;
 use App\States\GameState;
 use Thunk\Verbs\Event;
