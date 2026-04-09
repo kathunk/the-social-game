@@ -54,7 +54,9 @@
                                 </span>
                             @endif
                         </div>
-                        <div class="text-[11px] opacity-70 leading-snug mt-0.5">{{ $meta['tagline'] }}</div>
+                        @if (! empty($mode->description))
+                            <div class="text-[11px] opacity-70 leading-snug mt-0.5">{{ $mode->description }}</div>
+                        @endif
                     </div>
                     <div class="text-pale/60 group-hover:text-pale transition-colors shrink-0 mt-0.5">→</div>
                 </div>
