@@ -1,5 +1,19 @@
 @props(['element'])
 
+@once
+    <script>
+        document.addEventListener('alpine:init', () => {
+            if (window.Alpine && !Alpine.store('mr')) {
+                Alpine.store('mr', {
+                    revealReward: null,
+                    show(reward) { this.revealReward = reward; },
+                    dismiss() { this.revealReward = null; },
+                });
+            }
+        });
+    </script>
+@endonce
+
 @php
     $currentLocation = $element['current_location'];
     $currentRoomMess = $element['current_room_mess'];
@@ -70,8 +84,7 @@
         },
 
         takeReward(rewardKey) {
-            const reward = this.rewards[rewardKey];
-            window.dispatchEvent(new CustomEvent('mr-reveal-reward', { detail: reward }));
+            Alpine.store('mr').show(this.rewards[rewardKey]);
             this.$wire.set('round_properties.{{ $classKey }}.reward_key', rewardKey);
             this.$nextTick(() => {
                 this.$wire.callClassAction('takeReward', 'challenge', '{{ $classKey }}', {{ Js::from($this->challenge_component) }});
@@ -152,55 +165,51 @@
         @endforeach
     </div>
 
-    {{-- REWARD REVEAL ANIMATION (separate Alpine sub-component with stable x-data
-         so it survives Livewire morphs / re-renders) --}}
+    {{-- REWARD REVEAL ANIMATION - reads from Alpine $store which is global
+         and survives all Livewire re-renders --}}
     <div
-        x-data="{ reward: null }"
-        @mr-reveal-reward.window="reward = $event.detail"
-        @keydown.escape.window="reward = null"
+        x-data
+        x-show="$store.mr.revealReward !== null"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-cloak
+        @click="$store.mr.dismiss()"
+        @keydown.escape.window="$store.mr.dismiss()"
+        class="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-4 cursor-pointer"
     >
         <div
-            x-show="reward !== null"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-cloak
-            @click="reward = null"
-            class="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-4 cursor-pointer"
+            x-show="$store.mr.revealReward !== null"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="scale-50 rotate-12 opacity-0"
+            x-transition:enter-end="scale-100 rotate-0 opacity-100"
+            class="bg-white rounded-2xl p-6 max-w-sm shadow-2xl border-4 border-yellow-400"
+            @click.stop
         >
-            <div
-                x-show="reward !== null"
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="scale-50 rotate-12 opacity-0"
-                x-transition:enter-end="scale-100 rotate-0 opacity-100"
-                class="bg-white rounded-2xl p-6 max-w-sm shadow-2xl border-4 border-yellow-400"
-                @click.stop
-            >
-                <div class="text-center space-y-3">
-                    <div class="text-3xl">⭐</div>
-                    <h3 class="text-xl font-bold" x-text="reward?.name"></h3>
-                    <p class="italic text-gray-600 text-sm" x-text="'&ldquo;' + (reward?.flavor ?? '') + '&rdquo;'"></p>
+            <div class="text-center space-y-3">
+                <div class="text-3xl">⭐</div>
+                <h3 class="text-xl font-bold" x-text="$store.mr.revealReward?.name"></h3>
+                <p class="italic text-gray-600 text-sm" x-text="'&ldquo;' + ($store.mr.revealReward?.flavor ?? '') + '&rdquo;'"></p>
 
-                    <div class="flex justify-center gap-3 pt-2">
-                        <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                            +<span x-text="reward?.points"></span> pts
-                        </span>
-                        <span class="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700">
-                            +<span x-text="reward?.mess"></span> mess
-                        </span>
-                    </div>
-
-                    <template x-if="reward?.effect_description">
-                        <p class="text-xs text-purple-700 bg-purple-50 rounded-lg p-2 mt-2" x-text="reward.effect_description"></p>
-                    </template>
-
-                    <button
-                        @click="reward = null"
-                        class="mt-3 w-full rounded-lg bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-medium"
-                    >
-                        Continue
-                    </button>
+                <div class="flex justify-center gap-3 pt-2">
+                    <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                        +<span x-text="$store.mr.revealReward?.points"></span> pts
+                    </span>
+                    <span class="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700">
+                        +<span x-text="$store.mr.revealReward?.mess"></span> mess
+                    </span>
                 </div>
+
+                <template x-if="$store.mr.revealReward?.effect_description">
+                    <p class="text-xs text-purple-700 bg-purple-50 rounded-lg p-2 mt-2" x-text="$store.mr.revealReward.effect_description"></p>
+                </template>
+
+                <button
+                    @click="$store.mr.dismiss()"
+                    class="mt-3 w-full rounded-lg bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-medium"
+                >
+                    Continue
+                </button>
             </div>
         </div>
     </div>
