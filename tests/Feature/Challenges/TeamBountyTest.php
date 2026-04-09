@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\TeamBounty;
+use App\Challenges\Classes\Laracon2025\TeamBounty;
 use App\Challenges\Classes\TeamFiller;
 use App\Models\Player;
 use App\Models\Team;

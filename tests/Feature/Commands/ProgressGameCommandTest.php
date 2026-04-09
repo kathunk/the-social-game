@@ -1,7 +1,7 @@
 <?php
 
-use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Classes\PeckingOrder\PyramidScheme;
+use App\Challenges\Classes\Laracon2025\StayOnMessage;
 use Illuminate\Support\Facades\Date;
 use Thunk\Verbs\Facades\Verbs;
 

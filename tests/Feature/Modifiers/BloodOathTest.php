@@ -1,8 +1,8 @@
 <?php
 
-use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Challenges\Classes\PeckingOrder\IndividualHighScoreQuiz;
 use App\Livewire\GameDashboard;
-use App\Modifiers\Classes\BloodOaths;
+use App\Modifiers\Classes\PeckingOrder\BloodOaths;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 

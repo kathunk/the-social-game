@@ -2,7 +2,7 @@
 
 use App\Challenges\Classes\IndividualFiller;
 use App\Livewire\GameDashboard;
-use App\Modifiers\Classes\IndividualResignation;
+use App\Modifiers\Classes\PeckingOrder\IndividualResignation;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 

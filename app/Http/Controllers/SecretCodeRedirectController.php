@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Modifiers\Classes\TeamSecretCodes;
+use App\Modifiers\Classes\Laracon2025\TeamSecretCodes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

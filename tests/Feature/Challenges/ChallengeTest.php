@@ -1,9 +1,9 @@
 <?php
 
 use App\Challenges\Classes\BaseChallengeClass;
-use App\Challenges\Classes\FlattenTheCurve;
-use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Classes\Laracon2025\FlattenTheCurve;
+use App\Challenges\Classes\PeckingOrder\PyramidScheme;
+use App\Challenges\Classes\Laracon2025\StayOnMessage;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
 

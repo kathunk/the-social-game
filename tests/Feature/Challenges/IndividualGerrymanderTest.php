@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualGerrymander;
+use App\Challenges\Classes\PeckingOrder\IndividualGerrymander;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

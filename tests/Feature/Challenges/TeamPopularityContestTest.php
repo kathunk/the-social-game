@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\TeamPopularityContest;
+use App\Challenges\Classes\Laracon2025\TeamPopularityContest;
 use App\Livewire\GameDashboard;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;

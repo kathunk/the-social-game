@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualSpy;
+use App\Challenges\Classes\PeckingOrder\IndividualSpy;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

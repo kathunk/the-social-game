@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\TeamBrinksmanship;
+use App\Challenges\Classes\Laracon2025\TeamBrinksmanship;
 use App\Livewire\GameDashboard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Features\SupportTesting\Testable as LivewireTest;

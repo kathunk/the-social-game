@@ -1,8 +1,8 @@
 <?php
 
-use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Classes\Laracon2025\StayOnMessage;
 use App\Livewire\GameDashboard;
-use App\Modifiers\Classes\TeamResignation;
+use App\Modifiers\Classes\Laracon2025\TeamResignation;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 

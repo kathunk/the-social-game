@@ -1,0 +1,151 @@
+<?php
+
+namespace App\Events\Farm;
+
+use App\Events\Traits\HasActivePlayer;
+use App\Events\Traits\HasGame;
+use App\Events\Traits\HasModifier;
+use App\Events\Traits\HasTeam;
+use App\Modifiers\Classes\Farm\FarmActions;
+use App\Modifiers\Classes\Farm\FarmMap;
+use App\Modifiers\Classes\Farm\FarmSkills;
+use App\States\GameState;
+use App\States\PlayerState;
+use App\States\TeamState;
+use Thunk\Verbs\Event;
+
+class PlayerPickpocketedOpponent extends Event
+{
+    use HasActivePlayer, HasGame, HasModifier, HasTeam;
+
+    public int $x_index;
+
+    public int $y_index;
+
+    public int $amount;
+
+    public int $target_player_id;
+
+    public function validate()
+    {
+        $game = $this->state(GameState::class);
+        $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
+        $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
+        $skills_state = $game->modifiers()->firstWhere('class_key', FarmSkills::key());
+        $player_data = $actions_state->modifier_data[$this->player_id];
+        $player_skills = $skills_state->modifier_data[$this->player_id]['skills'];
+        $target_player = PlayerState::load($this->target_player_id);
+
+        // Player is in correct space
+        $player_space = collect($map_state->modifier_data)
+            ->firstWhere(fn ($space) => in_array($this->player_id, $space['player_ids']));
+
+        $this->assert(
+            $player_space !== null,
+            'Player is not currently on any space',
+        );
+
+        $this->assert(
+            $player_space['x-index'] === $this->x_index && $player_space['y-index'] === $this->y_index,
+            'Player is not on the specified space',
+        );
+
+        // Player has enough capacity
+        $player_grain = $player_data['grain'];
+        $player_capacity = $player_data['grain_capacity'];
+        $this->assert(
+            $player_grain + $this->amount <= $player_capacity,
+            'Player does not have enough capacity (has '.$player_grain.'/'.$player_capacity.', trying to withdraw '.$this->amount.')',
+        );
+
+        // Opponent is on space
+        $this->assert(
+            in_array($this->target_player_id, $player_space['player_ids']),
+            'Opponent is not on the same space',
+        );
+
+        // Opponent is on a different team
+        $this->assert(
+            $target_player->team_id !== $this->team_id,
+            'Opponent is on the same team',
+        );
+
+        // opponent has that much grain
+        $target_grain = $actions_state->modifier_data[$this->target_player_id]['grain'];
+        $this->assert(
+            $target_grain >= $this->amount,
+            'Opponent does not have enough grain to pickpocket',
+        );
+    }
+
+    public function apply(GameState $game)
+    {
+        $map_state = $game->modifiers()->firstWhere('class_key', FarmMap::key());
+
+        $thief_state = $this->state(PlayerState::class);
+        $target_state = PlayerState::load($this->target_player_id);
+
+        $map_state->modifier_data = collect($map_state->modifier_data)->map(function ($space) use ($game, $thief_state, $target_state) {
+            if ($space['x-index'] === $this->x_index && $space['y-index'] === $this->y_index) {
+                $space['history'][] = [
+                    'round_number' => $game->currentChallenge()->round_number,
+                    'emoji' => '🦹',
+                    'message' => $thief_state->name.' pickpocketed '.$target_state->name.' and stole '.$this->amount.' grain',
+                ];
+            }
+
+            return $space;
+        })->toArray();
+
+        $actions_state = $game->modifiers()->firstWhere('class_key', FarmActions::key());
+        $actions_state->modifier_data = collect($actions_state->modifier_data)
+            ->map(function ($data, $player_id) {
+                $is_thief = $player_id === $this->player_id;
+                $is_target = $player_id === $this->target_player_id;
+
+                if (! $is_thief && ! $is_target) {
+                    return $data;
+                }
+
+                if ($is_thief) {
+                    $data['grain'] += $this->amount;
+                }
+
+                if ($is_target) {
+                    $data['grain'] -= $this->amount;
+                }
+
+                return $data;
+            })->toArray();
+
+        // $thief_team = $this->state(TeamState::class);
+        // $target_team = $target_state->team();
+
+        // $thief_team_description = 'One of you scoundrels pickpocketed '.$target_state->name;
+        // $target_team_description = 'Some scoundrel pickpocketed '.$target_state->name;
+
+        // if ($this->amount === 0) {
+        //     $thief_team_description .= ' but they had empty pockets.';
+        //     $target_team_description .= ' but they had empty pockets.';
+        // }
+
+        // $thief_team->addToScoreHistory(
+        //     icon: '🦹',
+        //     points: $this->amount,
+        //     description: $thief_team_description,
+        // );
+
+        // $target_team->addToScoreHistory(
+        //     icon: '🦹',
+        //     points: -$this->amount,
+        //     description: $target_team_description,
+        // );
+    }
+
+    public function handle()
+    {
+        $this->game()->modifiers->each(fn ($modifier) => $modifier->updateModelWithStateData());
+
+        $this->game()->teams->each(fn ($team) => $team->updateModelWithStateData());
+    }
+}

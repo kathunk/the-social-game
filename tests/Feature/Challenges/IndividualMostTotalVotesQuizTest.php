@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualMostTotalVotesQuiz;
+use App\Challenges\Classes\PeckingOrder\IndividualMostTotalVotesQuiz;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

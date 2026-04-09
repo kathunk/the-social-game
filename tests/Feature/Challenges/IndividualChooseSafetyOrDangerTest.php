@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualChooseSafetyOrDanger;
+use App\Challenges\Classes\PeckingOrder\IndividualChooseSafetyOrDanger;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

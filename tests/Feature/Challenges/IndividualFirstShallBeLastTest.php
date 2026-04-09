@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualFirstShallBeLast;
+use App\Challenges\Classes\PeckingOrder\IndividualFirstShallBeLast;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

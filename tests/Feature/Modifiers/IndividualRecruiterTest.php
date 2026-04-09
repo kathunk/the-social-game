@@ -2,7 +2,7 @@
 
 use App\Challenges\Classes\IndividualFiller;
 use App\Livewire\GameDashboard;
-use App\Modifiers\Classes\IndividualRecruiter;
+use App\Modifiers\Classes\PeckingOrder\IndividualRecruiter;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 

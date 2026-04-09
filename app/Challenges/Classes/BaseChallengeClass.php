@@ -2,7 +2,7 @@
 
 namespace App\Challenges\Classes;
 
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
+use App\Challenges\Support\Laracon2025\SupportsTeamSwaps;
 use App\Models\Challenge;
 use App\Models\Player;
 use App\States\ChallengeState;

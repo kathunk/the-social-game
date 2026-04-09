@@ -3,11 +3,11 @@
 namespace App\Support;
 
 use App\Challenges\Classes\BaseChallengeClass;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
+use App\Challenges\Support\PeckingOrder\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Laracon2025\SupportsTeamSwaps;
 use App\Modifiers\Classes\BaseModifierClass;
-use App\Support\FormBuilderTraits\FarmFormElements;
-use App\Support\FormBuilderTraits\TierListFormElements;
+use App\Support\FormBuilderTraits\Farm\FarmFormElements;
+use App\Support\FormBuilderTraits\TierList\TierListFormElements;
 use Illuminate\Support\Collection;
 
 class FormBuilder

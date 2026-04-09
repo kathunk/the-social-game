@@ -3,7 +3,7 @@
 use App\Challenges\Classes\TeamFiller;
 use App\Livewire\ModifierConfigurationPage;
 use App\Livewire\SecretsPage;
-use App\Modifiers\Classes\TeamSecretCodes;
+use App\Modifiers\Classes\Laracon2025\TeamSecretCodes;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 

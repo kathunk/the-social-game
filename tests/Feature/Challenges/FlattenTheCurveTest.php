@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\FlattenTheCurve;
+use App\Challenges\Classes\Laracon2025\FlattenTheCurve;
 use App\Livewire\GameDashboard;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;

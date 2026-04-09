@@ -109,15 +109,6 @@
                     </flux:select>
                 </flux:field>
                     @break
-                @case('tier_list_guess')
-                    <x-game-components.custom-form-elements.guess-tiers :element="$element" />
-                    @break
-                @case('farm_map')
-                    <x-game-components.custom-form-elements.farm-map :element="$element" />
-                    @break
-                @case('farm_actions')
-                    <x-game-components.custom-form-elements.farm-actions :element="$element" />
-                    @break
                 @case('radio_group')
                     <flux:radio.group label="{{ $element['label'] }}" variant="cards" class="flex-col" wire:model="round_properties.{{ $class_key }}.{{ $element['property_name'] }}">
                         @foreach ($element['options'] as $option)
@@ -129,6 +120,14 @@
                             />
                         @endforeach
                     </flux:radio.group>
+                    @break
+                @default
+                    @php
+                        $customComponent = 'game-components.custom-form-elements.' . str_replace('_', '-', $element['type']);
+                    @endphp
+                    @if (View::exists('components.' . $customComponent))
+                        <x-dynamic-component :component="$customComponent" :element="$element" />
+                    @endif
                     @break
             @endswitch
         @endforeach

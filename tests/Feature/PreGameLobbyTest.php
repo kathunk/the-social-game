@@ -1,9 +1,9 @@
 <?php
 
-use App\Challenges\Classes\FlattenTheCurve;
-use App\Challenges\Classes\IndividualHighScoreQuiz;
-use App\Challenges\Classes\IndividualLowScoreQuiz;
-use App\Challenges\Classes\TeamHotPotato;
+use App\Challenges\Classes\Laracon2025\FlattenTheCurve;
+use App\Challenges\Classes\PeckingOrder\IndividualHighScoreQuiz;
+use App\Challenges\Classes\PeckingOrder\IndividualLowScoreQuiz;
+use App\Challenges\Classes\Laracon2025\TeamHotPotato;
 use App\Events\UserGainedMembership;
 use App\Livewire\CreateGame;
 use App\Livewire\PreGameLobby;
@@ -11,8 +11,8 @@ use App\Models\Game;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\User;
-use App\Modifiers\Classes\BloodOaths;
-use App\Modifiers\Classes\TeamSecretCodes;
+use App\Modifiers\Classes\PeckingOrder\BloodOaths;
+use App\Modifiers\Classes\Laracon2025\TeamSecretCodes;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 
