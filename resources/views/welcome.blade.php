@@ -96,18 +96,18 @@
             @endfor
         </div>
 
-        <div class="relative z-10 max-w-6xl mx-auto px-6">
+        <div class="relative z-10 max-w-5xl mx-auto px-6">
             <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-                {{-- Left: just the logo rectangle --}}
-                <div class="flex justify-center md:justify-end animate-fade-in-up">
-                    <div class="w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px]">
+                {{-- Left: logo rectangle, left-aligned to match TIER LIST h2 below --}}
+                <div class="flex justify-center md:justify-start animate-fade-in-up">
+                    <div class="w-full max-w-[260px] sm:max-w-xs md:max-w-md">
                         <x-icons.big-logo class="w-full h-auto" />
                     </div>
                 </div>
 
-                {{-- Right: headline + CTAs --}}
+                {{-- Right: headline + CTAs, same column width as the logo --}}
                 <div class="text-center md:text-left">
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 animate-fade-in-up delay-100">
+                    <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6 animate-fade-in-up delay-100">
                         Smart social games<br />for groups of any size.
                     </h1>
 
