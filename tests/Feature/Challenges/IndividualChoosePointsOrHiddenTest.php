@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualChoosePointsOrHidden;
+use App\Challenges\PeckingOrder\IndividualChoosePointsOrHidden;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualFewestHiddenPointQuiz;
+use App\Challenges\PeckingOrder\IndividualFewestHiddenPointQuiz;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

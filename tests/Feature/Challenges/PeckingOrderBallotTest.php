@@ -1,7 +1,7 @@
 <?php
 
-use App\Challenges\Classes\IndividualHighScoreQuiz;
-use App\Events\PlayerSubmittedPeckingOrderBallot;
+use App\Challenges\PeckingOrder\IndividualHighScoreQuiz;
+use App\Events\PeckingOrder\PlayerSubmittedPeckingOrderBallot;
 use App\Models\Challenge;
 use Thunk\Verbs\Facades\Verbs;
 

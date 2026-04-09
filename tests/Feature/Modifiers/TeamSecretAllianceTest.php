@@ -1,8 +1,8 @@
 <?php
 
-use App\Challenges\Classes\PyramidScheme;
+use App\Challenges\PeckingOrder\PyramidScheme;
 use App\Livewire\SecretsPage;
-use App\Modifiers\Classes\TeamSecretAlliance;
+use App\Modifiers\Laracon2025\TeamSecretAlliance;
 use Illuminate\Support\Facades\Date;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;

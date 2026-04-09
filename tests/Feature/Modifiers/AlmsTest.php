@@ -1,9 +1,9 @@
 <?php
 
-use App\Challenges\Classes\IndividualChoosePointsOrHidden;
-use App\Challenges\Classes\IndividualFiller;
+use App\Challenges\PeckingOrder\IndividualChoosePointsOrHidden;
+use App\Challenges\IndividualFiller;
 use App\Livewire\GameDashboard;
-use App\Modifiers\Classes\Alms;
+use App\Modifiers\PeckingOrder\Alms;
 use Illuminate\Support\Facades\Date;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;

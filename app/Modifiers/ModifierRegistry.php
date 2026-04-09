@@ -3,7 +3,6 @@
 namespace App\Modifiers;
 
 use App\Models\Modifier;
-use App\Modifiers\Classes\BaseModifierClass;
 use App\States\ModifierState;
 use Illuminate\Support\Facades\File;
 
@@ -17,10 +16,10 @@ class ModifierRegistry
             return self::$map;
         }
 
-        $classes = collect(File::allFiles(app_path('Modifiers/Classes')))
+        $classes = collect(File::allFiles(app_path('Modifiers')))
             ->map(function ($file) {
                 $relative = $file->getRelativePathname();
-                $class = 'App\\Modifiers\\Classes\\'.str_replace(['/', '.php'], ['\\', ''], $relative);
+                $class = 'App\\Modifiers\\'.str_replace(['/', '.php'], ['\\', ''], $relative);
 
                 if (! class_exists($class)) {
                     return null;

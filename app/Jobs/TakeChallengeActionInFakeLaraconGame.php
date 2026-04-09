@@ -2,14 +2,14 @@
 
 namespace App\Jobs;
 
-use App\Challenges\Classes\FlattenTheCurve;
-use App\Challenges\Classes\StayOnMessage;
-use App\Challenges\Classes\TeamBounty;
-use App\Challenges\Classes\TeamBrinksmanship;
-use App\Challenges\Classes\TeamHotPotato;
-use App\Challenges\Classes\TeamPrisonersDilemma;
-use App\Challenges\Classes\TeamWarmUp;
-use App\Challenges\Classes\TheGreatRealignment;
+use App\Challenges\Laracon2025\FlattenTheCurve;
+use App\Challenges\Laracon2025\StayOnMessage;
+use App\Challenges\Laracon2025\TeamBounty;
+use App\Challenges\Laracon2025\TeamBrinksmanship;
+use App\Challenges\Laracon2025\TeamHotPotato;
+use App\Challenges\Laracon2025\TeamPrisonersDilemma;
+use App\Challenges\Laracon2025\TeamWarmUp;
+use App\Challenges\Laracon2025\TheGreatRealignment;
 use App\Models\Challenge;
 use App\Models\Game;
 use App\Models\Player;

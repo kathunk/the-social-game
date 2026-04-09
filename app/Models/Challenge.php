@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Challenges\ChallengeRegistry;
-use App\Challenges\Classes\BaseChallengeClass;
+use App\Challenges\BaseChallengeClass;
 use App\Events\ChallengeEnded;
 use App\Events\ChallengeStarted;
 use App\States\ChallengeState;
