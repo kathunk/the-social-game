@@ -7,12 +7,13 @@ use App\Challenges\Support\PeckingOrder\SupportsPeckingOrderBallots;
 use App\Challenges\Support\Laracon2025\SupportsTeamSwaps;
 use App\Modifiers\BaseModifierClass;
 use App\Support\FormBuilderTraits\Farm\FarmFormElements;
+use App\Support\FormBuilderTraits\MorningRoutine\MorningRoutineFormElements;
 use App\Support\FormBuilderTraits\TierList\TierListFormElements;
 use Illuminate\Support\Collection;
 
 class FormBuilder
 {
-    use FarmFormElements, TierListFormElements;
+    use FarmFormElements, MorningRoutineFormElements, TierListFormElements;
 
     protected array $elements = [];
 
