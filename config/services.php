@@ -74,8 +74,7 @@ return [
         'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
     ],
 
-    'kit' => [
-        'api_key' => env('KIT_API_KEY'),
-        'form_id' => env('KIT_FORM_ID'),
+    'catacombian' => [
+        'newsletter_token' => env('CATACOMBIAN_NEWSLETTER_TOKEN'),
     ],
 ];

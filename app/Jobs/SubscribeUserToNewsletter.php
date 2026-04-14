@@ -2,14 +2,14 @@
 
 namespace App\Jobs;
 
-use App\Services\KitService;
+use App\Services\CatacombianNewsletterService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class UnsubscribeUserFromKit implements ShouldQueue
+class SubscribeUserToNewsletter implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -19,10 +19,11 @@ class UnsubscribeUserFromKit implements ShouldQueue
 
     public function __construct(
         public string $email,
+        public ?string $name = null,
     ) {}
 
-    public function handle(KitService $kit): void
+    public function handle(CatacombianNewsletterService $newsletter): void
     {
-        $kit->unsubscribe($this->email);
+        $newsletter->subscribe($this->email, $this->name);
     }
 }

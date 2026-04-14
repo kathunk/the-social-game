@@ -3,7 +3,7 @@
 namespace App\Events;
 
 use App\Events\Traits\HasUser;
-use App\Jobs\SubscribeUserToKit;
+use App\Jobs\SubscribeUserToNewsletter as SubscribeUserToNewsletterJob;
 use Thunk\Verbs\Event;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -20,7 +20,7 @@ class UserSubscribedToNewsletter extends Event
         ]);
 
         Verbs::unlessReplaying(function () use ($user) {
-            SubscribeUserToKit::dispatch($user->email, $user->name);
+            SubscribeUserToNewsletterJob::dispatch($user->email, $user->name);
         });
     }
 }
