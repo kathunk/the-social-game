@@ -335,7 +335,7 @@
                 We collect only the information needed to create your account and run the game.
                 We do not sell your data. We do not use cookies. Enjoy the game!
             </p>
-            <p class="text-[10px] opacity-60">© {{ date('Y') }} Catacombian Games. The Social Game™.</p>
+            <p class="text-[10px] opacity-60">© {{ date('Y') }} <a href="https://catacombian.com" target="_blank" rel="noopener noreferrer" class="underline hover:opacity-100">Catacombian Games</a>. The Social Game™.</p>
         </div>
     </footer>
 </body>
