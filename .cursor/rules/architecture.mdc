@@ -1,0 +1,15 @@
+---
+description: Architectural rules for The Social Game. Always apply.
+alwaysApply: true
+---
+
+The full architectural rules, non-negotiables, trip-wire files, and "how to add a feature" guidance for this repo live in `/CLAUDE.md` at the repo root. Read it before doing anything in this codebase. Follow it strictly — every rule there applies in Cursor too.
+
+Quick summary of the highest-priority rules (full version in `/CLAUDE.md`):
+
+1. No direct model writes for state changes — fire Verbs events, then `Verbs::commit()`.
+2. Livewire + Alpine.js only. No React/Vue/etc.
+3. Do not modify generic infrastructure (GameDashboard, BaseChallengeClass, BaseModifierClass, form.blade.php, HandlesClassActions, ChallengeRegistry, ModifierRegistry, FormBuilder). If you think you need to, STOP and ask.
+4. New features = new Challenge or Modifier class. Mirror an existing one in the same game-mode subfolder.
+5. Every feature ships with Livewire feature tests.
+6. Trust the code over the `docs/` markdown — some of those docs are stale.
