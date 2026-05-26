@@ -4,17 +4,28 @@ Welcome. You don't need to know PHP, Laravel, or git mechanics to ship things he
 
 Read it top to bottom once before doing anything. Then start at step 1.
 
+> **About terminals.** This doc has terminal commands in `monospace boxes`. They work the same on macOS and Windows, but the *terminal you run them in* differs:
+>
+> - **macOS:** the built-in **Terminal** app. Open it via ⌘+Space → type "Terminal" → enter.
+> - **Windows:** install **Git for Windows** from https://gitforwindows.org. That gives you **Git Bash**, a terminal that behaves like macOS's so the commands below work identically (forward slashes, `~`, `cp`, etc.). Open it from the Start menu after install. Alternatively, **Windows Terminal** with PowerShell 7+ also works for everything in this doc.
+>
+> Whenever this doc says "open Terminal," use Terminal on Mac or Git Bash on Windows.
+
 ---
 
 ## Step 1 — Install the dev environment (one time, ~20 min)
 
-We use [Laravel Herd](https://herd.laravel.com/) — it's a one-click installer that gives you PHP, MySQL, and a local web server without any terminal gymnastics.
+We use [Laravel Herd](https://herd.laravel.com/) — it's a one-click installer that gives you PHP, MySQL, and a local web server without any terminal gymnastics. Herd has both **macOS** and **Windows** builds; download the right one for your machine.
 
-1. Download **Herd Pro** from https://herd.laravel.com/. The free version works for the basics; Pro is needed if you want the GUI database tools. Either is fine.
-2. Run the installer. Open the app and let it finish setting up.
-3. Herd will create `~/Herd/` as the default directory for projects. You can change this in Herd's settings, but you don't need to.
+1. Download Herd from https://herd.laravel.com/ and run the installer. The free version is fine for everything in this doc.
+2. Open the Herd app and let it finish setting up (it will install PHP, MySQL, and the local web server).
+3. Herd will create a default projects folder for you:
+   - **macOS:** `~/Herd/`
+   - **Windows:** `C:\Users\<your-username>\Herd\` (you can also write this as `~/Herd/` in Git Bash)
 
-**Sanity check:** open Terminal (⌘+Space, type "Terminal", hit enter) and run:
+   You can change this in Herd's settings, but you don't need to.
+
+**Sanity check:** open your terminal (Terminal on Mac, Git Bash on Windows — see the note at the top) and run:
 
 ```bash
 php --version
@@ -28,11 +39,11 @@ You should see PHP 8.3 or higher. If not, ping John.
 
 1. Make a GitHub account at https://github.com if you don't have one. Tell John your username; he'll add you as a collaborator on `kathunk/the-social-game` with Write access.
 2. **Accept the invite** in your GitHub email or notifications.
-3. Install GitHub Desktop from https://desktop.github.com if you want a clickable git interface. (You can use Terminal too — your choice. The rest of this doc shows both.)
+3. Install **GitHub Desktop** from https://desktop.github.com (Mac and Windows both supported) if you want a clickable git interface. You can use the terminal instead — your choice. The rest of this doc shows both.
 
 Now clone the repo:
 
-**GitHub Desktop:** File → Clone repository → search "kathunk/the-social-game" → choose a folder under `~/Herd/` → Clone.
+**GitHub Desktop:** File → Clone repository → search "kathunk/the-social-game" → choose a folder inside your Herd projects folder (e.g. `~/Herd/` on Mac, `C:\Users\<you>\Herd\` on Windows) → Clone.
 
 **Terminal:**
 ```bash
@@ -45,7 +56,7 @@ cd the-social-game
 
 ## Step 3 — Set up the project (one time, ~10 min)
 
-In Terminal, navigate to the project folder if you're not already there:
+In your terminal (Terminal on Mac, Git Bash on Windows), navigate to the project folder if you're not already there:
 
 ```bash
 cd ~/Herd/the-social-game
@@ -60,7 +71,9 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Now create the local database. Herd ships with MySQL built in. Open Herd's app, find the "Services" or "MySQL" panel, and create a database called `the_social_game` (or whatever name you want). Then in your `.env` file (open it in any text editor; it's at the project root), set:
+(If `cp` doesn't work because you're using PowerShell instead of Git Bash, use `copy .env.example .env` instead — same effect.)
+
+Now create the local database. Herd ships with MySQL built in. Open Herd's app, find the "Services" or "MySQL" panel, and create a database called `the_social_game` (or whatever name you want). Then in your `.env` file (open it in any text editor — VS Code, Sublime, even Notepad on Windows or TextEdit on Mac works; the file is at the project root), set:
 
 ```
 DB_DATABASE=the_social_game
@@ -83,7 +96,9 @@ If that runs without errors, you're set up.
 
 ## Step 4 — Run the app (every time you work)
 
-Open three Terminal tabs in the project directory. In each, run one of:
+You'll need three terminal windows or tabs open in the project directory. On Mac, Terminal supports tabs (⌘+T) and so does iTerm2. On Windows, **Windows Terminal** supports tabs natively (Ctrl+T); Git Bash also opens new windows easily.
+
+In each one, run one of:
 
 ```bash
 php artisan serve
@@ -91,7 +106,7 @@ npm run dev
 php artisan reverb:start
 ```
 
-(Herd users may not need `php artisan serve` because Herd auto-serves projects in `~/Herd/`. If `http://the-social-game.test` works in your browser, you can skip that one.)
+(Herd users may not need `php artisan serve` because Herd auto-serves projects in your Herd projects folder. If `http://the-social-game.test` works in your browser, you can skip that one.)
 
 Open your browser and visit `http://the-social-game.test` (or whatever Herd showed you).
 
@@ -105,8 +120,8 @@ Pick one or both. Both will automatically read the architectural rules from `CLA
 
 ### Option A: Claude Code
 
-1. Install from https://claude.com/claude-code (follow the install instructions for your platform).
-2. Open Terminal, navigate to the project: `cd ~/Herd/the-social-game`.
+1. Install from https://claude.com/claude-code (the install page covers both macOS and Windows).
+2. Open your terminal (Terminal on Mac, Git Bash on Windows), navigate to the project: `cd ~/Herd/the-social-game`.
 3. Run `claude` to start a session.
 
 That's it. Claude Code will auto-read `CLAUDE.md` every conversation.
@@ -119,11 +134,23 @@ That's it. Claude Code will auto-read `CLAUDE.md` every conversation.
 
 You can use both. Most people pick one and stick with it.
 
+### Authenticate GitHub for your AI assistant (highly recommended)
+
+Once your AI assistant is installed, also install the **GitHub CLI** from https://cli.github.com (Mac and Windows both supported), then run:
+
+```bash
+gh auth login
+```
+
+Follow the prompts to log in with your GitHub account. After this is done, your AI assistant can do your entire git workflow for you — create branches, commit, push, open PRs, even respond to review comments — without you typing any `git` commands yourself. You can just say things like "commit this and open a PR" and it will. The manual commands shown in Step 6 are there as reference for when something goes sideways, not as required steps.
+
 ---
 
 ## Step 6 — Your first PR (the workflow you'll repeat every time)
 
 This is the loop you'll use for every change. Practice it once with a trivial edit (fix a typo, change a button label) before doing anything real.
+
+> **You probably don't need to type any of these commands.** If you finished the "Authenticate GitHub for your AI assistant" step above, you can just say "create a branch called `fix/button-typo`, commit my changes, push it, and open a PR" and your assistant will handle every command below for you. The terminal commands here are reference material for when something goes sideways or you want to understand what's happening — not a script you have to run by hand.
 
 ### 6a. Make a new branch
 
