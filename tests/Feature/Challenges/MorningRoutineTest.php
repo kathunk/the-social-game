@@ -327,3 +327,55 @@ it('boss suit effect cancels a bust penalty', function () {
     $challenge->refresh();
     expect($challenge->challenge_data['player_penalties'][$players[0]->id])->toBe(0);
 });
+
+it('persists round points and bust penalties to score history when the challenge ends', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupMorningRoutine($this, 2);
+
+    // Force a known reward so points are deterministic (hot_shave: 2 points, 2 mess, no effect)
+    mutateState($challenge, fn ($state) => $state->challenge_data['available_rewards']['bathroom'] = ['hot_shave']);
+
+    callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'bathroom'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'hot_shave'])->assertHasNoErrors();
+
+    // Player 1 queues, player 0 exits with 2 mess -> busted for 2
+    callAction($this, $players[1], $challenge, 'queueForRoom', ['room' => 'bathroom'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'exitRoom')->assertHasNoErrors();
+
+    $challenge->refresh();
+    expect($challenge->challenge_data['player_points'][$players[0]->id])->toBe(2);
+    expect($challenge->challenge_data['player_penalties'][$players[0]->id])->toBe(2);
+
+    $challenge->end();
+
+    // +2 reward points, -2 bust penalty
+    expect($players[0]->fresh()->score)->toBe(0);
+    expect($players[1]->fresh()->score)->toBe(0);
+
+    $history = collect($players[0]->fresh()->state()->score_history);
+    expect($history->pluck('points')->all())->toBe([2, -2]);
+});
+
+it('persists end-of-game effect bonuses like the mirror to score history', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupMorningRoutine($this, 2);
+
+    mutateState($challenge, fn ($state) => $state->challenge_data['available_rewards']['bathroom'] = ['mirror']);
+
+    callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'bathroom'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'mirror'])->assertHasNoErrors();
+
+    // Seed a second taken reward so the mirror has a lowest-value reward to double
+    // (hot_shave: 2 points)
+    mutateState($challenge, function ($state) use ($players) {
+        $state->challenge_data['taken_rewards']['bathroom']['hot_shave'] = $players[0]->id;
+        $state->challenge_data['player_points'][$players[0]->id] += 2;
+    });
+
+    $challenge->end();
+
+    // 0 (mirror) + 2 (hot_shave) round points, +2 mirror bonus doubling hot_shave
+    expect($players[0]->fresh()->score)->toBe(4);
+
+    $history = collect($players[0]->fresh()->state()->score_history);
+    expect($history->pluck('points')->all())->toBe([2, 2]);
+    expect($history->last()['description'])->toContain('Mirror');
+});

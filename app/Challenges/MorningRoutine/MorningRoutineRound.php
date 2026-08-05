@@ -88,31 +88,60 @@ class MorningRoutineRound extends BaseChallengeClass
     }
 
     /**
-     * Lifecycle hook: dispatched by ChallengeEnded.
-     * Calculates the final point bonus/penalty from each player's reward effects
-     * and applies it to player_points.
+     * Lifecycle hook: dispatched by ChallengeEnded (handler is built fromState,
+     * so read challenge_data off challenge_state — the model is null here).
+     * Persists round points, bust penalties, and end-of-game reward effect
+     * bonuses to each player's score history.
      */
     public function onChallengeEnded(GameState $game_state)
     {
-        // Tally end-of-game effect bonuses
-        $data = $this->challenge->challenge_data;
-        $bonuses = [];
+        $data = $this->challenge_state->challenge_data;
 
+        $game_state->players()->each(function ($player) use ($data) {
+            $points = $data['player_points'][$player->id] ?? 0;
+            if ($points !== 0) {
+                $player->addToScoreHistory(
+                    icon: '🌅',
+                    points: $points,
+                    description: 'Earned '.$points.' points from morning routine rewards.',
+                );
+            }
+
+            $penalties = $data['player_penalties'][$player->id] ?? 0;
+            if ($penalties !== 0) {
+                $player->addToScoreHistory(
+                    icon: '🚨',
+                    points: -$penalties,
+                    description: 'Lost '.$penalties.' points for getting busted leaving a mess.',
+                );
+            }
+        });
+
+        // End-of-game reward effect bonuses (Mirror, Gambler's Fallacy, etc.)
         foreach ($data['taken_rewards'] ?? [] as $room => $rewards_in_room) {
             foreach ($rewards_in_room as $reward_key => $taker_id) {
                 $reward = RewardRegistry::find($reward_key);
-                if ($reward && $reward->hasEffect()) {
-                    $effect_class = $reward->effect_class;
-                    $effect = new $effect_class;
-                    $bonus = $effect->onChallengeEnded((int) $taker_id, $data);
-                    if ($bonus !== 0) {
-                        $bonuses[$taker_id] = ($bonuses[$taker_id] ?? 0) + $bonus;
-                    }
+                if (! $reward || ! $reward->hasEffect()) {
+                    continue;
                 }
+
+                $effect_class = $reward->effect_class;
+                $effect = new $effect_class;
+                $bonus = $effect->onChallengeEnded((int) $taker_id, $data);
+
+                if ($bonus === 0) {
+                    continue;
+                }
+
+                $game_state->players()
+                    ->first(fn ($p) => $p->id === (int) $taker_id)
+                    ?->addToScoreHistory(
+                        icon: '✨',
+                        points: $bonus,
+                        description: $reward->name.': '.($bonus > 0 ? 'gained' : 'lost').' '.abs($bonus).' bonus points.',
+                    );
             }
         }
-
-        // @todo persist these bonuses via a final event so they show up in scoring
     }
 
     // ─────────────────────────────────────────────────────────────────────
