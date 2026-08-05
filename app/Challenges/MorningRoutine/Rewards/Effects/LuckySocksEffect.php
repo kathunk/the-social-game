@@ -14,7 +14,7 @@ class LuckySocksEffect extends RewardEffect
         $queues = $challenge_data['room_queues'] ?? [];
 
         // Was anyone queued for the room they just left?
-        $queued_for_their_room = ($queues[$room] ?? null) !== null;
+        $queued_for_their_room = ! empty($queues[$room]);
 
         if ($queued_for_their_room) {
             return $challenge_data;
@@ -22,16 +22,13 @@ class LuckySocksEffect extends RewardEffect
 
         // Are any other rooms queued?
         $other_room_queued = collect($queues)
-            ->filter(fn ($pid, $r) => $r !== $room && $pid !== null)
+            ->filter(fn ($queue, $r) => $r !== $room && ! empty($queue))
             ->isNotEmpty();
 
         if (! $other_room_queued) {
             return $challenge_data;
         }
 
-        $challenge_data['player_points'][$taker_id] =
-            ($challenge_data['player_points'][$taker_id] ?? 0) + 3;
-
-        return $challenge_data;
+        return $this->credit($challenge_data, $taker_id, 3, 'Lucky socks: slipped past a line');
     }
 }

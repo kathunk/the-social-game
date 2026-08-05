@@ -18,14 +18,17 @@ class PlayerLeftQueue extends Event
     public function validate()
     {
         $data = $this->state(ChallengeState::class)->challenge_data;
-        $queued = $data['room_queues'][$this->room] ?? null;
+        $queue = $data['room_queues'][$this->room] ?? [];
 
-        $this->assert($queued === $this->player_id, 'You are not queued for this room.');
+        $this->assert(in_array($this->player_id, $queue, true), 'You are not queued for this room.');
     }
 
     public function apply(ChallengeState $challenge)
     {
-        $challenge->challenge_data['room_queues'][$this->room] = null;
+        $challenge->challenge_data['room_queues'][$this->room] = array_values(array_filter(
+            $challenge->challenge_data['room_queues'][$this->room] ?? [],
+            fn ($id) => $id !== $this->player_id,
+        ));
     }
 
     public function handle(ChallengeState $state)

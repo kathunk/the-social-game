@@ -23,9 +23,6 @@ class HolyRobesEffect extends RewardEffect
             return $challenge_data;
         }
 
-        $challenge_data['player_points'][$taker_id] =
-            ($challenge_data['player_points'][$taker_id] ?? 0) + 3;
-
-        return $challenge_data;
+        return $this->credit($challenge_data, $taker_id, 3, 'Holy robes: someone queued for your spotless room');
     }
 }

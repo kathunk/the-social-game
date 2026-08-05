@@ -14,9 +14,6 @@ class JanitorsUniformEffect extends RewardEffect
             return $challenge_data;
         }
 
-        $challenge_data['player_points'][$taker_id] =
-            ($challenge_data['player_points'][$taker_id] ?? 0) + 1;
-
-        return $challenge_data;
+        return $this->credit($challenge_data, $taker_id, 1, 'Janitor\'s uniform: cleaned up');
     }
 }

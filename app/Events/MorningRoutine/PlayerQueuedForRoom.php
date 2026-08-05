@@ -19,10 +19,14 @@ class PlayerQueuedForRoom extends Event
     public function validate()
     {
         $data = $this->state(ChallengeState::class)->challenge_data;
+
         $location = $data['player_locations'][$this->player_id] ?? 'hallway';
 
         $this->assert($location === 'hallway', 'You must be in the hallway to queue.');
-        $this->assert(($data['room_queues'][$this->room] ?? null) === null, 'That room is already queued.');
+
+        $already_queued_somewhere = collect($data['room_queues'] ?? [])
+            ->contains(fn ($queue) => in_array($this->player_id, $queue ?? [], true));
+        $this->assert(! $already_queued_somewhere, 'You are already waiting in a line.');
 
         $occupant = collect($data['player_locations'] ?? [])
             ->first(fn ($loc) => $loc === $this->room);
@@ -31,7 +35,7 @@ class PlayerQueuedForRoom extends Event
 
     public function apply(ChallengeState $challenge)
     {
-        $challenge->challenge_data['room_queues'][$this->room] = $this->player_id;
+        $challenge->challenge_data['room_queues'][$this->room][] = $this->player_id;
 
         // Dispatch onPlayerQueuedForRoom hook for all taken rewards
         foreach ($challenge->challenge_data['taken_rewards'] ?? [] as $r => $rewards_in_room) {

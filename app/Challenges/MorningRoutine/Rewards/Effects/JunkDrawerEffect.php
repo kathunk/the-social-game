@@ -23,8 +23,7 @@ class JunkDrawerEffect extends RewardEffect
         $pull = $candidates->random();
 
         // Credit points and mess from the pulled reward
-        $challenge_data['player_points'][$player_id] =
-            ($challenge_data['player_points'][$player_id] ?? 0) + $pull->points;
+        $challenge_data = $this->credit($challenge_data, $player_id, $pull->points, "Junk drawer pull: {$pull->name}");
         $challenge_data['room_mess']['kitchen'] =
             ($challenge_data['room_mess']['kitchen'] ?? 0) + $pull->mess;
 

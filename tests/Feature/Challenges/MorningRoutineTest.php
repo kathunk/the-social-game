@@ -77,7 +77,7 @@ it('initializes all players in the hallway with empty state', function () {
     foreach (MorningRoutineRound::ROOMS as $room) {
         $room_pool_size = count(RewardRegistry::forRoom($room));
         expect($data['room_mess'][$room])->toBe(0);
-        expect($data['room_queues'][$room])->toBeNull();
+        expect($data['room_queues'][$room])->toBe([]);
         expect($data['available_rewards'][$room])->toHaveCount(min($desired_count, $room_pool_size));
     }
 });
@@ -148,7 +148,7 @@ it('allows queueing for an occupied room and auto-enters when door opens', funct
     callAction($this, $players[1], $challenge, 'queueForRoom', ['room' => 'bathroom'])->assertHasNoErrors();
 
     $challenge->refresh();
-    expect($challenge->challenge_data['room_queues']['bathroom'])->toBe($players[1]->id);
+    expect($challenge->challenge_data['room_queues']['bathroom'])->toBe([$players[1]->id]);
 
     // Player 0 exits → player 1 should auto-enter
     callAction($this, $players[0], $challenge, 'exitRoom')->assertHasNoErrors();
@@ -156,7 +156,7 @@ it('allows queueing for an occupied room and auto-enters when door opens', funct
     $challenge->refresh();
     expect($challenge->challenge_data['player_locations'][$players[0]->id])->toBe('hallway');
     expect($challenge->challenge_data['player_locations'][$players[1]->id])->toBe('bathroom');
-    expect($challenge->challenge_data['room_queues']['bathroom'])->toBeNull();
+    expect($challenge->challenge_data['room_queues']['bathroom'])->toBe([]);
 });
 
 it('busts a player who exits a messy room with someone queued', function () {
@@ -345,6 +345,11 @@ it('persists round points and bust penalties to score history when the challenge
     expect($challenge->challenge_data['player_points'][$players[0]->id])->toBe(2);
     expect($challenge->challenge_data['player_penalties'][$players[0]->id])->toBe(2);
 
+    // Player 1 auto-entered the bathroom; get them back to the hallway so they
+    // aren't stranded when time runs out
+    callAction($this, $players[1], $challenge, 'exitRoom')->assertHasNoErrors();
+
+    $challenge->refresh();
     $challenge->end();
 
     // +2 reward points, -2 bust penalty
@@ -353,6 +358,8 @@ it('persists round points and bust penalties to score history when the challenge
 
     $history = collect($players[0]->fresh()->state()->score_history);
     expect($history->pluck('points')->all())->toBe([2, -2]);
+    expect($history->first()['description'])->toContain('Hot shave');
+    expect($history->last()['description'])->toContain('Busted leaving the bathroom');
 });
 
 it('persists end-of-game effect bonuses like the mirror to score history', function () {
@@ -362,12 +369,19 @@ it('persists end-of-game effect bonuses like the mirror to score history', funct
 
     callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'bathroom'])->assertHasNoErrors();
     callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'mirror'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'exitRoom')->assertHasNoErrors();
 
     // Seed a second taken reward so the mirror has a lowest-value reward to double
     // (hot_shave: 2 points)
     mutateState($challenge, function ($state) use ($players) {
         $state->challenge_data['taken_rewards']['bathroom']['hot_shave'] = $players[0]->id;
         $state->challenge_data['player_points'][$players[0]->id] += 2;
+        $state->challenge_data['point_log'][] = [
+            'player_id' => $players[0]->id,
+            'points' => 2,
+            'type' => 'reward',
+            'label' => 'Hot shave',
+        ];
     });
 
     $challenge->end();
@@ -378,4 +392,69 @@ it('persists end-of-game effect bonuses like the mirror to score history', funct
     $history = collect($players[0]->fresh()->state()->score_history);
     expect($history->pluck('points')->all())->toBe([2, 2]);
     expect($history->last()['description'])->toContain('Mirror');
+});
+
+it('supports multiple players queueing FIFO and busts by the first in line', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupMorningRoutine($this, 4);
+
+    callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'kitchen'])->assertHasNoErrors();
+
+    mutateState($challenge, fn ($state) => $state->challenge_data['room_mess']['kitchen'] = 3);
+
+    callAction($this, $players[1], $challenge, 'queueForRoom', ['room' => 'kitchen'])->assertHasNoErrors();
+    callAction($this, $players[2], $challenge, 'queueForRoom', ['room' => 'kitchen'])->assertHasNoErrors();
+
+    $challenge->refresh();
+    expect($challenge->challenge_data['room_queues']['kitchen'])->toBe([$players[1]->id, $players[2]->id]);
+
+    // Can't queue twice / can't hold two spots
+    callAction($this, $players[1], $challenge, 'queueForRoom', ['room' => 'kitchen'])
+        ->assertHasErrors('action_error');
+    callAction($this, $players[3], $challenge, 'enterRoom', ['room' => 'study'])->assertHasNoErrors();
+    callAction($this, $players[2], $challenge, 'queueForRoom', ['room' => 'study'])
+        ->assertHasErrors('action_error');
+
+    // Exit: first in line busts and auto-enters, second stays queued
+    callAction($this, $players[0], $challenge, 'exitRoom')->assertHasNoErrors();
+
+    $challenge->refresh();
+    expect($challenge->challenge_data['player_locations'][$players[1]->id])->toBe('kitchen');
+    expect($challenge->challenge_data['room_queues']['kitchen'])->toBe([$players[2]->id]);
+    expect($challenge->challenge_data['player_penalties'][$players[0]->id])->toBe(3);
+});
+
+it('awards descending exit bonuses and penalizes players stranded in rooms', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupMorningRoutine($this, 3);
+
+    // First out gets player_count points, next one fewer
+    // (the game creator is also a player, so count from the actual roster)
+    $n = count($challenge->challenge_data['player_locations']);
+
+    callAction($this, $players[0], $challenge, 'leaveHouse')->assertHasNoErrors();
+    callAction($this, $players[1], $challenge, 'leaveHouse')->assertHasNoErrors();
+
+    $challenge->refresh();
+    expect($challenge->challenge_data['exit_order'])->toBe([$players[0]->id, $players[1]->id]);
+    expect($challenge->challenge_data['player_points'][$players[0]->id])->toBe($n);
+    expect($challenge->challenge_data['player_points'][$players[1]->id])->toBe($n - 1);
+    expect($challenge->challenge_data['player_locations'][$players[0]->id])->toBe('left');
+
+    // Once out, you cannot come back in or leave again
+    callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'kitchen'])
+        ->assertHasErrors('action_error');
+    callAction($this, $players[0], $challenge, 'leaveHouse')
+        ->assertHasErrors('action_error');
+
+    // Player 2 gets caught in a room when time runs out
+    callAction($this, $players[2], $challenge, 'enterRoom', ['room' => 'study'])->assertHasNoErrors();
+
+    $challenge->refresh();
+    $challenge->end();
+
+    expect($players[0]->fresh()->score)->toBe($n);
+    expect($players[1]->fresh()->score)->toBe($n - 1);
+    expect($players[2]->fresh()->score)->toBe(-1);
+
+    $stranded = collect($players[2]->fresh()->state()->score_history)->last();
+    expect($stranded['description'])->toContain('Still in the study');
 });

@@ -9,6 +9,7 @@ use App\Events\MorningRoutine\PlayerBusted;
 use App\Events\MorningRoutine\PlayerCleanedRoom;
 use App\Events\MorningRoutine\PlayerEnteredRoom;
 use App\Events\MorningRoutine\PlayerExitedRoom;
+use App\Events\MorningRoutine\PlayerLeftHouse;
 use App\Events\MorningRoutine\PlayerLeftQueue;
 use App\Events\MorningRoutine\PlayerQueuedForRoom;
 use App\Events\MorningRoutine\PlayerStartedCleaning;
@@ -32,6 +33,8 @@ class MorningRoutineRound extends BaseChallengeClass
 
     const SECONDS_PER_MESS_CLEAN = 15;
 
+    const STRANDED_PENALTY = 1;
+
     public static function key(): string
     {
         return 'morning_routine_round';
@@ -52,7 +55,7 @@ class MorningRoutineRound extends BaseChallengeClass
         foreach (self::ROOMS as $room) {
             $available_rewards[$room] = RewardRegistry::randomKeysForRoom($room, $reward_count_per_room);
             $room_mess[$room] = 0;
-            $room_queues[$room] = null;
+            $room_queues[$room] = [];
         }
 
         return [
@@ -65,6 +68,8 @@ class MorningRoutineRound extends BaseChallengeClass
             'cleaning_state' => [],
             'player_points' => $players->mapWithKeys(fn ($p) => [$p->id => 0])->toArray(),
             'player_penalties' => $players->mapWithKeys(fn ($p) => [$p->id => 0])->toArray(),
+            'point_log' => [],
+            'exit_order' => [],
             'active_effects' => [],
             'toasts' => [],
         ];
@@ -82,6 +87,7 @@ class MorningRoutineRound extends BaseChallengeClass
                 rooms: self::ROOMS,
                 players: $this->challenge->game->players,
                 seconds_per_mess_clean: self::SECONDS_PER_MESS_CLEAN,
+                ends_at_ts: $this->challenge->ends_at?->timestamp,
             )
             ->poll(2000)
             ->build();
@@ -90,32 +96,32 @@ class MorningRoutineRound extends BaseChallengeClass
     /**
      * Lifecycle hook: dispatched by ChallengeEnded (handler is built fromState,
      * so read challenge_data off challenge_state — the model is null here).
-     * Persists round points, bust penalties, and end-of-game reward effect
-     * bonuses to each player's score history.
+     *
+     * Finalizes the round: penalizes players stranded in a room, resolves
+     * end-of-game reward effects, then writes every point_log entry to the
+     * owning player's score history. The finalized point_log is written back
+     * to challenge_state so the results round can display the full ledger.
      */
     public function onChallengeEnded(GameState $game_state)
     {
         $data = $this->challenge_state->challenge_data;
 
-        $game_state->players()->each(function ($player) use ($data) {
-            $points = $data['player_points'][$player->id] ?? 0;
-            if ($points !== 0) {
-                $player->addToScoreHistory(
-                    icon: '🌅',
-                    points: $points,
-                    description: 'Earned '.$points.' points from morning routine rewards.',
-                );
+        // Players still in a room when time ran out failed to get out the door
+        foreach ($data['player_locations'] ?? [] as $player_id => $location) {
+            if ($location === 'hallway' || $location === 'left') {
+                continue;
             }
 
-            $penalties = $data['player_penalties'][$player->id] ?? 0;
-            if ($penalties !== 0) {
-                $player->addToScoreHistory(
-                    icon: '🚨',
-                    points: -$penalties,
-                    description: 'Lost '.$penalties.' points for getting busted leaving a mess.',
-                );
-            }
-        });
+            $data['player_penalties'][$player_id] =
+                ($data['player_penalties'][$player_id] ?? 0) + self::STRANDED_PENALTY;
+
+            $data['point_log'][] = [
+                'player_id' => (int) $player_id,
+                'points' => -self::STRANDED_PENALTY,
+                'type' => 'stranded',
+                'label' => "Still in the {$location} when time ran out",
+            ];
+        }
 
         // End-of-game reward effect bonuses (Mirror, Gambler's Fallacy, etc.)
         foreach ($data['taken_rewards'] ?? [] as $room => $rewards_in_room) {
@@ -133,15 +139,59 @@ class MorningRoutineRound extends BaseChallengeClass
                     continue;
                 }
 
-                $game_state->players()
-                    ->first(fn ($p) => $p->id === (int) $taker_id)
-                    ?->addToScoreHistory(
-                        icon: '✨',
-                        points: $bonus,
-                        description: $reward->name.': '.($bonus > 0 ? 'gained' : 'lost').' '.abs($bonus).' bonus points.',
-                    );
+                $data['player_points'][$taker_id] =
+                    ($data['player_points'][$taker_id] ?? 0) + $bonus;
+
+                $data['point_log'][] = [
+                    'player_id' => (int) $taker_id,
+                    'points' => $bonus,
+                    'type' => 'effect',
+                    'label' => "{$reward->name} (end of game)",
+                ];
             }
         }
+
+        $this->challenge_state->challenge_data = $data;
+
+        // Itemized score history: one entry per point_log line
+        $logs = collect($data['point_log'] ?? []);
+        $icons = [
+            'reward' => '🌅',
+            'effect' => '✨',
+            'bust' => '🚨',
+            'exit' => '🏃',
+            'stranded' => '😴',
+        ];
+
+        $game_state->players()->each(function ($player) use ($logs, $icons, $data) {
+            $entries = $logs->where('player_id', $player->id);
+
+            foreach ($entries as $entry) {
+                if (($entry['points'] ?? 0) === 0) {
+                    continue;
+                }
+
+                $player->addToScoreHistory(
+                    icon: $icons[$entry['type']] ?? '🌅',
+                    points: $entry['points'],
+                    description: 'Morning Routine — '.$entry['label'],
+                );
+            }
+
+            // Safety net: if anything changed the aggregates without logging
+            // itemized entries, reconcile so the scoreboard total stays true.
+            $expected = ($data['player_points'][$player->id] ?? 0)
+                - ($data['player_penalties'][$player->id] ?? 0);
+            $remainder = $expected - $entries->sum('points');
+
+            if ($remainder !== 0) {
+                $player->addToScoreHistory(
+                    icon: '🌅',
+                    points: $remainder,
+                    description: 'Morning Routine — other adjustments',
+                );
+            }
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -183,6 +233,10 @@ class MorningRoutineRound extends BaseChallengeClass
             throw new \RuntimeException('You are already in the hallway.');
         }
 
+        if ($current === 'left') {
+            throw new \RuntimeException('You already left the house.');
+        }
+
         $room = $current;
 
         // Auto-finalize any in-progress cleaning
@@ -199,7 +253,7 @@ class MorningRoutineRound extends BaseChallengeClass
         }
 
         $room_mess = $data['room_mess'][$room] ?? 0;
-        $queued_player_id = $data['room_queues'][$room] ?? null;
+        $queued_player_id = $data['room_queues'][$room][0] ?? null;
 
         $is_bust = $room_mess > 0 && $queued_player_id !== null;
 
@@ -295,6 +349,22 @@ class MorningRoutineRound extends BaseChallengeClass
                 player_id: $player->id,
                 room: $cleaning['room'],
                 finished_at: now()->timestamp,
+            );
+
+            Verbs::commit();
+            event(new GameUpdatedForReverb($player->game->fresh()));
+        });
+    }
+
+    public function leaveHouse(Player $player, array $params): void
+    {
+        $this->withChallengeLock(function () use ($player) {
+            $this->assertNotCleaning($player);
+
+            PlayerLeftHouse::fire(
+                game_id: $player->game_id,
+                challenge_id: $this->challenge->id,
+                player_id: $player->id,
             );
 
             Verbs::commit();

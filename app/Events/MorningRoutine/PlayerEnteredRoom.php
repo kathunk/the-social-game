@@ -41,9 +41,12 @@ class PlayerEnteredRoom extends Event
     {
         $challenge->challenge_data['player_locations'][$this->player_id] = $this->room;
 
-        // If from queue, clear the queue
-        if ($this->from_queue) {
-            $challenge->challenge_data['room_queues'][$this->room] = null;
+        // Entering a room removes the player from every line they were standing in
+        foreach ($challenge->challenge_data['room_queues'] ?? [] as $queued_room => $queue) {
+            $challenge->challenge_data['room_queues'][$queued_room] = array_values(array_filter(
+                $queue ?? [],
+                fn ($id) => $id !== $this->player_id,
+            ));
         }
 
         // Dispatch onPlayerEnteredRoom hook for all taken rewards

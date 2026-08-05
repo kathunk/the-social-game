@@ -71,6 +71,13 @@ class PlayerTookReward extends Event
         $challenge->challenge_data['player_points'][$this->player_id] =
             ($challenge->challenge_data['player_points'][$this->player_id] ?? 0) + $reward->points;
 
+        $challenge->challenge_data['point_log'][] = [
+            'player_id' => $this->player_id,
+            'points' => $reward->points,
+            'type' => 'reward',
+            'label' => $reward->name,
+        ];
+
         // Add mess
         $challenge->challenge_data['room_mess'][$this->room] =
             ($challenge->challenge_data['room_mess'][$this->room] ?? 0) + $reward->mess;

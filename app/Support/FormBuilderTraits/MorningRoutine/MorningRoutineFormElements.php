@@ -14,6 +14,7 @@ trait MorningRoutineFormElements
         array $rooms,
         Collection $players,
         int $seconds_per_mess_clean,
+        ?int $ends_at_ts = null,
     ): static {
         $players_by_id = $players->keyBy('id');
 
@@ -37,14 +38,19 @@ trait MorningRoutineFormElements
                 ->filter(fn ($loc) => $loc === $room)
                 ->keys()
                 ->first();
-            $queued_id = $room_queues[$room] ?? null;
+            $queue = $room_queues[$room] ?? [];
+            $queue_position = array_search($player->id, $queue, true);
 
             $room_states[$room] = [
                 'occupied' => $occupant_id !== null,
                 'occupant_is_current_player' => $occupant_id == $player->id,
-                'queued' => $queued_id !== null,
-                'queued_is_current_player' => $queued_id == $player->id,
-                'queued_player_name' => $queued_id ? ($players_by_id[$queued_id]?->name ?? null) : null,
+                'queued' => count($queue) > 0,
+                'queued_is_current_player' => $queue_position !== false,
+                'queue_position' => $queue_position === false ? null : $queue_position + 1,
+                'queue_names' => collect($queue)
+                    ->map(fn ($id) => $players_by_id[$id]?->name ?? 'Unknown')
+                    ->values()
+                    ->all(),
                 'mess_visible' => $has_monocle && $occupant_id !== null,
                 'mess' => $room_mess[$room] ?? 0,
                 'header' => RewardRegistry::ROOM_HEADERS[$room] ?? ucfirst($room),
@@ -62,6 +68,22 @@ trait MorningRoutineFormElements
             ])
             ->values()
             ->toArray();
+
+        // Who's made it out the door, in exit order
+        $exit_order = $challenge_data['exit_order'] ?? [];
+        $exit_position = array_search($player->id, $exit_order, true);
+        $exit_order_names = collect($exit_order)
+            ->map(fn ($id) => $players_by_id[$id]?->name ?? 'Unknown')
+            ->values()
+            ->all();
+        $still_inside_names = collect($challenge_data['player_locations'] ?? [])
+            ->filter(fn ($loc) => $loc !== 'left')
+            ->keys()
+            ->map(fn ($id) => $players_by_id[$id]?->name ?? 'Unknown')
+            ->values()
+            ->all();
+        $exit_bonus = collect($challenge_data['point_log'] ?? [])
+            ->first(fn ($entry) => $entry['type'] === 'exit' && $entry['player_id'] == $player->id)['points'] ?? null;
 
         // Available rewards in the current room (no flavor text shown until taken)
         $room_rewards = [];
@@ -122,6 +144,12 @@ trait MorningRoutineFormElements
             'player_penalties' => $player_penalties[$player->id] ?? 0,
             'toasts' => $recent_toasts,
             'player_name' => $player->name,
+            'ends_at_ts' => $ends_at_ts,
+            'has_left' => $current_location === 'left',
+            'exit_position' => $exit_position === false ? null : $exit_position + 1,
+            'exit_bonus' => $exit_bonus,
+            'exit_order_names' => $exit_order_names,
+            'still_inside_names' => $still_inside_names,
         ];
 
         return $this;

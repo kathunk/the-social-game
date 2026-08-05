@@ -82,6 +82,26 @@ abstract class RewardEffect
     }
 
     /**
+     * Helper: grant points to a player, keeping the aggregate total and the
+     * itemized point_log (used for score history and the results screen) in sync.
+     * All effect point grants must go through this.
+     */
+    protected function credit(array $challenge_data, int $player_id, int $points, string $label): array
+    {
+        $challenge_data['player_points'][$player_id] =
+            ($challenge_data['player_points'][$player_id] ?? 0) + $points;
+
+        $challenge_data['point_log'][] = [
+            'player_id' => $player_id,
+            'points' => $points,
+            'type' => 'effect',
+            'label' => $label,
+        ];
+
+        return $challenge_data;
+    }
+
+    /**
      * Helper: arm a "next time..." effect flag.
      */
     protected function arm(array $challenge_data, int $player_id, string $flag): array

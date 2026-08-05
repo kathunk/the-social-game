@@ -48,6 +48,15 @@ class PlayerBusted extends Event
         $challenge->challenge_data['player_penalties'][$this->busted_player_id] =
             ($challenge->challenge_data['player_penalties'][$this->busted_player_id] ?? 0) + $penalty;
 
+        if ($penalty !== 0) {
+            $challenge->challenge_data['point_log'][] = [
+                'player_id' => $this->busted_player_id,
+                'points' => -$penalty,
+                'type' => 'bust',
+                'label' => "Busted leaving the {$this->room} ({$this->mess_amount} mess)",
+            ];
+        }
+
         // Add toast notifications
         $now = now()->timestamp;
         $challenge->challenge_data['toasts'][$this->busted_player_id][] = [

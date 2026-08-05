@@ -30,6 +30,12 @@
     $playerPenalties = $element['player_penalties'];
     $toasts = $element['toasts'];
     $playerName = $element['player_name'];
+    $endsAtTs = $element['ends_at_ts'];
+    $hasLeft = $element['has_left'];
+    $exitPosition = $element['exit_position'];
+    $exitBonus = $element['exit_bonus'];
+    $exitOrderNames = $element['exit_order_names'];
+    $stillInsideNames = $element['still_inside_names'];
     $classKey = \App\Challenges\MorningRoutine\MorningRoutineRound::key();
 
     // Build a map of reward key → flavor for the reveal animation
@@ -53,10 +59,31 @@
         cleaningInterval: null,
         rewards: @js($rewardFlavorMap),
         currentRoomMess: {{ $currentRoomMess }},
+        endsAtTs: @js($endsAtTs),
+        hasLeft: @js($hasLeft),
+        secondsRemaining: null,
+        endTicker: null,
 
         init() {
             this.startCleaningTicker();
             this.$watch('cleaningStartedAt', () => this.startCleaningTicker());
+            this.startEndTicker();
+        },
+
+        startEndTicker() {
+            if (!this.endsAtTs) return;
+            const tick = () => {
+                this.secondsRemaining = Math.max(0, this.endsAtTs - Math.floor(Date.now() / 1000));
+            };
+            tick();
+            this.endTicker = setInterval(tick, 1000);
+        },
+
+        get inDanger() {
+            return !this.hasLeft
+                && this.secondsRemaining !== null
+                && this.secondsRemaining > 0
+                && this.secondsRemaining <= 60;
         },
 
         startCleaningTicker() {
@@ -114,6 +141,10 @@
 
         exitRoom() {
             this.$wire.callClassAction('exitRoom', 'challenge', '{{ $classKey }}', {{ Js::from($this->challenge_component) }});
+        },
+
+        leaveHouse() {
+            this.$wire.callClassAction('leaveHouse', 'challenge', '{{ $classKey }}', {{ Js::from($this->challenge_component) }});
         },
 
         startCleaning() {
@@ -227,6 +258,20 @@
         </div>
     </div>
 
+    {{-- LAST-MINUTE WARNING: not out the door yet --}}
+    <div
+        x-show="inDanger"
+        x-cloak
+        class="mb-4 rounded-lg border-2 border-red-500 bg-red-50 p-3 text-center animate-pulse"
+    >
+        <div class="text-sm font-bold text-red-700">
+            ⏰ GET OUT THE DOOR!
+        </div>
+        <div class="text-xs text-red-600">
+            <span x-text="secondsRemaining"></span>s left — you lose points if you're caught in a room when time runs out.
+        </div>
+    </div>
+
     {{-- HEADER: SCORE --}}
     <div class="mb-4 flex justify-between items-center text-sm">
         <div class="flex gap-3">
@@ -241,7 +286,45 @@
         </div>
     </div>
 
-    @if ($currentLocation === 'hallway')
+    @if ($hasLeft)
+        {{-- LEFT-THE-HOUSE VIEW --}}
+        <div class="space-y-4 text-center">
+            <div class="text-4xl">🏃🚪</div>
+            <h3 class="text-lg font-bold text-gray-800">You're out the door!</h3>
+            @if ($exitPosition !== null)
+                <p class="text-sm text-gray-600">
+                    #{{ $exitPosition }} to leave
+                    @if ($exitBonus !== null)
+                        — <span class="font-semibold text-green-700">+{{ $exitBonus }} points</span>
+                    @endif
+                </p>
+            @endif
+
+            @if (count($exitOrderNames) > 0)
+                <div class="rounded-lg bg-green-50 border border-green-200 p-3 text-left">
+                    <div class="text-xs font-medium text-green-700 mb-2">Out the door:</div>
+                    <ol class="text-xs text-green-800 space-y-1 list-decimal list-inside">
+                        @foreach ($exitOrderNames as $name)
+                            <li>{{ $name }}</li>
+                        @endforeach
+                    </ol>
+                </div>
+            @endif
+
+            @if (count($stillInsideNames) > 0)
+                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3 text-left">
+                    <div class="text-xs font-medium text-gray-500 mb-2">Still inside:</div>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($stillInsideNames as $name)
+                            <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">{{ $name }}</span>
+                        @endforeach
+                    </div>
+                </div>
+            @else
+                <p class="text-xs text-gray-500">Everyone made it out. Waiting for the round to wrap up...</p>
+            @endif
+        </div>
+    @elseif ($currentLocation === 'hallway')
         {{-- HALLWAY VIEW --}}
         <div class="space-y-4">
             <div class="text-center">
@@ -250,12 +333,15 @@
             </div>
 
             {{-- Room doors --}}
+            @php
+                $queuedAnywhere = collect($roomStates)->contains(fn ($s) => $s['queued_is_current_player']);
+            @endphp
             <div class="grid grid-cols-2 gap-3">
                 @foreach ($roomStates as $room => $state)
                     @php
                         $isQueuedHere = $state['queued_is_current_player'];
                         $canEnter = !$state['occupied'];
-                        $canQueue = $state['occupied'] && !$state['queued'];
+                        $canQueue = $state['occupied'] && !$isQueuedHere && !$queuedAnywhere;
                     @endphp
                     <button
                         @if ($canEnter)
@@ -299,11 +385,15 @@
 
                         @if ($isQueuedHere)
                             <div class="mt-2 inline-block rounded-full bg-blue-200 px-2 py-0.5 text-xxs font-medium text-blue-800">
-                                You're queued — tap to cancel
+                                @if ($state['queue_position'] === 1)
+                                    You're next in line — tap to cancel
+                                @else
+                                    #{{ $state['queue_position'] }} in line — tap to cancel
+                                @endif
                             </div>
                         @elseif ($state['queued'])
                             <div class="mt-2 inline-block rounded-full bg-yellow-200 px-2 py-0.5 text-xxs font-medium text-yellow-800">
-                                {{ $state['queued_player_name'] }} queued
+                                In line: {{ implode(', ', $state['queue_names']) }}
                             </div>
                         @endif
                     </button>
@@ -325,6 +415,27 @@
                     @endforeach
                 </div>
             </div>
+
+            {{-- Who's already out --}}
+            @if (count($exitOrderNames) > 0)
+                <div class="rounded-lg bg-green-50 border border-green-200 p-3">
+                    <div class="text-xs font-medium text-green-700 mb-1">Out the door:</div>
+                    <div class="text-xs text-green-800">{{ implode(' → ', $exitOrderNames) }}</div>
+                </div>
+            @endif
+
+            {{-- Leave the house --}}
+            <button
+                @click="leaveHouse()"
+                wire:loading.attr="disabled"
+                :class="inDanger ? 'border-red-500 bg-red-500 text-white hover:bg-red-600 animate-pulse' : 'border-green-500 bg-green-500 text-white hover:bg-green-600'"
+                class="w-full rounded-lg border-2 px-4 py-3 text-sm font-bold transition-all"
+            >
+                🚪 Leave the house — done for the morning!
+            </button>
+            <p class="text-center text-xxs text-gray-400">
+                The earlier you leave, the bigger your bonus. Once you're out, you can't come back in.
+            </p>
         </div>
     @else
         {{-- ROOM VIEW --}}
