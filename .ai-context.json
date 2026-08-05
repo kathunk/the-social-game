@@ -48,7 +48,7 @@
         "app/Livewire/": "Livewire components",
         "app/Livewire/Concerns/": "Livewire traits (HandlesClassActions)",
         "app/Support/FormBuilder.php": "Fluent UI builder used by every Challenge/Modifier",
-        "app/Support/FormBuilderTraits/": "Per-game-mode FormBuilder extensions for custom UI",
+        "app/Support/FormBuilderElements/": "Per-game-mode form element providers, auto-discovered by FormElementRegistry",
         "resources/views/components/game-components/": "Generic game UI (form.blade.php is the renderer)",
         "resources/views/components/game-components/custom-form-elements/": "Per-game-mode custom UI components",
         "tests/Feature/": "Feature tests organized by Challenges/, Modifiers/, etc.",

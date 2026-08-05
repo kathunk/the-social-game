@@ -14,7 +14,7 @@ Pick one (delete the others):
 - [ ] **New Challenge** — adds `app/Challenges/<Mode>/<Name>.php` and a test in `tests/Feature/Challenges/`
 - [ ] **New Modifier** — adds `app/Modifiers/<Mode>/<Name>.php` and a test in `tests/Feature/Modifiers/`
 - [ ] **Change to an existing Challenge or Modifier** — change is scoped to a single file under `app/Challenges/<Mode>/` or `app/Modifiers/<Mode>/`
-- [ ] **New custom UI for a challenge/modifier** — adds a method on a per-mode `FormBuilderTraits/<Mode>` trait + a blade in `custom-form-elements/`
+- [ ] **New custom UI for a challenge/modifier** — adds a method on a per-mode `FormBuilderElements/<Mode>` provider (auto-discovered, no FormBuilder edit) + a blade in `custom-form-elements/`
 - [ ] **New game-mode-specific Verbs event** — adds to `app/Events/<Mode>/`
 - [ ] **Bug fix scoped to one challenge/modifier**
 - [ ] **Other** — explain below and tag @johnrudolph for design alignment before reviewing

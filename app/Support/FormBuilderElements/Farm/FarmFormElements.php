@@ -1,22 +1,25 @@
 <?php
 
-namespace App\Support\FormBuilderTraits\Farm;
+namespace App\Support\FormBuilderElements\Farm;
 
 use App\Models\Player;
 use App\Models\Team;
+use App\Support\FormBuilder;
+use App\Support\FormElementProvider;
 use Illuminate\Support\Collection;
 
-trait FarmFormElements
+class FarmFormElements implements FormElementProvider
 {
     public function farmMap(
+        FormBuilder $form,
         array $spaces,
         Player $player,
         array $accessible_spaces,
         array $scoutable_spaces,
         int $actions,
         ?array $player_space = null,
-    ) {
-        $this->elements[] = [
+    ): void {
+        $form->addElement([
             'type' => 'farm_map',
             'property_name' => 'farm_map',
             'spaces' => $spaces,
@@ -27,12 +30,11 @@ trait FarmFormElements
             'validation_messages' => ['required' => 'Space is required', 'in' => 'Space is invalid'],
             'scoutable_spaces' => $scoutable_spaces,
             'actions' => $actions,
-        ];
-
-        return $this;
+        ]);
     }
 
     public function farmActions(
+        FormBuilder $form,
         bool $can_bank_grain,
         array $player_actions,
         array $player_space,
@@ -60,11 +62,11 @@ trait FarmFormElements
         array $all_leader_ids,
         array $silo_seize_data,
         bool $can_see_history,
-    ) {
+    ): void {
         // Generate sprite configuration for the player's current space
         $sprite_config = $this->buildSpaceSpriteConfig($player_space, $player, $can_see_stash);
 
-        $this->elements[] = [
+        $form->addElement([
             'type' => 'farm_actions',
             'property_name' => 'farm_actions',
             'actions' => $player_actions,
@@ -88,7 +90,7 @@ trait FarmFormElements
             'can_create_stash' => $can_create_stash,
             'can_see_stash' => $can_see_stash,
             'can_deposit_stash' => $can_deposit_stash,
-        ];
+        ]);
 
         if ($player_space['field_status']['level'] > 0) {
             $is_mature = $player_space['field_status']['stage'] === 'mature_1' || $player_space['field_status']['stage'] === 'mature_2' || $player_space['field_status']['stage'] === 'mature_3';
@@ -96,8 +98,8 @@ trait FarmFormElements
                 ? 'mature'
                 : $player_space['field_status']['stage'];
 
-            $this->divider();
-            $this->title('Field')
+            $form->divider();
+            $form->title('Field')
                 ->subtitle('📈 Level: '.$player_space['field_status']['level'])
                 ->subtitle('📜 Owner: '.Team::find($player_space['field_status']['owner_team_id'])->name)
                 ->subtitle('🌱 Stage: '.$stage_display)
@@ -133,7 +135,7 @@ trait FarmFormElements
         }
 
         if ($player_space['npc'] === 'professor') {
-            $this->divider()
+            $form->divider()
                 ->title('Welcome to the academy')
                 ->subtitle('In exchange for 20 grain, you can reset your skills, and reallocate your XP to other skills.')
                 ->when($can_reset_skills, function ($builder) {
@@ -146,7 +148,7 @@ trait FarmFormElements
         if ($player_space['npc'] === 'broker') {
             $teams = $player->game->teams()->with('players')->get();
 
-            $this->divider()
+            $form->divider()
                 ->title('Welcome to the grain exchange')
                 ->subtitle('Permanently bank your grain in exchange for victory points.')
                 ->when($can_bank_grain, function ($builder) use ($player_actions) {
@@ -196,7 +198,7 @@ trait FarmFormElements
             $withdrawable = min($amount_in_silo, $player_capacity - $player_grain);
             $depositable = min($player_grain, $silo_capacity - $amount_in_silo);
 
-            $this->divider()
+            $form->divider()
                 ->title('Silo')
                 ->subtitle('📈 Level: '.$player_space['silo_status']['level'])
                 ->subtitle('📜 Owner: '.Team::find($player_space['silo_status']['owner_team_id'])->name)
@@ -220,7 +222,7 @@ trait FarmFormElements
                         default => '',
                     };
 
-                    $this->select(
+                    $builder->select(
                         label: 'Withdraw amount',
                         property_name: 'withdraw_amount',
                         validation_rules: 'required|in:'.implode(',', collect(range(1, $withdrawable))->toArray()),
@@ -235,7 +237,7 @@ trait FarmFormElements
                         ->endGroup();
                 })
                 ->when($can_deposit_silo, function ($builder) use ($depositable) {
-                    $this->select(
+                    $builder->select(
                         label: 'Deposit amount',
                         property_name: 'deposit_amount',
                         validation_rules: 'required|in:'.implode(',', collect(range(1, $depositable))->toArray()),
@@ -250,7 +252,7 @@ trait FarmFormElements
                         ->endGroup();
                 })
                 ->when($can_upgrade_silo, function ($builder) {
-                    $this->buttonGroup()
+                    $builder->buttonGroup()
                         ->button('Upgrade 💪', 'upgradeSilo')
                         ->endGroup();
                 })
@@ -262,14 +264,14 @@ trait FarmFormElements
                         default => '',
                     };
 
-                    $this->buttonGroup()
+                    $builder->buttonGroup()
                         ->button($cost_prefix.' Seize', 'seizeSilo')
                         ->endGroup();
                 });
         }
 
         if ($player_space['trap_status']['level'] > 0) {
-            $this->divider()
+            $form->divider()
                 ->title('Trap')
                 ->when($player_space['trap_status']['status'] === 'set', function ($builder) use ($player_space) {
                     $builder
@@ -288,7 +290,7 @@ trait FarmFormElements
             $player_grain = $player_actions['grain'];
             $stash_owner_player = Player::find($player_space['stash_status']['player_owner_id']);
 
-            $this->divider()
+            $form->divider()
                 ->title('Hidden stash')
                 ->subtitle('📜 Created by: '.($stash_owner_player?->name ?: 'A brave wanderer'))
                 ->subtitle('🌾 Amount: '.$amount_in_stash)
@@ -336,7 +338,7 @@ trait FarmFormElements
                 default => '',
             };
 
-            $this->buttonGroup()
+            $form->buttonGroup()
                 ->when($can_plant_field, function ($builder) use ($plant_cost) {
                     $builder->button('Plant field '.$plant_cost, 'plantField');
                 })
@@ -360,8 +362,6 @@ trait FarmFormElements
                 })
                 ->endGroup();
         }
-
-        return $this;
     }
 
     /**

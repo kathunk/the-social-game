@@ -9,7 +9,7 @@ app/Modifiers/<Mode>/              # modifiers
 app/Events/<Mode>/                 # mode-specific Verbs events
 database/seeders/<Mode>Seeder.php  # seed templates / game modes
 resources/views/components/game-components/custom-form-elements/  # any custom UI blade components (no per-mode subfolders today; named by element type)
-app/Support/FormBuilderTraits/<Mode>/  # per-mode FormBuilder methods (when custom UI is needed)
+app/Support/FormBuilderElements/<Mode>/  # per-mode form element providers, auto-discovered (when custom UI is needed)
 ```
 
 To list everything in a mode at any moment: `ls app/Challenges/<Mode>/ app/Modifiers/<Mode>/ app/Events/<Mode>/`.
@@ -43,7 +43,7 @@ Players construct and guess tier lists.
 - Challenges: `app/Challenges/TierList/` (TierListConstructionPhase, TierListGuess)
 - Modifiers: `app/Modifiers/TierList/` (TierListModifier)
 - Events: `app/Events/TierList/`
-- Custom UI: `app/Support/FormBuilderTraits/TierList/TierListFormElements.php` → `resources/views/components/game-components/custom-form-elements/tier-list-guess.blade.php`
+- Custom UI: `app/Support/FormBuilderElements/TierList/TierListFormElements.php` → `resources/views/components/game-components/custom-form-elements/tier-list-guess.blade.php`
 - Seeder: `database/seeders/TierListSeeder.php`
 
 ### Farm (`Farm`)
@@ -53,7 +53,7 @@ Grid-based simulation with movement, harvesting, building, and team coordination
 - Challenges: `app/Challenges/Farm/`
 - Modifiers: `app/Modifiers/Farm/` (FarmTeams, FarmActions, FarmSkills, FarmMap)
 - Events: `app/Events/Farm/`
-- Custom UI: `app/Support/FormBuilderTraits/Farm/FarmFormElements.php` → blade components for `farm-map`, `farm-actions`, and `farm-space-elements/{field,stash,trap}`
+- Custom UI: `app/Support/FormBuilderElements/Farm/FarmFormElements.php` → blade components for `farm-map`, `farm-actions`, and `farm-space-elements/{field,stash,trap}`
 - Seeder: `database/seeders/FarmSeeder.php`
 
 ### ChooseSafetyOrDanger
@@ -81,6 +81,6 @@ These files do **not** belong to a single game mode. Touching them is a trip-wir
 
 1. Create `app/Challenges/<NewMode>/`, `app/Modifiers/<NewMode>/`, `app/Events/<NewMode>/`.
 2. If shared logic is needed across challenges in the mode, create `app/Challenges/Support/<NewMode>/`.
-3. If custom UI is needed, add `app/Support/FormBuilderTraits/<NewMode>/<Name>FormElements.php` and the matching blade components under `resources/views/components/game-components/custom-form-elements/`.
+3. If custom UI is needed, add a `FormElementProvider` class at `app/Support/FormBuilderElements/<NewMode>/<Name>FormElements.php` (auto-discovered by `FormElementRegistry` — no FormBuilder edit) and the matching blade components under `resources/views/components/game-components/custom-form-elements/`.
 4. Add `database/seeders/<NewMode>Seeder.php` and register it in `DatabaseSeeder` if it should run by default.
 5. Each new challenge/modifier auto-registers via `ChallengeRegistry` / `ModifierRegistry` based on its directory location — no manual wiring.

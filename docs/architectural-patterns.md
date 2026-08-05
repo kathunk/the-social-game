@@ -73,7 +73,8 @@ app/
 └── Support/
     ├── FormBuilder.php              # fluent UI builder
     ├── FrontendComponentProcessor.php
-    └── FormBuilderTraits/
+    ├── FormElementRegistry.php          # auto-discovers form element providers
+    └── FormBuilderElements/             # per-mode providers (implement FormElementProvider)
         ├── Farm/FarmFormElements.php
         └── TierList/TierListFormElements.php
 ```

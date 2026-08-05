@@ -1,21 +1,24 @@
 <?php
 
-namespace App\Support\FormBuilderTraits\MorningRoutine;
+namespace App\Support\FormBuilderElements\MorningRoutine;
 
 use App\Challenges\MorningRoutine\Rewards\RewardRegistry;
 use App\Models\Player;
+use App\Support\FormBuilder;
+use App\Support\FormElementProvider;
 use Illuminate\Support\Collection;
 
-trait MorningRoutineFormElements
+class MorningRoutineFormElements implements FormElementProvider
 {
     public function morningRoutine(
+        FormBuilder $form,
         Player $player,
         array $challenge_data,
         array $rooms,
         Collection $players,
         int $seconds_per_mess_clean,
         ?int $ends_at_ts = null,
-    ): static {
+    ): void {
         $players_by_id = $players->keyBy('id');
 
         $current_location = $challenge_data['player_locations'][$player->id] ?? 'hallway';
@@ -125,7 +128,7 @@ trait MorningRoutineFormElements
         // Cleaning state for current player
         $current_cleaning = $cleaning_state[$player->id] ?? null;
 
-        $this->elements[] = [
+        $form->addElement([
             'type' => 'morning_routine',
             'current_location' => $current_location,
             'current_room_mess' => $current_location !== 'hallway' ? ($room_mess[$current_location] ?? 0) : 0,
@@ -150,16 +153,15 @@ trait MorningRoutineFormElements
             'exit_bonus' => $exit_bonus,
             'exit_order_names' => $exit_order_names,
             'still_inside_names' => $still_inside_names,
-        ];
-
-        return $this;
+        ]);
     }
 
     public function morningRoutineResults(
+        FormBuilder $form,
         Player $player,
         array $round_data,
         Collection $players,
-    ): static {
+    ): void {
         $players_by_id = $players->keyBy('id');
         $point_log = collect($round_data['point_log'] ?? []);
         $taken_rewards = $round_data['taken_rewards'] ?? [];
@@ -207,12 +209,10 @@ trait MorningRoutineFormElements
             ->values()
             ->toArray();
 
-        $this->elements[] = [
+        $form->addElement([
             'type' => 'morning_routine_results',
             'results' => $results,
             'current_player_name' => $player->name,
-        ];
-
-        return $this;
+        ]);
     }
 }
