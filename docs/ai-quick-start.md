@@ -57,12 +57,12 @@ Game-specific events live under `app/Events/<GameMode>/`. Game-agnostic lifecycl
 
 If a built-in FormBuilder method doesn't fit (e.g. a drag-drop ranker, a map, a complex SVG view), add a custom element. Keep it scoped to one game mode.
 
-1. Add a method to a per-mode FormBuilder trait at `app/Support/FormBuilderTraits/<GameMode>/<Name>FormElements.php`. The method appends an element array with a unique `type` (snake_case) onto `$this->elements`. Pass all data the blade will need.
-2. Register the trait on `FormBuilder` (`use <Name>FormElements;` at the top of `app/Support/FormBuilder.php`).
+1. Add a provider class at `app/Support/FormBuilderElements/<GameMode>/<Name>FormElements.php` implementing the `App\Support\FormElementProvider` marker interface. Each public method takes `FormBuilder $form` as its first parameter and appends an element array with a unique `type` (snake_case) via `$form->addElement([...])`. Pass all data the blade will need.
+2. There is **no registration step** — `FormElementRegistry` auto-discovers every provider in that directory (same pattern as `ChallengeRegistry`), and `FormBuilder::__call` resolves the method by name. Your challenge calls `$this->form()->yourMethod(...)` as if the method lived on FormBuilder. Do not edit `FormBuilder.php`.
 3. Create the blade at `resources/views/components/game-components/custom-form-elements/<kebab-type>.blade.php`. Accept `@props(['element'])`, extract data from `$element`, render the UI. Use `wire:model="round_properties.{{ $class_key }}.{{ $element['property_name'] }}"` for two-way binding.
 4. `form.blade.php` will pick it up automatically by converting the `type` to kebab-case and rendering via `<x-dynamic-component>`.
 
-**Canonical references:** `app/Support/FormBuilderTraits/TierList/TierListFormElements.php` + `resources/views/components/game-components/custom-form-elements/tier-list-guess.blade.php`.
+**Canonical references:** `app/Support/FormBuilderElements/TierList/TierListFormElements.php` + `resources/views/components/game-components/custom-form-elements/tier-list-guess.blade.php`.
 
 ## Recipe: change scoring without changing UI
 
