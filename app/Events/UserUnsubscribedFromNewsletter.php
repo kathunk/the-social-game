@@ -11,7 +11,9 @@ class UserUnsubscribedFromNewsletter extends Event
 
     public function handle()
     {
-        $this->user()->update([
+        $user = $this->user();
+
+        $user->update([
             'subscribed_to_newsletter' => false,
         ]);
     }

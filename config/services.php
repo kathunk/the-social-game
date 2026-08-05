@@ -73,4 +73,8 @@ return [
         'bot_username' => env('TELEGRAM_BOT_USERNAME'),
         'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
     ],
+
+    'catacombian' => [
+        'newsletter_token' => env('CATACOMBIAN_NEWSLETTER_TOKEN'),
+    ],
 ];

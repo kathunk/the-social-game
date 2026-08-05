@@ -37,13 +37,6 @@ class CreateGame extends Component
         return auth()->user();
     }
 
-    public function mount()
-    {
-        if (! $this->user->is_member) {
-            return redirect()->route('marketing-page');
-        }
-    }
-
     public function createGame()
     {
         $this->validate();

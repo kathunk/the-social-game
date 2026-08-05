@@ -139,7 +139,7 @@ new #[Layout("components.layouts.auth")] class extends Component {
         <div class="flex items-center justify-between">
             <flux:checkbox
                 wire:model="subscribed_to_newsletter"
-                :label="__('Email me when something cool drops')"
+                :label="__('Let me know when Catacombian releases a new game')"
             />
         </div>
 

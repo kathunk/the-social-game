@@ -23,7 +23,7 @@ class TierListSeeder extends Seeder
         Verbs::commitImmediately();
 
         $mode_id = GameModeAdded::fire(
-            name: 'Tier List',
+            name: 'Hot Takes',
             description: 'Rank stuff',
             pre_game_lobby_message: '<h1>Rank stuff</h1><p>Rank stuff</p>',
             type: 'individual',
@@ -38,7 +38,7 @@ class TierListSeeder extends Seeder
 
         $template_id = GameTemplateAdded::fire(
             game_mode_id: $mode_id,
-            name: 'Tier List Template 1',
+            name: 'Hot Takes Template 1',
             type: 'individual',
             is_public: true,
             team_names: [],
