@@ -458,3 +458,22 @@ it('awards descending exit bonuses and penalizes players stranded in rooms', fun
     $stranded = collect($players[2]->fresh()->state()->score_history)->last();
     expect($stranded['description'])->toContain('Still in the study');
 });
+
+it('pre-rolls gamblers fallacy so the outcome is stored in state, not decided at replay', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupMorningRoutine($this, 2);
+
+    mutateState($challenge, fn ($state) => $state->challenge_data['available_rewards']['study'] = ['gamblers_fallacy']);
+
+    callAction($this, $players[0], $challenge, 'enterRoom', ['room' => 'study'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'takeReward', ['reward_key' => 'gamblers_fallacy'])->assertHasNoErrors();
+    callAction($this, $players[0], $challenge, 'exitRoom')->assertHasNoErrors();
+
+    $challenge->refresh();
+    $roll = $challenge->challenge_data['active_effects'][$players[0]->id]['gamblers_fallacy_roll'];
+    expect(in_array($roll, [3, -1], true))->toBeTrue();
+
+    $challenge->end();
+
+    // gamblers_fallacy itself is worth 0 points; the stored roll resolves at the end
+    expect($players[0]->fresh()->score)->toBe($roll);
+});

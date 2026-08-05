@@ -295,8 +295,17 @@ class MorningRoutineRound extends BaseChallengeClass
             $reward_key = $params['reward_key'] ?? null;
             $room = $this->challenge->challenge_data['player_locations'][$player->id] ?? null;
 
-            if ($room === null || $room === 'hallway') {
+            if ($room === null || $room === 'hallway' || $room === 'left') {
                 throw new \RuntimeException('You must be in a room to take a reward.');
+            }
+
+            // Roll any randomness the effect needs BEFORE firing, so the
+            // event replays deterministically (see RewardEffect::prepareRng)
+            $reward = RewardRegistry::find($reward_key ?? '');
+            $rng = null;
+            if ($reward?->hasEffect()) {
+                $effect_class = $reward->effect_class;
+                $rng = (new $effect_class)->prepareRng($player->id, $this->challenge->challenge_data);
             }
 
             PlayerTookReward::fire(
@@ -305,6 +314,7 @@ class MorningRoutineRound extends BaseChallengeClass
                 player_id: $player->id,
                 room: $room,
                 reward_key: $reward_key,
+                rng: $rng,
             );
 
             Verbs::commit();

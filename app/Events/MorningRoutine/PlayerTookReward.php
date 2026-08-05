@@ -18,6 +18,12 @@ class PlayerTookReward extends Event
 
     public string $reward_key;
 
+    /**
+     * Pre-rolled randomness from the effect's prepareRng(), rolled by the
+     * challenge action before firing so event replay is deterministic.
+     */
+    public ?array $rng = null;
+
     public function validate()
     {
         $reward = RewardRegistry::find($this->reward_key);
@@ -86,7 +92,7 @@ class PlayerTookReward extends Event
         if ($reward->hasEffect()) {
             $effect_class = $reward->effect_class;
             $effect = new $effect_class;
-            $challenge->challenge_data = $effect->onTaken($this->player_id, $challenge->challenge_data);
+            $challenge->challenge_data = $effect->onTaken($this->player_id, $challenge->challenge_data, $this->rng);
         }
     }
 

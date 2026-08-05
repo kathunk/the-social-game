@@ -8,7 +8,7 @@ namespace App\Challenges\MorningRoutine\Rewards\Effects;
  */
 class MonocleEffect extends RewardEffect
 {
-    public function onTaken(int $player_id, array $challenge_data): array
+    public function onTaken(int $player_id, array $challenge_data, ?array $rng = null): array
     {
         return $this->arm($challenge_data, $player_id, 'monocle_xray');
     }

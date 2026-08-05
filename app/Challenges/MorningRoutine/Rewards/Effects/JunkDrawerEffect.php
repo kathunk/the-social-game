@@ -6,7 +6,7 @@ use App\Challenges\MorningRoutine\Rewards\RewardRegistry;
 
 class JunkDrawerEffect extends RewardEffect
 {
-    public function onTaken(int $player_id, array $challenge_data): array
+    public function prepareRng(int $player_id, array $challenge_data): ?array
     {
         $available = $challenge_data['available_rewards']['kitchen'] ?? [];
         $taken_keys = array_keys($challenge_data['taken_rewards']['kitchen'] ?? []);
@@ -17,10 +17,19 @@ class JunkDrawerEffect extends RewardEffect
             ->values();
 
         if ($candidates->isEmpty()) {
-            return $challenge_data;
+            return null;
         }
 
-        $pull = $candidates->random();
+        return ['pull_key' => $candidates->random()->key];
+    }
+
+    public function onTaken(int $player_id, array $challenge_data, ?array $rng = null): array
+    {
+        $pull = isset($rng['pull_key']) ? RewardRegistry::find($rng['pull_key']) : null;
+
+        if ($pull === null) {
+            return $challenge_data;
+        }
 
         // Credit points and mess from the pulled reward
         $challenge_data = $this->credit($challenge_data, $player_id, $pull->points, "Junk drawer pull: {$pull->name}");

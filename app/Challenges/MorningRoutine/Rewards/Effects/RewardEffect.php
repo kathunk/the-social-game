@@ -22,9 +22,24 @@ use App\States\ChallengeState;
 abstract class RewardEffect
 {
     /**
-     * Called immediately when a player takes this reward.
+     * Roll any randomness this effect needs, BEFORE the event fires.
+     *
+     * Verbs replays events to rebuild state, so nothing inside an event's
+     * apply() (which calls the other hooks here) may be random — a replay
+     * would roll differently than what players saw. The challenge action
+     * calls this pre-fire and stuffs the result into the event payload; it
+     * arrives back in onTaken() as $rng, deterministic on every replay.
      */
-    public function onTaken(int $player_id, array $challenge_data): array
+    public function prepareRng(int $player_id, array $challenge_data): ?array
+    {
+        return null;
+    }
+
+    /**
+     * Called immediately when a player takes this reward.
+     * $rng is the pre-rolled payload from prepareRng(), if any.
+     */
+    public function onTaken(int $player_id, array $challenge_data, ?array $rng = null): array
     {
         return $challenge_data;
     }
