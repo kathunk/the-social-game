@@ -154,4 +154,65 @@ trait MorningRoutineFormElements
 
         return $this;
     }
+
+    public function morningRoutineResults(
+        Player $player,
+        array $round_data,
+        Collection $players,
+    ): static {
+        $players_by_id = $players->keyBy('id');
+        $point_log = collect($round_data['point_log'] ?? []);
+        $taken_rewards = $round_data['taken_rewards'] ?? [];
+        $exit_order = $round_data['exit_order'] ?? [];
+
+        $results = $players->map(function ($p) use ($player, $round_data, $point_log, $taken_rewards, $exit_order) {
+            $inventory = [];
+            foreach ($taken_rewards as $room => $rewards_in_room) {
+                foreach ($rewards_in_room as $reward_key => $taker_id) {
+                    if ($taker_id != $p->id) {
+                        continue;
+                    }
+                    $reward = RewardRegistry::find($reward_key);
+                    if ($reward !== null) {
+                        $inventory[] = [
+                            'name' => $reward->name,
+                            'room' => $room,
+                            'points' => $reward->points,
+                            'effect_description' => $reward->effect_description,
+                        ];
+                    }
+                }
+            }
+
+            $ledger = $point_log
+                ->filter(fn ($entry) => $entry['player_id'] == $p->id)
+                ->values()
+                ->all();
+
+            $exit_position = array_search($p->id, $exit_order, true);
+            $location = $round_data['player_locations'][$p->id] ?? 'hallway';
+
+            return [
+                'name' => $p->name,
+                'is_current_player' => $p->id == $player->id,
+                'total' => ($round_data['player_points'][$p->id] ?? 0)
+                    - ($round_data['player_penalties'][$p->id] ?? 0),
+                'inventory' => $inventory,
+                'ledger' => $ledger,
+                'exit_position' => $exit_position === false ? null : $exit_position + 1,
+                'stranded_in' => ($location !== 'hallway' && $location !== 'left') ? $location : null,
+            ];
+        })
+            ->sortByDesc('total')
+            ->values()
+            ->toArray();
+
+        $this->elements[] = [
+            'type' => 'morning_routine_results',
+            'results' => $results,
+            'current_player_name' => $player->name,
+        ];
+
+        return $this;
+    }
 }

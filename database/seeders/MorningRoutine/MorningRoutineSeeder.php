@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\MorningRoutine;
 
+use App\Challenges\MorningRoutine\MorningRoutineResults;
 use App\Challenges\MorningRoutine\MorningRoutineRound;
 use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
@@ -42,6 +43,10 @@ class MorningRoutineSeeder extends Seeder
                 [
                     'challenge_keys' => [MorningRoutineRound::key()],
                     'duration' => 5, // 5 minutes
+                ],
+                [
+                    'challenge_keys' => [MorningRoutineResults::key()],
+                    'duration' => 3, // recap screen before the game wraps up
                 ],
             ],
             modifiers: [],

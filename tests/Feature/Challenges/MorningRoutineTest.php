@@ -477,3 +477,43 @@ it('pre-rolls gamblers fallacy so the outcome is stored in state, not decided at
     // gamblers_fallacy itself is worth 0 points; the stored roll resolves at the end
     expect($players[0]->fresh()->score)->toBe($roll);
 });
+
+it('shows the results recap with inventory and ledger after the round ends', function () {
+    Verbs::commitImmediately();
+
+    $this->mockGameTemplate(
+        challenges: [
+            ['challenge_keys' => [MorningRoutineRound::key()], 'duration' => 5],
+            ['challenge_keys' => [\App\Challenges\MorningRoutine\MorningRoutineResults::key()], 'duration' => 3],
+        ],
+        type: 'individual',
+    );
+
+    $this->createGame();
+    $player_0 = $this->createPlayer();
+    $player_1 = $this->createPlayer();
+    $this->game->start();
+
+    $challenge = Challenge::first();
+
+    mutateState($challenge, fn ($state) => $state->challenge_data['available_rewards']['bathroom'] = ['hot_shave']);
+
+    callAction($this, $player_0, $challenge, 'enterRoom', ['room' => 'bathroom'])->assertHasNoErrors();
+    callAction($this, $player_0, $challenge, 'takeReward', ['reward_key' => 'hot_shave'])->assertHasNoErrors();
+    callAction($this, $player_0, $challenge, 'exitRoom')->assertHasNoErrors();
+    callAction($this, $player_0, $challenge, 'leaveHouse')->assertHasNoErrors();
+
+    // Progress to the results round
+    $challenge->refresh();
+    $challenge->end();
+    $results_challenge = $this->game->fresh()->challenges->firstWhere('status', 'upcoming');
+    $results_challenge->start();
+
+    $this->actingAs($player_0->user);
+
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->assertSee('How the morning went')
+        ->assertSee('Hot shave')
+        ->assertSee('#1 out the door')
+        ->assertSee('Out the door #1');
+});
