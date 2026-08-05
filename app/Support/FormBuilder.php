@@ -9,8 +9,8 @@ use App\Modifiers\BaseModifierClass;
 use Illuminate\Support\Collection;
 
 /**
- * Per-game-mode element methods (e.g. ->morningRoutine(), ->farmMap(),
- * ->elephantBoard()) are NOT defined here. They live on auto-discovered
+ * Per-game-mode element methods (e.g. ->farmMap(), ->elephantBoard())
+ * are NOT defined here. They live on auto-discovered
  * FormElementProvider classes under app/Support/FormBuilderElements/ and
  * are resolved through __call — see FormElementRegistry. Adding a new game
  * mode's custom UI should never require editing this file.

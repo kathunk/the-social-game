@@ -3,7 +3,6 @@
 use App\Support\FormBuilder;
 use App\Support\FormBuilderElements\ElephantInTheRoom\ElephantFormElements;
 use App\Support\FormBuilderElements\Farm\FarmFormElements;
-use App\Support\FormBuilderElements\MorningRoutine\MorningRoutineFormElements;
 use App\Support\FormBuilderElements\TierList\TierListFormElements;
 use App\Support\FormElementRegistry;
 
@@ -13,8 +12,6 @@ it('auto-discovers every game mode\'s form element provider methods', function (
     expect($map['tierListGuess'])->toBe(TierListFormElements::class);
     expect($map['farmMap'])->toBe(FarmFormElements::class);
     expect($map['farmActions'])->toBe(FarmFormElements::class);
-    expect($map['morningRoutine'])->toBe(MorningRoutineFormElements::class);
-    expect($map['morningRoutineResults'])->toBe(MorningRoutineFormElements::class);
     expect($map['elephantBoard'])->toBe(ElephantFormElements::class);
 });
 
