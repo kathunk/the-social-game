@@ -20,6 +20,7 @@ These are the rules the human owner of this repo will reject PRs over:
 2. **Livewire + Alpine.js only.** Do not introduce React, Vue, htmx, jQuery, or any other frontend framework.
 3. **Do not modify generic infrastructure to make a feature work.** New behavior lives inside a specific Challenge or Modifier class (or a `Support/<GameMode>/` trait if shared across challenges in *that one* game mode). If your only path forward seems to require editing the trip-wire files below, **STOP and ask the human first** — the answer is almost always "find a different design".
 4. **Every new feature ships with Livewire tests** that prove frontend integration works end-to-end. Unit tests alone are not sufficient. Follow patterns in `tests/Feature/`.
+5. **No randomness (and no random-dependent decisions) inside a Verbs event's `validate()` or `apply()`.** Verbs replays events to rebuild state, so anything non-deterministic inside an event produces different state on replay than what players actually saw. Roll dice / shuffle / pick randomly *before* firing the event and pass the result in the event's payload. Precedents: `ChallengeStarted` receives its randomized `challenge_data` pre-computed; MorningRoutine's `RewardEffect::prepareRng()` rolls in the action and ships the result via `PlayerTookReward->rng`.
 
 ## Trip-wire files — STOP and ask before modifying
 

@@ -140,6 +140,10 @@ Read `app/Events/ChallengeEnded.php` for a representative example. Events:
 
 **Top-level events** (`app/Events/*.php`) are game-agnostic and represent the core lifecycle. **Don't add new top-level events for game-specific behavior** — that's a red flag. Add game-specific events under `app/Events/<GameMode>/`.
 
+### Determinism rule
+
+`validate()` and `apply()` must be deterministic: Verbs replays events to rebuild state, and a random call inside an event rolls differently on replay than it did live. If an event's outcome involves randomness, roll it **before** `::fire()` and pass the result as event data — the payload is stored, so replay sees the same roll. Examples: `ChallengeStarted` is fired with its randomized `challenge_data` already computed; MorningRoutine effects implement `prepareRng()` which the `takeReward` action calls pre-fire, shipping the roll in `PlayerTookReward->rng`. (`now()` in cosmetic fields like toast timestamps is tolerated; decisions must not depend on it.)
+
 ## State objects
 
 States live in `app/States/`. They are in-memory snapshots that Verbs maintains for fast event application without round-tripping to MySQL.
