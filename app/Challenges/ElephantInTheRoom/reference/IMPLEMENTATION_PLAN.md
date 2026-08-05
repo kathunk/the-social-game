@@ -258,4 +258,4 @@ Coverage checklist:
 4. ~~Match ceiling~~ — confirmed: 20 minutes.
 5. **Still open: sign-off on the one `FormBuilder.php` line** (risk register item 5) — assumed yes given precedent, will flag in the PR.
 
-**Ready to build. Next step: PR 1 (server core) on John's go.**
+**Built and shipped as a single PR at John's request: [#150](https://github.com/kathunk/the-social-game/pull/150).**
