@@ -15,12 +15,13 @@
 
 @once
     <script>
-        // Background animation for the elephant card: a FULL grid of large
-        // game-colored tiles, edge to edge with no gaps. Every beat a random
-        // row or column slides one cell — up, down, left, or right — with the
-        // same snappy ease as slides on the real board. Because the grid is
-        // packed, every slide is a true push: the far tile is shoved off the
-        // edge (the card clips it) while a fresh tile slides in behind.
+        // Background animation for the elephant card, obeying the game's one
+        // law of motion: nothing moves unless a tile pushes it. The board
+        // starts EMPTY. Every beat, one new tile slides in from a random
+        // edge; only the contiguous run of tiles in front of it shifts one
+        // cell deeper (the real cascade rule). The card gradually fills, and
+        // once a line is full the next push shoves the far tile off the
+        // clipped edge — a true push, never a drift.
         window.elephantCardTiles = function () {
             const PITCH = 56; // grid cell: 48px tile + 8px breathing room
             const COLORS = ['#FF6857', '#007393'];
@@ -38,15 +39,18 @@
                     this.cols = Math.ceil(width / PITCH) + 1;
                     this.rows = Math.ceil(height / PITCH) + 1;
 
-                    for (let r = 0; r < this.rows; r++) {
-                        for (let c = 0; c < this.cols; c++) {
-                            this.tiles.push(this.makeTile(c, r));
+                    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                        // No animation: show the filled end-state instead
+                        for (let r = 0; r < this.rows; r++) {
+                            for (let c = 0; c < this.cols; c++) {
+                                this.tiles.push(this.makeTile(c, r));
+                            }
                         }
+
+                        return;
                     }
 
-                    if (! window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                        this.timer = setInterval(() => this.slideOnce(), 1000);
-                    }
+                    this.timer = setInterval(() => this.pushOnce(), 1000);
                 },
 
                 makeTile(c, r) {
@@ -58,40 +62,57 @@
                     };
                 },
 
-                slideOnce() {
+                pushOnce() {
                     const horizontal = Math.random() < 0.5;
-                    const delta = Math.random() < 0.5 ? 1 : -1;
+                    const lineLength = horizontal ? this.cols : this.rows;
+                    const lineIndex = Math.floor(Math.random() * (horizontal ? this.rows : this.cols));
+                    const fromStart = Math.random() < 0.5; // left/top vs right/bottom entry
 
-                    if (horizontal) {
-                        const row = Math.floor(Math.random() * this.rows);
-                        this.tiles.filter((t) => t.r === row).forEach((t) => { t.c += delta; });
-                        this.cull();
-                        // The grid stays packed: every push slides a fresh
-                        // tile in behind the row
-                        const entry = this.makeTile(delta === 1 ? -1 : this.cols, row);
-                        this.tiles.push(entry);
-                        setTimeout(() => { entry.c += delta; }, 30);
-                    } else {
-                        const col = Math.floor(Math.random() * this.cols);
-                        this.tiles.filter((t) => t.c === col).forEach((t) => { t.r += delta; });
-                        this.cull();
-                        const entry = this.makeTile(col, delta === 1 ? -1 : this.rows);
-                        this.tiles.push(entry);
-                        setTimeout(() => { entry.r += delta; }, 30);
-                    }
-                },
+                    // Cell at depth i along the slide path (0 = the entry
+                    // cell; -1 and lineLength resolve to off-board cells)
+                    const cellAt = (i) => {
+                        const pos = fromStart ? i : lineLength - 1 - i;
 
-                // Drop tiles that have fully slid past the clipped edge —
-                // after their exit transition finishes
-                cull() {
-                    const gone = this.tiles.filter(
-                        (t) => t.c < -1 || t.c > this.cols || t.r < -1 || t.r > this.rows
-                    );
-                    if (gone.length) {
-                        setTimeout(() => {
-                            this.tiles = this.tiles.filter((t) => ! gone.includes(t));
-                        }, 500);
+                        return horizontal ? { c: pos, r: lineIndex } : { c: lineIndex, r: pos };
+                    };
+
+                    const tileAt = (i) => {
+                        const cell = cellAt(i);
+
+                        return this.tiles.find((t) => ! t.gone && t.c === cell.c && t.r === cell.r);
+                    };
+
+                    // The contiguous occupied run in front of the entry —
+                    // the only tiles the new tile actually pushes
+                    let run = 0;
+                    while (run < lineLength && tileAt(run)) run++;
+
+                    // Shift the run one cell deeper, deepest first. A full
+                    // line means the far tile is pushed off the board.
+                    for (let i = run - 1; i >= 0; i--) {
+                        const tile = tileAt(i);
+                        const target = cellAt(i + 1);
+                        tile.c = target.c;
+                        tile.r = target.r;
+
+                        if (i + 1 >= lineLength) {
+                            tile.gone = true;
+                            setTimeout(() => {
+                                this.tiles = this.tiles.filter((t) => t !== tile);
+                            }, 550);
+                        }
                     }
+
+                    // The pushing tile: spawn just off the entry edge, then
+                    // slide onto the board
+                    const spawn = cellAt(-1);
+                    const entry = this.makeTile(spawn.c, spawn.r);
+                    this.tiles.push(entry);
+                    const target = cellAt(0);
+                    setTimeout(() => {
+                        entry.c = target.c;
+                        entry.r = target.r;
+                    }, 30);
                 },
 
                 styleFor(tile) {
