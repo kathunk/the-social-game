@@ -68,6 +68,17 @@ If a built-in FormBuilder method doesn't fit (e.g. a drag-drop ranker, a map, a 
 
 You usually want this. Don't reach for a new event — instead, change what an existing `onChallengeEnded` or `apply()` method does, or add a new `addToScoreHistory()` call.
 
+## Recipe: add post-game UI (rematch buttons, recaps)
+
+Never add a challenge for this — games end when the last real challenge ends (see architectural-patterns.md, "How games end"). Post-game UI belongs to a modifier:
+
+1. Create a modifier in your mode's folder with a `postGameComponent(Player $player)` method returning a FormBuilder build (custom elements welcome — same pipeline as everything else). `frontendComponent` can return `[]` if the modifier is post-game-only.
+2. Store its working data in `ModifierState::$modifier_data` via mode-scoped Verbs events — the challenge is already ended by now, so challenge state is the wrong home.
+3. Actions declared on the modifier work normally on the ended-game dashboard via `callClassAction('yourAction', 'modifier', 'your_key', null)`. Guard them with a `game->status === 'ended'` check.
+4. Add the modifier's key to your mode's `GameTemplateAdded` `modifiers:` array in the seeder.
+
+**Canonical reference:** `app/Modifiers/ElephantInTheRoom/ElephantRematch.php` + `resources/views/components/game-components/custom-form-elements/elephant-rematch.blade.php`.
+
 ## Things that look easy but are actually red flags
 
 - "I'll just add a field to `GameDashboard` for X." → Almost certainly belongs inside a Challenge instead.

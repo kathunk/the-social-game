@@ -121,20 +121,42 @@ abstract class BaseModifierClass
         return [];
     }
 
-    public function propertiesForLivewire(Player $player, ?bool $for_dedicated_page = false): array
+    /**
+     * Third render surface (alongside frontendComponent and
+     * frontendComponentForDedicatedPage): what this modifier shows on the
+     * dashboard after the game has ended. This is the sanctioned home for
+     * end-of-game UI (rematch buttons, recaps) — games end when their last
+     * real challenge ends, and post-game concerns belong to modifiers, not
+     * to buffer challenges.
+     */
+    public function postGameComponent(Player $player): array
     {
+        return [];
+    }
+
+    public function propertiesForLivewire(
+        Player $player,
+        ?bool $for_dedicated_page = false,
+        ?bool $for_post_game = false,
+    ): array {
+        $component = match (true) {
+            (bool) $for_post_game => $this->postGameComponent($player),
+            (bool) $for_dedicated_page => $this->frontendComponentForDedicatedPage($player),
+            default => $this->frontendComponent($player),
+        };
+
         return FrontendComponentProcessor::propertiesForLivewire(
-            $for_dedicated_page
-                ? $this->frontendComponentForDedicatedPage($player)
-                : $this->frontendComponent($player),
+            $component,
             useEmptyStringForSelects: true
         );
     }
 
-    public function validationRulesForLivewire(Player $player): array
+    public function validationRulesForLivewire(Player $player, ?bool $for_post_game = false): array
     {
         return FrontendComponentProcessor::validationRulesForLivewire(
-            $this->frontendComponent($player)
+            $for_post_game
+                ? $this->postGameComponent($player)
+                : $this->frontendComponent($player)
         );
     }
 }

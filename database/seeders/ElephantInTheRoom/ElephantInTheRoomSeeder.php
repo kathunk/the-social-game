@@ -5,6 +5,7 @@ namespace Database\Seeders\ElephantInTheRoom;
 use App\Challenges\ElephantInTheRoom\ElephantMatch;
 use App\Events\GameModeAdded;
 use App\Events\GameTemplateAdded;
+use App\Modifiers\ElephantInTheRoom\ElephantRematch;
 use Illuminate\Database\Seeder;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -33,7 +34,7 @@ class ElephantInTheRoomSeeder extends Seeder
             max_players: 2,
             is_public: false,
             players_can_join_late: false,
-            scoreboard_type: 'individual',
+            scoreboard_type: 'none',
         )->game_mode_id;
 
         GameTemplateAdded::fire(
@@ -48,7 +49,7 @@ class ElephantInTheRoomSeeder extends Seeder
                     'duration' => 20, // hard ceiling; the match usually ends itself well before
                 ],
             ],
-            modifiers: [],
+            modifiers: [ElephantRematch::key()],
             players_can_join_late: false,
         );
 
@@ -61,7 +62,7 @@ class ElephantInTheRoomSeeder extends Seeder
             max_players: 1,
             is_public: false,
             players_can_join_late: false,
-            scoreboard_type: 'individual',
+            scoreboard_type: 'none',
         )->game_mode_id;
 
         GameTemplateAdded::fire(
@@ -76,7 +77,7 @@ class ElephantInTheRoomSeeder extends Seeder
                     'duration' => 20,
                 ],
             ],
-            modifiers: [],
+            modifiers: [ElephantRematch::key()],
             players_can_join_late: false,
         );
     }
