@@ -14,6 +14,12 @@
 @endphp
 
 @once
+    <style>
+        @keyframes elephant-card-enter {
+            from { transform: translate(var(--enter-x, 0), var(--enter-y, 0)); }
+            to { transform: translate(0, 0); }
+        }
+    </style>
     <script>
         // Background animation for the elephant card, obeying the game's one
         // law of motion: nothing moves unless a tile pushes it. The board
@@ -58,14 +64,24 @@
                         return;
                     }
 
-                    this.timer = setInterval(() => this.pushOnce(), 1000);
+                    this.pushOnce();
+                    this.timer = setInterval(() => {
+                        // Hidden tabs get throttled timers and no paints —
+                        // don't play beats nobody can see
+                        if (! document.hidden) {
+                            this.pushOnce();
+                        }
+                    }, 1000);
                 },
 
-                makeTile(c, r) {
+                makeTile(c, r, enterX = 0, enterY = 0) {
                     return {
                         id: this.nextId++,
                         c: c,
                         r: r,
+                        enterX: enterX,
+                        enterY: enterY,
+                        gone: false,
                         color: COLORS[Math.floor(Math.random() * COLORS.length)],
                     };
                 },
@@ -111,22 +127,31 @@
                         }
                     }
 
-                    // The pushing tile: spawn just off the entry edge, then
-                    // slide onto the board in the same beat as the run it
-                    // pushes (double-rAF so the off-edge position paints
-                    // before the transition starts)
-                    const spawn = cellAt(-1);
-                    const entry = this.makeTile(spawn.c, spawn.r);
-                    this.tiles.push(entry);
-                    const target = cellAt(0);
-                    requestAnimationFrame(() => requestAnimationFrame(() => {
-                        entry.c = target.c;
-                        entry.r = target.r;
-                    }));
+                    // The pushing tile claims the entry cell IMMEDIATELY, in
+                    // the same tick as the run it shoved — board state is
+                    // always consistent, so the next beat's run lookups can
+                    // never see a half-applied push. Its visual slide-in is
+                    // a pure CSS enter animation (see elephant-card-enter):
+                    // no deferred JS, so throttled tabs can't corrupt state.
+                    const cell = cellAt(0);
+                    const enter = horizontal
+                        ? [fromStart ? -this.pitchX : this.pitchX, 0]
+                        : [0, fromStart ? -this.pitchY : this.pitchY];
+                    this.tiles.push(this.makeTile(cell.c, cell.r, enter[0], enter[1]));
                 },
 
-                styleFor(tile) {
-                    return `transform: translate(${tile.c * this.pitchX}px, ${tile.r * this.pitchY}px); background-color: ${tile.color};`;
+                placeFor(tile) {
+                    return `transform: translate(${tile.c * this.pitchX}px, ${tile.r * this.pitchY}px);`;
+                },
+
+                innerFor(tile) {
+                    let style = `background-color: ${tile.color};`;
+
+                    if (tile.enterX || tile.enterY) {
+                        style += ` --enter-x: ${tile.enterX}px; --enter-y: ${tile.enterY}px; animation: elephant-card-enter 500ms ease-in-out;`;
+                    }
+
+                    return style;
                 },
             };
         };
@@ -142,10 +167,14 @@
         aria-hidden="true"
     >
         <template x-for="tile in tiles" :key="tile.id">
+            {{-- Outer layer: grid placement (transitions on push). Inner
+                 layer: the tile itself, with its one-shot enter animation. --}}
             <div
-                class="absolute w-12 h-12 rounded-lg transition-transform duration-500 ease-in-out"
-                :style="styleFor(tile)"
-            ></div>
+                class="absolute transition-transform duration-500 ease-in-out"
+                :style="placeFor(tile)"
+            >
+                <div class="w-12 h-12 rounded-lg" :style="innerFor(tile)"></div>
+            </div>
         </template>
     </div>
 
