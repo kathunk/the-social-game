@@ -272,8 +272,7 @@ class ElephantMatch extends BaseChallengeClass
 
     /**
      * Serialize action handlers for a single match to prevent race conditions
-     * (e.g. a move and a forfeit claim landing at the same moment). Mirrors
-     * MorningRoutineRound::withChallengeLock.
+     * (e.g. a move and a forfeit claim landing at the same moment).
      */
     protected function withChallengeLock(callable $callback)
     {
