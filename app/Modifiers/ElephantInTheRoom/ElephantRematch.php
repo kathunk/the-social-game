@@ -4,7 +4,7 @@ namespace App\Modifiers\ElephantInTheRoom;
 
 use App\Challenges\ElephantInTheRoom\ElephantMatch;
 use App\Events\ElephantInTheRoom\PlayerWantsRematch;
-use App\Events\ElephantInTheRoom\RematchGameCreated;
+use App\Events\ElephantInTheRoom\RematchGameLinked;
 use App\Events\GameUpdatedForReverb;
 use App\Models\Game;
 use App\Models\Player;
@@ -94,7 +94,7 @@ class ElephantRematch extends BaseModifierClass
 
             $rematch = $this->createRematchGame($game);
 
-            RematchGameCreated::fire(
+            RematchGameLinked::fire(
                 game_id: $game->id,
                 modifier_id: $this->modifier->id,
                 rematch_game_id: $rematch->id,

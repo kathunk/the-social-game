@@ -118,14 +118,23 @@ it('shows the rematch card with the match result once the game ends', function (
         ->assertSee('Rematch');
 });
 
-it('renders no scoreboard for a mode with scoreboard_type none', function () {
+it('renders no scoreboard at all for a mode with scoreboard_type none', function () {
     ['players' => $players, 'challenge' => $challenge] = setupRematchGame($this);
+
+    $this->actingAs($players[0]->user);
+
+    // During the game: neither the scoreboard nor the "scoreboard is hidden"
+    // placeholder card renders
+    Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
+        ->assertDontSee('Scoreboard')
+        ->assertDontSee('The scoreboard is hidden');
 
     finishMatchWithWinner($this, $players, $challenge);
 
-    $this->actingAs($players[0]->user);
+    // After the game: still nothing
     Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()])
-        ->assertDontSee('Scoreboard');
+        ->assertDontSee('Scoreboard')
+        ->assertDontSee('The scoreboard is hidden');
 });
 
 // ─────────────────────────────────────────────────────────────────────────

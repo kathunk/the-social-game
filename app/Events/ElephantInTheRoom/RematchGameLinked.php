@@ -9,10 +9,13 @@ use App\States\ModifierState;
 use Thunk\Verbs\Event;
 
 /**
- * Records the rematch game's id on the ORIGINAL game's rematch modifier so
+ * Links an already-created rematch game to the ORIGINAL game's rematch
+ * modifier. This event does NOT create the game — that's the generic
+ * GameCreated/GameStarted flow via Game::fromTemplate — it only records the
+ * pointer on ModifierState so
  * every player's post-game card can forward them to the new game.
  */
-class RematchGameCreated extends Event
+class RematchGameLinked extends Event
 {
     use HasGame, HasModifier;
 
