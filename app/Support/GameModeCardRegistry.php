@@ -41,6 +41,13 @@ class GameModeCardRegistry
                 'variants' => [],
             ],
             [
+                'slug' => 'elephant',
+                'keywords' => ['elephant'],
+                'component' => 'game-mode-cards.elephant',
+                'sort' => 15,
+                'variants' => [],
+            ],
+            [
                 'slug' => 'pecking-order',
                 'keywords' => ['peckingorder', 'bloodoath', 'kingmaker', 'pyramidscheme'],
                 'component' => 'game-mode-cards.pecking-order',

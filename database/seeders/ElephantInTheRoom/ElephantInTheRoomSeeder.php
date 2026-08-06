@@ -41,7 +41,7 @@ class ElephantInTheRoomSeeder extends Seeder
             game_mode_id: $mode_id,
             name: 'Elephant in the Room Template 1',
             type: 'individual',
-            is_public: false,
+            is_public: true,
             team_names: [],
             challenges: [
                 [
@@ -63,13 +63,14 @@ class ElephantInTheRoomSeeder extends Seeder
             is_public: false,
             players_can_join_late: false,
             scoreboard_type: 'none',
+            skips_pre_game_lobby: true,
         )->game_mode_id;
 
         GameTemplateAdded::fire(
             game_mode_id: $bot_mode_id,
             name: 'Elephant in the Room vs Bot Template 1',
             type: 'individual',
-            is_public: false,
+            is_public: true,
             team_names: [],
             challenges: [
                 [

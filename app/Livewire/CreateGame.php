@@ -72,6 +72,19 @@ class CreateGame extends Component
             social_links: ! empty($url_input) ? [$url_input] : []
         );
 
+        // Instant-start modes skip the lobby — unless the game was scheduled
+        // for later, in which case the lobby is still the waiting room
+        if (
+            $mode->skips_pre_game_lobby
+            && ! $this->has_scheduled_start
+            && $game->players()->count() >= ($mode->min_players ?? 1)
+        ) {
+            $game->fresh()->start();
+            Verbs::commit();
+
+            return redirect()->route('game-dashboard', ['game' => $game->id]);
+        }
+
         return redirect()->route('pre-game-lobby', $game);
     }
 
