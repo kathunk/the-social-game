@@ -72,8 +72,9 @@
         </div>
 
         {{-- Mini tier list mockup: fixed tier letters, snack chips that keep
-             trading places --}}
-        <div class="hidden sm:block w-32 shrink-0">
+             trading places. Visible at every width — on narrow screens the
+             description column compresses and wraps beside it. --}}
+        <div class="w-28 sm:w-32 shrink-0">
             <div class="rounded-lg p-1.5 bg-gradient-to-b from-green-200 via-yellow-100 to-red-100" x-data="hotTakesPreview()">
                 <div class="relative" style="height: 106px;">
                     @foreach (['A', 'B', 'C', 'D', 'F'] as $index => $letter)

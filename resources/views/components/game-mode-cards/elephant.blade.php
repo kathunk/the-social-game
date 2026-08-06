@@ -15,13 +15,14 @@
 
 @once
     <script>
-        // Background animation for the elephant card: a loose grid of
-        // game-colored tiles where, every beat, a random row or column
-        // slides one cell — up, down, left, or right — with the same snappy
-        // ease as slides on the real board. Tiles pushed past the edge slide
-        // out (the card clips them) and a fresh tile slides in behind them.
+        // Background animation for the elephant card: a FULL grid of large
+        // game-colored tiles, edge to edge with no gaps. Every beat a random
+        // row or column slides one cell — up, down, left, or right — with the
+        // same snappy ease as slides on the real board. Because the grid is
+        // packed, every slide is a true push: the far tile is shoved off the
+        // edge (the card clips it) while a fresh tile slides in behind.
         window.elephantCardTiles = function () {
-            const PITCH = 36; // 28px tile + 8px gap
+            const PITCH = 56; // tile size, no gap — tiles sit flush
             const COLORS = ['#FF6857', '#007393'];
 
             return {
@@ -39,9 +40,7 @@
 
                     for (let r = 0; r < this.rows; r++) {
                         for (let c = 0; c < this.cols; c++) {
-                            if (Math.random() < 0.45) {
-                                this.tiles.push(this.makeTile(c, r));
-                            }
+                            this.tiles.push(this.makeTile(c, r));
                         }
                     }
 
@@ -67,21 +66,18 @@
                         const row = Math.floor(Math.random() * this.rows);
                         this.tiles.filter((t) => t.r === row).forEach((t) => { t.c += delta; });
                         this.cull();
-                        // A fresh tile slides in from the entry edge
-                        if (Math.random() < 0.6) {
-                            const entry = this.makeTile(delta === 1 ? -1 : this.cols, row);
-                            this.tiles.push(entry);
-                            setTimeout(() => { entry.c += delta; }, 30);
-                        }
+                        // The grid stays packed: every push slides a fresh
+                        // tile in behind the row
+                        const entry = this.makeTile(delta === 1 ? -1 : this.cols, row);
+                        this.tiles.push(entry);
+                        setTimeout(() => { entry.c += delta; }, 30);
                     } else {
                         const col = Math.floor(Math.random() * this.cols);
                         this.tiles.filter((t) => t.c === col).forEach((t) => { t.r += delta; });
                         this.cull();
-                        if (Math.random() < 0.6) {
-                            const entry = this.makeTile(col, delta === 1 ? -1 : this.rows);
-                            this.tiles.push(entry);
-                            setTimeout(() => { entry.r += delta; }, 30);
-                        }
+                        const entry = this.makeTile(col, delta === 1 ? -1 : this.rows);
+                        this.tiles.push(entry);
+                        setTimeout(() => { entry.r += delta; }, 30);
                     }
                 },
 
@@ -116,7 +112,7 @@
     >
         <template x-for="tile in tiles" :key="tile.id">
             <div
-                class="absolute w-7 h-7 rounded-md transition-transform duration-500 ease-in-out"
+                class="absolute w-14 h-14 rounded-lg transition-transform duration-500 ease-in-out"
                 :style="styleFor(tile)"
             ></div>
         </template>
