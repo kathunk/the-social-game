@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\TeamPrisonersDilemma;
+use App\Challenges\Laracon2025\TeamPrisonersDilemma;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Features\SupportTesting\Testable as LivewireTest;

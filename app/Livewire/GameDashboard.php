@@ -199,19 +199,25 @@ class GameDashboard extends Component
             return;
         }
 
+        // Once the game has ended, modifiers render their post-game surface
+        // instead of their in-game one (most have none and render nothing)
+        $post_game = $this->game->status === 'ended';
+
         foreach ($this->modifiers as $modifier) {
             $this->round_properties[$modifier->class_key] =
-                $modifier->handler()?->propertiesForLivewire($this->player) ??
-                [];
+                $modifier->handler()?->propertiesForLivewire(
+                    $this->player,
+                    for_post_game: $post_game,
+                ) ?? [];
 
             $this->validation_rules[$modifier->class_key] =
                 $modifier
                     ->handler()
-                    ?->validationRulesForLivewire($this->player) ?? [];
+                    ?->validationRulesForLivewire($this->player, for_post_game: $post_game) ?? [];
 
-            $this->modifier_components[$modifier->class_key] = $modifier
-                ->handler()
-                ->frontendComponent($this->player);
+            $this->modifier_components[$modifier->class_key] = $post_game
+                ? $modifier->handler()->postGameComponent($this->player)
+                : $modifier->handler()->frontendComponent($this->player);
         }
     }
 

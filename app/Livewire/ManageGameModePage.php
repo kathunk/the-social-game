@@ -39,11 +39,14 @@ class ManageGameModePage extends Component
 
     public bool $requires_team_membership;
 
+    public bool $skips_pre_game_lobby;
+
     const SCOREBOARD_TYPES = [
         'individual' => 'Individual',
         'team' => 'Team',
         'blood_oath' => 'Blood Oath',
         'hide_until_end' => 'Hide Until End of Game',
+        'none' => 'None (no scoreboard)',
     ];
 
     #[Computed]
@@ -69,6 +72,7 @@ class ManageGameModePage extends Component
             $this->game_type = $game_mode->type ?? 'individual';
             $this->scoreboard_type = $game_mode->scoreboard_type ?? 'individual';
             $this->requires_team_membership = $game_mode->requires_team_membership ?? false;
+            $this->skips_pre_game_lobby = $game_mode->skips_pre_game_lobby ?? false;
         } else {
             $this->name = '';
             $this->description = '';
@@ -82,6 +86,7 @@ class ManageGameModePage extends Component
             $this->game_type = 'individual';
             $this->scoreboard_type = $game_mode->scoreboard_type ?? 'individual';
             $this->requires_team_membership = false;
+            $this->skips_pre_game_lobby = false;
         }
     }
 
@@ -100,6 +105,7 @@ class ManageGameModePage extends Component
             'game_type' => 'required|string|in:individual,team',
             'scoreboard_type' => 'required|string|in:'.implode(',', array_keys(self::SCOREBOARD_TYPES)),
             'requires_team_membership' => 'boolean',
+            'skips_pre_game_lobby' => 'boolean',
         ];
     }
 
@@ -124,6 +130,7 @@ class ManageGameModePage extends Component
                 players_can_join_late: $this->players_can_join_late,
                 scoreboard_type: $this->scoreboard_type,
                 requires_team_membership: $this->requires_team_membership,
+                skips_pre_game_lobby: $this->skips_pre_game_lobby,
             )->game_mode_id;
         } catch (Exception $e) {
             $this->addError('error', $e->getMessage());

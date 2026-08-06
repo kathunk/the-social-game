@@ -2,18 +2,21 @@
 
 namespace App\Support;
 
-use App\Challenges\Classes\BaseChallengeClass;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
-use App\Modifiers\Classes\BaseModifierClass;
-use App\Support\FormBuilderTraits\FarmFormElements;
-use App\Support\FormBuilderTraits\TierListFormElements;
+use App\Challenges\BaseChallengeClass;
+use App\Challenges\Support\PeckingOrder\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Laracon2025\SupportsTeamSwaps;
+use App\Modifiers\BaseModifierClass;
 use Illuminate\Support\Collection;
 
+/**
+ * Per-game-mode element methods (e.g. ->farmMap(), ->elephantBoard())
+ * are NOT defined here. They live on auto-discovered
+ * FormElementProvider classes under app/Support/FormBuilderElements/ and
+ * are resolved through __call — see FormElementRegistry. Adding a new game
+ * mode's custom UI should never require editing this file.
+ */
 class FormBuilder
 {
-    use FarmFormElements, TierListFormElements;
-
     protected array $elements = [];
 
     protected ?int $poll_interval = null;
@@ -397,6 +400,37 @@ class FormBuilder
         $this->buttonGroup();
         $this->button('Vote', 'vote', ['upvote_player_id', 'downvote_player_id']);
         $this->endGroup();
+
+        return $this;
+    }
+
+    /**
+     * Append a raw element array. This is the surface FormElementProvider
+     * classes build on — elements need a unique snake_case 'type', which the
+     * generic form blade resolves to a matching custom-form-elements blade.
+     */
+    public function addElement(array $element): static
+    {
+        $this->addToElements($element);
+
+        return $this;
+    }
+
+    /**
+     * Resolve per-game-mode element methods from the auto-discovered
+     * registry. Named arguments pass straight through to the provider.
+     */
+    public function __call(string $method, array $arguments)
+    {
+        $provider = FormElementRegistry::resolve($method);
+
+        if (! $provider) {
+            throw new \BadMethodCallException(
+                "Method [{$method}] does not exist on FormBuilder and no FormElementProvider under app/Support/FormBuilderElements/ defines it."
+            );
+        }
+
+        $provider->{$method}($this, ...$arguments);
 
         return $this;
     }

@@ -35,7 +35,10 @@
     @if ($this->challenge_component && $this->player->status === 'active' && $this->game->status === 'active')
         <x-game-components.form :form="$this->challenge_component" type="challenge" class_key="{{ $this->challenge->class_key }}" />
     @endif
-    @if ($this->game->status === 'active' && count($this->modifier_components) > 0 && $this->player->status === 'active')
+    @if (in_array($this->game->status, ['active', 'ended']) && count($this->modifier_components) > 0 && $this->player->status === 'active')
+        {{-- For ended games these are the modifiers' postGameComponent
+             surfaces (initializeProperties swaps the source); modifiers
+             without one produce empty components and render nothing --}}
         @foreach ($this->modifier_components as $class_key => $modifier)
             <x-game-components.form :form="$modifier" type="modifier" class_key="{{ $class_key }}" />
         @endforeach
@@ -45,18 +48,20 @@
             <div class="text-red-600 text-sm">{{ $message }}</div>
         @endforeach
     @endforeach
-    @if ($this->showScoreboard)
-        <x-game-components.scoreboard 
-        :teams="$this->teams" 
-        :players="$this->players->filter(fn ($p) => $p->status === 'active')" 
-        :type="$this->template->type" 
-        :scoreboard_type="$this->gameMode->scoreboard_type"
-        />
-    @else
-        <x-card>
-            <flux:heading>Scoreboard</flux:heading>
-            <flux:subheading>The scoreboard is hidden for this challenge.</flux:subheading>
-        </x-card>
+    @if ($this->gameMode->scoreboard_type !== 'none')
+        @if ($this->showScoreboard)
+            <x-game-components.scoreboard
+            :teams="$this->teams"
+            :players="$this->players->filter(fn ($p) => $p->status === 'active')"
+            :type="$this->template->type"
+            :scoreboard_type="$this->gameMode->scoreboard_type"
+            />
+        @else
+            <x-card>
+                <flux:heading>Scoreboard</flux:heading>
+                <flux:subheading>The scoreboard is hidden for this challenge.</flux:subheading>
+            </x-card>
+        @endif
     @endif
     @if ($this->game->status === 'active')
         @if ($this->template->players_can_join_late || $this->socialLink)

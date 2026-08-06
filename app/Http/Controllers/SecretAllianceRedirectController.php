@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Modifiers\Classes\TeamSecretAlliance;
+use App\Modifiers\Laracon2025\TeamSecretAlliance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

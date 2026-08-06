@@ -1,229 +1,112 @@
-# AI Assistant Quick Start Guide
+# Quick Start
 
-This is your starting point for working on The Social Game project. Read this first, then dive deeper into the specific documentation as needed.
+You're about to add or change something in the game. Before writing code:
 
-## 🎯 What You Need to Know Immediately
+1. Read `/CLAUDE.md` if you haven't.
+2. Skim `docs/architectural-patterns.md` for the system mental model.
+3. **Find the closest existing example and read it end-to-end.** Almost every legitimate feature is "do what `app/Challenges/PeckingOrder/IndividualBuddySystem.php` does, but for X." If you can't find a similar example, your design might be off-pattern — stop and ask.
 
-### Core Architecture Pattern
-Everything revolves around this interaction:
-- **GameDashboard** (Livewire) ↔ **Challenge/Modifier Classes** ↔ **Verbs Events** ↔ **form.blade.php**
+Below are recipes for the common task shapes.
 
-### Key Files to Understand
-1. `app/Livewire/GameDashboard.php` - Central UI controller
-2. `app/Challenges/Classes/BaseChallengeClass.php` - Base for all game mechanics
-3. `app/Modifiers/Classes/BaseModifierClass.php` - Base for game rule changes
-4. `resources/views/components/game-components/form.blade.php` - Dynamic form renderer
-5. `app/Livewire/Concerns/HandlesClassActions.php` - UI-to-backend bridge
+## Recipe: add a new Challenge
 
-## 🚀 Quick Development Flow
+Decide what game mode it belongs to (PeckingOrder, Farm, Laracon2025, TierList, or a new one).
 
-When adding new game features, you'll typically:
+1. Create `app/Challenges/<GameMode>/<ChallengeName>.php`.
+2. Extend `App\Challenges\BaseChallengeClass`.
+3. Set constants: `NAME`, `DESCRIPTION`, `TYPE` (`'individual'` or `'team'`), optionally `HIDE_SCOREBOARD`.
+4. Implement `public static function key(): string` — return a unique snake_case key.
+5. Implement `dataArrayForState(): array` — the initial shape of `ChallengeState::$challenge_data` (e.g. `['votes' => [], 'submissions' => []]`).
+6. Implement `frontendComponent(Player $player): array` using `$this->form()->...->build()`. Use `->when(condition, fn ($form) => ...)` for conditional UI.
+7. Add one method per button: `public function actionName(Player $player, array $params)`. Inside, fire a Verbs event. The `$params` array contains the form fields the user submitted.
+8. Implement `onChallengeEnded(GameState $game_state)` for scoring. Use `$game_state->players()->each(...)` and `$player->addToScoreHistory(icon: '🎯', points: 1, description: '...', is_hidden: false)`.
+9. If this challenge shares logic with others in the same mode (e.g. ballots): create or use a `Support/<GameMode>/Supports<Thing>` interface + `Has<Thing>` trait.
+10. Write a feature test. See `docs/testing-guidelines.md`.
 
-1. **Create a Challenge/Modifier Class** that extends the base class
-2. **Define frontend components** via `frontendComponent()` method
-3. **Handle user actions** with methods that fire Verbs events (NEVER direct database updates)
-4. **The form.blade.php automatically renders** your UI (generic, works with any challenge)
-5. **GameDashboard orchestrates** everything via HandlesClassActions
-6. **Write comprehensive Livewire tests** to prove frontend integration works
+**Canonical reference:** `app/Challenges/PeckingOrder/IndividualBuddySystem.php`. **Mirror its structure.**
 
-## 📚 Essential Documentation
+## Recipe: add a new Modifier
 
-Read these in order:
+1. Create `app/Modifiers/<GameMode>/<ModifierName>.php`.
+2. Extend `App\Modifiers\BaseModifierClass`.
+3. Set constants: `NAME`, `DESCRIPTION`, `TYPE`. Set `REQUIRES_PRE_GAME_CONFIGURATION = true` only if a game admin must configure something before the game starts (then also set `DEFAULT_CONFIGURATION`).
+4. Implement `public static function key(): string`.
+5. Implement `dataArrayForState(?Game $game = null): array`.
+6. Implement either `frontendComponent(Player $player)` (rendered inside `GameDashboard`) or `frontendComponentForDedicatedPage(Player $player)` (rendered on `SecretsPage`) — or both. Return `$this->form()->...->build()`, or `$this->form()->title('...')->build()` if there's nothing for the player to do right now.
+7. Add action methods (same signature as challenges).
+8. Implement any of the lifecycle hooks: `onGameStarted`, `onChallengeStarted`, `onChallengeEnded`, `onUserAdmittedToGame`, `onPlayerJoinedTeam`, `onSecretDiscovered`. These let the modifier observe and react without wiring up event listeners.
+9. Write a feature test.
 
-1. **[Architectural Patterns](architectural-patterns.md)** - ⭐ MUST READ FIRST
-   - Complete understanding of GameDashboard + Challenge/Modifier pattern
-   - Event sourcing with Verbs
-   - Frontend component lifecycle
+**Canonical references:** `app/Modifiers/PeckingOrder/BloodOaths.php` (no pre-game config), `app/Modifiers/Laracon2025/TeamSecretCodes.php` (with pre-game config + dedicated page).
 
-2. **[AI Development Guide](ai-development-guide.md)** - Comprehensive project overview
-   - Project structure and conventions
-   - Development commands and testing
-   - Database schema and relationships
+## Recipe: add a new Verbs event
 
-3. **[MCP Integration](../mcp/README.md)** - AI data access
-   - Model Context Protocol server for querying game data
-   - Available tools and resources
+Game-specific events live under `app/Events/<GameMode>/`. Game-agnostic lifecycle events live at the top level — **do not** add new top-level events unless you're touching core lifecycle, which is a trip-wire.
 
-## 🔧 Common Tasks & Patterns
+1. Create `app/Events/<GameMode>/<EventName>.php` extending `Thunk\Verbs\Event`.
+2. Use the relevant traits from `app/Events/Traits/` (`HasGame`, `HasPlayer`, `HasChallenge`, etc.) to declare state IDs.
+3. Add public typed properties for any non-trait event data.
+4. Implement `validate()` — call `$this->assert(condition, 'Error message')` for preconditions.
+5. Implement `apply()` (or `applyToGame`, `applyToChallenge`, etc.) — mutate the relevant state object(s).
+6. Implement `handle()` — persist by calling `$model->updateModelWithStateData()` on affected models.
+7. Fire it from a challenge/modifier action: `MyEvent::fire(player_id: ..., ...)`. `HandlesClassActions` calls `Verbs::commit()` for you.
 
-### Adding a New Challenge
-```php
-// 1. Extend BaseChallengeClass
-class MyNewChallenge extends BaseChallengeClass 
-{
-    const NAME = 'My Challenge';
-    const DESCRIPTION = 'Challenge description';
-    const TYPE = 'individual'; // or 'team'
-    
-    public static function key(): string { return 'my_new_challenge'; }
-    
-    // 2. Define UI
-    public function frontendComponent(Player $player): array {
-        return [
-            'elements' => [
-                ['type' => 'title', 'text' => static::NAME],
-                ['type' => 'input', 'property_name' => 'user_input', 'label' => 'Enter something'],
-                ['type' => 'button_group', 'buttons' => [
-                    ['label' => 'Submit', 'action' => 'submitAction']
-                ]]
-            ]
-        ];
-    }
-    
-    // 3. Handle user action
-    public function submitAction(Player $player, array $properties) {
-        // Fire event for state change
-        PlayerDidSomething::fire(
-            player_id: $player->id,
-            game_id: $player->game_id,
-            challenge_id: $this->challenge->id,
-            user_input: $properties['user_input']
-        );
-        
-        return redirect()->route('game-dashboard', ['game' => $player->game]);
-    }
-}
-```
+**Canonical reference:** any event under `app/Events/PeckingOrder/` (e.g. `PlayerSubmittedPeckingOrderBallot.php`).
 
-### Creating a Verbs Event
-```php
-class PlayerDidSomething extends Event
-{
-    use HasChallenge, HasGame, HasPlayer;
-    
-    public string $user_input;
-    
-    public function validate() {
-        $this->assert(!empty($this->user_input), 'Input cannot be empty');
-    }
-    
-    public function apply(ChallengeState $challenge) {
-        $challenge->challenge_data['submissions'][$this->player_id] = $this->user_input;
-    }
-    
-    public function handle() {
-        Challenge::find($this->challenge_id)->updateModelWithStateData();
-    }
-}
-```
+## Recipe: add custom UI for a challenge/modifier
 
-## 🎮 Game Development Context
+If a built-in FormBuilder method doesn't fit (e.g. a drag-drop ranker, a map, a complex SVG view), add a custom element. Keep it scoped to one game mode.
 
-### This is a Social Gaming Platform
-- Multi-player games with real-time interactions
-- Team-based and individual challenges
-- Hidden point systems and secret mechanics
-- Payment integration for premium features
-- Event sourcing for complete game state tracking
+1. Add a provider class at `app/Support/FormBuilderElements/<GameMode>/<Name>FormElements.php` implementing the `App\Support\FormElementProvider` marker interface. Each public method takes `FormBuilder $form` as its first parameter and appends an element array with a unique `type` (snake_case) via `$form->addElement([...])`. Pass all data the blade will need.
+2. There is **no registration step** — `FormElementRegistry` auto-discovers every provider in that directory (same pattern as `ChallengeRegistry`), and `FormBuilder::__call` resolves the method by name. Your challenge calls `$this->form()->yourMethod(...)` as if the method lived on FormBuilder. Do not edit `FormBuilder.php`.
+3. Create the blade at `resources/views/components/game-components/custom-form-elements/<kebab-type>.blade.php`. Accept `@props(['element'])`, extract data from `$element`, render the UI. Use `wire:model="round_properties.{{ $class_key }}.{{ $element['property_name'] }}"` for two-way binding.
+4. `form.blade.php` will pick it up automatically by converting the `type` to kebab-case and rendering via `<x-dynamic-component>`.
 
-### Key Gaming Concepts
-- **Challenges** - Individual game rounds with specific mechanics
-- **Modifiers** - Rules that change how the game works
-- **Teams** - Player groups that can be formed/changed during games
-- **Hidden Points** - Secret scoring revealed at game end
-- **Real-time Updates** - WebSocket-powered live game state
+**Canonical references:** `app/Support/FormBuilderElements/TierList/TierListFormElements.php` + `resources/views/components/game-components/custom-form-elements/tier-list-guess.blade.php`.
 
-## 🛠 Development Setup
+## Recipe: change scoring without changing UI
 
-### Start Development Servers
+You usually want this. Don't reach for a new event — instead, change what an existing `onChallengeEnded` or `apply()` method does, or add a new `addToScoreHistory()` call.
+
+## Recipe: add post-game UI (rematch buttons, recaps)
+
+Never add a challenge for this — games end when the last real challenge ends (see architectural-patterns.md, "How games end"). Post-game UI belongs to a modifier:
+
+1. Create a modifier in your mode's folder with a `postGameComponent(Player $player)` method returning a FormBuilder build (custom elements welcome — same pipeline as everything else). `frontendComponent` can return `[]` if the modifier is post-game-only.
+2. Store its working data in `ModifierState::$modifier_data` via mode-scoped Verbs events — the challenge is already ended by now, so challenge state is the wrong home.
+3. Actions declared on the modifier work normally on the ended-game dashboard via `callClassAction('yourAction', 'modifier', 'your_key', null)`. Guard them with a `game->status === 'ended'` check.
+4. Add the modifier's key to your mode's `GameTemplateAdded` `modifiers:` array in the seeder.
+
+**Canonical reference:** `app/Modifiers/ElephantInTheRoom/ElephantRematch.php` + `resources/views/components/game-components/custom-form-elements/elephant-rematch.blade.php`.
+
+## Things that look easy but are actually red flags
+
+- "I'll just add a field to `GameDashboard` for X." → Almost certainly belongs inside a Challenge instead.
+- "I'll add a new top-level event for this." → Use a per-game-mode event, or use a lifecycle hook.
+- "I'll add a method to `BaseChallengeClass` to share logic between two challenges." → Use a `Support/<GameMode>/Has<X>` trait + `Supports<X>` interface.
+- "I'll just call `$model->save()` for speed." → No. Fire a Verbs event.
+- "I'll render this with raw blade in `frontendComponent`." → No. Use FormBuilder. If a custom shape is needed, use the custom-element pattern above.
+
+## Development commands
+
 ```bash
-# Laravel web server
-php artisan serve
-
-# Frontend assets
-npm run dev
-
-# Queue processing
-php artisan queue:work
-
-# WebSocket server (real-time features)
-php artisan reverb:start
-
-# MCP server (AI data access)
-cd mcp && npm run dev
+php artisan serve              # web server
+npm run dev                    # frontend assets
+php artisan queue:work         # queues
+php artisan reverb:start       # websockets (required for real-time updates)
+php artisan test               # run tests
+php artisan pail               # tail logs
+php artisan db:reset-data      # reset local game data
+php artisan progress:games     # advance time / end current challenge
+php artisan create:bots        # create bot users for testing
+php artisan fill:game-with-bots  # populate a game
 ```
 
-### Useful Commands
-```bash
-# Create test users/games
-php artisan create:bots
-php artisan fill:game-with-bots
+## When to stop and ask
 
-# Advance game state
-php artisan progress:games
+- Anything in the trip-wire list (`/CLAUDE.md`).
+- Anything that would require changing more than one game mode's code.
+- Anything where the natural design seems to need a new top-level abstraction or a new generic Livewire component.
+- Anything where you can't find a similar existing example to mirror.
 
-# Reset development data
-php artisan db:reset-data
-
-# Replay events for debugging
-php artisan verbs:replay-selective
-```
-
-## 🔍 How to Debug
-
-1. **Check Event Log** - All state changes are in the events table
-2. **Use Verbs Replay** - Replay events to debug state issues
-3. **Laravel Pail** - Monitor logs in real-time: `php artisan pail`
-4. **Horizon Dashboard** - Monitor queues at `/horizon`
-
-## ⚡ Critical Development Principles
-
-**These are NON-NEGOTIABLE and define the entire system:**
-
-1. **Database Changes ONLY Through Verbs Events**
-   - NEVER use `$model->save()`, `Model::update()`, etc. in business logic
-   - ALL state changes must fire Verbs events followed by `Verbs::commit()`
-   - Direct database updates break state synchronization and event sourcing
-
-2. **Livewire + Alpine.js ONLY**
-   - No React, Vue, or other frontend frameworks allowed
-   - Livewire for reactive server-side components
-   - Alpine.js for client-side interactivity
-
-3. **Generic Frontend Architecture**
-   - GameDashboard, PlayerView, TeamView are completely game-agnostic
-   - They're a "superhighway that accommodates vehicles of all sizes"
-   - New game modes should work without frontend code changes
-
-4. **Test Everything Through Livewire**
-   - Every feature needs comprehensive Livewire integration tests
-   - Follow established patterns in `tests/Feature/`
-   - Tests must prove frontend integration actually works
-
-## ⚡ Quick Tips
-
-5. **GameDashboard is the central hub** - Most game interactions flow through it  
-6. **Challenge/Modifier classes define UI AND logic** - They're self-contained
-7. **Form validation happens automatically** - Define rules in `validationRulesForLivewire()`
-8. **Real-time updates are crucial** - Many features need WebSocket updates
-9. **Test with bots** - Use artisan commands to quickly populate games
-
-## 🚨 Common Gotchas
-
-- **NEVER** update database directly - only through Verbs events
-- Don't forget `Verbs::commit()` after firing events
-- Always use `->fresh()` when reloading models after state changes
-- GameDashboard must remain generic - don't add game-specific logic
-- WebSocket events need proper authentication and authorization  
-- Game fairness is critical - prevent cheating in challenge logic
-- Hidden points should only be revealed at appropriate times
-- Test everything through Livewire - unit tests alone aren't sufficient
-
-## 📖 Next Steps
-
-Once you understand this overview:
-
-1. Read the full [Architectural Patterns](architectural-patterns.md) guide
-2. Explore existing Challenge classes in `app/Challenges/Classes/`
-3. Look at Verbs events in `app/Events/`
-4. Study the GameDashboard implementation
-5. Review the form.blade.php component structure
-
-## 🤝 Getting Help
-
-- Check `.ai-context.json` for machine-readable project info
-- Use MCP server tools to query game data
-- Reference existing patterns in Challenge/Modifier classes
-- All documentation is in `docs/` directory
-
-Remember: This is an event-sourced, real-time social gaming platform with a generic frontend architecture. Every interaction should be fun, fair, properly tracked through the event system, and work seamlessly with the existing generic components!
+A clarifying question now is cheap. A wrong-shape PR is expensive.

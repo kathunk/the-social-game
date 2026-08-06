@@ -4,7 +4,7 @@ use App\Models\Game;
 use App\Models\GameMode;
 use App\Models\GameTemplate;
 use App\Models\User;
-use Database\Seeders\Laracon2025Seeder;
+use Database\Seeders\Laracon2025\Laracon2025Seeder;
 use Database\Seeders\UserSeeder;
 use Thunk\Verbs\Facades\Verbs;
 

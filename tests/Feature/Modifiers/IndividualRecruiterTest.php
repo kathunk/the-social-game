@@ -1,8 +1,8 @@
 <?php
 
-use App\Challenges\Classes\IndividualFiller;
+use App\Challenges\IndividualFiller;
 use App\Livewire\GameDashboard;
-use App\Modifiers\Classes\IndividualRecruiter;
+use App\Modifiers\PeckingOrder\IndividualRecruiter;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 

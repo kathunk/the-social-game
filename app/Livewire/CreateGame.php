@@ -37,13 +37,6 @@ class CreateGame extends Component
         return auth()->user();
     }
 
-    public function mount()
-    {
-        if (! $this->user->is_member) {
-            return redirect()->route('marketing-page');
-        }
-    }
-
     public function createGame()
     {
         $this->validate();
@@ -78,6 +71,19 @@ class CreateGame extends Component
             requires_admin_approval_to_join: $this->requires_admin_approval_to_join,
             social_links: ! empty($url_input) ? [$url_input] : []
         );
+
+        // Instant-start modes skip the lobby — unless the game was scheduled
+        // for later, in which case the lobby is still the waiting room
+        if (
+            $mode->skips_pre_game_lobby
+            && ! $this->has_scheduled_start
+            && $game->players()->count() >= ($mode->min_players ?? 1)
+        ) {
+            $game->fresh()->start();
+            Verbs::commit();
+
+            return redirect()->route('game-dashboard', ['game' => $game->id]);
+        }
 
         return redirect()->route('pre-game-lobby', $game);
     }

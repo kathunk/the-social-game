@@ -1,7 +1,7 @@
 <?php
 
-use App\Challenges\Classes\TeamFiller;
-use App\Challenges\Classes\TeamHotPotato;
+use App\Challenges\TeamFiller;
+use App\Challenges\Laracon2025\TeamHotPotato;
 use App\Livewire\GameDashboard;
 use App\Models\Player;
 use Illuminate\Support\Facades\Date;

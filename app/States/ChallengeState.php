@@ -3,7 +3,7 @@
 namespace App\States;
 
 use App\Challenges\ChallengeRegistry;
-use App\Challenges\Classes\BaseChallengeClass;
+use App\Challenges\BaseChallengeClass;
 use Illuminate\Support\Carbon;
 use Thunk\Verbs\State;
 
