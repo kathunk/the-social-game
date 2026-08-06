@@ -2,7 +2,11 @@
 
 @if (isset($form['elements']))
 <x-card>
-    <div class="flex flex-col space-y-1">
+    @if (isset($form['poll_interval']))
+        <div wire:poll.{{ $form['poll_interval'] }}ms="refreshChallenge" class="flex flex-col space-y-1">
+    @else
+        <div class="flex flex-col space-y-1">
+    @endif
         @if ($type === 'challenge')
             @php
                 $challenges = $this->game->challenges;
@@ -12,7 +16,9 @@
             <flux:text class="flex flex-wrap items-baseline gap-1 text-faded-gray text-tiny md:text-xxs font-medium">
                 <span>CHALLENGE</span>
                 <span>({{ $activated_challenges }} of {{ $total_challenges }})</span>
-                <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
+                @if ($this->challenge->ends_at)
+                    <x-game-components.countdown-timer :time="$this->challenge->ends_at->toIsoString()" type="ends" />
+                @endif
             </flux:text>
         @endif
         @foreach ($form['elements'] as $element)
@@ -36,16 +42,15 @@
                     <flux:table>
                         <flux:table.columns>
                             @foreach ($element['headers'] as $header)
-                                <flux:table.column>{{ $header }}</flux:table.column>
+                                <flux:table.column class="text-xs break-words whitespace-normal">{{ $header }}</flux:table.column>
                             @endforeach
                         </flux:table.columns>
-                        {{-- @dd($element['rows']) --}}
 
                         <flux:table.rows>
                             @foreach ($element['rows'] as $row)
                                 <flux:table.row>
                                     @foreach ($row as $cell)
-                                        <flux:table.cell>{{ $cell }}</flux:table.cell>
+                                        <flux:table.cell class="text-xs break-words whitespace-normal">{{ $cell }}</flux:table.cell>
                                     @endforeach
                                 </flux:table.row>
                             @endforeach
@@ -122,6 +127,26 @@
                         @endforeach
                     </flux:select>
                 </flux:field>
+                    @break
+                @case('radio_group')
+                    <flux:radio.group label="{{ $element['label'] }}" variant="cards" class="flex-col" wire:model="round_properties.{{ $class_key }}.{{ $element['property_name'] }}">
+                        @foreach ($element['options'] as $option)
+                            <flux:radio 
+                                value="{{ $option['value'] }}" 
+                                label="{{ $option['label'] }}" 
+                                description="{{ $option['description'] }}" 
+                                :disabled="$option['disabled']"
+                            />
+                        @endforeach
+                    </flux:radio.group>
+                    @break
+                @default
+                    @php
+                        $customComponent = 'game-components.custom-form-elements.' . str_replace('_', '-', $element['type']);
+                    @endphp
+                    @if (View::exists('components.' . $customComponent))
+                        <x-dynamic-component :component="$customComponent" :element="$element" />
+                    @endif
                     @break
             @endswitch
         @endforeach

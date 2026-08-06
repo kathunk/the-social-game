@@ -11,10 +11,12 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            Laracon2025Seeder::class,
-            // PeckingOrderSeeder::class,
-            // BloodOathSeeder::class,
-            // PyramidSchemeSeeder::class,
+            // Laracon2025\Laracon2025Seeder::class,
+            PeckingOrder\PeckingOrderSeeder::class,
+            // PeckingOrder\BloodOathSeeder::class,
+            // PeckingOrder\PyramidSchemeSeeder::class,
+            // TierList\TierListSeeder::class,
+            // Farm\FarmSeeder::class,
         ]);
     }
 }

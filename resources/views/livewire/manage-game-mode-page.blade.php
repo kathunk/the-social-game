@@ -27,9 +27,19 @@
                 <flux:label>Players can join late</flux:label>
                 <flux:error name="players_can_join_late" />
             </flux:field>
+            <flux:field variant="inline">
+                <flux:checkbox wire:model="skips_pre_game_lobby" />
+                <flux:label>Skip the pre-game lobby (start instantly)</flux:label>
+                <flux:error name="skips_pre_game_lobby" />
+            </flux:field>
             <flux:radio.group wire:model="game_type" label="Victory Condition">
                 <flux:radio value="individual" label="Individual" checked />
                 <flux:radio value="team" label="Team" />
+            </flux:radio.group>
+            <flux:radio.group wire:model="scoreboard_type" label="Scoreboard Type">
+                @foreach (App\Livewire\ManageGameModePage::SCOREBOARD_TYPES as $key => $label)
+                    <flux:radio value="{{ $key }}" label="{{ $label }}" />
+                @endforeach
             </flux:radio.group>
 
             <x-button variant="primary" wire:click="saveGameMode">Save</x-button>

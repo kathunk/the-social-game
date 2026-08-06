@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualFiller;
+use App\Challenges\IndividualFiller;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Thunk\Verbs\Facades\Verbs;

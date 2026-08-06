@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualLargestIncreaseQuiz;
+use App\Challenges\PeckingOrder\IndividualLargestIncreaseQuiz;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

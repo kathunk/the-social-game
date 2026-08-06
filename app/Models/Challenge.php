@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Challenges\ChallengeRegistry;
-use App\Challenges\Classes\BaseChallengeClass;
+use App\Challenges\BaseChallengeClass;
 use App\Events\ChallengeEnded;
 use App\Events\ChallengeStarted;
 use App\States\ChallengeState;
@@ -39,7 +39,9 @@ class Challenge extends Model
 
     public function next()
     {
-        return $this->game->challenges()->where('starts_at', '>', $this->starts_at)->first();
+        return $this->game->challenges
+            ->where('round_number', $this->round_number + 1)
+            ->first();
     }
 
     public function start()

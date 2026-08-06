@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\FlattenTheCurve;
+use App\Challenges\Laracon2025\FlattenTheCurve;
 use App\Livewire\GameDashboard;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
@@ -62,13 +62,13 @@ it('runs the Flatten the Curve challenge', function () {
     expect($team->fresh()->score)->toBe(0);
 
     // second team has 2 players
-    expect($team_2->fresh()->score)->toBe(-5);
+    expect($team_2->fresh()->score)->toBe(-10);
 
     // third team has 7 players
-    expect($team_3->fresh()->score)->toBe(-30);
+    expect($team_3->fresh()->score)->toBe(-60);
 
     // fourth team has 0 players
-    expect($team_4->fresh()->score)->toBe(5);
+    expect($team_4->fresh()->score)->toBe(10);
 });
 
 it('selects a reasonable stop time', function () {

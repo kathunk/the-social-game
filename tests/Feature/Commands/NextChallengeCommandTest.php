@@ -1,8 +1,8 @@
 <?php
 
-use App\Challenges\Classes\FlattenTheCurve;
-use App\Challenges\Classes\PyramidScheme;
-use App\Challenges\Classes\StayOnMessage;
+use App\Challenges\Laracon2025\FlattenTheCurve;
+use App\Challenges\PeckingOrder\PyramidScheme;
+use App\Challenges\Laracon2025\StayOnMessage;
 use Illuminate\Support\Facades\Artisan;
 use Thunk\Verbs\Facades\Verbs;
 

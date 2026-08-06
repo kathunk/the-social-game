@@ -32,6 +32,15 @@ class GameModeAdded extends Event
 
     public ?string $post_game_message = '';
 
+    public ?string $scoreboard_type = 'individual';
+
+    public ?bool $requires_team_membership = false;
+
+    // When true, starting a game from this mode skips the pre-game lobby:
+    // the game is created and started in one step and the creator lands
+    // directly on the dashboard (single-player / instant modes)
+    public ?bool $skips_pre_game_lobby = false;
+
     public function validate()
     {
         $this->assert(
@@ -42,6 +51,11 @@ class GameModeAdded extends Event
         $this->assert(
             $this->min_players <= $this->max_players,
             'Minimum players must be less than or equal to maximum players.'
+        );
+
+        $this->assert(
+            in_array($this->scoreboard_type, ['individual', 'team', 'blood_oath', 'hide_until_end', 'none']),
+            'Scoreboard type must be either "individual", "team", "blood_oath", "hide_until_end", or "none".'
         );
     }
 
@@ -57,6 +71,15 @@ class GameModeAdded extends Event
         $game_mode->players_can_join_late = $this->players_can_join_late;
         $game_mode->footer_message = $this->footer_message;
         $game_mode->post_game_message = $this->post_game_message;
+        $game_mode->scoreboard_type = $this->scoreboard_type;
+        $game_mode->requires_team_membership = $this->requires_team_membership;
+        $game_mode->skips_pre_game_lobby = $this->skips_pre_game_lobby;
+
+        $game_mode->gameTemplates()->each(function ($game_template) {
+            $game_template->scoreboard_type = $this->scoreboard_type;
+            $game_template->min_players = $this->min_players;
+            $game_template->max_players = $this->max_players;
+        });
     }
 
     public function handle()
@@ -75,12 +98,17 @@ class GameModeAdded extends Event
                 'players_can_join_late' => $this->players_can_join_late,
                 'footer_message' => $this->footer_message,
                 'post_game_message' => $this->post_game_message,
+                'scoreboard_type' => $this->scoreboard_type,
+                'requires_team_membership' => $this->requires_team_membership,
+                'skips_pre_game_lobby' => $this->skips_pre_game_lobby,
             ]);
+
+            $this->setTemplateScoreboardType($existing);
 
             return;
         }
 
-        GameMode::create([
+        $mode = GameMode::create([
             'id' => $this->game_mode_id,
             'name' => $this->name,
             'type' => $this->type,
@@ -92,6 +120,21 @@ class GameModeAdded extends Event
             'players_can_join_late' => $this->players_can_join_late,
             'footer_message' => $this->footer_message,
             'post_game_message' => $this->post_game_message,
+            'scoreboard_type' => $this->scoreboard_type,
+            'requires_team_membership' => $this->requires_team_membership,
+            'skips_pre_game_lobby' => $this->skips_pre_game_lobby,
         ]);
+
+        $this->setTemplateScoreboardType($mode);
+    }
+
+    public function setTemplateScoreboardType(GameMode $mode)
+    {
+        $mode->gameTemplates->each(function ($game_template) {
+            $game_template->scoreboard_type = $this->scoreboard_type;
+            $game_template->min_players = $this->min_players;
+            $game_template->max_players = $this->max_players;
+            $game_template->save();
+        });
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\States;
 
-use App\Modifiers\Classes\BaseModifierClass;
+use App\Modifiers\BaseModifierClass;
 use App\Modifiers\ModifierRegistry;
 use Thunk\Verbs\State;
 

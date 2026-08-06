@@ -34,7 +34,7 @@
                                     <flux:table.cell>
                                         <div class="flex items-center gap-2 text-black text-xs">
                                             <div data-flux-avatar="data-flux-avatar" data-slot="avatar" data-size="sm" class="[:where(&amp;)]:size-8 [:where(&amp;)]:text-sm [--avatar-radius:var(--radius-md)] relative flex-none isolate flex items-center justify-center [:where(&amp;)]:font-medium rounded-[var(--avatar-radius)] [:where(&amp;)]:bg-zinc-200 [:where(&amp;)]:dark:bg-zinc-600 [:where(&amp;)]:text-zinc-800 [:where(&amp;)]:dark:text-white  after:absolute after:inset-0 after:inset-ring-[1px] after:inset-ring-black/7 dark:after:inset-ring-white/10 after:rounded-md">
-                                                <img src="{{$player->user->gravatar}}"  alt="" onerror="this.onerror=null; this.src='http://the-social-game.test/build/images/default-avatar.png';" loading="lazy" class="rounded-[var(--avatar-radius)]">
+                                                <img src="{{$player->user->gravatar}}"  alt="" onerror="this.onerror=null; this.src='/build/images/default-avatar.png';" loading="lazy" class="rounded-[var(--avatar-radius)]">
                                             </div>
 
                                             {{ $player->user->name }}

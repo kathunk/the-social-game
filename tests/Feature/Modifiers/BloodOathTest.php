@@ -1,8 +1,8 @@
 <?php
 
-use App\Challenges\Classes\IndividualHighScoreQuiz;
+use App\Challenges\PeckingOrder\IndividualHighScoreQuiz;
 use App\Livewire\GameDashboard;
-use App\Modifiers\Classes\BloodOaths;
+use App\Modifiers\PeckingOrder\BloodOaths;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -20,7 +20,7 @@ it('facilitates blood oaths', function () {
 
     $modifiers = [BloodOaths::key()];
 
-    $this->mockGameTemplate(challenges: $challenges, type: 'individual', modifiers: $modifiers);
+    $this->mockGameTemplate(challenges: $challenges, type: 'individual', modifiers: $modifiers, scoreboard_type: 'blood_oath');
 
     $game = $this->createGame();
     $player_1 = $this->createPlayer();
@@ -92,6 +92,7 @@ it('ensures Blood Oaths can only be used with a blood oath scoreboard', function
         challenges: $challenges,
         type: 'individual',
         modifiers: $modifiers,
+        scoreboard_type: 'blood_oath',
     );
 
     expect($this->game_template->scoreboard_type)->toBe('blood_oath');

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Modifiers\Classes\BaseModifierClass;
+use App\Modifiers\BaseModifierClass;
 use App\Modifiers\ModifierRegistry;
 use App\States\ModifierState;
 use Glhd\Bits\Database\HasSnowflakes;

@@ -3,7 +3,7 @@
 namespace App\States;
 
 use App\Challenges\ChallengeRegistry;
-use App\Challenges\Classes\BaseChallengeClass;
+use App\Challenges\BaseChallengeClass;
 use Illuminate\Support\Carbon;
 use Thunk\Verbs\State;
 
@@ -15,13 +15,15 @@ class ChallengeState extends State
 
     public string $status;
 
-    public Carbon $starts_at;
+    public ?Carbon $starts_at = null;
 
-    public Carbon $ends_at;
+    public ?Carbon $ends_at = null;
 
     public bool $allows_turncoat;
 
     public array $challenge_data;
+
+    public ?int $round_number = null;
 
     public function game(): GameState
     {

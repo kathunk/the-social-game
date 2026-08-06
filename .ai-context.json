@@ -1,0 +1,101 @@
+{
+    "project": {
+        "name": "The Social Game",
+        "type": "Laravel multiplayer social-gaming platform",
+        "description": "Event-sourced web game with a generic Livewire dashboard that hosts pluggable game modes built from Challenge and Modifier classes.",
+        "primaryLanguages": ["PHP", "Blade", "JavaScript"]
+    },
+    "stack": {
+        "framework": "Laravel 12",
+        "ui": "Livewire 3 + Alpine.js + Flux UI + Tailwind",
+        "frontendFrameworksAllowed": ["Livewire", "Alpine.js"],
+        "frontendFrameworksProhibited": ["React", "Vue", "htmx", "jQuery", "any other JS framework"],
+        "eventSourcing": "hirethunk/verbs",
+        "realtime": "Laravel Reverb (WebSockets)",
+        "queue": "Laravel Horizon",
+        "payments": "Laravel Cashier (Stripe)",
+        "testing": "Pest"
+    },
+    "primaryRules": [
+        "All state changes go through Verbs events: fire the event, then Verbs::commit(). Never call $model->save() or Model::update() in business logic.",
+        "Livewire + Alpine.js only. Do not introduce other frontend frameworks.",
+        "GameDashboard and the other top-level Livewire components are game-agnostic. New game modes ship as new Challenge/Modifier classes; do not modify generic infrastructure to make a feature work.",
+        "Every new feature requires Livewire feature tests in tests/Feature/. Unit tests alone do not satisfy the testing requirement; there is no tests/Unit/ by design.",
+        "Mirror an existing Challenge/Modifier when adding new ones. Do not invent new patterns when an existing one fits."
+    ],
+    "tripWireFiles": [
+        "app/Livewire/GameDashboard.php",
+        "app/Livewire/PlayerPage.php",
+        "app/Livewire/TeamPage.php",
+        "app/Livewire/SecretsPage.php",
+        "app/Livewire/Concerns/HandlesClassActions.php",
+        "app/Challenges/BaseChallengeClass.php",
+        "app/Modifiers/BaseModifierClass.php",
+        "app/Challenges/ChallengeRegistry.php",
+        "app/Modifiers/ModifierRegistry.php",
+        "app/Support/FormBuilder.php",
+        "app/Support/FrontendComponentProcessor.php",
+        "resources/views/components/game-components/form.blade.php",
+        "app/Events/*.php (top-level lifecycle events; game-specific events go under app/Events/<GameMode>/)"
+    ],
+    "keyDirectories": {
+        "app/Challenges/": "Challenge base class + per-game-mode subfolders (PeckingOrder, Farm, Laracon2025, TierList)",
+        "app/Challenges/Support/": "Per-game-mode interfaces and traits shared across challenges in that mode",
+        "app/Modifiers/": "Modifier base class + per-game-mode subfolders",
+        "app/Events/": "Verbs events. Top-level files are game-agnostic lifecycle; subfolders are game-specific",
+        "app/Events/Traits/": "Event traits (HasGame, HasPlayer, HasChallenge, etc.)",
+        "app/States/": "Verbs state objects (GameState, PlayerState, etc.)",
+        "app/Livewire/": "Livewire components",
+        "app/Livewire/Concerns/": "Livewire traits (HandlesClassActions)",
+        "app/Support/FormBuilder.php": "Fluent UI builder used by every Challenge/Modifier",
+        "app/Support/FormBuilderElements/": "Per-game-mode form element providers, auto-discovered by FormElementRegistry",
+        "resources/views/components/game-components/": "Generic game UI (form.blade.php is the renderer)",
+        "resources/views/components/game-components/custom-form-elements/": "Per-game-mode custom UI components",
+        "tests/Feature/": "Feature tests organized by Challenges/, Modifiers/, etc.",
+        "tests/TestCase.php": "Provides mockGameTemplate(), createGame(), createPlayer()",
+        "docs/": "Architectural docs (architectural-patterns.md is the canonical reference)"
+    },
+    "canonicalExamples": {
+        "simpleChallenge": "app/Challenges/PeckingOrder/IndividualBuddySystem.php",
+        "complexChallenge": "app/Challenges/TierList/TierListGuess.php",
+        "modifierNoConfig": "app/Modifiers/PeckingOrder/BloodOaths.php",
+        "modifierWithConfig": "app/Modifiers/Laracon2025/TeamSecretCodes.php",
+        "challengeTest": "tests/Feature/Challenges/IndividualBuddySystemTest.php",
+        "modifierTest": "tests/Feature/Modifiers/BloodOathTest.php",
+        "supportTraitPattern": "app/Challenges/Support/PeckingOrder/HasPeckingOrderBallots.php"
+    },
+    "verbsLifecycle": {
+        "validate": "Assert preconditions with $this->assert(condition, 'message')",
+        "apply": "Mutate state objects (applyToGame(GameState $g), applyToChallenge(ChallengeState $c), etc.)",
+        "handle": "Persist by calling $model->updateModelWithStateData() on affected Eloquent models",
+        "fire": "Event::fire(state_id: ..., ...) — HandlesClassActions commits automatically"
+    },
+    "lifecycleHooks": {
+        "challenge": ["onChallengeEnded", "onPlayerJoinedTeam"],
+        "modifier": ["onGameStarted", "onChallengeStarted", "onChallengeEnded", "onUserAdmittedToGame", "onPlayerJoinedTeam", "onSecretDiscovered"],
+        "rule": "Always prefer a lifecycle hook over wiring a new event listener"
+    },
+    "commands": {
+        "php artisan serve": "Web server",
+        "npm run dev": "Frontend assets / hot reload",
+        "php artisan queue:work": "Queues",
+        "php artisan reverb:start": "WebSocket server (required for real-time)",
+        "php artisan test": "All feature tests",
+        "php artisan pail": "Tail logs",
+        "php artisan progress:games": "Advance current challenge if time is up",
+        "php artisan db:reset-data": "Reset local game data",
+        "php artisan create:bots": "Create bot user accounts",
+        "php artisan fill:game-with-bots": "Add bots to a game",
+        "php artisan verbs:replay": "Rebuild state from event log"
+    },
+    "documentation": {
+        "/CLAUDE.md": "Non-negotiable rules and trip-wire — read this first",
+        "docs/architectural-patterns.md": "Canonical architectural reference",
+        "docs/ai-quick-start.md": "Recipes for adding challenges, modifiers, events, custom UI",
+        "docs/module-mapping.md": "Per-game-mode file layout",
+        "docs/testing-guidelines.md": "Test patterns and helpers",
+        "docs/ai-development-guide.md": "Stack, env, commands, debugging notes"
+    },
+    "stalenessPolicy": "When this file or any markdown in docs/ contradicts current code, the code is authoritative. Update the doc in your PR and call out the discrepancy.",
+    "lastVerifiedAgainstCode": "2026-05-26"
+}

@@ -2,15 +2,24 @@
 
 namespace App\Support;
 
-use App\Challenges\Classes\BaseChallengeClass;
-use App\Challenges\Support\Interfaces\SupportsPeckingOrderBallots;
-use App\Challenges\Support\Interfaces\SupportsTeamSwaps;
-use App\Modifiers\Classes\BaseModifierClass;
+use App\Challenges\BaseChallengeClass;
+use App\Challenges\Support\PeckingOrder\SupportsPeckingOrderBallots;
+use App\Challenges\Support\Laracon2025\SupportsTeamSwaps;
+use App\Modifiers\BaseModifierClass;
 use Illuminate\Support\Collection;
 
+/**
+ * Per-game-mode element methods (e.g. ->farmMap(), ->elephantBoard())
+ * are NOT defined here. They live on auto-discovered
+ * FormElementProvider classes under app/Support/FormBuilderElements/ and
+ * are resolved through __call — see FormElementRegistry. Adding a new game
+ * mode's custom UI should never require editing this file.
+ */
 class FormBuilder
 {
     protected array $elements = [];
+
+    protected ?int $poll_interval = null;
 
     protected ?array $currentGroup = null;
 
@@ -146,6 +155,34 @@ class FormBuilder
         return $this;
     }
 
+    public function radioGroup(
+        string $label,
+        array $options,
+        string $property_name, // this will be the name of the property in livewire
+        string $validation_rules,
+        array $validation_messages,
+    ): static {
+        $this->elements[] = [
+            'type' => 'radio_group',
+            'label' => $label,
+            'options' => $options,
+            // example:
+            // 'options' => [
+            //     [
+            //         'label' => 'Strategist',
+            //         'value' => 'strategist',
+            //         'description' => 'Max capacity of 5 Actions',
+            //         'disabled' => false,
+            //     ],
+            // ],
+            'property_name' => $property_name,
+            'validation_rules' => $validation_rules,
+            'validation_messages' => $validation_messages,
+        ];
+
+        return $this;
+    }
+
     public function title(string $text): static
     {
         $this->elements[] = [
@@ -203,10 +240,16 @@ class FormBuilder
             throw new \RuntimeException('You must call endGroup() before build()');
         }
 
-        return [
+        $result = [
             'type' => 'form',
             'elements' => $this->elements,
         ];
+
+        if ($this->poll_interval !== null) {
+            $result['poll_interval'] = $this->poll_interval;
+        }
+
+        return $result;
     }
 
     public function teamSwap(
@@ -271,6 +314,37 @@ class FormBuilder
         return $this;
     }
 
+    /**
+     * Append a raw element array. This is the surface FormElementProvider
+     * classes build on — elements need a unique snake_case 'type', which the
+     * generic form blade resolves to a matching custom-form-elements blade.
+     */
+    public function addElement(array $element): static
+    {
+        $this->elements[] = $element;
+
+        return $this;
+    }
+
+    /**
+     * Resolve per-game-mode element methods from the auto-discovered
+     * registry. Named arguments pass straight through to the provider.
+     */
+    public function __call(string $method, array $arguments)
+    {
+        $provider = FormElementRegistry::resolve($method);
+
+        if (! $provider) {
+            throw new \BadMethodCallException(
+                "Method [{$method}] does not exist on FormBuilder and no FormElementProvider under app/Support/FormBuilderElements/ defines it."
+            );
+        }
+
+        $provider->{$method}($this, ...$arguments);
+
+        return $this;
+    }
+
     public function merge(FormBuilder $other): static
     {
         $this->elements = array_merge($this->elements, $other->elements);
@@ -283,6 +357,13 @@ class FormBuilder
         if ($condition) {
             $callback($this);
         }
+
+        return $this;
+    }
+
+    public function poll(int $interval): static
+    {
+        $this->poll_interval = $interval;
 
         return $this;
     }

@@ -28,6 +28,7 @@ class UserSeeder extends Seeder
             ['Scammy McGee', 'scammy@thunk.dev'],
             ['Cedric Daniels', 'cedric@thunk.dev'],
             ['Jimmy McNulty', 'jimmy@thunk.dev'],
+            ['Kyle Evangelisto', 'kyle@thunk.dev'],
             ['Bubbles', 'bubbles@thunk.dev'],
             ['Kima Greggs', 'kima@thunk.dev'],
             ['Dwayne Pride', 'dwayne@thunk.dev'],
@@ -71,7 +72,7 @@ class UserSeeder extends Seeder
             UserGainedMembership::fire(user_id: $user->id);
         }
 
-        foreach ($users as $user) {
+        foreach (collect($users)->take(10) as $user) {
             $user = User::fromTemplate($user[0], $user[1], bcrypt('password'));
         }
     }

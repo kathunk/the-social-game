@@ -76,14 +76,18 @@ trait HandlesClassActions
                 $params['round_properties']
             );
         } catch (\Exception $e) {
-            $this->addError('error', $e->getMessage());
+            // Refresh UI even on failure so the player sees the actual current
+            // state (e.g. the room they tried to enter is now occupied).
+            // softRefresh() resets validation, so we add the error AFTER it.
+            $this->softRefresh();
+            $this->addError('action_error', $e->getMessage());
 
             return;
         }
 
         Verbs::commit();
 
-        $this->updateComponentsAfterAction($type, $class_key);
+        $this->softRefresh();
 
         return $response instanceof \Illuminate\Http\RedirectResponse ||
             $response instanceof \Livewire\Features\SupportRedirects\Redirector
@@ -141,43 +145,29 @@ trait HandlesClassActions
         throw new \Exception("No modifier found for class_key: {$class_key}");
     }
 
-    protected function updateComponentsAfterAction(
-        string $type,
-        string $class_key
-    ): void {
-        if ($type === 'challenge') {
-            $this->challenge_component = $this->game->currentChallenge
-                ?->fresh()
-                ->handler()
-                ->frontendComponent($this->player->fresh());
+    public function softRefresh()
+    {
+        Verbs::commit();
+
+        if (isset($this->game)) {
+            $this->game = $this->game->fresh();
         }
 
-        if ($type === 'modifier') {
-            $modifier = $this->game
-                ->fresh()
-                ->modifiers()
-                ->where('class_key', $class_key)
-                ->first();
-
-            if ($modifier) {
-                $this->round_properties[$modifier->class_key] =
-                    $modifier
-                        ->handler()
-                        ?->propertiesForLivewire($this->player->fresh()) ?? [];
-
-                $this->validation_rules[$modifier->class_key] =
-                    $modifier
-                        ->handler()
-                        ?->validationRulesForLivewire($this->player->fresh()) ??
-                    [];
-
-                if (isset($this->modifier_components)) {
-                    $this->modifier_components[$modifier->class_key] = $modifier
-                        ->fresh()
-                        ->handler()
-                        ->frontendComponent($this->player->fresh());
-                }
-            }
+        foreach ($this->getComputedPropertiesToClear() as $property) {
+            unset($this->{$property});
         }
+
+        if (method_exists($this, 'initializeProperties')) {
+            $this->initializeProperties();
+        }
+
+        $this->resetValidation();
+
+        $this->dispatch('component-refreshed');
+    }
+
+    protected function getComputedPropertiesToClear(): array
+    {
+        return [];
     }
 }

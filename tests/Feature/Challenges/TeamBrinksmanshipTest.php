@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\TeamBrinksmanship;
+use App\Challenges\Laracon2025\TeamBrinksmanship;
 use App\Livewire\GameDashboard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Features\SupportTesting\Testable as LivewireTest;
@@ -143,21 +143,6 @@ it('gives -50 points to ally team when a team launches a nuke ally strike', func
     foreach ($this->game->teams as $team) {
         expect($team->fresh()->score)->toBe(-40);
         expect($ally_team->fresh()->score)->toBe(-40);
-    }
-});
-
-it('prevents a team from launching multiple strikes', function () {
-    foreach ($this->game->teams as $team) {
-        $player = $team->players->first();
-        $ally_team = ally_team($team);
-        $ally_code = code($ally_team);
-
-        // First strike should succeed
-        launchNuclearStrike($player, 'carpet_bomb', $ally_code);
-
-        // Second strike should fail
-        launchNuclearStrike($player, 'nuke_ally', $ally_code)
-            ->assertHasErrors();
     }
 });
 

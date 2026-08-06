@@ -33,11 +33,22 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'provider_id',
+        'provider_name',
+        'avatar',
         'status',
         'current_game_id',
         'current_player_id',
         'is_super_admin',
         'subscribed_to_newsletter',
+        'phone_number',
+        'default_discord_webhook',
+        'notification_preferences',
+        'telegram_chat_id',
+        'telegram_username',
+        'telegram_verification_token',
+        'telegram_connected_at',
+        'push_subscriptions',
     ];
 
     /**
@@ -45,13 +56,13 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'is_super_admin' => 'boolean',
+        'notification_preferences' => 'array',
+        'telegram_connected_at' => 'datetime',
+        'push_subscriptions' => 'array',
     ];
 
     /**
@@ -78,12 +89,21 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    public static function fromTemplate(string $name, string $email, string $encrypted_password)
-    {
+    public static function fromTemplate(
+        string $name,
+        string $email,
+        string $encrypted_password,
+        ?string $provider_id = null,
+        ?string $provider_name = null,
+        ?string $avatar = null,
+    ) {
         return UserCreated::commit(
             name: $name,
             email: $email,
             encrypted_password: $encrypted_password,
+            provider_id: $provider_id,
+            provider_name: $provider_name,
+            avatar: $avatar,
         );
     }
 
@@ -105,7 +125,7 @@ class User extends Authenticatable
             'user_id', // Foreign key on players table
             'id', // Local key on games table
             'id', // Local key on users table
-            'game_id' // Foreign key on players table
+            'game_id', // Foreign key on players table
         );
     }
 
@@ -136,7 +156,9 @@ class User extends Authenticatable
 
     public function getIsMemberAttribute(): bool
     {
-        return $this->memberships->filter(fn ($m) => $m->isActive())->isNotEmpty();
+        return $this->memberships
+            ->filter(fn ($m) => $m->isActive())
+            ->isNotEmpty();
     }
 
     public function isGameAdmin(Game $game): bool
@@ -157,10 +179,7 @@ class User extends Authenticatable
 
     public function requestToJoinGame(Game $game)
     {
-        UserRequestedToJoinGame::fire(
-            user_id: $this->id,
-            game_id: $game->id,
-        );
+        UserRequestedToJoinGame::fire(user_id: $this->id, game_id: $game->id);
 
         Verbs::commit();
 
@@ -173,7 +192,10 @@ class User extends Authenticatable
 
     public function admitToGame(Game $game, ?User $admin = null)
     {
-        $application = $this->gameApplications->firstWhere('game_id', $game->id);
+        $application = $this->gameApplications->firstWhere(
+            'game_id',
+            $game->id,
+        );
 
         if (! $application) {
             throw new \Exception('User has not applied to this game');
@@ -189,7 +211,10 @@ class User extends Authenticatable
 
     public function rejectFromGame(Game $game, User $admin)
     {
-        $application = $this->gameApplications->firstWhere('game_id', $game->id);
+        $application = $this->gameApplications->firstWhere(
+            'game_id',
+            $game->id,
+        );
 
         if (! $application) {
             throw new \Exception('User has not applied to this game');
@@ -207,10 +232,23 @@ class User extends Authenticatable
         return $this->fresh();
     }
 
+    public function getAvatarUrlAttribute(): string
+    {
+        // Use social provider avatar if available
+        if ($this->avatar) {
+            return $this->avatar;
+        }
+
+        // Fallback to gravatar
+        return $this->gravatar;
+    }
+
     public function getGravatarAttribute(): string
     {
         // Return gravatar with 404 fallback for frontend handling
-        return 'https://www.gravatar.com/avatar/'.md5(strtolower(trim($this->email))).'?d=404&s=200';
+        return 'https://www.gravatar.com/avatar/'.
+            md5(strtolower(trim($this->email))).
+            '?d=404&s=200';
     }
 
     public function getDefaultAvatarUrlAttribute(): string
@@ -222,5 +260,42 @@ class User extends Authenticatable
     public function getHasActiveGameAttribute(): bool
     {
         return $this->games->where('status', 'active')->isNotEmpty();
+    }
+
+    public function wantsNotificationFor(string $event): bool
+    {
+        return $this->notification_preferences[$event] ?? false;
+    }
+
+    public function wantsNotificationVia(string $type): bool
+    {
+        return $this->notification_preferences[$type] ?? false;
+    }
+
+    public function wantsNotifications()
+    {
+        return $this->wantsNotificationVia('notify_via_email') ||
+            $this->wantsNotificationVia('notify_via_sms') ||
+            $this->wantsNotificationVia('notify_via_discord') ||
+            $this->wantsNotificationVia('notify_via_telegram') ||
+            $this->wantsNotificationVia('notify_via_browser');
+    }
+
+    public function hasNotificationContactConfigured(): bool
+    {
+        return ! empty($this->phone_number) ||
+            ! empty($this->default_discord_webhook) ||
+            ! empty($this->telegram_chat_id) ||
+            ! empty($this->push_subscriptions);
+    }
+
+    public function hasTelegramConnected(): bool
+    {
+        return ! empty($this->telegram_chat_id);
+    }
+
+    public function hasPushSubscriptions(): bool
+    {
+        return ! empty($this->push_subscriptions);
     }
 }

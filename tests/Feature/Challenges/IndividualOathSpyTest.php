@@ -1,9 +1,9 @@
 <?php
 
-use App\Challenges\Classes\IndividualOathSpy;
+use App\Challenges\PeckingOrder\IndividualOathSpy;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
-use App\Modifiers\Classes\BloodOaths;
+use App\Modifiers\PeckingOrder\BloodOaths;
 use Livewire\Livewire;
 use Thunk\Verbs\Facades\Verbs;
 

@@ -6,9 +6,12 @@ use App\Events\Traits\HasActiveGame;
 use App\Events\Traits\HasChallenge;
 use App\Models\Challenge;
 use App\Models\Game;
+use App\Notifications\ChallengeStartedNotification;
 use App\States\ChallengeState;
 use App\States\GameState;
+use Illuminate\Support\Facades\Log;
 use Thunk\Verbs\Event;
+use Thunk\Verbs\Facades\Verbs;
 
 class ChallengeStarted extends Event
 {
@@ -33,6 +36,14 @@ class ChallengeStarted extends Event
     public function applyToGame(GameState $state)
     {
         $state->current_challenge_id = $this->challenge_id;
+
+        $state->modifiers()->each(function ($modifier) {
+            $modifier->handler()->onChallengeStarted(
+                game_state: $this->state(GameState::class),
+                challenge_state: $this->state(ChallengeState::class),
+                modifier_state: $modifier,
+            );
+        });
     }
 
     public function handle(ChallengeState $state)
@@ -40,9 +51,28 @@ class ChallengeStarted extends Event
         $game = Game::find($this->game_id);
         $game->update(['current_challenge_id' => $this->challenge_id]);
 
-        Challenge::find($this->challenge_id)->update([
+        $challenge = Challenge::find($this->challenge_id);
+        $challenge->update([
             'status' => 'active',
             'challenge_data' => $state->challenge_data,
         ]);
+
+        if ($this->challenge()->round_number === 1) {
+            return;
+        }
+
+        Verbs::unlessReplaying(function () use ($game, $challenge) {
+            $this->game()->players()->each(function ($player) use ($game, $challenge) {
+                if ($player->status === 'resigned') {
+                    return;
+                }
+
+                $user = $player->user;
+
+                if ($user->wantsNotificationFor('notify_on_challenge_start')) {
+                    $user->notify(new ChallengeStartedNotification($challenge, $game));
+                }
+            });
+        });
     }
 }

@@ -11,19 +11,19 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component {
-    #[Validate('required|string|email')]
-    public string $email = '';
+new #[Layout("components.layouts.auth")] class extends Component {
+    #[Validate("required|string|email")]
+    public string $email = "";
 
-    #[Validate('required|string')]
-    public string $password = '';
+    #[Validate("required|string")]
+    public string $password = "";
 
     public bool $remember = false;
     public ?string $game = null;
 
     public function mount(): void
     {
-        $this->game = request()->query('game');
+        $this->game = request()->query("game");
     }
 
     /**
@@ -35,11 +35,16 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        if (
+            !Auth::attempt(
+                ["email" => $this->email, "password" => $this->password],
+                $this->remember,
+            )
+        ) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                "email" => __("auth.failed"),
             ]);
         }
 
@@ -47,13 +52,29 @@ new #[Layout('components.layouts.auth')] class extends Component {
         Session::regenerate();
 
         if ($this->game) {
-            $this->redirect(route('pre-game-lobby', ['game' => $this->game], absolute: false), navigate: true);
+            $this->redirect(
+                route(
+                    "pre-game-lobby",
+                    ["game" => $this->game],
+                    absolute: false,
+                ),
+                navigate: true,
+            );
         } else {
-            if (Session::has('url.intended') && str_contains(Session::get('url.intended'), '/games/')) {
-                Session::forget('url.intended');
-                $this->redirect(route('dashboard', absolute: false), navigate: true);
+            if (
+                Session::has("url.intended") &&
+                str_contains(Session::get("url.intended"), "/games/")
+            ) {
+                Session::forget("url.intended");
+                $this->redirect(
+                    route("dashboard", absolute: false),
+                    navigate: true,
+                );
             } else {
-                $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+                $this->redirectIntended(
+                    default: route("dashboard", absolute: false),
+                    navigate: true,
+                );
             }
         }
     }
@@ -63,7 +84,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     protected function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -72,9 +93,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => __('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
+            "email" => __("auth.throttle", [
+                "seconds" => $seconds,
+                "minutes" => ceil($seconds / 60),
             ]),
         ]);
     }
@@ -84,15 +105,21 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+        return Str::transliterate(
+            Str::lower($this->email) . "|" . request()->ip(),
+        );
     }
-}; ?>
+};
+?>
 
 <div class="flex flex-col gap-6">
     <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
+
+    <!-- Social Auth Errors -->
+    <x-social-auth-errors />
 
     <form wire:submit="login" class="flex flex-col gap-6">
         <!-- Email Address -->
@@ -130,6 +157,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
             <x-button variant="primary" type="submit" class="w-full">{{ __('Log in') }}</x-button>
         </div>
     </form>
+
+    <x-social-login-buttons />
 
     @if (Route::has('register'))
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">

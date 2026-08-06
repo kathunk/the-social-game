@@ -1,0 +1,41 @@
+# CODEOWNERS
+#
+# All PRs require review from @johnrudolph. The explicit trip-wire entries
+# below are redundant for review-required purposes (the wildcard already
+# covers everything) but they document intent: these are the architectural
+# infrastructure files that should be modified rarely and deliberately.
+#
+# See /CLAUDE.md for the full trip-wire list and why it matters.
+
+# Default: everything requires @johnrudolph review.
+* @johnrudolph
+
+# Trip-wire files: generic infrastructure that is game-agnostic.
+# Changes here typically indicate that something is being modeled at the
+# wrong level. Sanity-check before approving.
+/app/Livewire/GameDashboard.php                              @johnrudolph
+/app/Livewire/PlayerPage.php                                 @johnrudolph
+/app/Livewire/TeamPage.php                                   @johnrudolph
+/app/Livewire/SecretsPage.php                                @johnrudolph
+/app/Livewire/Concerns/HandlesClassActions.php               @johnrudolph
+/app/Challenges/BaseChallengeClass.php                       @johnrudolph
+/app/Challenges/ChallengeRegistry.php                        @johnrudolph
+/app/Modifiers/BaseModifierClass.php                         @johnrudolph
+/app/Modifiers/ModifierRegistry.php                          @johnrudolph
+/app/Support/FormBuilder.php                                 @johnrudolph
+/app/Support/FrontendComponentProcessor.php                  @johnrudolph
+/resources/views/components/game-components/form.blade.php   @johnrudolph
+
+# Top-level Verbs events (game-agnostic lifecycle).
+# Mode-specific events live under app/Events/<GameMode>/ and are covered by the wildcard.
+/app/Events/*.php                                            @johnrudolph
+/app/Events/Traits/                                          @johnrudolph
+
+# Architectural docs and AI rules.
+/CLAUDE.md                                                   @johnrudolph
+/.cursor/rules/                                              @johnrudolph
+/docs/                                                       @johnrudolph
+/.ai-context.json                                            @johnrudolph
+
+# Repo hygiene.
+/.github/                                                    @johnrudolph

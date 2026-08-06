@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualHighTrustEnvironment;
+use App\Challenges\PeckingOrder\IndividualHighTrustEnvironment;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

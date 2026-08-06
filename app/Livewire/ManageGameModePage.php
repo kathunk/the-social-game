@@ -35,6 +35,20 @@ class ManageGameModePage extends Component
 
     public string $game_type;
 
+    public string $scoreboard_type;
+
+    public bool $requires_team_membership;
+
+    public bool $skips_pre_game_lobby;
+
+    const SCOREBOARD_TYPES = [
+        'individual' => 'Individual',
+        'team' => 'Team',
+        'blood_oath' => 'Blood Oath',
+        'hide_until_end' => 'Hide Until End of Game',
+        'none' => 'None (no scoreboard)',
+    ];
+
     #[Computed]
     public function gameTemplates()
     {
@@ -56,6 +70,9 @@ class ManageGameModePage extends Component
             $this->is_public = $game_mode->is_public ?? false;
             $this->players_can_join_late = $game_mode->players_can_join_late ?? false;
             $this->game_type = $game_mode->type ?? 'individual';
+            $this->scoreboard_type = $game_mode->scoreboard_type ?? 'individual';
+            $this->requires_team_membership = $game_mode->requires_team_membership ?? false;
+            $this->skips_pre_game_lobby = $game_mode->skips_pre_game_lobby ?? false;
         } else {
             $this->name = '';
             $this->description = '';
@@ -67,21 +84,30 @@ class ManageGameModePage extends Component
             $this->is_public = false;
             $this->players_can_join_late = false;
             $this->game_type = 'individual';
+            $this->scoreboard_type = $game_mode->scoreboard_type ?? 'individual';
+            $this->requires_team_membership = false;
+            $this->skips_pre_game_lobby = false;
         }
     }
 
-    public $rules = [
-        'name' => 'required|string|max:100',
-        'description' => 'required|string',
-        'pre_game_lobby_message' => 'required|string',
-        'footer_message' => 'nullable|string',
-        'post_game_message' => 'nullable|string',
-        'min_players' => 'nullable|integer',
-        'max_players' => 'nullable|integer',
-        'is_public' => 'boolean',
-        'players_can_join_late' => 'boolean',
-        'game_type' => 'required|string|in:individual,team',
-    ];
+    public function rules()
+    {
+        return [
+            'name' => 'required|string|max:100',
+            'description' => 'required|string',
+            'pre_game_lobby_message' => 'required|string',
+            'footer_message' => 'nullable|string',
+            'post_game_message' => 'nullable|string',
+            'min_players' => 'nullable|integer',
+            'max_players' => 'nullable|integer',
+            'is_public' => 'boolean',
+            'players_can_join_late' => 'boolean',
+            'game_type' => 'required|string|in:individual,team',
+            'scoreboard_type' => 'required|string|in:'.implode(',', array_keys(self::SCOREBOARD_TYPES)),
+            'requires_team_membership' => 'boolean',
+            'skips_pre_game_lobby' => 'boolean',
+        ];
+    }
 
     public function saveGameMode()
     {
@@ -102,6 +128,9 @@ class ManageGameModePage extends Component
                 max_players: $this->max_players ?? null,
                 is_public: $this->is_public,
                 players_can_join_late: $this->players_can_join_late,
+                scoreboard_type: $this->scoreboard_type,
+                requires_team_membership: $this->requires_team_membership,
+                skips_pre_game_lobby: $this->skips_pre_game_lobby,
             )->game_mode_id;
         } catch (Exception $e) {
             $this->addError('error', $e->getMessage());

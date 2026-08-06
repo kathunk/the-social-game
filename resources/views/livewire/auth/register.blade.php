@@ -11,18 +11,18 @@ use App\Events\UserCreated;
 use App\Events\UserSubscribedToNewsletter;
 use Thunk\Verbs\Facades\Verbs;
 
-new #[Layout('components.layouts.auth')] class extends Component {
-    public string $name = '';
-    public string $email = '';
-    public string $password = '';
-    public string $password_confirmation = '';
+new #[Layout("components.layouts.auth")] class extends Component {
+    public string $name = "";
+    public string $email = "";
+    public string $password = "";
+    public string $password_confirmation = "";
     public bool $subscribed_to_newsletter = true;
 
     public ?string $game = null;
 
     public function mount(): void
     {
-        $this->game = request()->query('game');
+        $this->game = request()->query("game");
     }
 
     /**
@@ -31,15 +31,27 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public function register(): void
     {
         $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+            "name" => ["required", "string", "max:255"],
+            "email" => [
+                "required",
+                "string",
+                "lowercase",
+                "email",
+                "max:255",
+                "unique:" . User::class,
+            ],
+            "password" => [
+                "required",
+                "string",
+                "confirmed",
+                Rules\Password::defaults(),
+            ],
         ]);
 
         $user_id = UserCreated::fire(
-            name: $validated['name'],
-            email: $validated['email'],
-            encrypted_password: bcrypt($validated['password']),
+            name: $validated["name"],
+            email: $validated["email"],
+            encrypted_password: bcrypt($validated["password"]),
         )->user_id;
 
         Verbs::commit();
@@ -55,18 +67,32 @@ new #[Layout('components.layouts.auth')] class extends Component {
         }
 
         if ($this->game) {
-            $this->redirect(route('pre-game-lobby', ['game' => $this->game], absolute: false), navigate: true);
+            $this->redirect(
+                route(
+                    "pre-game-lobby",
+                    ["game" => $this->game],
+                    absolute: false,
+                ),
+                navigate: true,
+            );
         } else {
-            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+            $this->redirectIntended(
+                default: route("dashboard", absolute: false),
+                navigate: true,
+            );
         }
     }
-}; ?>
+};
+?>
 
 <div class="flex flex-col gap-6">
     <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
+
+    <!-- Social Auth Errors -->
+    <x-social-auth-errors />
 
     <form wire:submit="register" class="flex flex-col gap-6">
         <!-- Name -->
@@ -113,7 +139,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <div class="flex items-center justify-between">
             <flux:checkbox
                 wire:model="subscribed_to_newsletter"
-                :label="__('Email me when something cool drops')"
+                :label="__('Let me know when Catacombian releases a new game')"
             />
         </div>
 
@@ -123,6 +149,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
             </x-button>
         </div>
     </form>
+
+    <x-social-login-buttons />
 
     <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
         {{ __('Already have an account?') }}

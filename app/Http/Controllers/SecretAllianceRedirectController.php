@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Modifiers\Classes\TeamSecretAlliance;
+use App\Modifiers\Laracon2025\TeamSecretAlliance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,7 +21,7 @@ class SecretAllianceRedirectController extends Controller
             ->firstWhere('class_key', TeamSecretAlliance::key());
 
         if ($modifier) {
-            return redirect()->route('games.secrets', [
+            return redirect()->route('games.mods', [
                 'game' => $game->id,
                 'modifier' => $modifier->id,
             ]);

@@ -114,17 +114,23 @@ class GameDashboard extends Component
     }
 
     #[Computed]
+    public function gameMode()
+    {
+        return $this->game->gameMode;
+    }
+
+    #[Computed]
     public function footerMessage()
     {
         if (
             $this->game->status !== 'active' ||
-            ! $this->game->gameMode->footer_message
+            ! $this->gameMode->footer_message
         ) {
             return null;
         }
 
         return (new HtmlTransformer(
-            $this->game->gameMode->footer_message
+            $this->gameMode->footer_message
         ))->formatted();
     }
 
@@ -133,13 +139,13 @@ class GameDashboard extends Component
     {
         if (
             $this->game->status !== 'ended' ||
-            ! $this->game->gameMode->post_game_message
+            ! $this->gameMode->post_game_message
         ) {
             return null;
         }
 
         return (new HtmlTransformer(
-            $this->game->gameMode->post_game_message
+            $this->gameMode->post_game_message
         ))->formatted();
     }
 
@@ -152,7 +158,7 @@ class GameDashboard extends Component
         }
 
         $player_needs_to_join_team =
-            $this->template->type === 'team' && ! $this->player->team;
+            $this->template->type === 'team' && ! $this->player->team && $this->gameMode->requires_team_membership;
 
         if ($player_needs_to_join_team) {
             return;
@@ -193,26 +199,53 @@ class GameDashboard extends Component
             return;
         }
 
+        // Once the game has ended, modifiers render their post-game surface
+        // instead of their in-game one (most have none and render nothing)
+        $post_game = $this->game->status === 'ended';
+
         foreach ($this->modifiers as $modifier) {
             $this->round_properties[$modifier->class_key] =
-                $modifier->handler()?->propertiesForLivewire($this->player) ??
-                [];
+                $modifier->handler()?->propertiesForLivewire(
+                    $this->player,
+                    for_post_game: $post_game,
+                ) ?? [];
 
             $this->validation_rules[$modifier->class_key] =
                 $modifier
                     ->handler()
-                    ?->validationRulesForLivewire($this->player) ?? [];
+                    ?->validationRulesForLivewire($this->player, for_post_game: $post_game) ?? [];
 
-            $this->modifier_components[$modifier->class_key] = $modifier
-                ->handler()
-                ->frontendComponent($this->player);
+            $this->modifier_components[$modifier->class_key] = $post_game
+                ? $modifier->handler()->postGameComponent($this->player)
+                : $modifier->handler()->frontendComponent($this->player);
         }
+    }
+
+    protected function getComputedPropertiesToClear(): array
+    {
+        return [
+            'user',
+            'players',
+            'player',
+            'is_game_admin',
+            'teams',
+            'current_team',
+            'challenge',
+            'modifiers',
+            'challengeHandler',
+            'template',
+            'showScoreboard',
+            'socialLink',
+            'gameMode',
+            'footerMessage',
+            'postGameMessage',
+        ];
     }
 
     #[On('challenge-complete')]
     public function refreshChallenge()
     {
-        $this->initializeProperties();
+        // @todo this is a hack to refresh the challenge, but it's not the best way to do it
     }
 
     public function joinTeam()

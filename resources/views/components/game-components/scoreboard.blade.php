@@ -1,5 +1,7 @@
-@props(['teams', 'players', 'type'])
+@props(['teams', 'players', 'type', 'scoreboard_type'])
+@if ($scoreboard_type === 'hide_until_end' && $this->game->status !== 'ended')
 
+@else
 <div>
     <x-card>
         <x-forms.heading class="!text-lg">Scoreboard</x-forms.heading>
@@ -16,7 +18,7 @@
                 @if ($type === 'team')
                     <flux:table.column>PLAYERS</flux:table.column>
                 @endif
-                <flux:table.column>SCORE</flux:table.column>
+                <flux:table.column width="15%">SCORE</flux:table.column>
             </flux:table.columns>
 
             <flux:table.rows>
@@ -41,7 +43,7 @@
                             <flux:table.cell>
                                 @if ($this->game->status === 'ended')
                                     <div class="flex items-center gap-2">
-                                        <span class="text-black font-bold">{{ $team->hidden_score }}<span>
+                                        <span class="text-black font-bold">{{ $team->hidden_score }}</span>
                                         @if ($team->hidden_score !== $team->score)
                                             <flux:text class="text-faded-gray font-light">
                                                 ({{ $team->hidden_score - $team->score }} hidden)
@@ -67,7 +69,11 @@
                     @endforeach
                 @endif
 
-                @if ($type === 'individual' || ($type === 'blood_oath' && $this->game->status === 'active'))
+                @if (
+                    $type === 'individual' 
+                    || ($type === 'blood_oath' && $this->game->status === 'active') 
+                    || ($type === 'hide_until_end' && $this->game->status === 'ended' && $this->game->challenges->first()->handler()::TYPE === 'individual')
+                )
                     @foreach ($players as $player)
                         <flux:table.row>
                             <flux:table.cell>
@@ -182,3 +188,4 @@
         </flux:table>
     </x-card>
 </div>
+@endif

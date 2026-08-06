@@ -1,6 +1,6 @@
 <?php
 
-use App\Challenges\Classes\IndividualDoubleTrouble;
+use App\Challenges\PeckingOrder\IndividualDoubleTrouble;
 use App\Livewire\GameDashboard;
 use App\Models\Challenge;
 use Livewire\Livewire;

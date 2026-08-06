@@ -5,7 +5,6 @@ namespace App\Events;
 use App\Challenges\ChallengeRegistry;
 use App\Events\Traits\HasGameMode;
 use App\Models\GameTemplate;
-use App\Modifiers\Classes\BloodOaths;
 use App\Modifiers\ModifierRegistry;
 use App\States\GameModeState;
 use App\States\GameTemplateState;
@@ -87,11 +86,6 @@ class GameTemplateAdded extends Event
                 collect($challenge['challenge_keys'])->isNotEmpty(),
                 'Challenge keys are required.'
             );
-
-            $this->assert(
-                $challenge['duration'] > 0,
-                'Challenge duration must be greater than 0.'
-            );
         });
     }
 
@@ -109,12 +103,7 @@ class GameTemplateAdded extends Event
         $game_template->min_players = $mode->min_players;
         $game_template->max_players = $mode->max_players;
         $game_template->players_can_join_late = $mode->players_can_join_late;
-
-        if (in_array(BloodOaths::key(), $this->modifiers)) {
-            $game_template->scoreboard_type = 'blood_oath';
-        } else {
-            $game_template->scoreboard_type = $this->type;
-        }
+        $game_template->scoreboard_type = $this->state(GameModeState::class)->scoreboard_type;
     }
 
     public function applyToGameMode(GameModeState $game_mode)
