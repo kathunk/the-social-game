@@ -219,7 +219,7 @@
 
                 // Optimistic bookkeeping
                 sentMoveIds: [], pendingAction: false, animating: false,
-                botThinking: false, queuedServerState: null,
+                botThinking: false, queuedServerState: null, autoClaimedForTurn: null,
                 timerNow: Math.floor(Date.now() / 1000), timerInterval: null,
 
                 init() {
@@ -242,6 +242,7 @@
                     this.$nextTick(() => setTimeout(() => { this.initBoard = false; }, 100));
                     this.timerInterval = setInterval(() => {
                         this.timerNow = Math.floor(Date.now() / 1000);
+                        this.maybeAutoClaimForfeit();
                     }, 250);
                 },
 
@@ -316,8 +317,15 @@
                     });
                 },
 
-                claimForfeit() {
+                // When the opponent's turn timer runs out, the waiting
+                // player's client claims the win automatically — no prompt.
+                // Latched per turn_started_at so a rejected claim (e.g. the
+                // opponent's move raced in) doesn't retry until a new turn
+                // starts a new clock.
+                maybeAutoClaimForfeit() {
                     if (!this.canClaimForfeit || this.pendingAction) return;
+                    if (this.autoClaimedForTurn === this.turnStartedAt) return;
+                    this.autoClaimedForTurn = this.turnStartedAt;
                     this.sendAction('claimForfeit', {});
                 },
 
@@ -846,7 +854,7 @@
             </span>
         </div>
 
-        {{-- TURN TIMER + CLAIM FORFEIT (2-player games only) --}}
+        {{-- TURN TIMER (2-player games only) — expiry auto-ends the game --}}
         <template x-if="!isBotGame && matchStatus === 'active'">
             <div class="w-[240px] space-y-2">
                 <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -856,13 +864,12 @@
                         :style="`width: ${timerFraction}%`"
                     ></div>
                 </div>
-                <button
+                <p
                     x-show="canClaimForfeit"
-                    @click="claimForfeit()"
-                    class="w-full rounded-lg bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 text-sm font-medium"
+                    class="text-center text-sm text-amber-600 animate-pulse"
                 >
-                    Time's up — claim the win
-                </button>
+                    Time's up — ending the game…
+                </p>
             </div>
         </template>
 

@@ -81,10 +81,42 @@ class ElephantFormElements implements FormElementProvider
 
         $rematch_game_id = $modifier_data['rematch_game_id'] ?? null;
 
+        // Precomputed final-board snapshot: one entry per space with its seat
+        // color, whether it's part of the winning shape, and the elephant.
+        // Seat colors match the in-game board (first actor orange, second teal).
+        $board_cells = null;
+
+        if ($match_data !== []) {
+            $actor_order = array_map('strval', $match_data['actor_order'] ?? []);
+
+            $colors = [];
+            if (isset($actor_order[0])) {
+                $colors[$actor_order[0]] = '#FF6857';
+            }
+            if (isset($actor_order[1])) {
+                $colors[$actor_order[1]] = '#007393';
+            }
+
+            $board = $match_data['board'] ?? [];
+            $winning_spaces = $match_data['winning_spaces'] ?? [];
+            $elephant_space = $match_data['elephant_space'] ?? null;
+
+            $board_cells = [];
+            for ($space = 1; $space <= 16; $space++) {
+                $occupant = $board[$space] ?? null;
+                $board_cells[] = [
+                    'color' => $occupant !== null ? ($colors[(string) $occupant] ?? '#94a3b8') : null,
+                    'is_winning' => in_array($space, $winning_spaces),
+                    'has_elephant' => $elephant_space === $space,
+                ];
+            }
+        }
+
         $form->addElement([
             'type' => 'elephant_rematch',
             'class_key' => \App\Modifiers\ElephantInTheRoom\ElephantRematch::key(),
             'result_text' => $result_text,
+            'board_cells' => $board_cells,
             'is_bot_game' => $is_bot_game,
             'i_voted' => in_array($me, $votes, true),
             'requester_names' => $requester_names,

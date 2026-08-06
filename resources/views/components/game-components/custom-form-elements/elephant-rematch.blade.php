@@ -1,7 +1,37 @@
 @props(['element'])
 
+@once
+    <style>
+        @keyframes elephant-rematch-glow {
+            0%, 100% { box-shadow: 0 0 4px 2px rgba(250, 204, 21, 0.7); }
+            50% { box-shadow: 0 0 12px 5px rgba(250, 204, 21, 0.95); }
+        }
+        .elephant-rematch-glow { animation: elephant-rematch-glow 1.2s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+            .elephant-rematch-glow { animation: none; box-shadow: 0 0 8px 3px rgba(250, 204, 21, 0.8); }
+        }
+    </style>
+@endonce
+
 <div class="flex flex-col items-center gap-4 py-4 text-center">
     <flux:heading size="lg">{{ $element['result_text'] }}</flux:heading>
+
+    {{-- The final board, frozen: seat colors, winning shape glowing, elephant
+         where it ended up --}}
+    @if ($element['board_cells'])
+        <div class="grid grid-cols-4 gap-1 p-2 bg-slate-100 rounded-xl" style="width: max-content;">
+            @foreach ($element['board_cells'] as $cell)
+                <div
+                    class="relative w-9 h-9 rounded-md {{ $cell['is_winning'] ? 'elephant-rematch-glow' : '' }}"
+                    style="background-color: {{ $cell['color'] ?? '#e2e8f0' }};"
+                >
+                    @if ($cell['has_elephant'])
+                        <span class="absolute inset-0 flex items-center justify-center text-2xl">🐘</span>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    @endif
 
     @if ($element['rematch_url'])
         {{-- The rematch exists — forward this player. The auto-redirect fires
