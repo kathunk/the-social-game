@@ -49,10 +49,7 @@
 @endonce
 
 <div class="rounded-2xl bg-bold-orange text-pale p-5 shadow-sm overflow-hidden relative">
-    <div class="flex items-start justify-between gap-3 mb-1">
-        <h3 class="font-bold text-xl">{{ $mode->name }}</h3>
-        <div class="text-3xl shrink-0">🔥</div>
-    </div>
+    <h3 class="font-bold text-xl mb-1">{{ $mode->name }}</h3>
 
     <div class="grid grid-cols-[1fr_auto] gap-4 items-center">
         <div class="min-w-0">
