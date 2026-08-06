@@ -23,7 +23,7 @@
         // once a line is full the next push shoves the far tile off the
         // clipped edge — a true push, never a drift.
         window.elephantCardTiles = function () {
-            const PITCH = 56; // grid cell: 48px tile + 8px breathing room
+            const TARGET_PITCH = 56; // ideal grid cell: 48px tile + 8px gap
             const COLORS = ['#FF6857', '#007393'];
 
             return {
@@ -31,13 +31,21 @@
                 nextId: 1,
                 cols: 0,
                 rows: 0,
+                pitchX: TARGET_PITCH,
+                pitchY: TARGET_PITCH,
                 timer: null,
 
                 init() {
                     const width = this.$el.offsetWidth || 320;
                     const height = this.$el.offsetHeight || 170;
-                    this.cols = Math.ceil(width / PITCH) + 1;
-                    this.rows = Math.ceil(height / PITCH) + 1;
+
+                    // The grid spans the card EXACTLY, so every entry edge is
+                    // a visible edge — tiles are always seen sliding in from
+                    // just outside, never materializing in clipped dead space
+                    this.cols = Math.max(3, Math.round(width / TARGET_PITCH));
+                    this.rows = Math.max(2, Math.round(height / TARGET_PITCH));
+                    this.pitchX = width / this.cols;
+                    this.pitchY = height / this.rows;
 
                     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                         // No animation: show the filled end-state instead
@@ -104,19 +112,21 @@
                     }
 
                     // The pushing tile: spawn just off the entry edge, then
-                    // slide onto the board
+                    // slide onto the board in the same beat as the run it
+                    // pushes (double-rAF so the off-edge position paints
+                    // before the transition starts)
                     const spawn = cellAt(-1);
                     const entry = this.makeTile(spawn.c, spawn.r);
                     this.tiles.push(entry);
                     const target = cellAt(0);
-                    setTimeout(() => {
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
                         entry.c = target.c;
                         entry.r = target.r;
-                    }, 30);
+                    }));
                 },
 
                 styleFor(tile) {
-                    return `transform: translate(${tile.c * PITCH}px, ${tile.r * PITCH}px); background-color: ${tile.color};`;
+                    return `transform: translate(${tile.c * this.pitchX}px, ${tile.r * this.pitchY}px); background-color: ${tile.color};`;
                 },
             };
         };
