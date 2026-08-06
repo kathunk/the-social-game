@@ -44,6 +44,7 @@ class ManageGameModePage extends Component
         'team' => 'Team',
         'blood_oath' => 'Blood Oath',
         'hide_until_end' => 'Hide Until End of Game',
+        'none' => 'None (no scoreboard)',
     ];
 
     #[Computed]

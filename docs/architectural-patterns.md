@@ -107,7 +107,7 @@ Base class: `app/Modifiers/BaseModifierClass.php`. Same shape as a challenge, pl
 
 - `const REQUIRES_PRE_GAME_CONFIGURATION = false|true` — if true, the game admin configures this modifier on `ModifierConfigurationPage` before the game starts.
 - Optional `const DEFAULT_CONFIGURATION = [...]` — initial data used during pre-game config.
-- Two UI methods: `frontendComponent(Player $player)` (rendered inside `GameDashboard`) and `frontendComponentForDedicatedPage(Player $player)` (rendered on `SecretsPage` or similar). A modifier may use either or both.
+- Three UI surfaces: `frontendComponent(Player $player)` (rendered inside `GameDashboard` while the game is active), `frontendComponentForDedicatedPage(Player $player)` (rendered on `SecretsPage` or similar), and `postGameComponent(Player $player)` (rendered on the dashboard after the game has ended). A modifier may use any combination; all default to empty.
 
 **Canonical example without pre-game config:** `app/Modifiers/PeckingOrder/BloodOaths.php`.
 **Canonical example with pre-game config:** `app/Modifiers/Laracon2025/TeamSecretCodes.php`.
@@ -190,6 +190,16 @@ Verbs writes state changes to Eloquent models via `$model->updateModelWithStateD
 
 - Reading **inside** an event's `apply()` or a challenge/modifier `on*` hook → use the State object (it's the source of truth at that moment).
 - Reading **outside** of event handling (in a Livewire component, controller, etc.) → use the Eloquent model, refreshed with `->fresh()` after any commit.
+
+## How games end
+
+A game ends when its last real challenge ends. Full stop.
+
+**Buffer challenges are an anti-pattern.** Do not add a "results", "recap", or "lobby" challenge whose only job is to keep the game alive so you can show UI. Challenges are rounds of play; a game that has no play left is over. (MorningRoutine shipped with a results challenge and was removed — do not reintroduce the pattern.)
+
+End-of-game UI is a cross-cutting concern, and cross-cutting concerns belong to **modifiers**. A modifier's `postGameComponent(Player $player)` renders on the dashboard once `game->status === 'ended'`, through the same FormBuilder → form.blade pipeline as everything else, and its actions dispatch through the same `callClassAction(..., 'modifier', ...)` path. Post-game modifier actions are *expected* to run against ended games — that is the point of the surface. Canonical example: `app/Modifiers/ElephantInTheRoom/ElephantRematch.php` (double-opt-in rematch that creates a fresh game from the same template).
+
+Relatedly: a mode that doesn't want a scoreboard at all sets `scoreboard_type: 'none'` on its GameMode — the dashboard then renders no scoreboard UI in any state.
 
 ## When to break ground vs. follow patterns
 

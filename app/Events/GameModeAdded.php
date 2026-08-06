@@ -49,8 +49,8 @@ class GameModeAdded extends Event
         );
 
         $this->assert(
-            in_array($this->scoreboard_type, ['individual', 'team', 'blood_oath', 'hide_until_end']),
-            'Scoreboard type must be either "individual", "team", "blood_oath", or "hide_until_end".'
+            in_array($this->scoreboard_type, ['individual', 'team', 'blood_oath', 'hide_until_end', 'none']),
+            'Scoreboard type must be either "individual", "team", "blood_oath", "hide_until_end", or "none".'
         );
     }
 
