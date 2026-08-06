@@ -49,10 +49,7 @@
 @endonce
 
 <div class="rounded-2xl bg-bold-orange text-pale p-5 shadow-sm overflow-hidden relative">
-    <div class="flex items-start justify-between gap-3 mb-1">
-        <h3 class="font-bold text-xl">{{ $mode->name }}</h3>
-        <div class="text-3xl shrink-0">🔥</div>
-    </div>
+    <h3 class="font-bold text-xl mb-1">{{ $mode->name }}</h3>
 
     <div class="grid grid-cols-[1fr_auto] gap-4 items-center">
         <div class="min-w-0">
@@ -72,8 +69,9 @@
         </div>
 
         {{-- Mini tier list mockup: fixed tier letters, snack chips that keep
-             trading places --}}
-        <div class="hidden sm:block w-32 shrink-0">
+             trading places. Visible at every width — on narrow screens the
+             description column compresses and wraps beside it. --}}
+        <div class="w-28 sm:w-32 shrink-0">
             <div class="rounded-lg p-1.5 bg-gradient-to-b from-green-200 via-yellow-100 to-red-100" x-data="hotTakesPreview()">
                 <div class="relative" style="height: 106px;">
                     @foreach (['A', 'B', 'C', 'D', 'F'] as $index => $letter)
