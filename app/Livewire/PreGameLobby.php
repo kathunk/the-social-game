@@ -239,6 +239,13 @@ class PreGameLobby extends Component
 
     public function checkStatus()
     {
+        if (
+            $this->game->status === 'active' &&
+            $this->application?->status === 'accepted'
+        ) {
+            return redirect()->route('game-dashboard', $this->game->id);
+        }
+
         if (! $this->application) {
             return;
         }
