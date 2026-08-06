@@ -21,13 +21,39 @@ class FormBuilder
 
     protected ?int $poll_interval = null;
 
-    protected ?array $currentGroup = null;
+    protected array $group = [];
 
     public function __construct(
         public ?BaseChallengeClass $challenge_class = null,
         public ?BaseModifierClass $modifier_class = null,
     ) {
         //
+    }
+
+    protected function getCurrentGroup(): ?array
+    {
+        return !empty($this->group)
+            ? $this->group[count($this->group) - 1]
+            : null;
+    }
+
+    protected function setCurrentGroup(array $group): void
+    {
+        if (empty($this->group)) {
+            throw new \RuntimeException('Cannot set current group: stack is empty');
+        }
+
+        $this->group[count($this->group) - 1] = $group;
+    }
+
+    protected function addGroup(array $group): void
+    {
+        $this->group[] = $group;
+    }
+
+    protected function removeCurrentGroup()
+    {
+        return array_pop($this->group);
     }
 
     public function button(
@@ -82,30 +108,30 @@ class FormBuilder
             'has_confirmation' => $has_confirmation,
         ];
 
-        if ($this->currentGroup !== null) {
-            $this->currentGroup['buttons'][] = $button;
-        } else {
-            $this->elements[] = $button;
-        }
+        $this->addToElements($button);
 
         return $this;
     }
 
     public function buttonGroup(): static
     {
-        $this->currentGroup = [
+        $this->addGroup([
             'type' => 'button_group',
             'buttons' => [],
-        ];
+        ]);
 
         return $this;
     }
 
     public function endGroup(): static
     {
-        if ($this->currentGroup !== null) {
-            $this->elements[] = $this->currentGroup;
-            $this->currentGroup = null;
+        $group = $this->getCurrentGroup();
+
+        if (isset($group['type'])) {
+            $this->removeCurrentGroup();
+            $this->addToElements($group);
+        } elseif ($group !== null) {
+            throw new \RuntimeException('endGroup() failed for ' . print_r($group, true));
         }
 
         return $this;
@@ -119,7 +145,7 @@ class FormBuilder
         ?string $label = null,
         ?string $placeholder = null,
     ): static {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'input',
             'property_name' => $property_name,
             'label' => $label,
@@ -127,7 +153,7 @@ class FormBuilder
             'validation_rules' => $validation_rules,
             'validation_messages' => $validation_messages,
             'size' => $size,
-        ];
+        ]);
 
         return $this;
     }
@@ -141,7 +167,7 @@ class FormBuilder
         ?string $placeholder = null,
         ?bool $searchable = true,
     ): static {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'select',
             'label' => $label,
             'options' => $options,
@@ -150,7 +176,7 @@ class FormBuilder
             'validation_messages' => $validation_messages,
             'placeholder' => $placeholder,
             'searchable' => $searchable,
-        ];
+        ]);
 
         return $this;
     }
@@ -162,7 +188,7 @@ class FormBuilder
         string $validation_rules,
         array $validation_messages,
     ): static {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'radio_group',
             'label' => $label,
             'options' => $options,
@@ -178,66 +204,135 @@ class FormBuilder
             'property_name' => $property_name,
             'validation_rules' => $validation_rules,
             'validation_messages' => $validation_messages,
-        ];
+        ]);
 
         return $this;
     }
 
     public function title(string $text): static
     {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'title',
             'text' => $text,
-        ];
+        ]);
 
         return $this;
     }
 
     public function subtitle(string $text): static
     {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'subtitle',
             'text' => $text,
-        ];
+        ]);
 
         return $this;
     }
 
     public function table(array $headers, array $rows): static
     {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'table',
             'headers' => $headers,
             'rows' => $rows,
-        ];
+        ]);
 
         return $this;
     }
 
+    public function hideable()
+    {
+        $this->addGroup([
+            'type' => 'hideable',
+            'trigger' => null,
+            'hidden' => null,
+        ]);
+
+        return $this;
+    }
+
+    public function trigger(
+        bool $show_caret = true,
+        string $more_text = 'Show More',
+        string $less_text = 'Show Less'
+    ) {
+        $group = $this->getCurrentGroup();
+
+        if (isset($group['type']) && $group['type'] === 'hideable') {
+            $group['trigger'] = [
+                'show_caret' => $show_caret,
+                'more_text' => $more_text,
+                'less_text' => $less_text,
+            ];
+            $this->setCurrentGroup($group);
+        }
+
+        return $this;
+    }
+
+    public function hidden()
+    {
+        $group = $this->getCurrentGroup();
+
+        if (isset($group['type']) && $group['type'] === 'hideable') {
+            $group['hidden'] = [];
+            $this->setCurrentGroup($group);
+        }
+
+        return $this;
+    }
+
+    public function endHideable()
+    {
+        return $this->endGroup();
+    }
+
+    protected function addToElements(array $element): void
+    {
+        $group = $this->getCurrentGroup();
+
+        if ($group === null) {
+            // No active context, add to root elements
+            $this->elements[] = $element;
+            return;
+        }
+
+        if ($group['type'] === 'button_group' && $element['type'] === 'button') {
+            $group['buttons'][] = $element;
+            $this->setCurrentGroup($group);
+        } elseif ($group['type'] === 'hideable' && isset($group['hidden'])) {
+            $group['hidden'][] = $element;
+            $this->setCurrentGroup($group);
+        } else {
+            throw new \RuntimeException('Attempt to add element to unknown group' . print_r($group, true));
+        }
+    }
+
     public function divider(): static
     {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'divider',
-        ];
+        ]);
 
         return $this;
     }
 
     public function image(string $url, ?string $alt = null): static
     {
-        $this->elements[] = [
+        $this->addToElements([
             'type' => 'image',
             'url' => $url,
             'alt' => $alt,
-        ];
+        ]);
 
         return $this;
     }
 
     public function build(): array
     {
-        if ($this->currentGroup !== null) {
-            throw new \RuntimeException('You must call endGroup() before build()');
+        if (!empty($this->group)) {
+            $groupTypes = array_map(fn($ctx) => $ctx['type'], $this->group);
+            throw new \RuntimeException('You must close all open contexts before build(). Open contexts: '.implode(', ', $groupTypes));
         }
 
         $result = [
@@ -321,7 +416,7 @@ class FormBuilder
      */
     public function addElement(array $element): static
     {
-        $this->elements[] = $element;
+        $this->addToElements($element);
 
         return $this;
     }
