@@ -33,6 +33,8 @@ class GameModeState extends State
 
     public bool $requires_team_membership = false;
 
+    public bool $skips_pre_game_lobby = false;
+
     public Collection $game_template_ids;
 
     public function __construct()

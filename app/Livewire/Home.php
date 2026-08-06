@@ -57,6 +57,15 @@ class Home extends Component
             social_links: null,
         );
 
+        // Instant-start modes (e.g. single-player) skip the lobby entirely —
+        // guarded by min_players so a misconfigured flag falls back safely
+        if ($mode->skips_pre_game_lobby && $game->players()->count() >= ($mode->min_players ?? 1)) {
+            $game->fresh()->start();
+            Verbs::commit();
+
+            return redirect()->route('game-dashboard', ['game' => $game->id]);
+        }
+
         return redirect()->route('pre-game-lobby', $game);
     }
 

@@ -15,6 +15,7 @@ class GameMode extends Model
         'is_archived' => 'boolean',
         'is_public' => 'boolean',
         'players_can_join_late' => 'boolean',
+        'skips_pre_game_lobby' => 'boolean',
     ];
 
     protected static function booted()
