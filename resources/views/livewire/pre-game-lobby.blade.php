@@ -135,6 +135,25 @@
                         </div>
                     </div>
                 @endif
+                @if ($this->game->status !== 'upcoming' && $this->is_game_admin)
+                    <div x-data="{nukeStep: 0}">
+                        <div x-show="nukeStep === 0">
+                            <x-button variant="subtle" icon="trash" @click="nukeStep = 1">Nuke Game</x-button>
+                        </div>
+                        <div x-show="nukeStep === 1">
+                            <x-button variant="danger" @click="nukeStep = 2">Seriously nuke this game?</x-button>
+                        </div>
+                        <div x-show="nukeStep === 2" class="space-y-2">
+                            <flux:text class="!text-red-600 text-sm font-medium">
+                                This will permanently delete the game. It will abruptly disappear for all players, mid-game, with no warning to them. This cannot be undone.
+                            </flux:text>
+                            <div class="flex gap-2">
+                                <x-button variant="danger" wire:click="nukeGame" wire:target="nukeGame" wire:loading.attr="disabled">Yes — nuke it for everyone</x-button>
+                                <x-button variant="subtle" @click="nukeStep = 0">Never mind</x-button>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div x-show="editGameMode">
