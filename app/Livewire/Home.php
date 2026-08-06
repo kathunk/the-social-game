@@ -57,9 +57,13 @@ class Home extends Component
             social_links: null,
         );
 
-        // Instant-start modes (e.g. single-player) skip the lobby entirely —
-        // guarded by min_players so a misconfigured flag falls back safely
-        if ($mode->skips_pre_game_lobby && $game->players()->count() >= ($mode->min_players ?? 1)) {
+        // Instant-start modes skip the lobby entirely. Single-player modes
+        // (max_players 1) always do — there's nobody to wait for — so they
+        // don't depend on the flag being set. Guarded by min_players so a
+        // misconfigured flag falls back safely.
+        $skips_lobby = $mode->skips_pre_game_lobby || $mode->max_players === 1;
+
+        if ($skips_lobby && $game->players()->count() >= ($mode->min_players ?? 1)) {
             $game->fresh()->start();
             Verbs::commit();
 

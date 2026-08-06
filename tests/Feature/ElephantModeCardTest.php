@@ -106,6 +106,25 @@ it('sends "challenge a friend" through the pre-game lobby as usual', function ()
     expect(Game::first()->status)->toBe('upcoming');
 });
 
+it('starts any single-player mode instantly even without the flag', function () {
+    [, $bot] = seedElephantModes($this);
+
+    // A max_players 1 mode never needs a lobby — the instant start must not
+    // depend on skips_pre_game_lobby being remembered (e.g. modes created in
+    // prod via the admin UI before the flag existed)
+    GameMode::find($bot->id)->update(['skips_pre_game_lobby' => false]);
+
+    $user = $this->createUser('Flagless', 'flagless@example.com', 'password');
+
+    $this->actingAs($user);
+
+    Livewire::test(Home::class)
+        ->call('startGameFromMode', (string) $bot->id)
+        ->assertRedirect(route('game-dashboard', ['game' => Game::first()->id]));
+
+    expect(Game::first()->status)->toBe('active');
+});
+
 it('starts a bot game instantly, skipping the lobby', function () {
     [, $bot] = seedElephantModes($this);
 

@@ -73,9 +73,10 @@ class CreateGame extends Component
         );
 
         // Instant-start modes skip the lobby — unless the game was scheduled
-        // for later, in which case the lobby is still the waiting room
+        // for later, in which case the lobby is still the waiting room.
+        // Single-player modes (max_players 1) always skip: nobody to wait for.
         if (
-            $mode->skips_pre_game_lobby
+            ($mode->skips_pre_game_lobby || $mode->max_players === 1)
             && ! $this->has_scheduled_start
             && $game->players()->count() >= ($mode->min_players ?? 1)
         ) {

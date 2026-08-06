@@ -14,50 +14,112 @@
 @endphp
 
 @once
-    <style>
-        @keyframes elephant-card-drift-left {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-        @keyframes elephant-card-drift-right {
-            from { transform: translateX(-50%); }
-            to { transform: translateX(0); }
-        }
-        .elephant-card-row { animation: elephant-card-drift-left 36s linear infinite; }
-        .elephant-card-row-reverse { animation: elephant-card-drift-right 44s linear infinite; }
-        @media (prefers-reduced-motion: reduce) {
-            .elephant-card-row, .elephant-card-row-reverse { animation: none; }
-        }
-    </style>
+    <script>
+        // Background animation for the elephant card: a loose grid of
+        // game-colored tiles where, every beat, a random row or column
+        // slides one cell — up, down, left, or right — with the same snappy
+        // ease as slides on the real board. Tiles pushed past the edge slide
+        // out (the card clips them) and a fresh tile slides in behind them.
+        window.elephantCardTiles = function () {
+            const PITCH = 36; // 28px tile + 8px gap
+            const COLORS = ['#FF6857', '#007393'];
+
+            return {
+                tiles: [],
+                nextId: 1,
+                cols: 0,
+                rows: 0,
+                timer: null,
+
+                init() {
+                    const width = this.$el.offsetWidth || 320;
+                    const height = this.$el.offsetHeight || 170;
+                    this.cols = Math.ceil(width / PITCH) + 1;
+                    this.rows = Math.ceil(height / PITCH) + 1;
+
+                    for (let r = 0; r < this.rows; r++) {
+                        for (let c = 0; c < this.cols; c++) {
+                            if (Math.random() < 0.45) {
+                                this.tiles.push(this.makeTile(c, r));
+                            }
+                        }
+                    }
+
+                    if (! window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                        this.timer = setInterval(() => this.slideOnce(), 1000);
+                    }
+                },
+
+                makeTile(c, r) {
+                    return {
+                        id: this.nextId++,
+                        c: c,
+                        r: r,
+                        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+                    };
+                },
+
+                slideOnce() {
+                    const horizontal = Math.random() < 0.5;
+                    const delta = Math.random() < 0.5 ? 1 : -1;
+
+                    if (horizontal) {
+                        const row = Math.floor(Math.random() * this.rows);
+                        this.tiles.filter((t) => t.r === row).forEach((t) => { t.c += delta; });
+                        this.cull();
+                        // A fresh tile slides in from the entry edge
+                        if (Math.random() < 0.6) {
+                            const entry = this.makeTile(delta === 1 ? -1 : this.cols, row);
+                            this.tiles.push(entry);
+                            setTimeout(() => { entry.c += delta; }, 30);
+                        }
+                    } else {
+                        const col = Math.floor(Math.random() * this.cols);
+                        this.tiles.filter((t) => t.c === col).forEach((t) => { t.r += delta; });
+                        this.cull();
+                        if (Math.random() < 0.6) {
+                            const entry = this.makeTile(col, delta === 1 ? -1 : this.rows);
+                            this.tiles.push(entry);
+                            setTimeout(() => { entry.r += delta; }, 30);
+                        }
+                    }
+                },
+
+                // Drop tiles that have fully slid past the clipped edge —
+                // after their exit transition finishes
+                cull() {
+                    const gone = this.tiles.filter(
+                        (t) => t.c < -1 || t.c > this.cols || t.r < -1 || t.r > this.rows
+                    );
+                    if (gone.length) {
+                        setTimeout(() => {
+                            this.tiles = this.tiles.filter((t) => ! gone.includes(t));
+                        }, 500);
+                    }
+                },
+
+                styleFor(tile) {
+                    return `transform: translate(${tile.c * PITCH}px, ${tile.r * PITCH}px); background-color: ${tile.color};`;
+                },
+            };
+        };
+    </script>
 @endonce
 
 <div class="relative overflow-hidden rounded-2xl bg-slate-900 text-white p-5 shadow-sm">
-    {{-- Sliding tile background: two conveyor rows of game-colored tiles
-         drifting in opposite directions, like slides on the board --}}
-    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-        @php
-            // Tile sequences use the real game colors (orange / teal) with
-            // gaps for rhythm; each row is doubled so the -50% keyframe loops
-            // seamlessly.
-            $rows = [
-                ['top' => '8%', 'class' => 'elephant-card-row', 'opacity' => '0.35', 'tiles' => ['o', null, 't', 'o', null, null, 't', null, 'o', 't', null, 'o']],
-                ['top' => '44%', 'class' => 'elephant-card-row-reverse', 'opacity' => '0.25', 'tiles' => ['t', null, null, 'o', 't', null, 'o', null, null, 't', 'o', null]],
-                ['top' => '78%', 'class' => 'elephant-card-row', 'opacity' => '0.3', 'tiles' => [null, 'o', 't', null, 'o', null, null, 't', 'o', null, 't', null]],
-            ];
-        @endphp
-        @foreach ($rows as $row)
+    {{-- Sliding tile background: rows and columns snap one cell at a time,
+         just like slides on the board --}}
+    <div
+        x-data="elephantCardTiles()"
+        class="absolute inset-0 pointer-events-none opacity-30"
+        aria-hidden="true"
+    >
+        <template x-for="tile in tiles" :key="tile.id">
             <div
-                class="absolute flex gap-2 {{ $row['class'] }}"
-                style="top: {{ $row['top'] }}; width: max-content; opacity: {{ $row['opacity'] }};"
-            >
-                @foreach ([...$row['tiles'], ...$row['tiles']] as $tile)
-                    <div
-                        class="w-7 h-7 rounded-md shrink-0"
-                        style="background-color: {{ match ($tile) {'o' => '#FF6857', 't' => '#007393', default => 'transparent'} }};"
-                    ></div>
-                @endforeach
-            </div>
-        @endforeach
+                class="absolute w-7 h-7 rounded-md transition-transform duration-500 ease-in-out"
+                :style="styleFor(tile)"
+            ></div>
+        </template>
     </div>
 
     <div class="relative">
@@ -73,7 +135,7 @@
 
         <div class="flex gap-1.5 flex-wrap mb-3">
             <span class="text-[10px] font-semibold bg-white/10 rounded-full px-2 py-0.5">1–2 players</span>
-            <span class="text-[10px] font-semibold bg-white/10 rounded-full px-2 py-0.5">~10 min</span>
+            <span class="text-[10px] font-semibold bg-white/10 rounded-full px-2 py-0.5">~3 min</span>
             @if ($any && ! $any->is_public)
                 <span class="text-[10px] font-bold uppercase tracking-wide text-purple-200 bg-purple-900/50 rounded-full px-2 py-0.5">Hidden</span>
             @endif
