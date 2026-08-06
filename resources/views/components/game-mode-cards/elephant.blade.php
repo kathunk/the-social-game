@@ -22,7 +22,7 @@
         // packed, every slide is a true push: the far tile is shoved off the
         // edge (the card clips it) while a fresh tile slides in behind.
         window.elephantCardTiles = function () {
-            const PITCH = 56; // tile size, no gap — tiles sit flush
+            const PITCH = 56; // grid cell: 48px tile + 8px breathing room
             const COLORS = ['#FF6857', '#007393'];
 
             return {
@@ -112,7 +112,7 @@
     >
         <template x-for="tile in tiles" :key="tile.id">
             <div
-                class="absolute w-14 h-14 rounded-lg transition-transform duration-500 ease-in-out"
+                class="absolute w-12 h-12 rounded-lg transition-transform duration-500 ease-in-out"
                 :style="styleFor(tile)"
             ></div>
         </template>

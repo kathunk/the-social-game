@@ -49,10 +49,9 @@
 @endonce
 
 <div class="rounded-2xl bg-bold-orange text-pale p-5 shadow-sm overflow-hidden relative">
-    <h3 class="font-bold text-xl mb-1">{{ $mode->name }}</h3>
-
-    <div class="grid grid-cols-[1fr_auto] gap-4 items-center">
+    <div class="grid grid-cols-[1fr_auto] gap-4 items-start">
         <div class="min-w-0">
+            <h3 class="font-bold text-xl mb-1">{{ $mode->name }}</h3>
             <p class="text-xs opacity-90 leading-relaxed mb-3">
                 Build your perfect tier list, then guess how your friends ranked theirs.
             </p>
