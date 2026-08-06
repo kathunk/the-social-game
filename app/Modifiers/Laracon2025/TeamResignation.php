@@ -45,6 +45,7 @@ class TeamResignation extends BaseModifierClass
             )
             ->buttonGroup()
             ->button(
+                has_confirmation: true,
                 label: 'Resign',
                 action: 'resign',
                 properties_to_validate: ['points'],

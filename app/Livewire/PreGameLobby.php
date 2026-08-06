@@ -487,6 +487,23 @@ class PreGameLobby extends Component
         return redirect()->route('dashboard');
     }
 
+    public function nukeGame()
+    {
+        abort_unless($this->is_game_admin, 403);
+
+        $this->game->nuke($this->user);
+
+        Verbs::commit();
+
+        Flux::toast(
+            variant: 'success',
+            heading: 'Game nuked',
+            text: 'The game and all of its data have been deleted.',
+        );
+
+        return redirect()->route('dashboard');
+    }
+
     public function fillGameWithBots()
     {
         $available = User::where('email', 'like', 'bot%@bot.bot')->count();

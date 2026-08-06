@@ -58,16 +58,35 @@
         @endif
         @break
     @case('button_group')
-        <div class="flex flex-wrap gap-2 mt-4 justify-end">
+        <div
+            x-data="{ confirmation: false }"
+            class="flex flex-wrap gap-2 mt-4 justify-end"
+        >
             @foreach ($element['buttons'] as $btn)
-                <x-button
-                    wire:loading.attr="disabled"
-                    wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"
-                    variant="primary"
-                    wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}', {{ json_encode($form) }})"
-                >
-                    {{ $btn['label'] }}
-                </x-button>
+                @if(isset($btn['has_confirmation']))
+                    @php
+                        $modal = $btn['has_confirmation'];
+                        $heading = isset($modal['heading']) ? $modal['heading'] : null;
+                        $subheading = isset($modal['subheading']) ? $modal['subheading'] : null;
+                    @endphp
+
+                    <x-button @click="confirmation = true" variant="danger">
+                        {{ $btn['label'] }}
+                    </x-button>
+
+                    <x-modal.confirmation :heading="$heading" :subheading="$subheading" {{-- dynamic text --}}
+                        :action="$btn['action']" :type="$type" :class_key="$class_key" :form="$form" {{-- `callClassAction`--}}
+                    />
+                @else
+                    <x-button
+                        wire:loading.attr="disabled"
+                        wire:key="button-{{ $class_key }}-{{ $btn['action'] }}"
+                        variant="primary"
+                        wire:click="callClassAction('{{ $btn['action'] }}', '{{ $type }}', '{{ $class_key }}', {{ json_encode($form) }})"
+                    >
+                        {{ $btn['label'] }}
+                    </x-button>
+                @endif
             @endforeach
         </div>
         @break

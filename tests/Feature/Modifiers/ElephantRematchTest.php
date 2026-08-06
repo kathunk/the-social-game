@@ -118,6 +118,32 @@ it('shows the rematch card with the match result once the game ends', function (
         ->assertSee('Rematch');
 });
 
+it('shows the final board on the rematch card', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupRematchGame($this);
+
+    // players[0] wins with the square [1,2,5,6]; the elephant sits on 16
+    finishMatchWithWinner($this, $players, $challenge);
+
+    $this->actingAs($players[0]->user);
+
+    $component = Livewire::test(GameDashboard::class, ['game' => $this->game->fresh()]);
+    $element = $component->get('modifier_components')['elephant_rematch']['elements'][0];
+
+    expect($element['board_cells'])->toHaveCount(16);
+
+    $cells = collect($element['board_cells']);
+
+    // The winning square glows at spaces 1, 2, 5, 6 (indices 0, 1, 4, 5)
+    expect($cells->filter(fn ($c) => $c['is_winning'])->keys()->all())->toBe([0, 1, 4, 5]);
+
+    // Exactly the winner's four tiles are on the board, in their seat color
+    expect($cells->filter(fn ($c) => $c['color'] !== null))->toHaveCount(4);
+    expect($cells[0]['color'])->toBe('#FF6857');
+
+    // The elephant is frozen on space 16 (index 15)
+    expect($cells->filter(fn ($c) => $c['has_elephant'])->keys()->all())->toBe([15]);
+});
+
 it('renders no scoreboard at all for a mode with scoreboard_type none', function () {
     ['players' => $players, 'challenge' => $challenge] = setupRematchGame($this);
 

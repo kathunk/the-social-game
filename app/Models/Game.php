@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Events\ChallengeCreated;
 use App\Events\GameCanceled;
+use App\Events\GameNuked;
 use App\Events\GameCreated;
 use App\Events\GameEnded;
 use App\Events\GameStarted;
@@ -384,6 +385,11 @@ class Game extends Model
     public function cancel(User $admin)
     {
         GameCanceled::fire(game_id: $this->id, admin_id: $admin->id);
+    }
+
+    public function nuke(User $admin)
+    {
+        GameNuked::fire(game_id: $this->id, admin_id: $admin->id);
     }
 
     public function getTotalDurationAttribute(): int
