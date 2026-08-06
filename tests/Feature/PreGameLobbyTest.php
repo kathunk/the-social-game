@@ -105,3 +105,44 @@ it('creates modifier configurations before the game starts', function () {
     expect($modifier_configuration->modifier_key)->toBe(TeamSecretCodes::key());
     expect($modifier_configuration->modifier_data)->toBe(TeamSecretCodes::DEFAULT_CONFIGURATION);
 });
+
+it('redirects accepted players to the game dashboard when the game starts', function () {
+    $game = $this->createGame();
+    $player_1 = $this->createPlayer();
+    $player_2 = $this->createPlayer();
+    $player_3 = $this->createPlayer();
+
+    $component = Livewire::actingAs($player_1->user)->test(PreGameLobby::class, ['game' => $game]);
+
+    $component->call('checkStatus')->assertNoRedirect();
+
+    $game->start();
+
+    $component->call('checkStatus')->assertRedirect(route('game-dashboard', $game->id));
+});
+
+it('does not redirect game admins when the game starts', function () {
+    $game = $this->createGame();
+    $player_1 = $this->createPlayer();
+    $player_2 = $this->createPlayer();
+    $player_3 = $this->createPlayer();
+
+    $component = Livewire::actingAs($this->game_admin)->test(PreGameLobby::class, ['game' => $game]);
+
+    $game->start();
+
+    $component->call('checkStatus')->assertNoRedirect();
+});
+
+it('does not redirect users who are not in the game when the game starts', function () {
+    $game = $this->createGame();
+    $player_1 = $this->createPlayer();
+    $player_2 = $this->createPlayer();
+    $player_3 = $this->createPlayer();
+
+    $component = Livewire::actingAs($this->john)->test(PreGameLobby::class, ['game' => $game]);
+
+    $game->start();
+
+    $component->call('checkStatus')->assertNoRedirect();
+});

@@ -229,7 +229,7 @@ class PreGameLobby extends Component
         );
 
         if ($this->application) {
-            $this->checkStatus();
+            $this->checkStatus(redirect_when_active: false);
         }
 
         if ($this->game->status === 'canceled') {
@@ -237,8 +237,19 @@ class PreGameLobby extends Component
         }
     }
 
-    public function checkStatus()
+    public function checkStatus(bool $redirect_when_active = true)
     {
+        // Admins are exempt so they can still reach an active game's lobby
+        // (e.g. to nuke it); they keep the "Go to game" button instead.
+        if (
+            $redirect_when_active &&
+            $this->game->status === 'active' &&
+            $this->application?->status === 'accepted' &&
+            ! $this->is_game_admin
+        ) {
+            return redirect()->route('game-dashboard', $this->game->id);
+        }
+
         if (! $this->application) {
             return;
         }
