@@ -1,19 +1,22 @@
 <?php
 
-use App\Models\Game;
+use App\Challenges\PeckingOrder\IndividualLowScoreQuiz;
 use App\Models\User;
-use Database\Seeders\Laracon2025\Laracon2025Seeder;
-use Database\Seeders\UserSeeder;
 use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     Verbs::commitImmediately();
-    $this->seed(UserSeeder::class);
-    $this->seed(Laracon2025Seeder::class);
-    $this->game = Game::first();
-    $this->admin = $this->game->admins->first();
+
+    $this->mockGameTemplate(
+        challenges: [['challenge_keys' => [IndividualLowScoreQuiz::key()], 'duration' => 10]],
+        type: 'individual',
+    );
+
+    $this->createGame(requires_admin_approval_to_join: true);
+    $this->game->start();
+    $this->admin = $this->game_admin;
 });
 
 it('sets a new user to the correct status', function () {
