@@ -289,10 +289,35 @@ class GameDashboard extends Component
         return $rules;
     }
 
+    /**
+     * Broadcasts refresh the dashboard IN PLACE (the same soft path actions
+     * use) instead of hard-navigating — a full page reload on every
+     * broadcast destroyed client-side animation state and flashed the whole
+     * page. softRefresh re-pulls the game, rebuilds challenge/modifier
+     * components (including the post-game surface when the game just
+     * ended), and resets validation, so every state transition the redirect
+     * handled is still covered by the blade's status branches.
+     *
+     * Two cases still bail out the way mount() would: a player who no
+     * longer exists on the game (removed/rejected) gets the redirect so
+     * mount's guards can bounce them, and a teamless player in a
+     * team-required mode is left on the join-team card untouched.
+     */
     #[On('echo-private:games.{game.id},GameUpdatedForReverb')]
     public function refreshGame()
     {
-        return redirect()->route('game-dashboard', ['game' => $this->game]);
+        if (! $this->player) {
+            return redirect()->route('game-dashboard', ['game' => $this->game]);
+        }
+
+        $player_needs_to_join_team =
+            $this->template->type === 'team' && ! $this->player->team && $this->gameMode->requires_team_membership;
+
+        if ($player_needs_to_join_team) {
+            return;
+        }
+
+        $this->softRefresh();
     }
 
     public function render()
