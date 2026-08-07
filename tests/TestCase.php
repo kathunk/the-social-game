@@ -24,7 +24,7 @@ abstract class TestCase extends BaseTestCase
 
     public GameTemplate $game_template;
 
-    public function createGame(?GameMode $game_mode = null, ?GameTemplate $template = null, ?Carbon $starts_at = null)
+    public function createGame(?GameMode $game_mode = null, ?GameTemplate $template = null, ?Carbon $starts_at = null, bool $requires_admin_approval_to_join = false)
     {
         if (! isset($this->game_admin)) {
             $this->game_admin = $this->createUser(name: 'game_admin', email: 'game_admin@example.com', encrypted_password: 'password');
@@ -36,7 +36,7 @@ abstract class TestCase extends BaseTestCase
             starts_at: $starts_at ?? now(),
             user: $this->game_admin,
             is_public: true,
-            requires_admin_approval_to_join: false,
+            requires_admin_approval_to_join: $requires_admin_approval_to_join,
         );
 
         return $this->game;

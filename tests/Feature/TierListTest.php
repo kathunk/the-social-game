@@ -784,92 +784,24 @@ it('handles 2 player games', function () {
 
 function submitTierLists(Game $game, Challenge $construction_challenge)
 {
-    $key = TierListConstructionPhase::key();
-    $category_0 = $construction_challenge->challenge_data['categories'][0];
-    $category_1 = $construction_challenge->challenge_data['categories'][1];
-    $category_2 = $construction_challenge->challenge_data['categories'][2];
+    // Construction here is setup, not the thing under test - the Livewire
+    // construction-form flow is covered by the submission tests above. Call
+    // the challenge action directly (same pattern as completeGuessRound);
+    // going through the dashboard for 4 players x 3 categories costs ~5s of
+    // pure re-rendering per test.
+    $categories = array_slice($construction_challenge->challenge_data['categories'], 0, 3);
 
-    $game->players->each(function ($player) use (
-        $game,
-        $key,
-        $category_0,
-        $category_1,
-        $category_2,
-    ) {
-        // Submit for category 0
-        Livewire::actingAs($player->fresh()->user)
-            ->test(GameDashboard::class, ['game' => $game->fresh()])
-            ->set(
-                'round_properties.'.$key.'.'.$category_0.'-A',
-                $player->name.'-'.$category_0.'-A',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_0.'-B',
-                $player->name.'-'.$category_0.'-B',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_0.'-C',
-                $player->name.'-'.$category_0.'-C',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_0.'-D',
-                $player->name.'-'.$category_0.'-D',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_0.'-F',
-                $player->name.'-'.$category_0.'-F',
-            )
-            ->call('callClassAction', 'submitTierList', 'challenge', $key);
+    $game->players->each(function ($player) use ($construction_challenge, $categories) {
+        $challenge_class = new TierListConstructionPhase($construction_challenge->fresh());
 
-        // Submit for category 1
-        Livewire::actingAs($player->fresh()->user)
-            ->test(GameDashboard::class, ['game' => $game->fresh()])
-            ->set(
-                'round_properties.'.$key.'.'.$category_1.'-A',
-                $player->name.'-'.$category_1.'-A',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_1.'-B',
-                $player->name.'-'.$category_1.'-B',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_1.'-C',
-                $player->name.'-'.$category_1.'-C',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_1.'-D',
-                $player->name.'-'.$category_1.'-D',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_1.'-F',
-                $player->name.'-'.$category_1.'-F',
-            )
-            ->call('callClassAction', 'submitTierList', 'challenge', $key);
+        foreach ($categories as $category) {
+            $props = [];
+            foreach (['A', 'B', 'C', 'D', 'F'] as $tier) {
+                $props["{$category}-{$tier}"] = "{$player->name}-{$category}-{$tier}";
+            }
 
-        // Submit for category 2
-        Livewire::actingAs($player->fresh()->user)
-            ->test(GameDashboard::class, ['game' => $game->fresh()])
-            ->set(
-                'round_properties.'.$key.'.'.$category_2.'-A',
-                $player->name.'-'.$category_2.'-A',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_2.'-B',
-                $player->name.'-'.$category_2.'-B',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_2.'-C',
-                $player->name.'-'.$category_2.'-C',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_2.'-D',
-                $player->name.'-'.$category_2.'-D',
-            )
-            ->set(
-                'round_properties.'.$key.'.'.$category_2.'-F',
-                $player->name.'-'.$category_2.'-F',
-            )
-            ->call('callClassAction', 'submitTierList', 'challenge', $key);
+            $challenge_class->submitTierList($player, $props);
+        }
     });
 }
 

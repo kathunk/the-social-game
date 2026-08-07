@@ -1,31 +1,22 @@
 <?php
 
-use App\Models\Game;
-use App\Models\GameMode;
-use App\Models\GameTemplate;
+use App\Challenges\PeckingOrder\IndividualLowScoreQuiz;
 use App\Models\User;
-use Database\Seeders\Laracon2025\Laracon2025Seeder;
-use Database\Seeders\UserSeeder;
 use Thunk\Verbs\Facades\Verbs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     Verbs::commitImmediately();
-    $this->seed(UserSeeder::class);
-    $this->seed(Laracon2025Seeder::class);
-    $this->admin = User::first();
+
+    $this->mockGameTemplate(
+        challenges: [['challenge_keys' => [IndividualLowScoreQuiz::key()], 'duration' => 10]],
+        type: 'individual',
+    );
 });
 
 it('freely allows users to join games where admin approval is not required', function () {
-    $game = Game::fromTemplate(
-        game_mode: GameMode::first(),
-        template: GameTemplate::first(),
-        starts_at: now(),
-        user: $this->admin,
-        is_public: true,
-        requires_admin_approval_to_join: false,
-    );
+    $game = $this->createGame(requires_admin_approval_to_join: false);
 
     $new_user = User::fromTemplate('New User', 'new@test.com', 'password');
     $new_user->requestToJoinGame($game);
