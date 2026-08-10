@@ -263,14 +263,6 @@
                         && this.currentActorId !== this.me
                         && this.timerNow >= this.turnStartedAt + this.turnSeconds + this.grace;
                 },
-                get iAmVictor() { return this.victorIds.includes(this.me); },
-                get resultText() {
-                    if (this.matchStatus !== 'complete') return '';
-                    if (this.victorIds.length === 0) return "It's a draw — nobody made their shape.";
-                    if (this.victorIds.length > 1) return "It's a draw — you both made your shape!";
-                    return this.iAmVictor ? 'You win! 🎉' : (this.names[this.victorIds[0]] ?? 'Your opponent') + ' wins.';
-                },
-
                 colorFor(actorId) {
                     return actorId === this.actorOrder[0] ? '#FF6857' : '#007393';
                 },
@@ -650,14 +642,19 @@
 
 @php
     $state = $element['state'];
+    // Each shape can show more than one orientation — the L shows both
+    // chiralities side by side since either counts on the board
     $shapePatterns = [
-        'square' => [[1, 1], [1, 1]],
-        'line' => [[1, 1, 1, 1]],
-        'el' => [[1, 0], [1, 0], [1, 1]],
-        'zig' => [[1, 1, 0], [0, 1, 1]],
-        'pyramid' => [[1, 1, 1], [0, 1, 0]],
+        'square' => [[[1, 1], [1, 1]]],
+        'line' => [[[1, 1, 1, 1]]],
+        'el' => [
+            [[1, 0], [1, 0], [1, 1]],
+            [[0, 1], [0, 1], [1, 1]],
+        ],
+        'zig' => [[[1, 1, 0], [0, 1, 1]]],
+        'pyramid' => [[[1, 1, 1], [0, 1, 0]]],
     ];
-    $shapePattern = $shapePatterns[$state['victory_shape']] ?? [[1]];
+    $shapeVariants = $shapePatterns[$state['victory_shape']] ?? [[[1]]];
 @endphp
 
 {{-- ACTION ERROR BANNER --}}
@@ -695,15 +692,17 @@
         {{-- TARGET SHAPE --}}
         <div class="flex items-center gap-3">
             <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Target shape</span>
-            <div class="flex flex-col gap-px">
-                @foreach ($shapePattern as $row)
-                    <div class="flex gap-px">
-                        @foreach ($row as $cell)
-                            <div class="w-3 h-3 rounded-sm {{ $cell ? 'bg-gray-800' : 'bg-transparent' }}"></div>
-                        @endforeach
-                    </div>
-                @endforeach
-            </div>
+            @foreach ($shapeVariants as $variant)
+                <div class="flex flex-col gap-px">
+                    @foreach ($variant as $row)
+                        <div class="flex gap-px">
+                            @foreach ($row as $cell)
+                                <div class="w-3 h-3 rounded-sm {{ $cell ? 'bg-gray-800' : 'bg-transparent' }}"></div>
+                            @endforeach
+                        </div>
+                    @endforeach
+                </div>
+            @endforeach
         </div>
 
         {{-- PLAYER CARDS --}}
@@ -873,14 +872,8 @@
             </div>
         </template>
 
-        {{-- MATCH RESULT OVERLAY --}}
-        <template x-if="matchStatus === 'complete'">
-            <div class="w-full max-w-[300px] rounded-2xl border-4 p-5 text-center space-y-2"
-                :class="iAmVictor ? 'border-yellow-400 bg-yellow-50' : 'border-slate-300 bg-slate-50'"
-            >
-                <p class="text-xl font-bold" x-text="resultText"></p>
-                <p class="text-xs text-gray-500">Wrapping up the game…</p>
-            </div>
-        </template>
+        {{-- No result card here: the winning tiles glow on the board, and
+             the post-game screen (rematch card + final board) lands moments
+             later with the full result --}}
     </div>
 </div>
