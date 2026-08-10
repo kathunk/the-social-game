@@ -70,7 +70,12 @@ class ChallengeStarted extends Event
                 $user = $player->user;
 
                 if ($user->wantsNotificationFor('notify_on_challenge_start')) {
-                    $user->notify(new ChallengeStartedNotification($challenge, $game));
+                    // A broken notification stack must never block the game
+                    try {
+                        $user->notify(new ChallengeStartedNotification($challenge, $game));
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
                 }
             });
         });

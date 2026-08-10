@@ -3,11 +3,15 @@
 namespace App\Notifications;
 
 use App\Models\Game;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class GameEndedNotification extends Notification
+class GameEndedNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
     public function __construct(
         public Game $game
     ) {}

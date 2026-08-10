@@ -4,11 +4,15 @@ namespace App\Notifications;
 
 use App\Models\Challenge;
 use App\Models\Game;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ChallengeStartedNotification extends Notification
+class ChallengeStartedNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
     public function __construct(
         public Challenge $challenge,
         public Game $game
