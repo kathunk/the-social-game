@@ -56,7 +56,12 @@ class GameStarted extends Event
                 $user = $player->user;
 
                 if ($user->wantsNotificationFor('notify_on_game_start')) {
-                    $user->notify(new GameStartedNotification($game));
+                    // A broken notification stack must never block the game
+                    try {
+                        $user->notify(new GameStartedNotification($game));
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
                 }
             });
         });
