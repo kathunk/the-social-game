@@ -35,6 +35,7 @@ class BloodOathSeeder extends Seeder
             is_public: true,
             players_can_join_late: false,
             scoreboard_type: 'blood_oath',
+            has_notifications: true,
         )->game_mode_id;
 
         $mode = GameMode::find($mode_id);

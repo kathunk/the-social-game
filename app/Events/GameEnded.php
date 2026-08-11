@@ -28,15 +28,17 @@ class GameEnded extends Event
         $game->save();
 
         Verbs::unlessReplaying(function () use ($game) {
-            $this->game()->players()->each(function ($player) use ($game) {
+            if (! $game->gameMode->has_notifications) {
+                return;
+            }
+
+            $game->players()->each(function ($player) use ($game) {
                 if ($player->status === 'resigned') {
                     return;
                 }
 
-                $user = $player->user;
-
-                if ($user->wantsNotificationFor('notify_on_game_end')) {
-                    $user->notify(new GameEndedNotification($game));
+                if ($player->wantsGameNotifications()) {
+                    $player->user->notify(new GameEndedNotification($game, $player));
                 }
             });
         });

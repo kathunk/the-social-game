@@ -14,6 +14,18 @@ class Player extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'notification_channels' => 'array',
+    ];
+
+    public const NOTIFICATION_CHANNELS = [
+        'notify_via_email' => 'Email',
+        'notify_via_sms' => 'Text message',
+        'notify_via_discord' => 'Discord',
+        'notify_via_telegram' => 'Telegram',
+        'notify_via_browser' => 'Browser',
+    ];
+
     public function state(): PlayerState
     {
         return PlayerState::load($this->id);
@@ -46,6 +58,18 @@ class Player extends Model
         Verbs::commit();
 
         return $this->fresh();
+    }
+
+    public function wantsNotificationVia(string $type): bool
+    {
+        return ($this->notification_channels ?? [])[$type]
+            ?? $this->user->wantsNotificationVia($type);
+    }
+
+    public function wantsGameNotifications(): bool
+    {
+        return collect(array_keys(self::NOTIFICATION_CHANNELS))
+            ->contains(fn ($channel) => $this->wantsNotificationVia($channel));
     }
 
     public function updateModelWithStateData()

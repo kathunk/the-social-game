@@ -35,6 +35,8 @@ class GameModeState extends State
 
     public bool $skips_pre_game_lobby = false;
 
+    public bool $has_notifications = false;
+
     public Collection $game_template_ids;
 
     public function __construct()

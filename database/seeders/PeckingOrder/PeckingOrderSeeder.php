@@ -39,6 +39,7 @@ class PeckingOrderSeeder extends Seeder
             max_players: 12,
             is_public: true,
             players_can_join_late: true,
+            has_notifications: true,
         )->game_mode_id;
 
         $mode = GameMode::find($mode_id);

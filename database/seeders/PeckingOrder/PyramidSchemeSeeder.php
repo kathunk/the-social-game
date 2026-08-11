@@ -38,6 +38,7 @@ class PyramidSchemeSeeder extends Seeder
             max_players: 10000,
             is_public: false,
             players_can_join_late: true,
+            has_notifications: true,
         )->game_mode_id;
 
         $mode = GameMode::find($mode_id);

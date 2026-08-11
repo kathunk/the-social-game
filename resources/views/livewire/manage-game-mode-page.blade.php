@@ -32,6 +32,11 @@
                 <flux:label>Skip the pre-game lobby (start instantly)</flux:label>
                 <flux:error name="skips_pre_game_lobby" />
             </flux:field>
+            <flux:field variant="inline">
+                <flux:checkbox wire:model="has_notifications" />
+                <flux:label>Send player notifications (round starts, game start/end)</flux:label>
+                <flux:error name="has_notifications" />
+            </flux:field>
             <flux:radio.group wire:model="game_type" label="Victory Condition">
                 <flux:radio value="individual" label="Individual" checked />
                 <flux:radio value="team" label="Team" />

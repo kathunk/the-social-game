@@ -41,6 +41,8 @@ class ManageGameModePage extends Component
 
     public bool $skips_pre_game_lobby;
 
+    public bool $has_notifications;
+
     const SCOREBOARD_TYPES = [
         'individual' => 'Individual',
         'team' => 'Team',
@@ -73,6 +75,7 @@ class ManageGameModePage extends Component
             $this->scoreboard_type = $game_mode->scoreboard_type ?? 'individual';
             $this->requires_team_membership = $game_mode->requires_team_membership ?? false;
             $this->skips_pre_game_lobby = $game_mode->skips_pre_game_lobby ?? false;
+            $this->has_notifications = $game_mode->has_notifications ?? false;
         } else {
             $this->name = '';
             $this->description = '';
@@ -87,6 +90,7 @@ class ManageGameModePage extends Component
             $this->scoreboard_type = $game_mode->scoreboard_type ?? 'individual';
             $this->requires_team_membership = false;
             $this->skips_pre_game_lobby = false;
+            $this->has_notifications = false;
         }
     }
 
@@ -106,6 +110,7 @@ class ManageGameModePage extends Component
             'scoreboard_type' => 'required|string|in:'.implode(',', array_keys(self::SCOREBOARD_TYPES)),
             'requires_team_membership' => 'boolean',
             'skips_pre_game_lobby' => 'boolean',
+            'has_notifications' => 'boolean',
         ];
     }
 
@@ -131,6 +136,7 @@ class ManageGameModePage extends Component
                 scoreboard_type: $this->scoreboard_type,
                 requires_team_membership: $this->requires_team_membership,
                 skips_pre_game_lobby: $this->skips_pre_game_lobby,
+                has_notifications: $this->has_notifications,
             )->game_mode_id;
         } catch (Exception $e) {
             $this->addError('error', $e->getMessage());

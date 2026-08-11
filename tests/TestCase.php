@@ -87,6 +87,7 @@ abstract class TestCase extends BaseTestCase
         ?bool $is_public = null,
         ?array $team_names = null,
         ?string $scoreboard_type = null,
+        ?bool $has_notifications = null,
     ) {
         if (! isset($team_names)) {
             $team_names = $type === 'team' ? ['team1', 'team2', 'team3'] : [];
@@ -102,6 +103,7 @@ abstract class TestCase extends BaseTestCase
             is_public: $is_public ?? true,
             players_can_join_late: $players_can_join_late ?? true,
             scoreboard_type: $scoreboard_type ?? 'individual',
+            has_notifications: $has_notifications ?? false,
         )->game_mode_id;
 
         $this->game_mode = GameMode::find($mode_id);
