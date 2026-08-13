@@ -38,7 +38,12 @@ class GameEnded extends Event
                 }
 
                 if ($player->wantsGameNotifications()) {
-                    $player->user->notify(new GameEndedNotification($game, $player));
+                    // A broken notification stack must never block the game
+                    try {
+                        $player->user->notify(new GameEndedNotification($game, $player));
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
                 }
             });
         });

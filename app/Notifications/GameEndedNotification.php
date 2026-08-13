@@ -5,12 +5,14 @@ namespace App\Notifications;
 use App\Models\Game;
 use App\Models\Player;
 use App\Notifications\Concerns\ChecksPlayerChannelPreferences;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class GameEndedNotification extends Notification
+class GameEndedNotification extends Notification implements ShouldQueue
 {
-    use ChecksPlayerChannelPreferences;
+    use ChecksPlayerChannelPreferences, Queueable;
 
     public function __construct(
         public Game $game,
