@@ -3,6 +3,8 @@
 namespace App\Notifications;
 
 use App\Models\Game;
+use App\Models\Player;
+use App\Notifications\Concerns\ChecksPlayerChannelPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -10,10 +12,11 @@ use Illuminate\Notifications\Notification;
 
 class GameEndedNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use ChecksPlayerChannelPreferences, Queueable;
 
     public function __construct(
-        public Game $game
+        public Game $game,
+        public ?Player $player = null
     ) {}
 
     public function headline(): string
@@ -35,19 +38,19 @@ class GameEndedNotification extends Notification implements ShouldQueue
     {
         $channels = [];
 
-        if ($notifiable->wantsNotificationVia('notify_via_email')) {
+        if ($this->wantsVia($notifiable, 'notify_via_email')) {
             $channels[] = 'mail';
         }
 
-        if ($notifiable->wantsNotificationVia('notify_via_discord') && $notifiable->default_discord_webhook) {
+        if ($this->wantsVia($notifiable, 'notify_via_discord') && $notifiable->default_discord_webhook) {
             $channels[] = 'discord';
         }
 
-        if ($notifiable->wantsNotificationVia('notify_via_telegram') && $notifiable->telegram_chat_id) {
+        if ($this->wantsVia($notifiable, 'notify_via_telegram') && $notifiable->telegram_chat_id) {
             $channels[] = 'telegram';
         }
 
-        if ($notifiable->wantsNotificationVia('notify_via_browser') && $notifiable->hasPushSubscriptions()) {
+        if ($this->wantsVia($notifiable, 'notify_via_browser') && $notifiable->hasPushSubscriptions()) {
             $channels[] = 'webpush';
         }
 

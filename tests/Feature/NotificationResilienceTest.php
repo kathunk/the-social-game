@@ -74,6 +74,7 @@ beforeEach(function () {
             ],
         ],
         type: 'individual',
+        has_notifications: true,
     );
 
     $this->createGame();

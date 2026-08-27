@@ -21,6 +21,10 @@ class PlayerState extends State
 
     public array $score_history = [];
 
+    // Per-game channel overrides ('notify_via_email' => bool, ...); null
+    // means the player has never touched them and profile defaults apply
+    public ?array $notification_channels = null;
+
     public function user(): UserState
     {
         return UserState::load($this->user_id);

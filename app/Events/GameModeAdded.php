@@ -41,6 +41,10 @@ class GameModeAdded extends Event
     // directly on the dashboard (single-player / instant modes)
     public ?bool $skips_pre_game_lobby = false;
 
+    // When true, games in this mode send player notifications (round starts,
+    // game start/end); short synchronous modes should leave this off
+    public ?bool $has_notifications = false;
+
     public function validate()
     {
         $this->assert(
@@ -74,6 +78,7 @@ class GameModeAdded extends Event
         $game_mode->scoreboard_type = $this->scoreboard_type;
         $game_mode->requires_team_membership = $this->requires_team_membership;
         $game_mode->skips_pre_game_lobby = $this->skips_pre_game_lobby;
+        $game_mode->has_notifications = $this->has_notifications;
 
         $game_mode->gameTemplates()->each(function ($game_template) {
             $game_template->scoreboard_type = $this->scoreboard_type;
@@ -101,6 +106,7 @@ class GameModeAdded extends Event
                 'scoreboard_type' => $this->scoreboard_type,
                 'requires_team_membership' => $this->requires_team_membership,
                 'skips_pre_game_lobby' => $this->skips_pre_game_lobby,
+                'has_notifications' => $this->has_notifications,
             ]);
 
             $this->setTemplateScoreboardType($existing);
@@ -123,6 +129,7 @@ class GameModeAdded extends Event
             'scoreboard_type' => $this->scoreboard_type,
             'requires_team_membership' => $this->requires_team_membership,
             'skips_pre_game_lobby' => $this->skips_pre_game_lobby,
+            'has_notifications' => $this->has_notifications,
         ]);
 
         $this->setTemplateScoreboardType($mode);

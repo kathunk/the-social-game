@@ -52,13 +52,15 @@ class GameStarted extends Event
         });
 
         Verbs::unlessReplaying(function () use ($game) {
-            $this->game()->players->each(function ($player) use ($game) {
-                $user = $player->user;
+            if (! $game->gameMode->has_notifications) {
+                return;
+            }
 
-                if ($user->wantsNotificationFor('notify_on_game_start')) {
+            $game->players->each(function ($player) use ($game) {
+                if ($player->wantsGameNotifications()) {
                     // A broken notification stack must never block the game
                     try {
-                        $user->notify(new GameStartedNotification($game));
+                        $player->user->notify(new GameStartedNotification($game, $player));
                     } catch (\Throwable $e) {
                         report($e);
                     }

@@ -62,17 +62,19 @@ class ChallengeStarted extends Event
         }
 
         Verbs::unlessReplaying(function () use ($game, $challenge) {
-            $this->game()->players()->each(function ($player) use ($game, $challenge) {
+            if (! $game->gameMode->has_notifications) {
+                return;
+            }
+
+            $game->players()->each(function ($player) use ($game, $challenge) {
                 if ($player->status === 'resigned') {
                     return;
                 }
 
-                $user = $player->user;
-
-                if ($user->wantsNotificationFor('notify_on_challenge_start')) {
+                if ($player->wantsGameNotifications()) {
                     // A broken notification stack must never block the game
                     try {
-                        $user->notify(new ChallengeStartedNotification($challenge, $game));
+                        $player->user->notify(new ChallengeStartedNotification($challenge, $game, $player));
                     } catch (\Throwable $e) {
                         report($e);
                     }

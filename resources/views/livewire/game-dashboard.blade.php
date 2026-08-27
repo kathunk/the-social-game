@@ -95,6 +95,10 @@
         </x-card>
     @endif
 
+    @if ($this->gameMode->has_notifications && $this->player->status === 'active' && $this->game->status !== 'ended')
+        <livewire:game-notification-settings :game="$this->game" />
+    @endif
+
 
     <flux:modal name="qr-code">
         <div class="flex justify-center p-6">
