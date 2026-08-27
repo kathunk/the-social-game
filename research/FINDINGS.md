@@ -233,6 +233,51 @@ If real-world stalling abuse ever shows up, position-based repetition
 (airtight by pigeonhole: every position can occur at most twice, so games
 must end) is the escalation path.
 
+## Auto-elephant variant experiment (post-freeze)
+
+The original design was tested (`engine_auto.py` / `bots_auto.py` /
+`experiment_auto_elephant.py`): no shared elephant, no elephant phase; each
+player's elephant auto-parks on the border at the entry space of their last
+slide, and no slide may enter at a space where either elephant sits.
+
+Hypothesis: drastically shorter games, stalling eliminated, but the game
+over-simplifies and first-mover advantage returns.
+
+Auto-B3 self-play, 1,000 games/shape (baseline = frozen B3 numbers):
+
+| shape | 1st-mover | baseline | draws | avg plies | baseline plies |
+|---|---|---|---|---|---|
+| square | **70.5%** | 43.3% | 8% | 30.6 | 52.9 |
+| line | 49.4% | 59.2% | 2% | 20.2 | 46.6 |
+| el | 100% | — | 0 | 8.8 | — |
+| zig | 100% (+17% double wins) | — | 0 | 9.7 | — |
+| pyramid | 100% | — | 0 | 9.5 | — |
+
+Verdict on the hypothesis:
+
+- **Shorter games: confirmed.** ~40% shorter on square, ~57% on line.
+- **Stalling eliminated: refuted.** Stall-happy bots (repetition penalty
+  removed) still lock up 49% of square games and 21% of line games. The
+  bans are transient — only two entry spaces are blocked at a time and each
+  ban moves the moment its owner plays — so multi-lane push/counter-push
+  cycles survive. Auto-elephant is not an anti-stall mechanism.
+- **Over-simplification / first-mover: confirmed where it matters.** Square
+  jumps from 43% to 70.5% first-mover. The retired shapes become 100%
+  first-mover forced wins with near-instant games. Line is the odd one out —
+  near-balanced (49.4%) but with very short, trade-heavy games.
+
+Why: defense still functions (87–95% of threats neutralized) but it now
+**costs a tile every time** — you must occupy or entry-ban the opponent's
+completion square with a placement. The shipped game's shared elephant
+defends *for free*, which is exactly what powers counter-punching and the
+second-mover resilience at high skill. Removing the elephant decision
+removes the game's defensive economy, not just its aesthetics.
+
+**Conclusion:** the shipped free-elephant rules are the deeper game. The
+auto-elephant design buys speed, not integrity — it neither stops stalling
+nor preserves balance. (If shorter games are ever wanted, that's a separate
+lever: smaller hands or a move cap.)
+
 ## Open questions / next steps
 
 - **Solve the game.** State = (board, elephant, turn) with hands derivable;
