@@ -1,5 +1,12 @@
 # Elephant in the Room — Bot Research Findings
 
+**State freeze (Aug 27 2026).** Decisions locked so far: rotation reduced to
+**square + line** (el/zig/pyramid retired on `elephant/remove-el-shape`);
+difficulty ladder named **normal** (current bot) / **hard** (B3) /
+**impossible** (B4); repetition rule leaning move4-as-visible-UI-block, final
+call pending. Tagged `research-freeze-1` on this branch. Everything below is
+the evidence behind those calls.
+
 *Aug 2026. Produced by the `research/` simulation lab on the `elephant-bot-research`
 branch of the-social-game. Engine validated against
 `app/Challenges/ElephantInTheRoom/Support/BoardLogic.php` (victory lists
@@ -147,20 +154,20 @@ column triple into a row triple, walk the elephant into your own structure.
 
 ## Recommendations for the production bot
 
-- **Port B3 (tactician) as the new hard bot.** It's one evaluation function
-  over ~80 joint (slide, elephant) moves — no deep search, PHP-friendly, and
-  it beats the current hard bot ~95/5. Core ingredients, in order of value:
-  count opponent winning slides after your full move (huge penalty each),
-  count your own standing threats (+fork bonus), live-config progress
-  (partial shapes not contaminated by opponent/elephant), small
-  repetition penalty, keep-a-tile-in-hand penalty.
-- **B4 (2-ply) as an optional "soul-crushing" mode** — measurably stronger
-  (~3:1 over B3); costs ~100–300ms/move in Python, similar in PHP. Could gate
-  behind a "hard+" toggle.
-- **Difficulty ladder for free:** easy = current bot (random elephant),
-  medium = B2 (current + defensive elephant), hard = B3, nightmare = B4. This
-  replaces the top-2/top-3 selection hack with genuinely different play
+- **DECIDED (Aug 27 2026): the difficulty ladder is** —
+  **"normal" = the current shipped bot** (greedy slide scoring, random
+  elephant), **"hard" = B3 tactician**, **"impossible" = B4 lookahead**.
+  This replaces the top-2/top-3 selection hack with genuinely different play
   styles — weaker bots lose for human-like reasons (they forget the elephant).
+- B3 is one evaluation function over ~80 joint (slide, elephant) moves — no
+  deep search, ports cleanly to the blade's JS bot. Core ingredients, in
+  order of value: count opponent winning slides after your full move (huge
+  penalty each), count your own standing threats (+fork bonus), live-config
+  progress (partial shapes not contaminated by opponent/elephant), small
+  repetition penalty, keep-a-tile-in-hand penalty.
+- B4 = B3 + opponent best-reply search on the top 8 candidates (~100× the
+  compute, ~3:1 stronger than B3; fine for a client-side bot, budget
+  ~100–300ms/move).
 - **Reconsider el in the bot shape pool** (and pyramid if it's ever added):
   first player appears to win by force at high skill. Square and line are the
   shapes with real depth. *(Update: John retired el, then zig and pyramid too —
