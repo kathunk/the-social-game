@@ -186,12 +186,35 @@ Results:
    a UI warning ("this move would repeat the position a third time — you'd
    lose") reduces it to zero while still forcing the staller to give ground.
 
-**Recommendation:** adopt repetition-as-loss, but define it on *positions*,
-not moves: "if your move recreates a board position that has already occurred
-twice in this game, you lose." Implementation is cheap — the events already
-snapshot the board every move, and the client's JS port can warn before the
-player commits. Player-facing framing can stay simple: *you can't repeat
-yourself forever; change something or lose.*
+**Round 2 (move4, after position-based was rejected as un-visualizable):**
+"same slide 4 times in a row = loss" was tested the same way, plus a harder
+adversary: a *smart* staller that, when blocked, makes the most
+stall-preserving legal deviation (rotate lanes: A,A,A,B,A,A,A,B...) instead
+of a random one.
+
+- move4 vs naive stallers: 150/150 decisive, same as move3.
+- Ambush rate on unaware players: roughly half of move3's (23–49%).
+- Collateral in healthy strong games: a 4-in-a-row same slide occurs
+  naturally in 23% (zig) to 89% (pyramid) of decisive games — so as a
+  *hidden* loss rule it ambushes; as a *visible* constraint it's a real but
+  fair strategic limit ("rotate lanes").
+- **Two smart stallers can still fortress forever under move4**: 75–77% of
+  square/line games hit the 300-ply cap. The move-based rule is evadable in
+  principle.
+- **One smart staller vs a player trying to win**: 75–100% of games resolve
+  (13–25% residual stalls on square/line at bot strength). Compared to no
+  rule at all (60–90% stalls), move4 removes most of the problem.
+
+**Recommendation:** implement move4 as a **visible UI constraint** — the 4th
+consecutive identical slide is simply illegal (arrow greys out, with a pip
+counter), equivalently "you lose if you somehow submit it" with a clear
+warning. Zero memory burden (the UI counts for you), zero ambush, kills all
+naive stalling. Residual exotic stalling (two players rotating lanes in
+mutual agreement to draw) remains theoretically possible but requires both
+players to prefer not winning, and the 35s turn timer bounds it in practice.
+If real-world stalling abuse ever shows up, position-based repetition
+(airtight by pigeonhole: every position can occur at most twice, so games
+must end) is the escalation path.
 
 ## Open questions / next steps
 

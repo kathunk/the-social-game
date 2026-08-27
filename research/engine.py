@@ -226,8 +226,8 @@ def play_game(bot1, bot2, shape, first=1, rng=None, max_plies=200,
     max_plies are reported as "capped" (a de facto draw).
 
     repetition_rule (experimental variants, loss for the offender):
-      "move3" — a player whose slide equals their own previous two slides
-                loses immediately.
+      "moveN" (e.g. "move3", "move4") — a player whose slide equals their
+                own previous N-1 slides loses immediately.
       "pos3"  — a player whose full turn recreates a position (tiles +
                 elephant + player to move) for the third time loses.
     """
@@ -253,10 +253,12 @@ def play_game(bot1, bot2, shape, first=1, rng=None, max_plies=200,
         assert slide in valid_slides(p1 | p2, elephant), f"invalid slide {slide}"
 
         my_moves = history["_moves"][turn]
-        if (repetition_rule == "move3" and len(my_moves) >= 2
-                and my_moves[-1] == my_moves[-2] == slide):
-            return {"result": "repetition", "winners": [3 - turn],
-                    "loser": turn, "plies": plies}
+        if repetition_rule and repetition_rule.startswith("move"):
+            n = int(repetition_rule[4:])
+            if (len(my_moves) >= n - 1
+                    and all(m == slide for m in my_moves[-(n - 1):])):
+                return {"result": "repetition", "winners": [3 - turn],
+                        "loser": turn, "plies": plies}
         my_moves.append(slide)
 
         p1, p2, _pushed = execute_slide(p1, p2, slide, turn)

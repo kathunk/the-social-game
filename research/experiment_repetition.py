@@ -40,9 +40,11 @@ def rule_aware(bot, rule):
         h = history or {}
         slide, dest = bot(p1, p2, elephant, mover, masks, rng, history)
 
-        if rule == "move3":
+        if rule and rule.startswith("move"):
+            n = int(rule[4:])
             last = h.get("_moves", {}).get(mover, [])
-            if len(last) >= 2 and last[-1] == last[-2] == slide:
+            if (len(last) >= n - 1
+                    and all(m == slide for m in last[-(n - 1):])):
                 alts = [s for s in valid_slides(p1 | p2, elephant) if s != slide]
                 slide = rng.choice(alts)
         elif rule == "pos3":
@@ -81,15 +83,10 @@ def run(label, bot1, bot2, shape, rule, games=150):
 
 
 def main():
-    shapes = ["square", "line", "zig"]
-    staller_aware = {
-        "move3": rule_aware(stall_tactician, "move3"),
-        "pos3": rule_aware(stall_tactician, "pos3"),
-    }
-    guard_aware = {
-        "move3": rule_aware(bots.guard_bot, "move3"),
-        "pos3": rule_aware(bots.guard_bot, "pos3"),
-    }
+    shapes = ["square", "line", "zig", "pyramid"]
+    rules = ["move3", "move4", "pos3"]
+    staller_aware = {r: rule_aware(stall_tactician, r) for r in rules}
+    guard_aware = {r: rule_aware(bots.guard_bot, r) for r in rules}
 
     print("== 1) Motivated staller (no-rep-penalty tactician) vs guard bot ==")
     print("   Does each rule actually force games to end?\n")
@@ -98,9 +95,7 @@ def main():
     for shape in shapes:
         for rule, staller, guard in [
             (None, stall_tactician, bots.guard_bot),
-            ("move3", staller_aware["move3"], guard_aware["move3"]),
-            ("pos3", staller_aware["pos3"], guard_aware["pos3"]),
-        ]:
+        ] + [(r, staller_aware[r], guard_aware[r]) for r in rules]:
             res, rep, avg = run("stall", staller, guard, shape, rule)
             decided = res["win"] + res["double"]
             print(f"{shape:<8} {str(rule):<12} {decided:>7} {res['draw']:>5} "
@@ -110,7 +105,7 @@ def main():
     print("== 2) Rule-UNaware shipped-tier bots (B1 vs B2): ambush rate ==\n")
     print(header)
     for shape in shapes:
-        for rule in ["move3", "pos3"]:
+        for rule in rules:
             res, rep, avg = run("unaware", bots.current_bot, bots.guard_bot,
                                 shape, rule)
             decided = res["win"] + res["double"]
@@ -119,5 +114,56 @@ def main():
         print()
 
 
+def run_length_collateral(shapes, games=150):
+    """In healthy (rule-less, decisive) strong self-play, how often does a
+    player naturally slide the same lane 3+ / 4+ times in a row?"""
+    from engine import SHAPE_MASKS, hand, is_victorious
+
+    print("== 3) Collateral: same-slide runs in healthy strong games ==\n")
+    print(f"{'shape':<8} {'games':>6} {'run>=3':>8} {'run>=4':>8} {'run>=5':>8}")
+    for shape in shapes:
+        counts = Counter()
+        total = 0
+        for g in range(games):
+            rng = random.Random(hash(("legit", shape, g)) & 0xFFFFFFFF)
+            masks = SHAPE_MASKS[shape]
+            p1 = p2 = 0
+            elephant = 6
+            turn = 1 + g % 2
+            history = {"_moves": {1: [], 2: []}}
+            max_run = 0
+            run = {1: 0, 2: 0}
+            prev = {1: None, 2: None}
+            decided = False
+            for _ply in range(200):
+                key = (p1, p2, elephant, turn)
+                history[key] = history.get(key, 0) + 1
+                slide, dest = bots.tactician_bot(
+                    p1, p2, elephant, turn, masks, rng, history)
+                history["_moves"][turn].append(slide)
+                run[turn] = run[turn] + 1 if slide == prev[turn] else 1
+                prev[turn] = slide
+                max_run = max(max_run, run[turn])
+                p1, p2, _ = execute_slide(p1, p2, slide, turn)
+                if is_victorious(p1, masks) or is_victorious(p2, masks):
+                    decided = True
+                    break
+                if hand(p1) == 0 and hand(p2) == 0:
+                    decided = True
+                    break
+                elephant = dest
+                turn = next_turn_after(p1, p2, turn)
+            if not decided:
+                continue  # capped/stalled games are not "healthy"
+            total += 1
+            for n in (3, 4, 5):
+                if max_run >= n:
+                    counts[n] += 1
+        print(f"{shape:<8} {total:>6} "
+              f"{counts[3] / total:>8.0%} {counts[4] / total:>8.0%} "
+              f"{counts[5] / total:>8.0%}")
+
+
 if __name__ == "__main__":
     main()
+    run_length_collateral(["square", "line", "zig", "pyramid"])
