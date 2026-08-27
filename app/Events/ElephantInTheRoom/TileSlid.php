@@ -85,10 +85,20 @@ class TileSlid extends Event
             'client_move_id' => $this->client_move_id,
         ];
 
+        $run = BoardLogic::trailingSlideRuns($data['moves'])[$this->actor_id] ?? null;
+
         if ($victors !== []) {
             $data['match_status'] = 'complete';
             $data['victor_ids'] = $victors;
             $data['winning_spaces'] = $winning_spaces;
+        } elseif (($run['count'] ?? 0) > BoardLogic::MAX_SLIDE_REPEATS) {
+            // The same slide four times in a row forfeits the match to the
+            // opponent (a slide that completes a shape wins first, above)
+            $other = collect($data['actor_order'])->first(fn ($actor) => $actor !== $this->actor_id);
+
+            $data['match_status'] = 'complete';
+            $data['victor_ids'] = [$other];
+            $data['repetition_loss_by'] = $this->actor_id;
         } elseif (collect($data['hands'])->every(fn ($hand) => $hand === 0)) {
             // Both players out of tiles with no winner: the match is a dead draw
             $data['match_status'] = 'complete';

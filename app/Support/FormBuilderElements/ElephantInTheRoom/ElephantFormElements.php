@@ -59,8 +59,14 @@ class ElephantFormElements implements FormElementProvider
         $names = $players->mapWithKeys(fn ($p) => [(string) $p->id => $p->name])->all();
         $names[ElephantMatch::BOT_ID] = 'The Bot';
 
+        $repetition_loser = isset($match_data['repetition_loss_by'])
+            ? (string) $match_data['repetition_loss_by']
+            : null;
+
         $result_text = match (true) {
             $match_data === [] => 'Game over.',
+            $repetition_loser === $me => 'You made the same slide four times in a row — forfeit.',
+            $repetition_loser !== null => ($names[$repetition_loser] ?? 'Your opponent').' made the same slide four times in a row — you win!',
             $victors === [] => "It's a draw — nobody made their shape.",
             in_array($me, $victors, true) && count($victors) > 1 => "It's a draw — you both made your shape!",
             in_array($me, $victors, true) => 'You won! 🎉',

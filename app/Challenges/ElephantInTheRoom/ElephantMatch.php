@@ -278,7 +278,7 @@ class ElephantMatch extends BaseChallengeClass
 
     public function stateSnapshot(array $data): array
     {
-        return Arr::only($data, [
+        return array_merge(Arr::only($data, [
             'board',
             'elephant_space',
             'phase',
@@ -293,6 +293,11 @@ class ElephantMatch extends BaseChallengeClass
             'winning_spaces',
             'turn_started_at',
             'last_seq',
+            'repetition_loss_by',
+        ]), [
+            // Trailing identical-slide run per actor, so the client can warn
+            // at three in a row and bots can refuse a fatal fourth
+            'slide_runs' => BoardLogic::trailingSlideRuns($data['moves'] ?? []),
         ]);
     }
 

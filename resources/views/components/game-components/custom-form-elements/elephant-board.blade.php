@@ -172,8 +172,13 @@
                 return score;
             },
 
-            chooseBotSlide(board, elephant, botId, humanId, shape) {
-                const slides = this.shuffle(this.validSlides(board, elephant));
+            sameSlide(a, b) {
+                return !!a && !!b && a.space === b.space && a.direction === b.direction;
+            },
+
+            chooseBotSlide(board, elephant, botId, humanId, shape, banned = null) {
+                const slides = this.shuffle(this.validSlides(board, elephant))
+                    .filter((s) => !this.sameSlide(s, banned));
                 let best = null, bestScore = -Infinity;
                 for (const slide of slides) {
                     const hb = this.applySlide(board, slide.space, slide.direction, botId).board;
@@ -243,9 +248,10 @@
             // Every (slide, elephant destination) pair. A game-ending slide
             // gets an immediate score and no elephant options — the match is
             // over before the elephant phase
-            jointMoves(board, elephant, meId, oppId, shape) {
+            jointMoves(board, elephant, meId, oppId, shape, banned = null) {
                 const moves = [];
                 for (const slide of this.validSlides(board, elephant)) {
+                    if (this.sameSlide(slide, banned)) continue;
                     const hb = this.applySlide(board, slide.space, slide.direction, meId).board;
                     const myWin = this.isVictorious(hb, meId, shape);
                     const theirWin = this.isVictorious(hb, oppId, shape);
@@ -270,8 +276,8 @@
             // "Hard": 1-ply — hand the opponent the worst static position.
             // history maps positionKey -> times the bot has produced it, so
             // it varies rather than shuffling the same tiles forever
-            chooseTacticianMove(board, elephant, meId, oppId, shape, history) {
-                const moves = this.shuffle(this.jointMoves(board, elephant, meId, oppId, shape));
+            chooseTacticianMove(board, elephant, meId, oppId, shape, history, banned = null) {
+                const moves = this.shuffle(this.jointMoves(board, elephant, meId, oppId, shape, banned));
                 let best = null, bestScore = -Infinity;
                 for (const move of moves) {
                     let score = move.immediate ?? this.evaluate(move.board, move.dest, meId, oppId, shape);
@@ -295,8 +301,8 @@
 
             // "Impossible": 2-ply — judge each top candidate by the
             // opponent's best reply to it
-            chooseLookaheadMove(board, elephant, meId, oppId, shape, history) {
-                const moves = this.shuffle(this.jointMoves(board, elephant, meId, oppId, shape));
+            chooseLookaheadMove(board, elephant, meId, oppId, shape, history, banned = null) {
+                const moves = this.shuffle(this.jointMoves(board, elephant, meId, oppId, shape, banned));
                 const scored = moves.map((move) => ({
                     move,
                     score: move.immediate ?? this.evaluate(move.board, move.dest, meId, oppId, shape),
@@ -353,6 +359,7 @@
                 me: cfg.me, names: cfg.names, gameId: cfg.game_id,
                 shape: cfg.state.victory_shape, isBotGame: cfg.state.is_bot_game,
                 botDifficulty: cfg.state.bot_difficulty ?? null, botHistory: {},
+                slideRuns: cfg.state.slide_runs ?? {},
                 turnSeconds: cfg.turn_seconds, grace: cfg.forfeit_grace_seconds,
 
                 // Optimistic bookkeeping
@@ -387,6 +394,10 @@
                 // ── Getters ────────────────────────────────────────────────
                 get opponentId() { return this.actorOrder.find((a) => a !== this.me); },
                 get isMyTurn() { return this.matchStatus === 'active' && this.currentActorId === this.me; },
+                get repetitionWarning() {
+                    const run = this.slideRuns[this.me];
+                    return this.myTilePhase && (run?.count ?? 0) >= 3;
+                },
                 get needsDifficultyPick() { return this.isBotGame && this.matchStatus === 'active' && !this.botDifficulty; },
                 get myTilePhase() { return this.isMyTurn && this.phase === 'tile' && !this.animating && !this.pendingAction && !this.botThinking && !this.needsDifficultyPick; },
                 get myElephantPhase() { return this.isMyTurn && this.phase === 'move' && !this.animating && !this.pendingAction && !this.botThinking; },
@@ -501,12 +512,19 @@
                         // "normal" keeps the original greedy bot with its
                         // random elephant; the research bots pick the slide
                         // and elephant destination as one move
+                        // A fourth identical slide in a row forfeits — every
+                        // bot is strictly forbidden from ever making one
+                        const botRun = this.slideRuns['bot'];
+                        const banned = (botRun?.count ?? 0) >= 3
+                            ? { space: botRun.entry_space, direction: botRun.direction }
+                            : null;
+
                         let slide = null, plannedElephantTo = null;
                         if (this.botDifficulty === 'hard' || this.botDifficulty === 'impossible') {
                             const chooser = this.botDifficulty === 'impossible'
                                 ? 'chooseLookaheadMove'
                                 : 'chooseTacticianMove';
-                            const move = E[chooser](this.board, this.elephant, 'bot', this.me, this.shape, this.botHistory);
+                            const move = E[chooser](this.board, this.elephant, 'bot', this.me, this.shape, this.botHistory, banned);
                             if (move) {
                                 slide = move.slide;
                                 plannedElephantTo = move.dest;
@@ -514,7 +532,7 @@
                                 this.botHistory[key] = (this.botHistory[key] ?? 0) + 1;
                             }
                         } else {
-                            slide = E.chooseBotSlide(this.board, this.elephant, 'bot', this.me, this.shape);
+                            slide = E.chooseBotSlide(this.board, this.elephant, 'bot', this.me, this.shape, banned);
                         }
                         if (!slide) { this.botThinking = false; return; }
 
@@ -601,6 +619,17 @@
                         if (t) { t.x = target.x; t.y = target.y; }
                     }, 50);
 
+                    // Trailing identical-slide run for this actor (the same
+                    // slide four times in a row forfeits — mirrors TileSlid)
+                    const prevRun = this.slideRuns[actorId];
+                    this.slideRuns[actorId] = {
+                        entry_space: space,
+                        direction: direction,
+                        count: (prevRun && prevRun.entry_space === space && prevRun.direction === direction)
+                            ? prevRun.count + 1
+                            : 1,
+                    };
+
                     // Logical state
                     const result = E.applySlide(this.board, space, direction, actorId);
                     this.board = result.board;
@@ -624,6 +653,9 @@
                         this.matchStatus = 'complete';
                         this.victorIds = victors;
                         this.winningSpaces = winning;
+                    } else if ((this.slideRuns[actorId]?.count ?? 0) > 3) {
+                        this.matchStatus = 'complete';
+                        this.victorIds = [this.actorOrder.find((a) => a !== actorId)];
                     } else if (this.actorOrder.every((a) => (this.hands[a] ?? 0) === 0)) {
                         this.matchStatus = 'complete';
                     }
@@ -685,6 +717,7 @@
                             winningSpaces: this.winningSpaces,
                             turnStartedAt: this.turnStartedAt,
                             botDifficulty: this.botDifficulty,
+                            slideRuns: this.slideRuns,
                         }));
                     } catch (e) { /* storage full or unavailable — snap instead */ }
                 },
@@ -711,6 +744,7 @@
                     this.turnStartedAt = snap.turnStartedAt;
                     this.lastSeq = snap.lastSeq;
                     this.botDifficulty = snap.botDifficulty ?? this.botDifficulty;
+                    this.slideRuns = snap.slideRuns ?? {};
                     this.buildTilesFromBoard();
                     this.$nextTick(() => this.placeElephant());
                 },
@@ -780,6 +814,7 @@
                     this.turnStartedAt = state.turn_started_at;
                     this.lastSeq = state.last_seq;
                     this.botDifficulty = state.bot_difficulty ?? this.botDifficulty;
+                    this.slideRuns = state.slide_runs ?? this.slideRuns;
                     this.placeElephant();
                     this.persistSnapshot();
                     this.maybeRunBot();
@@ -798,6 +833,7 @@
                     this.turnStartedAt = state.turn_started_at;
                     this.lastSeq = state.last_seq;
                     this.botDifficulty = state.bot_difficulty ?? this.botDifficulty;
+                    this.slideRuns = state.slide_runs ?? {};
                     this.buildTilesFromBoard();
                     this.$nextTick(() => this.placeElephant());
                     this.persistSnapshot();
@@ -1044,6 +1080,15 @@
                     </template>
                 </div>
             </div>
+        </div>
+
+        {{-- REPETITION WARNING: three identical slides in a row — a fourth
+             forfeits the match (mirrors the TileSlid rule) --}}
+        <div
+            x-show="repetitionWarning"
+            class="w-full max-w-[300px] rounded-lg bg-amber-100 border border-amber-300 text-amber-800 px-3 py-2 text-xs font-medium text-center"
+        >
+            You've made the same slide 3 times in a row — making it a 4th time forfeits the game.
         </div>
 
         {{-- STATUS LINE --}}

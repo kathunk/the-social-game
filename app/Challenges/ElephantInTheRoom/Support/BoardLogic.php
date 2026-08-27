@@ -89,6 +89,40 @@ class BoardLogic
         ],
     ];
 
+    // A player may make the same slide (entry space + direction) at most
+    // this many times in a row; the next identical slide forfeits the match.
+    // Keeps fortress stalling impossible to sustain on one lane.
+    public const MAX_SLIDE_REPEATS = 3;
+
+    /**
+     * Each actor's trailing run of identical tile slides, computed from the
+     * move log: actor_id => [entry_space, direction, count]. A run only
+     * counts the actor's own consecutive tile moves — opponent moves in
+     * between do not break it, a different slide of their own does.
+     */
+    public static function trailingSlideRuns(array $moves): array
+    {
+        $runs = [];
+
+        foreach ($moves as $move) {
+            if (($move['type'] ?? null) !== 'tile') {
+                continue;
+            }
+
+            $actor = (string) $move['actor_id'];
+            $extends = ($runs[$actor]['entry_space'] ?? null) === $move['entry_space']
+                && ($runs[$actor]['direction'] ?? null) === $move['direction'];
+
+            $runs[$actor] = [
+                'entry_space' => $move['entry_space'],
+                'direction' => $move['direction'],
+                'count' => $extends ? $runs[$actor]['count'] + 1 : 1,
+            ];
+        }
+
+        return $runs;
+    }
+
     public static function emptyBoard(): array
     {
         return array_fill_keys(range(1, 16), null);

@@ -662,6 +662,130 @@ it('gives the human the win when their score is settled after beating the bot', 
 });
 
 // ─────────────────────────────────────────────────────────────────────────
+// Repetition forfeit: the same slide four times in a row loses
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Seed prior tile moves into the log (board untouched — the repetition rule
+ * reads only the move log, so tests can skip the board choreography).
+ */
+function elephantSeedTileMoves(Challenge $challenge, array $entries): Challenge
+{
+    return elephantMutateState($challenge, function ($state) use ($entries) {
+        $data = $state->challenge_data;
+        foreach ($entries as $i => [$actor_id, $entry_space, $direction]) {
+            $data['last_seq'] = ($data['last_seq'] ?? 0) + 1;
+            $data['moves'][] = [
+                'seq' => $data['last_seq'],
+                'actor_id' => $actor_id,
+                'type' => 'tile',
+                'entry_space' => $entry_space,
+                'direction' => $direction,
+                'pushed_off_owner' => null,
+                'client_move_id' => 'seeded-'.$i,
+            ];
+        }
+        $state->challenge_data = $data;
+    });
+}
+
+it('forfeits the match to the opponent on a fourth identical slide in a row', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this);
+    $p1 = (string) $players[0]->id;
+    $p2 = (string) $players[1]->id;
+
+    // Opponent slides in between do NOT break the run — only your own
+    // different slide does
+    $challenge = elephantSeedTileMoves($challenge, [
+        [$p1, 1, 'down'], [$p2, 16, 'up'],
+        [$p1, 1, 'down'], [$p2, 16, 'up'],
+        [$p1, 1, 'down'], [$p2, 16, 'up'],
+    ]);
+
+    elephantCallAction($this, $players[0], $challenge, 'slideTile', [
+        'entry_space' => 1,
+        'direction' => 'down',
+        'client_move_id' => 'fatal-fourth',
+    ])->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['match_status'])->toBe('complete');
+    expect($data['victor_ids'])->toBe([$p2]);
+    expect($data['repetition_loss_by'])->toBe($p1);
+    expect($data['winning_spaces'])->toBe([]);
+    expect($players[1]->fresh()->score)->toBe(ElephantMatch::WIN_POINTS);
+});
+
+it('does not forfeit when the player broke their own streak', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this);
+    $p1 = (string) $players[0]->id;
+
+    $challenge = elephantSeedTileMoves($challenge, [
+        [$p1, 1, 'down'], [$p1, 1, 'down'], [$p1, 4, 'down'],
+    ]);
+
+    elephantCallAction($this, $players[0], $challenge, 'slideTile', [
+        'entry_space' => 1,
+        'direction' => 'down',
+        'client_move_id' => 'fresh-run',
+    ])->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['match_status'])->toBe('active');
+    expect($data)->not->toHaveKey('repetition_loss_by');
+});
+
+it('lets a fourth identical slide win when it completes the shape', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this);
+    $p1 = (string) $players[0]->id;
+
+    $challenge = elephantMutateState($challenge, function ($state) use ($p1) {
+        $data = $state->challenge_data;
+        $data['victory_shape'] = 'line';
+        $data['board'][5] = $p1;
+        $data['board'][9] = $p1;
+        $data['board'][13] = $p1;
+        $data['hands'][$p1] = 5;
+        $state->challenge_data = $data;
+    });
+    $challenge = elephantSeedTileMoves($challenge, [
+        [$p1, 1, 'down'], [$p1, 1, 'down'], [$p1, 1, 'down'],
+    ]);
+
+    elephantCallAction($this, $players[0], $challenge, 'slideTile', [
+        'entry_space' => 1,
+        'direction' => 'down',
+        'client_move_id' => 'winning-fourth',
+    ])->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['match_status'])->toBe('complete');
+    expect($data['victor_ids'])->toBe([$p1]);
+    expect($data)->not->toHaveKey('repetition_loss_by');
+});
+
+it('exposes trailing slide runs in the state snapshot', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this);
+    $p1 = (string) $players[0]->id;
+
+    $challenge = elephantSeedTileMoves($challenge, [
+        [$p1, 1, 'down'], [$p1, 1, 'down'],
+    ]);
+
+    $snapshot = ElephantMatch::fromModel($challenge)
+        ->stateSnapshot($challenge->challenge_data);
+
+    expect($snapshot['slide_runs'][$p1])->toBe([
+        'entry_space' => 1,
+        'direction' => 'down',
+        'count' => 2,
+    ]);
+});
+
+// ─────────────────────────────────────────────────────────────────────────
 // Victory table integrity
 // ─────────────────────────────────────────────────────────────────────────
 
