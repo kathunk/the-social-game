@@ -17,11 +17,14 @@ namespace App\Challenges\ElephantInTheRoom\Support;
  */
 class BoardLogic
 {
-    public const SHAPES = ['square', 'line', 'el', 'zig', 'pyramid'];
+    // El is retired from the rotation: bot-vs-bot simulation showed a
+    // first-player forced win (a protected middle-row triple forks four
+    // completion squares). Its victory table remains for historical games.
+    public const SHAPES = ['square', 'line', 'zig', 'pyramid'];
 
     // The bot's check heuristics are strongest for these shapes, so bot
     // games only deal from this subset (same rule as the original game)
-    public const BOT_SHAPES = ['square', 'line', 'el'];
+    public const BOT_SHAPES = ['square', 'line'];
 
     public const ADJACENT_SPACES = [
         1 => [2, 5],
