@@ -4,6 +4,7 @@ namespace App\Challenges\ElephantInTheRoom;
 
 use App\Challenges\BaseChallengeClass;
 use App\Challenges\ElephantInTheRoom\Support\BoardLogic;
+use App\Events\ElephantInTheRoom\BotDifficultySet;
 use App\Events\ElephantInTheRoom\ElephantMoved;
 use App\Events\ElephantInTheRoom\MatchForfeited;
 use App\Events\ElephantInTheRoom\TileSlid;
@@ -29,6 +30,12 @@ class ElephantMatch extends BaseChallengeClass
     // sentinel actor id inside challenge_data. Its brain runs client-side;
     // the server only validates that its moves are legal.
     const BOT_ID = 'bot';
+
+    // The bot's brain lives client-side (see the elephant-board blade); this
+    // list is the server-authoritative set of difficulties it can be asked
+    // to play. "normal" is the original greedy bot; "hard" adds joint
+    // slide+elephant scoring; "impossible" adds opponent best-reply search.
+    const BOT_DIFFICULTIES = ['normal', 'hard', 'impossible'];
 
     const TURN_SECONDS = 35;
 
@@ -67,6 +74,9 @@ class ElephantMatch extends BaseChallengeClass
             'hands' => array_fill_keys($actor_order, 8),
             'victory_shape' => Arr::random($is_bot_game ? BoardLogic::BOT_SHAPES : BoardLogic::SHAPES),
             'is_bot_game' => $is_bot_game,
+            // Chosen by the human on the board before the first move of a
+            // bot game; stays null (and unused) in 2-player games
+            'bot_difficulty' => null,
             'match_status' => 'active',
             'victor_ids' => [],
             'winning_spaces' => [],
@@ -120,6 +130,21 @@ class ElephantMatch extends BaseChallengeClass
     // ─────────────────────────────────────────────────────────────────────
     // Actions
     // ─────────────────────────────────────────────────────────────────────
+
+    public function setBotDifficulty(Player $player, array $params): void
+    {
+        $this->withChallengeLock(function () use ($player, $params) {
+            BotDifficultySet::fire(
+                game_id: $player->game_id,
+                challenge_id: $this->challenge->id,
+                actor_id: (string) $player->id,
+                difficulty: (string) ($params['difficulty'] ?? ''),
+            );
+
+            Verbs::commit();
+            $this->afterMoves($player);
+        });
+    }
 
     public function slideTile(Player $player, array $params): void
     {
@@ -262,6 +287,7 @@ class ElephantMatch extends BaseChallengeClass
             'hands',
             'victory_shape',
             'is_bot_game',
+            'bot_difficulty',
             'match_status',
             'victor_ids',
             'winning_spaces',

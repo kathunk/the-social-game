@@ -102,6 +102,85 @@ it('initializes a bot game with the virtual bot as the second actor', function (
 });
 
 // ─────────────────────────────────────────────────────────────────────────
+// Bot difficulty
+// ─────────────────────────────────────────────────────────────────────────
+
+it('starts a bot game with no difficulty chosen', function () {
+    ['challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    expect($challenge->challenge_data['bot_difficulty'])->toBeNull();
+});
+
+it('lets the human pick a difficulty before the first move and shares it with the client', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    elephantCallAction($this, $players[0], $challenge, 'setBotDifficulty', [
+        'difficulty' => 'impossible',
+    ])->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['bot_difficulty'])->toBe('impossible');
+
+    $handler = ElephantMatch::fromModel($challenge);
+    expect($handler->stateSnapshot($data)['bot_difficulty'])->toBe('impossible');
+});
+
+it('rejects a difficulty outside the known set', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    elephantCallAction($this, $players[0], $challenge, 'setBotDifficulty', [
+        'difficulty' => 'nightmare',
+    ])->assertHasErrors('action_error');
+
+    expect($challenge->refresh()->challenge_data['bot_difficulty'])->toBeNull();
+});
+
+it('rejects setting a difficulty in a 2-player game', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this);
+
+    elephantCallAction($this, $players[0], $challenge, 'setBotDifficulty', [
+        'difficulty' => 'hard',
+    ])->assertHasErrors('action_error');
+
+    expect($challenge->refresh()->challenge_data['bot_difficulty'])->toBeNull();
+});
+
+it('rejects changing the difficulty once the match has started', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    elephantCallAction($this, $players[0], $challenge, 'setBotDifficulty', [
+        'difficulty' => 'normal',
+    ])->assertHasNoErrors();
+
+    elephantCallAction($this, $players[0], $challenge, 'slideTile', [
+        'entry_space' => 1,
+        'direction' => 'down',
+        'client_move_id' => 'move-1',
+    ])->assertHasNoErrors();
+
+    elephantCallAction($this, $players[0], $challenge, 'setBotDifficulty', [
+        'difficulty' => 'hard',
+    ])->assertHasErrors('action_error');
+
+    expect($challenge->refresh()->challenge_data['bot_difficulty'])->toBe('normal');
+});
+
+it('rejects picking a difficulty twice even before the first move', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    elephantCallAction($this, $players[0], $challenge, 'setBotDifficulty', [
+        'difficulty' => 'normal',
+    ])->assertHasNoErrors();
+
+    elephantCallAction($this, $players[0], $challenge, 'setBotDifficulty', [
+        'difficulty' => 'impossible',
+    ])->assertHasErrors('action_error');
+
+    expect($challenge->refresh()->challenge_data['bot_difficulty'])->toBe('normal');
+});
+
+// ─────────────────────────────────────────────────────────────────────────
 // Tile slides
 // ─────────────────────────────────────────────────────────────────────────
 

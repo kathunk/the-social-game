@@ -188,6 +188,143 @@
                 return moves[Math.floor(Math.random() * moves.length)];
             },
 
+            // ─── Stronger bots (ported from bot-vs-bot research; see
+            //     research/FINDINGS.md on the elephant-bot-research branch).
+            //     A move is a (slide, elephant destination) PAIR scored by
+            //     the position it hands the opponent: never allow them an
+            //     immediate winning slide, count standing threats (a fork of
+            //     two wins games), grow shapes the opponent hasn't touched. ───
+
+            PROGRESS: [0, 1, 4, 12, 0],
+
+            countTiles(board, actorId) {
+                let n = 0;
+                for (let s = 1; s <= 16; s++) if (board[s] === actorId) n++;
+                return n;
+            },
+
+            winningSlides(board, elephant, actorId, shape) {
+                const wins = [];
+                for (const slide of this.validSlides(board, elephant)) {
+                    const hb = this.applySlide(board, slide.space, slide.direction, actorId).board;
+                    if (this.isVictorious(hb, actorId, shape)) wins.push(slide);
+                }
+                return wins;
+            },
+
+            // Static score of a completed turn from meId's perspective — the
+            // opponent acts next
+            evaluate(board, elephant, meId, oppId, shape) {
+                let score = 0;
+
+                score -= 120000 * this.winningSlides(board, elephant, oppId, shape).length;
+
+                const myThreats = this.winningSlides(board, elephant, meId, shape).length;
+                score += 400 * myThreats;
+                if (myThreats >= 2) score += 2000;
+
+                for (const set of this.VICTORIES[shape]) {
+                    let mine = 0, theirs = 0, hasElephant = false;
+                    for (const s of set) {
+                        if (board[s] === meId) mine++;
+                        else if (board[s] === oppId) theirs++;
+                        if (s === elephant) hasElephant = true;
+                    }
+                    if (!hasElephant) {
+                        if (theirs === 0) score += this.PROGRESS[mine];
+                        if (mine === 0) score -= this.PROGRESS[theirs];
+                    }
+                }
+
+                if (this.countTiles(board, meId) === 8) score -= 600;
+                return score;
+            },
+
+            // Every (slide, elephant destination) pair. A game-ending slide
+            // gets an immediate score and no elephant options — the match is
+            // over before the elephant phase
+            jointMoves(board, elephant, meId, oppId, shape) {
+                const moves = [];
+                for (const slide of this.validSlides(board, elephant)) {
+                    const hb = this.applySlide(board, slide.space, slide.direction, meId).board;
+                    const myWin = this.isVictorious(hb, meId, shape);
+                    const theirWin = this.isVictorious(hb, oppId, shape);
+                    if (myWin || theirWin) {
+                        const immediate = myWin && theirWin ? 0 : (myWin ? 1e9 : -1e9);
+                        moves.push({ slide, dest: elephant, board: hb, immediate });
+                        continue;
+                    }
+                    for (const dest of this.validElephantMoves(elephant)) {
+                        moves.push({ slide, dest, board: hb, immediate: null });
+                    }
+                }
+                return moves;
+            },
+
+            positionKey(board, dest) {
+                let key = '';
+                for (let s = 1; s <= 16; s++) key += (board[s] ?? '.') + ',';
+                return key + dest;
+            },
+
+            // "Hard": 1-ply — hand the opponent the worst static position.
+            // history maps positionKey -> times the bot has produced it, so
+            // it varies rather than shuffling the same tiles forever
+            chooseTacticianMove(board, elephant, meId, oppId, shape, history) {
+                const moves = this.shuffle(this.jointMoves(board, elephant, meId, oppId, shape));
+                let best = null, bestScore = -Infinity;
+                for (const move of moves) {
+                    let score = move.immediate ?? this.evaluate(move.board, move.dest, meId, oppId, shape);
+                    if (move.immediate === null && history) {
+                        score -= 800 * (history[this.positionKey(move.board, move.dest)] ?? 0);
+                    }
+                    if (score > bestScore) { bestScore = score; best = move; }
+                }
+                return best;
+            },
+
+            bestReplyScore(board, elephant, meId, oppId, shape) {
+                let best = -Infinity;
+                for (const move of this.jointMoves(board, elephant, meId, oppId, shape)) {
+                    const score = move.immediate ?? this.evaluate(move.board, move.dest, meId, oppId, shape);
+                    if (score > best) best = score;
+                    if (best >= 1e9) break;
+                }
+                return best === -Infinity ? 0 : best;
+            },
+
+            // "Impossible": 2-ply — judge each top candidate by the
+            // opponent's best reply to it
+            chooseLookaheadMove(board, elephant, meId, oppId, shape, history) {
+                const moves = this.shuffle(this.jointMoves(board, elephant, meId, oppId, shape));
+                const scored = moves.map((move) => ({
+                    move,
+                    score: move.immediate ?? this.evaluate(move.board, move.dest, meId, oppId, shape),
+                }));
+                scored.sort((a, b) => b.score - a.score);
+
+                if (scored[0].score >= 1e9) return scored[0].move;
+
+                let best = null, bestTotal = -Infinity;
+                for (const { move, score } of scored.slice(0, 8)) {
+                    let total;
+                    if (move.immediate !== null) {
+                        total = score;
+                    } else if (this.countTiles(move.board, oppId) === 8) {
+                        // Opponent's hand is empty — they get skipped, so
+                        // there is no reply to search
+                        total = score;
+                    } else {
+                        total = -this.bestReplyScore(move.board, move.dest, oppId, meId, shape) + 0.001 * score;
+                    }
+                    if (move.immediate === null && history) {
+                        total -= 800 * (history[this.positionKey(move.board, move.dest)] ?? 0);
+                    }
+                    if (total > bestTotal) { bestTotal = total; best = move; }
+                }
+                return best;
+            },
+
             shuffle(arr) {
                 const a = [...arr];
                 for (let i = a.length - 1; i > 0; i--) {
@@ -215,6 +352,7 @@
                 // Meta
                 me: cfg.me, names: cfg.names, gameId: cfg.game_id,
                 shape: cfg.state.victory_shape, isBotGame: cfg.state.is_bot_game,
+                botDifficulty: cfg.state.bot_difficulty ?? null, botHistory: {},
                 turnSeconds: cfg.turn_seconds, grace: cfg.forfeit_grace_seconds,
 
                 // Optimistic bookkeeping
@@ -249,7 +387,8 @@
                 // ── Getters ────────────────────────────────────────────────
                 get opponentId() { return this.actorOrder.find((a) => a !== this.me); },
                 get isMyTurn() { return this.matchStatus === 'active' && this.currentActorId === this.me; },
-                get myTilePhase() { return this.isMyTurn && this.phase === 'tile' && !this.animating && !this.pendingAction && !this.botThinking; },
+                get needsDifficultyPick() { return this.isBotGame && this.matchStatus === 'active' && !this.botDifficulty; },
+                get myTilePhase() { return this.isMyTurn && this.phase === 'tile' && !this.animating && !this.pendingAction && !this.botThinking && !this.needsDifficultyPick; },
                 get myElephantPhase() { return this.isMyTurn && this.phase === 'move' && !this.animating && !this.pendingAction && !this.botThinking; },
                 get validSlideList() { return E.validSlides(this.board, this.elephant); },
                 get validElephantMoveList() { return E.validElephantMoves(this.elephant); },
@@ -309,6 +448,13 @@
                     });
                 },
 
+                chooseDifficulty(level) {
+                    if (!this.needsDifficultyPick || this.pendingAction) return;
+                    this.botDifficulty = level;
+                    this.persistSnapshot();
+                    this.sendAction('setBotDifficulty', { difficulty: level });
+                },
+
                 // When the opponent's turn timer runs out, the waiting
                 // player's client claims the win automatically — no prompt.
                 // Latched per turn_started_at so a rejected claim (e.g. the
@@ -347,11 +493,29 @@
                 maybeRunBot() {
                     if (!this.isBotGame || this.matchStatus !== 'active') return;
                     if (this.currentActorId !== 'bot' || this.botThinking || this.pendingAction) return;
+                    if (this.needsDifficultyPick) return; // waiting on the picker
 
                     this.botThinking = true;
 
                     setTimeout(() => {
-                        const slide = E.chooseBotSlide(this.board, this.elephant, 'bot', this.me, this.shape);
+                        // "normal" keeps the original greedy bot with its
+                        // random elephant; the research bots pick the slide
+                        // and elephant destination as one move
+                        let slide = null, plannedElephantTo = null;
+                        if (this.botDifficulty === 'hard' || this.botDifficulty === 'impossible') {
+                            const chooser = this.botDifficulty === 'impossible'
+                                ? 'chooseLookaheadMove'
+                                : 'chooseTacticianMove';
+                            const move = E[chooser](this.board, this.elephant, 'bot', this.me, this.shape, this.botHistory);
+                            if (move) {
+                                slide = move.slide;
+                                plannedElephantTo = move.dest;
+                                const key = E.positionKey(move.board, move.dest);
+                                this.botHistory[key] = (this.botHistory[key] ?? 0) + 1;
+                            }
+                        } else {
+                            slide = E.chooseBotSlide(this.board, this.elephant, 'bot', this.me, this.shape);
+                        }
                         if (!slide) { this.botThinking = false; return; }
 
                         const tileMoveId = this.uuid();
@@ -367,7 +531,7 @@
                         };
 
                         if (!completed) {
-                            const elephantTo = E.chooseBotElephantMove(this.elephant);
+                            const elephantTo = plannedElephantTo ?? E.chooseBotElephantMove(this.elephant);
                             const elephantMoveId = this.uuid();
                             this.sentMoveIds.push(elephantMoveId);
                             props.bot_to_space = elephantTo;
@@ -520,6 +684,7 @@
                             victorIds: this.victorIds,
                             winningSpaces: this.winningSpaces,
                             turnStartedAt: this.turnStartedAt,
+                            botDifficulty: this.botDifficulty,
                         }));
                     } catch (e) { /* storage full or unavailable — snap instead */ }
                 },
@@ -545,6 +710,7 @@
                     this.winningSpaces = snap.winningSpaces ?? [];
                     this.turnStartedAt = snap.turnStartedAt;
                     this.lastSeq = snap.lastSeq;
+                    this.botDifficulty = snap.botDifficulty ?? this.botDifficulty;
                     this.buildTilesFromBoard();
                     this.$nextTick(() => this.placeElephant());
                 },
@@ -613,6 +779,7 @@
                     this.winningSpaces = state.winning_spaces ?? [];
                     this.turnStartedAt = state.turn_started_at;
                     this.lastSeq = state.last_seq;
+                    this.botDifficulty = state.bot_difficulty ?? this.botDifficulty;
                     this.placeElephant();
                     this.persistSnapshot();
                     this.maybeRunBot();
@@ -630,6 +797,7 @@
                     this.winningSpaces = state.winning_spaces ?? [];
                     this.turnStartedAt = state.turn_started_at;
                     this.lastSeq = state.last_seq;
+                    this.botDifficulty = state.bot_difficulty ?? this.botDifficulty;
                     this.buildTilesFromBoard();
                     this.$nextTick(() => this.placeElephant());
                     this.persistSnapshot();
@@ -687,8 +855,44 @@
     <div
         x-data="elephantBoard('elephant-board-config')"
         x-on:elephant-server-state.window="onServerState($event.detail)"
-        class="flex flex-col items-center space-y-5 py-4"
+        class="relative flex flex-col items-center space-y-5 py-4"
     >
+        {{-- BOT DIFFICULTY PICKER: bot games open here; the board unlocks
+             once a difficulty is chosen (stored via setBotDifficulty) --}}
+        <template x-if="needsDifficultyPick">
+            <div class="absolute inset-0 z-40 flex items-center justify-center bg-white/90 rounded-xl">
+                <div class="w-full max-w-[280px] space-y-3 text-center px-4">
+                    <div>
+                        <p class="font-bold text-lg text-slate-900">Choose your opponent</p>
+                        <p class="text-xs text-slate-500 mt-1">How hard should The Bot try?</p>
+                    </div>
+                    <button
+                        @click="chooseDifficulty('normal')"
+                        class="w-full rounded-xl text-white font-bold py-2.5 px-4 text-sm hover:scale-[1.02] transition-transform"
+                        style="background-color: #007393;"
+                    >
+                        Normal
+                        <span class="block text-[11px] font-medium opacity-80">The classic bot</span>
+                    </button>
+                    <button
+                        @click="chooseDifficulty('hard')"
+                        class="w-full rounded-xl text-white font-bold py-2.5 px-4 text-sm hover:scale-[1.02] transition-transform"
+                        style="background-color: #FF6857;"
+                    >
+                        Hard
+                        <span class="block text-[11px] font-medium opacity-80">Guards the elephant. Hunts forks.</span>
+                    </button>
+                    <button
+                        @click="chooseDifficulty('impossible')"
+                        class="w-full rounded-xl bg-slate-900 text-white font-bold py-2.5 px-4 text-sm hover:scale-[1.02] transition-transform"
+                    >
+                        Impossible
+                        <span class="block text-[11px] font-medium opacity-80">It reads your replies. Good luck.</span>
+                    </button>
+                </div>
+            </div>
+        </template>
+
         {{-- TARGET SHAPE --}}
         <div class="flex items-center gap-3">
             <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Target shape</span>
