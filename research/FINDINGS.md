@@ -81,6 +81,14 @@ opponent-check correctly prices defense above offense. What holds it back:
 6. First-mover advantage at current-bot level is enormous everywhere
    (67–83% in B1 self-play). "Loser goes first in the rematch" is doing more
    balancing work than it probably gets credit for.
+7. **On the surviving rotation (square + line), first-mover advantage is mild
+   and inverts with skill.** Large self-play mirrors after el/zig/pyramid were
+   retired: B3 at 1,000 games/shape — square 43.3% first-mover (367–481–152),
+   line 59.2% (533–368–99). B4 at 200 games/shape — square 34.0% (53–103–44),
+   line 41.0% (55–79–66). At shipped-bot skill the first mover dominates
+   (~67%); at strong play the *second* mover is favored, especially on square
+   — the counter-puncher gets to respond to committed structures. Neither
+   seat is close to a forced win on either shape.
 
 ## The el kill (concrete forced-looking line)
 
@@ -155,7 +163,9 @@ column triple into a row triple, walk the elephant into your own structure.
   styles — weaker bots lose for human-like reasons (they forget the elephant).
 - **Reconsider el in the bot shape pool** (and pyramid if it's ever added):
   first player appears to win by force at high skill. Square and line are the
-  shapes with real depth.
+  shapes with real depth. *(Update: John retired el, then zig and pyramid too —
+  the rotation is now square + line only, on the `elephant/remove-el-shape`
+  branch.)*
 - **Consider a threefold-repetition draw rule** to close the infinite-stall
   loophole.
 
