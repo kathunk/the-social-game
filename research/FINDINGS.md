@@ -159,6 +159,40 @@ column triple into a row triple, walk the elephant into your own structure.
 - **Consider a threefold-repetition draw rule** to close the infinite-stall
   loophole.
 
+## Repetition rule experiments (Aug 2026 follow-up)
+
+Proposal tested: repetition should be a LOSS for the repeater (not a chess-style
+draw). Two definitions were simulated (`experiment_repetition.py`):
+
+- **move3** — playing the same slide three times in a row loses.
+- **pos3** — recreating the same position (tiles + elephant + player to move)
+  for the third time loses.
+
+Results:
+
+1. **Both rules kill stalling stone dead.** Against a motivated staller,
+   games without a rule stall out 7–60% of the time; with either rule, 150/150
+   games end decisively on every shape tested. Repetition-as-loss also has the
+   right competitive shape: the fortress-holder is the one forced to give
+   ground, so the attacker gets rewarded and games resolve.
+2. **But move3 outlaws normal play.** In strong, healthy, decisive self-play
+   games (no stalling involved), a player slides the same lane three times in
+   a row in **51–92% of games** depending on shape — loading a column/row by
+   repeated pushes is a core legitimate pattern. Unaware shipped-tier bots
+   lose by move3 ambush in 59% of games.
+3. **pos3 only fires on actual repetition.** By definition it cannot trigger
+   unless the whole position has already occurred twice — i.e. genuine
+   stalling. Ambush rate on unaware players is roughly half of move3's, and
+   a UI warning ("this move would repeat the position a third time — you'd
+   lose") reduces it to zero while still forcing the staller to give ground.
+
+**Recommendation:** adopt repetition-as-loss, but define it on *positions*,
+not moves: "if your move recreates a board position that has already occurred
+twice in this game, you lose." Implementation is cheap — the events already
+snapshot the board every move, and the client's JS port can warn before the
+player commits. Player-facing framing can stay simple: *you can't repeat
+yourself forever; change something or lose.*
+
 ## Open questions / next steps
 
 - **Solve the game.** State = (board, elephant, turn) with hands derivable;

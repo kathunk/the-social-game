@@ -208,13 +208,28 @@ def hand(bits):
     return 8 - popcount(bits)
 
 
-def play_game(bot1, bot2, shape, first=1, rng=None, max_plies=200):
+def next_turn_after(np1, np2, mover):
+    """Who moves next after `mover` finishes a full turn on this board."""
+    opponent = 3 - mover
+    opp_bits = np1 if opponent == 1 else np2
+    return opponent if hand(opp_bits) > 0 else mover
+
+
+def play_game(bot1, bot2, shape, first=1, rng=None, max_plies=200,
+              repetition_rule=None):
     """Play a full game. bot(p1, p2, elephant, mover, masks, rng, history) ->
     ((entry, direction), elephant_dest). Returns a result dict.
 
     history maps (p1, p2, elephant, turn) -> times seen, so bots can avoid
-    (or exploit) repetition. The real game has no repetition rule; games
-    exceeding max_plies are reported as "capped" (a de facto draw).
+    (or exploit) repetition; history["_moves"] holds each player's slide
+    sequence. The real game has no repetition rule; games exceeding
+    max_plies are reported as "capped" (a de facto draw).
+
+    repetition_rule (experimental variants, loss for the offender):
+      "move3" — a player whose slide equals their own previous two slides
+                loses immediately.
+      "pos3"  — a player whose full turn recreates a position (tiles +
+                elephant + player to move) for the third time loses.
     """
     rng = rng or random.Random()
     masks = SHAPE_MASKS[shape]
@@ -222,7 +237,7 @@ def play_game(bot1, bot2, shape, first=1, rng=None, max_plies=200):
     elephant = 6
     turn = first
     plies = 0
-    history = {}
+    history = {"_moves": {1: [], 2: []}}
 
     while True:
         plies += 1
@@ -236,6 +251,14 @@ def play_game(bot1, bot2, shape, first=1, rng=None, max_plies=200):
         slide, dest = bot(p1, p2, elephant, turn, masks, rng, history)
 
         assert slide in valid_slides(p1 | p2, elephant), f"invalid slide {slide}"
+
+        my_moves = history["_moves"][turn]
+        if (repetition_rule == "move3" and len(my_moves) >= 2
+                and my_moves[-1] == my_moves[-2] == slide):
+            return {"result": "repetition", "winners": [3 - turn],
+                    "loser": turn, "plies": plies}
+        my_moves.append(slide)
+
         p1, p2, _pushed = execute_slide(p1, p2, slide, turn)
 
         v1 = is_victorious(p1, masks)
@@ -254,7 +277,9 @@ def play_game(bot1, bot2, shape, first=1, rng=None, max_plies=200):
         assert dest in valid_elephant_moves(elephant), f"invalid elephant {dest}"
         elephant = dest
 
-        opponent = 3 - turn
-        opp_bits = p1 if opponent == 1 else p2
-        if hand(opp_bits) > 0:
-            turn = opponent
+        nxt = next_turn_after(p1, p2, turn)
+        if repetition_rule == "pos3":
+            if history.get((p1, p2, elephant, nxt), 0) >= 2:
+                return {"result": "repetition", "winners": [3 - turn],
+                        "loser": turn, "plies": plies}
+        turn = nxt
