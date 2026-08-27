@@ -278,6 +278,35 @@ auto-elephant design buys speed, not integrity — it neither stops stalling
 nor preserves balance. (If shorter games are ever wanted, that's a separate
 lever: smaller hands or a move cap.)
 
+## Hand-size experiment (post-freeze)
+
+What if players had 6 or 10 tiles instead of 8? (Board stays 4x4 = 16 spaces.)
+B3 self-play, 600 games/shape (`experiment_hand_size.py`):
+
+| hand | shape | decisive | draws | stalled | 1st-mover | avg plies |
+|---|---|---|---|---|---|---|
+| 6 | square | 44% | 56% | 0 | 28.6% | 21 |
+| 6 | line | 43% | 57% | 0 | 17.0% | 24 |
+| 8 | square | 87% | 12% | 1% | 45.5% | 51 |
+| 8 | line | 91% | 8% | 2% | 56.9% | 47 |
+| 10 | square | 63% | 0 | **37%** | 52.2% | 128 |
+| 10 | line | 94% | 0 | 6% | 71.9% | 62 |
+
+- **6 tiles starves the game**: over half of games are dead draws (board
+  fills to 12 and dies), and the first mover is *punished* (17–29%) — commit
+  first, run out of gas, get counter-punched.
+- **10 tiles feeds the fortress**: the board-full draw is structurally
+  impossible (20 tiles > 16 spaces), but the draws convert into stalls —
+  37% of square games grind past 200 plies. More hand material = more
+  push-off ammunition = defensive cycles get easier, not harder. Line's
+  first-mover edge balloons to 72%.
+- **8 is the knee of the curve on every metric at once**: ~90% decisive,
+  near-balanced seats, mid-length games, negligible stalling. The original
+  design choice is empirically optimal among its neighbors.
+- Stalling-vs-hand-size: motivated stallers stall at every hand size
+  (38–52% of games at 8–10 tiles, slightly less at 6) — hand size tunes
+  stalling but never eliminates it; that took the repetition rule.
+
 ## Open questions / next steps
 
 - **Solve the game.** State = (board, elephant, turn) with hands derivable;

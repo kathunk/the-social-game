@@ -46,7 +46,7 @@ def evaluate_auto(p1, p2, e1, e2, mover, masks):
         if mine == 0:
             score -= PROGRESS[theirs]
 
-    if popcount(me) == 8:
+    if hand(me) == 0:
         score -= 600
     return score
 

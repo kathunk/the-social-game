@@ -83,7 +83,7 @@ def current_board_score(p1, p2, elephant, mover, masks):
     if has_check(opp, occ, elephant, masks):
         score -= 200
     score += adjacent_pairs(me) - adjacent_pairs(opp)
-    if popcount(me) == 8:
+    if hand(me) == 0:
         score -= 500
     return score
 
@@ -173,7 +173,7 @@ def evaluate(p1, p2, elephant, mover, masks):
         if mine == 0 and not (m & ele_bit):
             score -= PROGRESS[theirs]
 
-    if popcount(me) == 8:
+    if hand(me) == 0:
         score -= 600
     return score
 

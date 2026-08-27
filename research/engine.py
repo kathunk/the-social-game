@@ -204,8 +204,11 @@ def is_victorious(bits, masks):
     return False
 
 
+HAND_SIZE = 8  # tiles per player; experiments may override
+
+
 def hand(bits):
-    return 8 - popcount(bits)
+    return HAND_SIZE - popcount(bits)
 
 
 def next_turn_after(np1, np2, mover):
