@@ -17,13 +17,14 @@ namespace App\Challenges\ElephantInTheRoom\Support;
  */
 class BoardLogic
 {
-    // El is retired from the rotation: bot-vs-bot simulation showed a
-    // first-player forced win (a protected middle-row triple forks four
-    // completion squares). Its victory table remains for historical games.
-    public const SHAPES = ['square', 'line', 'zig', 'pyramid'];
+    // El, zig, and pyramid are retired from the rotation. Bot-vs-bot
+    // simulation showed el and pyramid are first-player forced wins (a
+    // protected middle triple forks four completion squares) and zig is
+    // fortress-prone (huge first-mover edge plus the highest stall rate).
+    // Square and line are the balanced, deep shapes. Retired victory
+    // tables remain so historical games still render.
+    public const SHAPES = ['square', 'line'];
 
-    // The bot's check heuristics are strongest for these shapes, so bot
-    // games only deal from this subset (same rule as the original game)
     public const BOT_SHAPES = ['square', 'line'];
 
     public const ADJACENT_SPACES = [
