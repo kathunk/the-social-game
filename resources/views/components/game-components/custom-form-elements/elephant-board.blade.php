@@ -396,7 +396,7 @@
                 get isMyTurn() { return this.matchStatus === 'active' && this.currentActorId === this.me; },
                 get repetitionWarning() {
                     const run = this.slideRuns[this.me];
-                    return this.myTilePhase && (run?.count ?? 0) >= 3;
+                    return this.myTilePhase && (run?.count ?? 0) >= 2;
                 },
                 get needsDifficultyPick() { return this.isBotGame && this.matchStatus === 'active' && !this.botDifficulty; },
                 get myTilePhase() { return this.isMyTurn && this.phase === 'tile' && !this.animating && !this.pendingAction && !this.botThinking && !this.needsDifficultyPick; },
@@ -407,11 +407,20 @@
                 get secondsLeft() { return Math.max(0, this.turnStartedAt + this.turnSeconds - this.timerNow); },
                 get timerFraction() { return Math.min(100, Math.max(0, (1 - this.secondsLeft / this.turnSeconds) * 100)); },
                 get timerUrgent() { return this.secondsLeft > 0 && this.secondsLeft <= 10; },
+                get timerExpired() {
+                    return this.timerNow >= this.turnStartedAt + this.turnSeconds + this.grace;
+                },
                 get canClaimForfeit() {
-                    return !this.isBotGame
-                        && this.matchStatus === 'active'
-                        && this.currentActorId !== this.me
-                        && this.timerNow >= this.turnStartedAt + this.turnSeconds + this.grace;
+                    if (this.matchStatus !== 'active' || this.needsDifficultyPick || !this.timerExpired) {
+                        return false;
+                    }
+                    // 2-player: the WAITING player claims the win. Bot game:
+                    // the human runs the only client, so they report their
+                    // own timeout (the bot wins) — the bot itself moves
+                    // promptly whenever a client is present
+                    return this.isBotGame
+                        ? this.currentActorId === this.me && !this.botThinking
+                        : this.currentActorId !== this.me;
                 },
                 colorFor(actorId) {
                     return actorId === this.actorOrder[0] ? '#FF6857' : '#007393';
@@ -462,6 +471,7 @@
                 chooseDifficulty(level) {
                     if (!this.needsDifficultyPick || this.pendingAction) return;
                     this.botDifficulty = level;
+                    this.turnStartedAt = Math.floor(Date.now() / 1000);
                     this.persistSnapshot();
                     this.sendAction('setBotDifficulty', { difficulty: level });
                 },
@@ -512,10 +522,10 @@
                         // "normal" keeps the original greedy bot with its
                         // random elephant; the research bots pick the slide
                         // and elephant destination as one move
-                        // A fourth identical slide in a row forfeits — every
+                        // A third identical slide in a row forfeits — every
                         // bot is strictly forbidden from ever making one
                         const botRun = this.slideRuns['bot'];
-                        const banned = (botRun?.count ?? 0) >= 3
+                        const banned = (botRun?.count ?? 0) >= 2
                             ? { space: botRun.entry_space, direction: botRun.direction }
                             : null;
 
@@ -620,7 +630,7 @@
                     }, 50);
 
                     // Trailing identical-slide run for this actor (the same
-                    // slide four times in a row forfeits — mirrors TileSlid)
+                    // slide three times in a row forfeits — mirrors TileSlid)
                     const prevRun = this.slideRuns[actorId];
                     this.slideRuns[actorId] = {
                         entry_space: space,
@@ -653,7 +663,7 @@
                         this.matchStatus = 'complete';
                         this.victorIds = victors;
                         this.winningSpaces = winning;
-                    } else if ((this.slideRuns[actorId]?.count ?? 0) > 3) {
+                    } else if ((this.slideRuns[actorId]?.count ?? 0) > 2) {
                         this.matchStatus = 'complete';
                         this.victorIds = [this.actorOrder.find((a) => a !== actorId)];
                     } else if (this.actorOrder.every((a) => (this.hands[a] ?? 0) === 0)) {
@@ -1082,13 +1092,13 @@
             </div>
         </div>
 
-        {{-- REPETITION WARNING: three identical slides in a row — a fourth
+        {{-- REPETITION WARNING: two identical slides in a row — a third
              forfeits the match (mirrors the TileSlid rule) --}}
         <div
             x-show="repetitionWarning"
             class="w-full max-w-[300px] rounded-lg bg-amber-100 border border-amber-300 text-amber-800 px-3 py-2 text-xs font-medium text-center"
         >
-            You've made the same slide 3 times in a row — making it a 4th time forfeits the game.
+            You've made the same slide twice in a row — making it a 3rd time forfeits the game.
         </div>
 
         {{-- STATUS LINE --}}
@@ -1102,8 +1112,10 @@
             </span>
         </div>
 
-        {{-- TURN TIMER (2-player games only) — expiry auto-ends the game --}}
-        <template x-if="!isBotGame && matchStatus === 'active'">
+        {{-- TURN TIMER — expiry auto-ends the game (in bot games your own
+             timeout forfeits to the bot; the clock waits for the
+             difficulty pick) --}}
+        <template x-if="matchStatus === 'active' && !needsDifficultyPick">
             <div class="w-[240px] space-y-2">
                 <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div

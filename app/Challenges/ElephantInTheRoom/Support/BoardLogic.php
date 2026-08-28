@@ -92,7 +92,7 @@ class BoardLogic
     // A player may make the same slide (entry space + direction) at most
     // this many times in a row; the next identical slide forfeits the match.
     // Keeps fortress stalling impossible to sustain on one lane.
-    public const MAX_SLIDE_REPEATS = 3;
+    public const MAX_SLIDE_REPEATS = 2;
 
     /**
      * Each actor's trailing run of identical tile slides, computed from the

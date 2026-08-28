@@ -92,7 +92,7 @@ class TileSlid extends Event
             $data['victor_ids'] = $victors;
             $data['winning_spaces'] = $winning_spaces;
         } elseif (($run['count'] ?? 0) > BoardLogic::MAX_SLIDE_REPEATS) {
-            // The same slide four times in a row forfeits the match to the
+            // The same slide three times in a row forfeits the match to the
             // opponent (a slide that completes a shape wins first, above)
             $other = collect($data['actor_order'])->first(fn ($actor) => $actor !== $this->actor_id);
 

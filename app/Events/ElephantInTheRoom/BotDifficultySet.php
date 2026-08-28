@@ -17,6 +17,10 @@ class BotDifficultySet extends Event
 
     public string $difficulty;
 
+    // Supplied by the caller so event replay is deterministic; the turn
+    // clock starts fresh once the human has picked their opponent
+    public int $set_at;
+
     public function validate()
     {
         $data = $this->state(ChallengeState::class)->challenge_data;
@@ -41,6 +45,7 @@ class BotDifficultySet extends Event
         $data = $challenge->challenge_data;
 
         $data['bot_difficulty'] = $this->difficulty;
+        $data['turn_started_at'] = $this->set_at;
 
         $challenge->challenge_data = $data;
     }

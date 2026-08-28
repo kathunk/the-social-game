@@ -121,6 +121,7 @@ it('lets the human pick a difficulty before the first move and shares it with th
     $data = $challenge->refresh()->challenge_data;
 
     expect($data['bot_difficulty'])->toBe('impossible');
+    expect($data['turn_started_at'])->toBeGreaterThanOrEqual(now()->timestamp - 5);
 
     $handler = ElephantMatch::fromModel($challenge);
     expect($handler->stateSnapshot($data)['bot_difficulty'])->toBe('impossible');
@@ -689,7 +690,7 @@ function elephantSeedTileMoves(Challenge $challenge, array $entries): Challenge
     });
 }
 
-it('forfeits the match to the opponent on a fourth identical slide in a row', function () {
+it('forfeits the match to the opponent on a third identical slide in a row', function () {
     ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this);
     $p1 = (string) $players[0]->id;
     $p2 = (string) $players[1]->id;
@@ -699,13 +700,12 @@ it('forfeits the match to the opponent on a fourth identical slide in a row', fu
     $challenge = elephantSeedTileMoves($challenge, [
         [$p1, 1, 'down'], [$p2, 16, 'up'],
         [$p1, 1, 'down'], [$p2, 16, 'up'],
-        [$p1, 1, 'down'], [$p2, 16, 'up'],
     ]);
 
     elephantCallAction($this, $players[0], $challenge, 'slideTile', [
         'entry_space' => 1,
         'direction' => 'down',
-        'client_move_id' => 'fatal-fourth',
+        'client_move_id' => 'fatal-third',
     ])->assertHasNoErrors();
 
     $data = $challenge->refresh()->challenge_data;
@@ -722,13 +722,13 @@ it('does not forfeit when the player broke their own streak', function () {
     $p1 = (string) $players[0]->id;
 
     $challenge = elephantSeedTileMoves($challenge, [
-        [$p1, 1, 'down'], [$p1, 1, 'down'], [$p1, 4, 'down'],
+        [$p1, 1, 'down'], [$p1, 4, 'down'], [$p1, 1, 'down'],
     ]);
 
     elephantCallAction($this, $players[0], $challenge, 'slideTile', [
         'entry_space' => 1,
         'direction' => 'down',
-        'client_move_id' => 'fresh-run',
+        'client_move_id' => 'second-of-run',
     ])->assertHasNoErrors();
 
     $data = $challenge->refresh()->challenge_data;
@@ -737,7 +737,7 @@ it('does not forfeit when the player broke their own streak', function () {
     expect($data)->not->toHaveKey('repetition_loss_by');
 });
 
-it('lets a fourth identical slide win when it completes the shape', function () {
+it('lets a third identical slide win when it completes the shape', function () {
     ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this);
     $p1 = (string) $players[0]->id;
 
@@ -751,13 +751,13 @@ it('lets a fourth identical slide win when it completes the shape', function () 
         $state->challenge_data = $data;
     });
     $challenge = elephantSeedTileMoves($challenge, [
-        [$p1, 1, 'down'], [$p1, 1, 'down'], [$p1, 1, 'down'],
+        [$p1, 1, 'down'], [$p1, 1, 'down'],
     ]);
 
     elephantCallAction($this, $players[0], $challenge, 'slideTile', [
         'entry_space' => 1,
         'direction' => 'down',
-        'client_move_id' => 'winning-fourth',
+        'client_move_id' => 'winning-third',
     ])->assertHasNoErrors();
 
     $data = $challenge->refresh()->challenge_data;
@@ -783,6 +783,62 @@ it('exposes trailing slide runs in the state snapshot', function () {
         'direction' => 'down',
         'count' => 2,
     ]);
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// Turn timer in bot games
+// ─────────────────────────────────────────────────────────────────────────
+
+it('forfeits a bot game to the bot when the human times out', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    $challenge = elephantMutateState($challenge, function ($state) {
+        $data = $state->challenge_data;
+        $data['bot_difficulty'] = 'normal';
+        $data['turn_started_at'] = now()->timestamp - 120;
+        $state->challenge_data = $data;
+    });
+
+    elephantCallAction($this, $players[0], $challenge, 'claimForfeit')
+        ->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['match_status'])->toBe('complete');
+    expect($data['victor_ids'])->toBe([ElephantMatch::BOT_ID]);
+});
+
+it('rejects a bot-game forfeit claim while the timer is still running', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    $challenge = elephantMutateState($challenge, function ($state) {
+        $data = $state->challenge_data;
+        $data['bot_difficulty'] = 'normal';
+        $data['turn_started_at'] = now()->timestamp;
+        $state->challenge_data = $data;
+    });
+
+    elephantCallAction($this, $players[0], $challenge, 'claimForfeit')
+        ->assertHasErrors('action_error');
+
+    expect($challenge->refresh()->challenge_data['match_status'])->toBe('active');
+});
+
+it('rejects claiming a forfeit against the bot on its turn', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    $challenge = elephantMutateState($challenge, function ($state) {
+        $data = $state->challenge_data;
+        $data['bot_difficulty'] = 'normal';
+        $data['current_actor_id'] = ElephantMatch::BOT_ID;
+        $data['turn_started_at'] = now()->timestamp - 120;
+        $state->challenge_data = $data;
+    });
+
+    elephantCallAction($this, $players[0], $challenge, 'claimForfeit')
+        ->assertHasErrors('action_error');
+
+    expect($challenge->refresh()->challenge_data['match_status'])->toBe('active');
 });
 
 // ─────────────────────────────────────────────────────────────────────────

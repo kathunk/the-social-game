@@ -65,8 +65,8 @@ class ElephantFormElements implements FormElementProvider
 
         $result_text = match (true) {
             $match_data === [] => 'Game over.',
-            $repetition_loser === $me => 'You made the same slide four times in a row — forfeit.',
-            $repetition_loser !== null => ($names[$repetition_loser] ?? 'Your opponent').' made the same slide four times in a row — you win!',
+            $repetition_loser === $me => 'You made the same slide three times in a row — forfeit.',
+            $repetition_loser !== null => ($names[$repetition_loser] ?? 'Your opponent').' made the same slide three times in a row — you win!',
             $victors === [] => "It's a draw — nobody made their shape.",
             in_array($me, $victors, true) && count($victors) > 1 => "It's a draw — you both made your shape!",
             in_array($me, $victors, true) => 'You won! 🎉',

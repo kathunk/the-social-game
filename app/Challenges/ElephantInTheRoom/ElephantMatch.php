@@ -139,6 +139,7 @@ class ElephantMatch extends BaseChallengeClass
                 challenge_id: $this->challenge->id,
                 actor_id: (string) $player->id,
                 difficulty: (string) ($params['difficulty'] ?? ''),
+                set_at: now()->timestamp,
             );
 
             Verbs::commit();

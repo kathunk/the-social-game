@@ -29,10 +29,21 @@ class MatchForfeited extends Event
 
         $this->assert(($data['match_status'] ?? null) === 'active', 'The match is over.');
         $this->assert(in_array($this->claimant_id, $data['actor_order'] ?? [], true), 'Unknown player.');
-        $this->assert(
-            ($data['current_actor_id'] ?? null) !== $this->claimant_id,
-            'You cannot claim a forfeit on your own turn.'
-        );
+
+        if ($data['is_bot_game'] ?? false) {
+            // The human runs the only client, so the only claimable timeout
+            // is their own — the bot always moves promptly when a client is
+            // present, so it can never legitimately be overdue
+            $this->assert(
+                ($data['current_actor_id'] ?? null) === $this->claimant_id,
+                'The Bot cannot time out.'
+            );
+        } else {
+            $this->assert(
+                ($data['current_actor_id'] ?? null) !== $this->claimant_id,
+                'You cannot claim a forfeit on your own turn.'
+            );
+        }
         $this->assert(
             $this->forfeited_at >= ($data['turn_started_at'] ?? 0) + ElephantMatch::TURN_SECONDS + ElephantMatch::FORFEIT_GRACE_SECONDS,
             'The turn timer has not expired yet.'
@@ -43,8 +54,13 @@ class MatchForfeited extends Event
     {
         $data = $challenge->challenge_data;
 
+        // The victor is whoever is NOT on the clock: the waiting player in a
+        // 2-player game (the claimant), the bot when the human times out
+        $victor = collect($data['actor_order'])
+            ->first(fn ($actor) => $actor !== ($data['current_actor_id'] ?? null));
+
         $data['match_status'] = 'complete';
-        $data['victor_ids'] = [$this->claimant_id];
+        $data['victor_ids'] = [$victor];
 
         $data['last_seq'] = ($data['last_seq'] ?? 0) + 1;
         $data['moves'][] = [
