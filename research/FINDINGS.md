@@ -307,6 +307,26 @@ B3 self-play, 600 games/shape (`experiment_hand_size.py`):
   (38–52% of games at 8–10 tiles, slightly less at 6) — hand size tunes
   stalling but never eliminates it; that took the repetition rule.
 
+## B5 depth-4 probe (post-freeze)
+
+`make_deep_bot(4)` in bots.py: alpha-beta over full turns at depth 4 (twice
+B4's horizon), children ordered by a cheap positional eval and pruned to
+top-K per node (~0.4s/move in Python). Nine games vs B4, alternating seats:
+
+- **Overall 2–2–5** — depth 4 did NOT dominate the way B4 dominated B3.
+- Split by shape: B5 won square 2–0–4 (it broke one fortress B4 would have
+  drawn); **B4 won line 2–0–1** — B5's cheap ordering heuristic (progress
+  only, no threat counting) prunes away tactically critical moves before
+  the deep search ever sees them, and line is the tactical shape.
+- Lesson: raw depth is not free strength — naive pruning gives it back.
+  A serious B5 needs threat-aware move ordering (or full-eval ordering with
+  iterative deepening), i.e. actual engine engineering, not one parameter.
+- Jackpot relevance: the "bring a deeper engine, beat impossible" attack is
+  not turnkey. A lazy depth bump roughly ties B4; beating it convincingly
+  requires competent engine work. The bar for threat #4 is real but higher
+  than assumed. (Series ran under pre-repetition-rule conditions; 5/9 games
+  were 200-ply stall draws that today's forfeit rule would force to resolve.)
+
 ## Open questions / next steps
 
 - **Solve the game.** State = (board, elephant, turn) with hands derivable;

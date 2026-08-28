@@ -295,3 +295,103 @@ BOTS = {
     "B3-tactician": tactician_bot,
     "B4-lookahead": lookahead_bot,
 }
+
+
+# ---------------------------------------------------------------------------
+# B5 — depth-N alpha-beta over full turns (a turn = one joint slide+elephant
+# move). B4 is effectively depth 2; make_deep_bot(4) looks twice as far.
+# Children are ordered by a cheap positional eval (no threat counting) and
+# pruned to TOP-K per node; leaves use the full evaluate().
+
+def _cheap_eval(p1, p2, elephant, mover, masks):
+    me, opp = _sides(p1, p2, mover)
+    score = 0
+    ele_bit = bit(elephant)
+    for m in masks:
+        mine = popcount(me & m)
+        theirs = popcount(opp & m)
+        if theirs == 0 and not (m & ele_bit):
+            score += PROGRESS[mine]
+        if mine == 0 and not (m & ele_bit):
+            score -= PROGRESS[theirs]
+    if hand(me) == 0:
+        score -= 600
+    return score
+
+
+def _deep_search(p1, p2, elephant, turn, root, depth, alpha, beta, masks, top_k):
+    """Value from `root`'s perspective with `turn` to move. depth counts
+    remaining turns to expand; leaves score with the full evaluate()."""
+    from engine import next_turn_after
+
+    scored = []
+    for slide, dest, np1, np2, immediate in _joint_moves(p1, p2, elephant, turn, masks):
+        if immediate is not None:
+            order = 10**12 if immediate > 0 else (-(10**12) if immediate < 0 else 0)
+        else:
+            order = _cheap_eval(np1, np2, dest, turn, masks)
+        scored.append((order, slide, dest, np1, np2, immediate))
+    scored.sort(key=lambda t: t[0], reverse=True)
+
+    maximizing = turn == root
+    best = None
+    for _, slide, dest, np1, np2, immediate in scored[: top_k.get(depth, 6)]:
+        if immediate is not None:
+            v = immediate + depth * 1000 if immediate > 0 else (
+                immediate - depth * 1000 if immediate < 0 else 0)
+            if turn != root:
+                v = -v
+        elif hand(np1) == 0 and hand(np2) == 0:
+            v = 0
+        elif depth <= 1:
+            ev = evaluate(np1, np2, dest, turn, masks)
+            v = ev if turn == root else -ev
+        else:
+            nxt = next_turn_after(np1, np2, turn)
+            v = _deep_search(np1, np2, dest, nxt, root, depth - 1,
+                             alpha, beta, masks, top_k)
+
+        if maximizing:
+            if best is None or v > best:
+                best = v
+            alpha = max(alpha, v)
+        else:
+            if best is None or v < best:
+                best = v
+            beta = min(beta, v)
+        if beta <= alpha:
+            break
+    return best if best is not None else 0
+
+
+def make_deep_bot(depth=4, top_k=None):
+    """B5 factory. depth = full turns of lookahead (B4 ~= 2)."""
+    from engine import next_turn_after
+
+    top_k = top_k or {4: 12, 3: 8, 2: 6, 1: 6}
+
+    def deep_bot(p1, p2, elephant, mover, masks, rng, history=None):
+        moves = list(_joint_moves(p1, p2, elephant, mover, masks))
+        rng.shuffle(moves)
+
+        best, best_score = None, None
+        alpha, beta = float("-inf"), float("inf")
+        for slide, dest, np1, np2, immediate in moves:
+            if immediate is not None:
+                score = immediate
+            elif hand(np1) == 0 and hand(np2) == 0:
+                score = 0
+            else:
+                nxt = next_turn_after(np1, np2, mover)
+                score = _deep_search(np1, np2, dest, nxt, mover, depth - 1,
+                                     alpha, beta, masks, top_k)
+                score -= _repetition_penalty(history, np1, np2, dest, mover)
+            if best_score is None or score > best_score:
+                best, best_score = (slide, dest), score
+            alpha = max(alpha, best_score)
+        return best
+
+    return deep_bot
+
+
+BOTS["B5-deep4"] = make_deep_bot(4)
