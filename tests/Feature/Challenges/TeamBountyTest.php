@@ -110,6 +110,13 @@ it('only awards points when a team recruits their bounty', function () {
             ->whereNotIn('id', $bounty_player_ids)
             ->first();
 
+        // The random bounty assignment can leave no eligible non-bounty
+        // player for this team — nothing to assert against, same as the
+        // bounty-player guard above
+        if (! $non_bounty_player) {
+            continue;
+        }
+
         swapTeam($non_bounty_player, $team->id, TeamBounty::key());
         expect($non_bounty_player->refresh()->team_id)->toBe($assigned_team_id);
 
