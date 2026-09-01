@@ -690,6 +690,11 @@
                     >
                         Impossible
                         <span class="block text-[11px] font-medium opacity-80">It reads your replies. Good luck.</span>
+                        @if ($element['reward'] ?? null)
+                            <span class="block text-[11px] font-bold text-amber-300 mt-0.5">
+                                🎁 Beat it and earn {{ $element['reward']['offer'] }}
+                            </span>
+                        @endif
                     </button>
                 </div>
             </div>

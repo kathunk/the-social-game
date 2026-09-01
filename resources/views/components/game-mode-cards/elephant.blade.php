@@ -1,14 +1,18 @@
-@props(['modes'])
+{{-- publicCta: renders signup/login links instead of the wire:click game
+     starters, so the card can sit on the guest-facing /elephant page (which
+     has no Livewire context and no modes to start) --}}
+@props(['modes' => null, 'publicCta' => false])
 
 @php
     // The elephant family has two modes: head-to-head (max 2 players) and
     // practice vs the bot (max 1). Either may be missing (e.g. mid-rollout) —
     // render whichever buttons we have modes for.
+    $modes = $modes ?? collect();
     $versus = $modes->first(fn ($m) => $m->max_players !== 1);
     $bot = $modes->first(fn ($m) => $m->max_players === 1);
     $any = $versus ?? $bot;
 
-    if (! $any) {
+    if (! $any && ! $publicCta) {
         return;
     }
 @endphp
@@ -198,6 +202,25 @@
         </div>
 
         <div class="flex flex-col sm:flex-row gap-2">
+            @if ($publicCta)
+                @auth
+                    <a
+                        href="{{ route('dashboard') }}"
+                        class="flex-1 text-center rounded-xl text-white font-bold py-2.5 px-4 text-sm hover:scale-[1.02] transition-transform"
+                        style="background-color: #007393;"
+                    >Play now</a>
+                @else
+                    <a
+                        href="{{ route('register') }}"
+                        class="flex-1 text-center rounded-xl text-white font-bold py-2.5 px-4 text-sm hover:scale-[1.02] transition-transform"
+                        style="background-color: #FF6857;"
+                    >Sign up to play</a>
+                    <a
+                        href="{{ route('login') }}"
+                        class="flex-1 text-center rounded-xl text-white font-bold py-2.5 px-4 text-sm hover:scale-[1.02] transition-transform bg-white/10"
+                    >Log in</a>
+                @endauth
+            @endif
             @if ($versus)
                 <button
                     wire:click="startGameFromMode('{{ $versus->id }}')"

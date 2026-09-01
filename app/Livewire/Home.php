@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Challenges\ElephantInTheRoom\Support\ImpossibleBotReward;
 use App\Events\GameCanceled;
 use App\Events\PlayerAbandonedGame;
 use App\Events\UserSwitchedCurrentGame;
@@ -18,6 +19,41 @@ class Home extends Component
     public function user()
     {
         return auth()->user();
+    }
+
+    /**
+     * The impossible-bot bounty promo modal: the offer plus the bot's
+     * record, with a CTA straight into a bot game. Hidden once this user
+     * has earned their code, or when the code pool is empty.
+     */
+    #[Computed]
+    public function elephantBounty(): ?array
+    {
+        if (! ImpossibleBotReward::isPromoActiveFor($this->user)) {
+            return null;
+        }
+
+        // The promo needs a public bot mode to send players into
+        $bot_mode = GameMode::where('is_public', true)->get()->first(function ($mode) {
+            $normalized = strtolower(preg_replace('/[^a-z]/i', '', $mode->name));
+
+            return str_contains($normalized, 'elephant') && $mode->max_players === 1;
+        });
+
+        if (! $bot_mode) {
+            return null;
+        }
+
+        $record = ImpossibleBotReward::botRecord();
+
+        return [
+            'offer' => ImpossibleBotReward::OFFER,
+            'offer_url' => ImpossibleBotReward::OFFER_URL,
+            'record' => $record,
+            'bot_mode_id' => (string) $bot_mode->id,
+            // Keyed by date: dismissing hides it for the rest of the day
+            'dismiss_key' => 'elephant-bounty-dismissed:'.now()->toDateString(),
+        ];
     }
 
     #[Computed]

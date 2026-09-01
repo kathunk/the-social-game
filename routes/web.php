@@ -6,6 +6,7 @@ use App\Http\Controllers\SecretCodeRedirectController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\MissingGameHandler;
 use App\Livewire\CreateGame;
+use App\Livewire\ElephantContestPage;
 use App\Livewire\GameComponentListPage;
 use App\Livewire\GameDashboard;
 use App\Livewire\GameModesListPage;
@@ -26,6 +27,9 @@ Route::get('/', function () {
 
 Route::get('/laracon', [LaraconRedirectController::class, 'handle'])
     ->name('laracon.shortcut');
+
+// Public landing page for the impossible-bot sweepstakes
+Route::get('/elephant', ElephantContestPage::class)->name('elephant.contest');
 
 Route::missing(new MissingGameHandler)->group(function () {
     Route::get('/games/{game}/pre-game-lobby', PreGameLobby::class)->name('pre-game-lobby');

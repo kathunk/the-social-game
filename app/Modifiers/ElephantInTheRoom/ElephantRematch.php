@@ -44,12 +44,15 @@ class ElephantRematch extends BaseModifierClass
 
     public function postGameComponent(Player $player): array
     {
+        $match = $this->endedMatch();
+
         return $this->form()
             ->elephantRematch(
                 player: $player,
                 modifier_data: $this->modifier->modifier_data,
-                match_data: $this->endedMatch()?->challenge_data ?? [],
+                match_data: $match?->challenge_data ?? [],
                 players: $this->modifier->game->players,
+                match_challenge_id: $match?->id,
             )
             ->poll(3000)
             ->build();
