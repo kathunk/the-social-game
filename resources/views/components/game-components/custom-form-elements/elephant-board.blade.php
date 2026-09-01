@@ -10,9 +10,10 @@
     </style>
     <script>
         // ─── Pure rules engine — a 1:1 mirror of Support/BoardLogic.php. ───
-        // Used for optimistic animation of every move and as the bot's brain
-        // in single-player games. The server independently validates every
-        // move via Verbs events, so a divergence here can't corrupt a match.
+        // Used for optimistic animation of every move. The bot's brain lives
+        // SERVER-side (Support/BotLogic.php) — this engine holds no bot
+        // logic, and the server independently validates every move via Verbs
+        // events, so a divergence here can't corrupt a match.
         window.ElephantEngine = {
             SLIDING_POSITIONS: {
                 1: { down: [1, 5, 9, 13], right: [1, 2, 3, 4] },
@@ -134,211 +135,6 @@
                 return this.winningSpaces(board, actorId, shape).length > 0;
             },
 
-            // "Check" = one tile away from completing the shape: any victory
-            // set with exactly 3 own tiles and the 4th space empty
-            hasCheck(board, actorId, shape) {
-                return this.VICTORIES[shape].some((set) => {
-                    let own = 0, empty = 0;
-                    for (const s of set) {
-                        if (board[s] === actorId) own++;
-                        else if (!board[s]) empty++;
-                    }
-                    return own === 3 && empty === 1;
-                });
-            },
-
-            adjacencyCount(board, actorId) {
-                let n = 0;
-                for (let s = 1; s <= 16; s++) {
-                    if (board[s] !== actorId) continue;
-                    for (const a of this.ADJACENT[s]) {
-                        if (board[a] === actorId) n++;
-                    }
-                }
-                return n;
-            },
-
-            // Bot scoring, ported from the original BotLogic (hard difficulty:
-            // always take the top-scoring slide; ties broken by the shuffle)
-            scoreBoard(board, botId, humanId, shape) {
-                let score = this.adjacencyCount(board, botId) - this.adjacencyCount(board, humanId);
-                if (this.hasCheck(board, botId, shape)) score += 100;
-                if (this.hasCheck(board, humanId, shape)) score -= 200;
-                if (this.isVictorious(board, humanId, shape)) score -= 1000;
-                if (this.isVictorious(board, botId, shape)) score += 1000000000;
-                let botTiles = 0;
-                for (let s = 1; s <= 16; s++) if (board[s] === botId) botTiles++;
-                if (botTiles === 8) score -= 500;
-                return score;
-            },
-
-            sameSlide(a, b) {
-                return !!a && !!b && a.space === b.space && a.direction === b.direction;
-            },
-
-            chooseBotSlide(board, elephant, botId, humanId, shape, banned = null) {
-                const slides = this.shuffle(this.validSlides(board, elephant))
-                    .filter((s) => !this.sameSlide(s, banned));
-                let best = null, bestScore = -Infinity;
-                for (const slide of slides) {
-                    const hb = this.applySlide(board, slide.space, slide.direction, botId).board;
-                    const score = this.scoreBoard(hb, botId, humanId, shape);
-                    if (score > bestScore) { bestScore = score; best = slide; }
-                }
-                return best;
-            },
-
-            chooseBotElephantMove(elephant) {
-                const moves = this.validElephantMoves(elephant);
-                return moves[Math.floor(Math.random() * moves.length)];
-            },
-
-            // ─── Stronger bots (ported from bot-vs-bot research; see
-            //     research/FINDINGS.md on the elephant-bot-research branch).
-            //     A move is a (slide, elephant destination) PAIR scored by
-            //     the position it hands the opponent: never allow them an
-            //     immediate winning slide, count standing threats (a fork of
-            //     two wins games), grow shapes the opponent hasn't touched. ───
-
-            PROGRESS: [0, 1, 4, 12, 0],
-
-            countTiles(board, actorId) {
-                let n = 0;
-                for (let s = 1; s <= 16; s++) if (board[s] === actorId) n++;
-                return n;
-            },
-
-            winningSlides(board, elephant, actorId, shape) {
-                const wins = [];
-                for (const slide of this.validSlides(board, elephant)) {
-                    const hb = this.applySlide(board, slide.space, slide.direction, actorId).board;
-                    if (this.isVictorious(hb, actorId, shape)) wins.push(slide);
-                }
-                return wins;
-            },
-
-            // Static score of a completed turn from meId's perspective — the
-            // opponent acts next
-            evaluate(board, elephant, meId, oppId, shape) {
-                let score = 0;
-
-                score -= 120000 * this.winningSlides(board, elephant, oppId, shape).length;
-
-                const myThreats = this.winningSlides(board, elephant, meId, shape).length;
-                score += 400 * myThreats;
-                if (myThreats >= 2) score += 2000;
-
-                for (const set of this.VICTORIES[shape]) {
-                    let mine = 0, theirs = 0, hasElephant = false;
-                    for (const s of set) {
-                        if (board[s] === meId) mine++;
-                        else if (board[s] === oppId) theirs++;
-                        if (s === elephant) hasElephant = true;
-                    }
-                    if (!hasElephant) {
-                        if (theirs === 0) score += this.PROGRESS[mine];
-                        if (mine === 0) score -= this.PROGRESS[theirs];
-                    }
-                }
-
-                if (this.countTiles(board, meId) === 8) score -= 600;
-                return score;
-            },
-
-            // Every (slide, elephant destination) pair. A game-ending slide
-            // gets an immediate score and no elephant options — the match is
-            // over before the elephant phase
-            jointMoves(board, elephant, meId, oppId, shape, banned = null) {
-                const moves = [];
-                for (const slide of this.validSlides(board, elephant)) {
-                    if (this.sameSlide(slide, banned)) continue;
-                    const hb = this.applySlide(board, slide.space, slide.direction, meId).board;
-                    const myWin = this.isVictorious(hb, meId, shape);
-                    const theirWin = this.isVictorious(hb, oppId, shape);
-                    if (myWin || theirWin) {
-                        const immediate = myWin && theirWin ? 0 : (myWin ? 1e9 : -1e9);
-                        moves.push({ slide, dest: elephant, board: hb, immediate });
-                        continue;
-                    }
-                    for (const dest of this.validElephantMoves(elephant)) {
-                        moves.push({ slide, dest, board: hb, immediate: null });
-                    }
-                }
-                return moves;
-            },
-
-            positionKey(board, dest) {
-                let key = '';
-                for (let s = 1; s <= 16; s++) key += (board[s] ?? '.') + ',';
-                return key + dest;
-            },
-
-            // "Hard": 1-ply — hand the opponent the worst static position.
-            // history maps positionKey -> times the bot has produced it, so
-            // it varies rather than shuffling the same tiles forever
-            chooseTacticianMove(board, elephant, meId, oppId, shape, history, banned = null) {
-                const moves = this.shuffle(this.jointMoves(board, elephant, meId, oppId, shape, banned));
-                let best = null, bestScore = -Infinity;
-                for (const move of moves) {
-                    let score = move.immediate ?? this.evaluate(move.board, move.dest, meId, oppId, shape);
-                    if (move.immediate === null && history) {
-                        score -= 800 * (history[this.positionKey(move.board, move.dest)] ?? 0);
-                    }
-                    if (score > bestScore) { bestScore = score; best = move; }
-                }
-                return best;
-            },
-
-            bestReplyScore(board, elephant, meId, oppId, shape) {
-                let best = -Infinity;
-                for (const move of this.jointMoves(board, elephant, meId, oppId, shape)) {
-                    const score = move.immediate ?? this.evaluate(move.board, move.dest, meId, oppId, shape);
-                    if (score > best) best = score;
-                    if (best >= 1e9) break;
-                }
-                return best === -Infinity ? 0 : best;
-            },
-
-            // "Impossible": 2-ply — judge each top candidate by the
-            // opponent's best reply to it
-            chooseLookaheadMove(board, elephant, meId, oppId, shape, history, banned = null) {
-                const moves = this.shuffle(this.jointMoves(board, elephant, meId, oppId, shape, banned));
-                const scored = moves.map((move) => ({
-                    move,
-                    score: move.immediate ?? this.evaluate(move.board, move.dest, meId, oppId, shape),
-                }));
-                scored.sort((a, b) => b.score - a.score);
-
-                if (scored[0].score >= 1e9) return scored[0].move;
-
-                let best = null, bestTotal = -Infinity;
-                for (const { move, score } of scored.slice(0, 8)) {
-                    let total;
-                    if (move.immediate !== null) {
-                        total = score;
-                    } else if (this.countTiles(move.board, oppId) === 8) {
-                        // Opponent's hand is empty — they get skipped, so
-                        // there is no reply to search
-                        total = score;
-                    } else {
-                        total = -this.bestReplyScore(move.board, move.dest, oppId, meId, shape) + 0.001 * score;
-                    }
-                    if (move.immediate === null && history) {
-                        total -= 800 * (history[this.positionKey(move.board, move.dest)] ?? 0);
-                    }
-                    if (total > bestTotal) { bestTotal = total; best = move; }
-                }
-                return best;
-            },
-
-            shuffle(arr) {
-                const a = [...arr];
-                for (let i = a.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [a[i], a[j]] = [a[j], a[i]];
-                }
-                return a;
-            },
         };
 
         window.elephantBoard = function (configElId) {
@@ -358,7 +154,7 @@
                 // Meta
                 me: cfg.me, names: cfg.names, gameId: cfg.game_id,
                 shape: cfg.state.victory_shape, isBotGame: cfg.state.is_bot_game,
-                botDifficulty: cfg.state.bot_difficulty ?? null, botHistory: {},
+                botDifficulty: cfg.state.bot_difficulty ?? null,
                 slideRuns: cfg.state.slide_runs ?? {},
                 turnSeconds: cfg.turn_seconds, grace: cfg.forfeit_grace_seconds,
 
@@ -510,7 +306,11 @@
                         });
                 },
 
-                // ── The client-side bot (single-player games only) ─────────
+                // ── Bot turn trigger (single-player games only) ────────────
+                // The bot's brain lives on the server (Support/BotLogic.php).
+                // This just tells the server the bot is up — no move data is
+                // sent — then pulls a fresh render so the reconcile path
+                // animates whatever the server chose.
                 maybeRunBot() {
                     if (!this.isBotGame || this.matchStatus !== 'active') return;
                     if (this.currentActorId !== 'bot' || this.botThinking || this.pendingAction) return;
@@ -519,61 +319,17 @@
                     this.botThinking = true;
 
                     setTimeout(() => {
-                        // "normal" keeps the original greedy bot with its
-                        // random elephant; the research bots pick the slide
-                        // and elephant destination as one move
-                        // A third identical slide in a row forfeits — every
-                        // bot is strictly forbidden from ever making one
-                        const botRun = this.slideRuns['bot'];
-                        const banned = (botRun?.count ?? 0) >= 2
-                            ? { space: botRun.entry_space, direction: botRun.direction }
-                            : null;
-
-                        let slide = null, plannedElephantTo = null;
-                        if (this.botDifficulty === 'hard' || this.botDifficulty === 'impossible') {
-                            const chooser = this.botDifficulty === 'impossible'
-                                ? 'chooseLookaheadMove'
-                                : 'chooseTacticianMove';
-                            const move = E[chooser](this.board, this.elephant, 'bot', this.me, this.shape, this.botHistory, banned);
-                            if (move) {
-                                slide = move.slide;
-                                plannedElephantTo = move.dest;
-                                const key = E.positionKey(move.board, move.dest);
-                                this.botHistory[key] = (this.botHistory[key] ?? 0) + 1;
-                            }
-                        } else {
-                            slide = E.chooseBotSlide(this.board, this.elephant, 'bot', this.me, this.shape, banned);
-                        }
-                        if (!slide) { this.botThinking = false; return; }
-
-                        const tileMoveId = this.uuid();
-                        this.sentMoveIds.push(tileMoveId);
-                        this.applyAndAnimateSlide(slide.space, slide.direction, 'bot');
-                        this.lastSeq++;
-
-                        const completed = this.matchStatus === 'complete';
-                        const props = {
-                            bot_entry_space: slide.space,
-                            bot_direction: slide.direction,
-                            bot_tile_move_id: tileMoveId,
-                        };
-
-                        if (!completed) {
-                            const elephantTo = plannedElephantTo ?? E.chooseBotElephantMove(this.elephant);
-                            const elephantMoveId = this.uuid();
-                            this.sentMoveIds.push(elephantMoveId);
-                            props.bot_to_space = elephantTo;
-                            props.bot_elephant_move_id = elephantMoveId;
-                            setTimeout(() => {
-                                this.applyElephantMove(elephantTo, 'bot');
-                                this.lastSeq++;
-                            }, 750);
-                        }
-
-                        setTimeout(() => {
-                            this.botThinking = false;
-                            this.sendAction('playBotTurn', props);
-                        }, completed ? 800 : 1550);
+                        this.$wire.callClassAction('playBotTurn', 'challenge', '{{ $element['class_key'] }}', null)
+                            .catch(() => {})
+                            .finally(() => {
+                                this.botThinking = false;
+                                if (this.queuedServerState) {
+                                    const q = this.queuedServerState;
+                                    this.queuedServerState = null;
+                                    this.reconcile(q.state, q.moves);
+                                }
+                                this.$wire.$refresh();
+                            });
                     }, 700);
                 },
 

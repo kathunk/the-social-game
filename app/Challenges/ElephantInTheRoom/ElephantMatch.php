@@ -4,6 +4,7 @@ namespace App\Challenges\ElephantInTheRoom;
 
 use App\Challenges\BaseChallengeClass;
 use App\Challenges\ElephantInTheRoom\Support\BoardLogic;
+use App\Challenges\ElephantInTheRoom\Support\BotLogic;
 use App\Events\ElephantInTheRoom\BotDifficultySet;
 use App\Events\ElephantInTheRoom\ElephantMoved;
 use App\Events\ElephantInTheRoom\MatchForfeited;
@@ -14,6 +15,7 @@ use App\Models\Player;
 use App\States\GameState;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Thunk\Verbs\Facades\Verbs;
 
 class ElephantMatch extends BaseChallengeClass
@@ -27,14 +29,13 @@ class ElephantMatch extends BaseChallengeClass
     const HIDE_SCOREBOARD = true;
 
     // The virtual opponent in single-player games. Not a Player row — just a
-    // sentinel actor id inside challenge_data. Its brain runs client-side;
-    // the server only validates that its moves are legal.
+    // sentinel actor id inside challenge_data. Its brain runs server-side
+    // (Support/BotLogic); the client only animates the moves the server chose.
     const BOT_ID = 'bot';
 
-    // The bot's brain lives client-side (see the elephant-board blade); this
-    // list is the server-authoritative set of difficulties it can be asked
-    // to play. "normal" is the original greedy bot; "hard" adds joint
-    // slide+elephant scoring; "impossible" adds opponent best-reply search.
+    // The difficulties the bot can be asked to play (see Support/BotLogic).
+    // "normal" is the original greedy bot; "hard" adds joint slide+elephant
+    // scoring; "impossible" adds opponent best-reply search.
     const BOT_DIFFICULTIES = ['normal', 'hard', 'impossible'];
 
     const TURN_SECONDS = 35;
@@ -116,12 +117,18 @@ class ElephantMatch extends BaseChallengeClass
             return;
         }
 
-        $game_state->players()->each(function ($player) use ($victors) {
+        // Bot wins record the difficulty, so a "beat the impossible bot"
+        // claim is verifiable straight from the score history
+        $description = ($data['is_bot_game'] ?? false)
+            ? 'Elephant in the Room — beat the '.($data['bot_difficulty'] ?? 'normal').' bot'
+            : 'Elephant in the Room — won the match';
+
+        $game_state->players()->each(function ($player) use ($victors, $description) {
             if (in_array((string) $player->id, $victors, true)) {
                 $player->addToScoreHistory(
                     icon: '🐘',
                     points: self::WIN_POINTS,
-                    description: 'Elephant in the Room — won the match',
+                    description: $description,
                 );
             }
         });
@@ -150,6 +157,10 @@ class ElephantMatch extends BaseChallengeClass
     public function slideTile(Player $player, array $params): void
     {
         $this->withChallengeLock(function () use ($player, $params) {
+            if ($this->forfeitIfExpired($player)) {
+                return;
+            }
+
             TileSlid::fire(
                 game_id: $player->game_id,
                 challenge_id: $this->challenge->id,
@@ -167,6 +178,10 @@ class ElephantMatch extends BaseChallengeClass
     public function moveElephant(Player $player, array $params): void
     {
         $this->withChallengeLock(function () use ($player, $params) {
+            if ($this->forfeitIfExpired($player)) {
+                return;
+            }
+
             ElephantMoved::fire(
                 game_id: $player->game_id,
                 challenge_id: $this->challenge->id,
@@ -182,44 +197,69 @@ class ElephantMatch extends BaseChallengeClass
     }
 
     /**
-     * Records the bot's full turn in a single-player game. The bot's brain
-     * runs client-side (see the elephant-board blade); the events below
-     * validate that the reported moves are legal, so a buggy client can't
-     * put the board in an impossible state — it just can't pick for you.
+     * Plays the bot's turn in a single-player game. The bot's brain runs
+     * server-side (Support/BotLogic): the client only reports that the bot
+     * is up, then animates whatever the server chose. Nothing in $params is
+     * read, so no client can influence — or play — the bot's moves.
+     *
+     * Loops because the bot keeps the turn while the human's hand is empty;
+     * the guard bounds the pathological case where its own pushed-off tiles
+     * keep refilling its hand.
      */
     public function playBotTurn(Player $player, array $params): void
     {
-        $this->withChallengeLock(function () use ($player, $params) {
+        $this->withChallengeLock(function () use ($player) {
             $data = $this->challenge->challenge_data;
 
             if (! ($data['is_bot_game'] ?? false)) {
                 throw new \RuntimeException('This is not a bot game.');
             }
 
-            TileSlid::fire(
-                game_id: $player->game_id,
-                challenge_id: $this->challenge->id,
-                actor_id: self::BOT_ID,
-                entry_space: (int) ($params['bot_entry_space'] ?? 0),
-                direction: (string) ($params['bot_direction'] ?? ''),
-                client_move_id: (string) ($params['bot_tile_move_id'] ?? ''),
-            );
+            if (($data['match_status'] ?? null) !== 'active' || ($data['current_actor_id'] ?? null) !== self::BOT_ID) {
+                throw new \RuntimeException("It is not the bot's turn.");
+            }
 
-            Verbs::commit();
+            $guard = 0;
 
-            // The slide may have ended the match (bot win, or a push that
-            // completed the human's shape) — only move the elephant if not
-            if (($this->challenge->fresh()->challenge_data['match_status'] ?? null) === 'active') {
-                ElephantMoved::fire(
+            while (
+                ($data['match_status'] ?? null) === 'active'
+                && ($data['current_actor_id'] ?? null) === self::BOT_ID
+                && $guard++ < 16
+            ) {
+                $turn = BotLogic::chooseTurn($data);
+
+                if ($turn === null) {
+                    break;
+                }
+
+                TileSlid::fire(
                     game_id: $player->game_id,
                     challenge_id: $this->challenge->id,
                     actor_id: self::BOT_ID,
-                    to_space: (int) ($params['bot_to_space'] ?? 0),
-                    client_move_id: (string) ($params['bot_elephant_move_id'] ?? ''),
-                    moved_at: now()->timestamp,
+                    entry_space: $turn['entry_space'],
+                    direction: $turn['direction'],
+                    client_move_id: 'bot-'.Str::uuid(),
                 );
 
                 Verbs::commit();
+                $data = $this->challenge->fresh()->challenge_data;
+
+                // The slide may have ended the match (bot win, draw, or a
+                // push that completed the human's shape) — only move the
+                // elephant if not
+                if (($data['match_status'] ?? null) === 'active') {
+                    ElephantMoved::fire(
+                        game_id: $player->game_id,
+                        challenge_id: $this->challenge->id,
+                        actor_id: self::BOT_ID,
+                        to_space: $turn['elephant_to'],
+                        client_move_id: 'bot-'.Str::uuid(),
+                        moved_at: now()->timestamp,
+                    );
+
+                    Verbs::commit();
+                    $data = $this->challenge->fresh()->challenge_data;
+                }
             }
 
             $this->afterMoves($player);
@@ -244,6 +284,44 @@ class ElephantMatch extends BaseChallengeClass
     // ─────────────────────────────────────────────────────────────────────
     // Helpers
     // ─────────────────────────────────────────────────────────────────────
+
+    /**
+     * Server-side turn-clock enforcement for bot games: a move landing after
+     * the timer (plus grace) has run out forfeits the match to the bot
+     * instead of being played, so blocking the client's auto-claim can't buy
+     * unlimited thinking time. 2-player games keep the lazy claim — the
+     * waiting player decides whether to call the timeout.
+     */
+    protected function forfeitIfExpired(Player $player): bool
+    {
+        $data = $this->challenge->challenge_data;
+
+        $clock_running = ($data['is_bot_game'] ?? false)
+            && ($data['match_status'] ?? null) === 'active'
+            // The clock doesn't start until the difficulty picker is answered
+            && ($data['bot_difficulty'] ?? null) !== null
+            && ($data['current_actor_id'] ?? null) === (string) $player->id;
+
+        if (! $clock_running) {
+            return false;
+        }
+
+        if (now()->timestamp < ($data['turn_started_at'] ?? 0) + self::TURN_SECONDS + self::FORFEIT_GRACE_SECONDS) {
+            return false;
+        }
+
+        MatchForfeited::fire(
+            game_id: $player->game_id,
+            challenge_id: $this->challenge->id,
+            claimant_id: (string) $player->id,
+            forfeited_at: now()->timestamp,
+        );
+
+        Verbs::commit();
+        $this->afterMoves($player);
+
+        return true;
+    }
 
     /**
      * Post-commit bookkeeping shared by every action.

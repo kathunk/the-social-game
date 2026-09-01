@@ -74,6 +74,9 @@ function finishMatchWithWinner($test, $players, Challenge $challenge): void
     $winner = (string) $players[0]->id;
 
     rematchMutateState($challenge, function ($state) use ($winner) {
+        if ($state->challenge_data['is_bot_game'] ?? false) {
+            $state->challenge_data['bot_difficulty'] = 'normal';
+        }
         $state->challenge_data['victory_shape'] = 'square';
         $state->challenge_data['board'][2] = $winner;
         $state->challenge_data['board'][5] = $winner;
