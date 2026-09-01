@@ -14,6 +14,26 @@
 @endonce
 
 <div class="flex flex-col items-center gap-4 py-4 text-center">
+    {{-- Bounty celebration: only on the game that earned this player their
+         offer code --}}
+    @if ($element['reward_win'] ?? null)
+        <div class="w-full max-w-[340px] rounded-2xl bg-slate-900 text-white px-5 py-6 space-y-2">
+            <div class="text-4xl">🎁</div>
+            <p class="font-bold text-lg">You beat the impossible bot!</p>
+            <p class="text-sm opacity-90">
+                Your one-time code for
+                <span class="font-bold text-amber-300">{{ $element['reward_win']['offer'] }}</span>
+                is on its way to your inbox.
+            </p>
+            <a
+                href="{{ $element['reward_win']['offer_url'] }}"
+                target="_blank"
+                rel="noopener"
+                class="text-xs text-amber-300/80 hover:text-amber-300 underline"
+            >What's Colossi?</a>
+        </div>
+    @endif
+
     <flux:heading size="lg">{{ $element['result_text'] }}</flux:heading>
 
     {{-- The final board, frozen: seat colors, winning shape glowing, elephant

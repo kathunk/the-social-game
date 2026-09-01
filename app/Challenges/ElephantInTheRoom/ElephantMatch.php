@@ -5,6 +5,7 @@ namespace App\Challenges\ElephantInTheRoom;
 use App\Challenges\BaseChallengeClass;
 use App\Challenges\ElephantInTheRoom\Support\BoardLogic;
 use App\Challenges\ElephantInTheRoom\Support\BotLogic;
+use App\Challenges\ElephantInTheRoom\Support\ImpossibleBotReward;
 use App\Events\ElephantInTheRoom\BotDifficultySet;
 use App\Events\ElephantInTheRoom\ElephantMoved;
 use App\Events\ElephantInTheRoom\MatchForfeited;
@@ -12,9 +13,11 @@ use App\Events\ElephantInTheRoom\TileSlid;
 use App\Events\GameUpdatedForReverb;
 use App\Jobs\ProgressChallenge;
 use App\Models\Player;
+use App\Notifications\ElephantInTheRoom\ImpossibleBotDefeatedNotification;
 use App\States\GameState;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Thunk\Verbs\Facades\Verbs;
 
@@ -132,6 +135,50 @@ class ElephantMatch extends BaseChallengeClass
                 );
             }
         });
+
+        $this->awardOfferCode($data);
+    }
+
+    /**
+     * An outright win against the impossible bot earns a one-time
+     * Catacombian offer code — at most one per user, so the one-tap
+     * rematch can't be ground for extras. Emails the code to the winner
+     * and a heads-up (with pool level) to the site owner; if the pool ran
+     * dry the winner gets an IOU and the owner gets an SOS.
+     */
+    protected function awardOfferCode(array $data): void
+    {
+        if (! ImpossibleBotReward::qualifiesAsWin($data)) {
+            return;
+        }
+
+        $winner = Player::find(ImpossibleBotReward::soloHumanVictorId($data));
+
+        if ($winner === null || $winner->user === null) {
+            return;
+        }
+
+        if (ImpossibleBotReward::hasClaimed($winner->user)) {
+            return;
+        }
+
+        $code = ImpossibleBotReward::claimCodeFor($winner->user, $this->challenge_state->id);
+        $remaining = ImpossibleBotReward::remainingCodes();
+
+        $winner->user->notify(new ImpossibleBotDefeatedNotification(
+            winner_name: $winner->name,
+            code: $code?->code,
+            codes_remaining: $remaining,
+        ));
+
+        Notification::route('mail', ImpossibleBotReward::OWNER_EMAIL)
+            ->notify(new ImpossibleBotDefeatedNotification(
+                winner_name: $winner->name,
+                code: $code?->code,
+                codes_remaining: $remaining,
+                for_owner: true,
+                winner_email: $winner->user->email,
+            ));
     }
 
     // ─────────────────────────────────────────────────────────────────────

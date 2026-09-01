@@ -3,6 +3,7 @@
 namespace App\Support\FormBuilderElements\ElephantInTheRoom;
 
 use App\Challenges\ElephantInTheRoom\ElephantMatch;
+use App\Challenges\ElephantInTheRoom\Support\ImpossibleBotReward;
 use App\Models\Player;
 use App\Support\FormBuilder;
 use App\Support\FormElementProvider;
@@ -25,6 +26,13 @@ class ElephantFormElements implements FormElementProvider
 
         $handler = $form->challenge_class;
 
+        // While codes remain (and this player hasn't earned theirs), the
+        // difficulty picker advertises the bounty on the Impossible option
+        $reward = ($challenge_data['is_bot_game'] ?? false)
+            && ImpossibleBotReward::isPromoActiveFor($player->user)
+            ? ['offer' => ImpossibleBotReward::OFFER]
+            : null;
+
         $form->addElement([
             'type' => 'elephant_board',
             'class_key' => ElephantMatch::key(),
@@ -33,6 +41,7 @@ class ElephantFormElements implements FormElementProvider
             'game_id' => (string) $game_id,
             'turn_seconds' => ElephantMatch::TURN_SECONDS,
             'forfeit_grace_seconds' => ElephantMatch::FORFEIT_GRACE_SECONDS,
+            'reward' => $reward,
             'state' => $handler->stateSnapshot($challenge_data),
             // Recent tail of the move log so a catching-up client can animate
             // what it missed instead of snapping
@@ -51,10 +60,27 @@ class ElephantFormElements implements FormElementProvider
         array $modifier_data,
         array $match_data,
         Collection $players,
+        ?int $match_challenge_id = null,
     ): void {
         $me = (string) $player->id;
         $victors = array_map('strval', $match_data['victor_ids'] ?? []);
         $is_bot_game = $match_data['is_bot_game'] ?? false;
+
+        // The game that EARNED this player their offer code gets a
+        // celebration block on their post-game card — a later win by the
+        // same player (one code per user) shows a plain result
+        $reward_win = null;
+
+        if ($match_challenge_id !== null && ImpossibleBotReward::soloHumanVictorId($match_data) === $me) {
+            $claim = ImpossibleBotReward::claimForChallenge($match_challenge_id);
+
+            if ($claim !== null && (string) $claim->claimed_by_user_id === (string) $player->user_id) {
+                $reward_win = [
+                    'offer' => ImpossibleBotReward::OFFER,
+                    'offer_url' => ImpossibleBotReward::OFFER_URL,
+                ];
+            }
+        }
 
         $names = $players->mapWithKeys(fn ($p) => [(string) $p->id => $p->name])->all();
         $names[ElephantMatch::BOT_ID] = 'The Bot';
@@ -121,6 +147,7 @@ class ElephantFormElements implements FormElementProvider
         $form->addElement([
             'type' => 'elephant_rematch',
             'class_key' => \App\Modifiers\ElephantInTheRoom\ElephantRematch::key(),
+            'reward_win' => $reward_win,
             'result_text' => $result_text,
             'board_cells' => $board_cells,
             'is_bot_game' => $is_bot_game,
