@@ -31,6 +31,13 @@ class TileSlid extends Event
         $data = $this->state(ChallengeState::class)->challenge_data;
 
         $this->assert(($data['match_status'] ?? null) === 'active', 'The match is over.');
+        // Bot games can't start until the human has picked an opponent — the
+        // client enforces this with the picker overlay, but only this assert
+        // makes it binding
+        $this->assert(
+            ! ($data['is_bot_game'] ?? false) || ($data['bot_difficulty'] ?? null) !== null,
+            'Pick a difficulty first.'
+        );
         $this->assert(in_array($this->actor_id, $data['actor_order'] ?? [], true), 'Unknown player.');
         $this->assert(($data['current_actor_id'] ?? null) === $this->actor_id, 'It is not your turn.');
         $this->assert(($data['phase'] ?? null) === 'tile', 'You must move the elephant first.');

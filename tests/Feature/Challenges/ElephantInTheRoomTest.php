@@ -570,30 +570,30 @@ it('lets the waiting player claim the win after the turn timer expires', functio
 });
 
 // ─────────────────────────────────────────────────────────────────────────
-// The bot turn
+// The bot turn — the brain runs server-side; the client only triggers it
 // ─────────────────────────────────────────────────────────────────────────
 
 it('rejects playBotTurn in a 2-player game', function () {
     ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this);
 
-    elephantCallAction($this, $players[0], $challenge, 'playBotTurn', [
-        'bot_entry_space' => 1, 'bot_direction' => 'down',
-        'bot_tile_move_id' => 'bot-1', 'bot_to_space' => 7, 'bot_elephant_move_id' => 'bot-2',
-    ])->assertHasErrors('action_error');
+    elephantCallAction($this, $players[0], $challenge, 'playBotTurn')
+        ->assertHasErrors('action_error');
 });
 
 it('rejects playBotTurn when it is not the bot\'s turn', function () {
     ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
 
-    elephantCallAction($this, $players[0], $challenge, 'playBotTurn', [
-        'bot_entry_space' => 1, 'bot_direction' => 'down',
-        'bot_tile_move_id' => 'bot-1', 'bot_to_space' => 7, 'bot_elephant_move_id' => 'bot-2',
-    ])->assertHasErrors('action_error');
+    elephantCallAction($this, $players[0], $challenge, 'playBotTurn')
+        ->assertHasErrors('action_error');
 });
 
-it('applies the bot\'s full turn (slide + elephant) and hands the turn back', function () {
+it('plays the bot\'s full turn server-side and hands the turn back', function () {
     ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
     $human = (string) $players[0]->id;
+
+    elephantCallAction($this, $players[0], $challenge, 'setBotDifficulty', [
+        'difficulty' => 'normal',
+    ])->assertHasNoErrors();
 
     elephantCallAction($this, $players[0], $challenge, 'slideTile', [
         'entry_space' => 1, 'direction' => 'down', 'client_move_id' => 'move-1',
@@ -605,22 +605,28 @@ it('applies the bot\'s full turn (slide + elephant) and hands the turn back', fu
 
     expect($challenge->refresh()->challenge_data['current_actor_id'])->toBe(ElephantMatch::BOT_ID);
 
-    elephantCallAction($this, $players[0], $challenge, 'playBotTurn', [
-        'bot_entry_space' => 4, 'bot_direction' => 'down',
-        'bot_tile_move_id' => 'bot-1', 'bot_to_space' => 6, 'bot_elephant_move_id' => 'bot-2',
-    ])->assertHasNoErrors();
+    elephantCallAction($this, $players[0], $challenge, 'playBotTurn')
+        ->assertHasNoErrors();
 
     $data = $challenge->refresh()->challenge_data;
 
-    expect($data['board'][4])->toBe(ElephantMatch::BOT_ID);
+    $bot_tiles = collect($data['board'])->filter(fn ($occupant) => $occupant === ElephantMatch::BOT_ID);
+    expect($bot_tiles)->toHaveCount(1);
     expect($data['hands'][ElephantMatch::BOT_ID])->toBe(7);
-    expect($data['elephant_space'])->toBe(6);
     expect($data['current_actor_id'])->toBe($human);
     expect($data['phase'])->toBe('tile');
+    // The human's slide+elephant plus the bot's slide+elephant
+    expect($data['moves'])->toHaveCount(4);
+    expect($data['moves'][2]['actor_id'])->toBe(ElephantMatch::BOT_ID);
+    expect($data['moves'][3]['actor_id'])->toBe(ElephantMatch::BOT_ID);
 });
 
-it('rejects an illegal bot slide', function () {
+it('ignores client-supplied bot moves entirely', function () {
     ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    elephantCallAction($this, $players[0], $challenge, 'setBotDifficulty', [
+        'difficulty' => 'normal',
+    ])->assertHasNoErrors();
 
     elephantCallAction($this, $players[0], $challenge, 'slideTile', [
         'entry_space' => 1, 'direction' => 'down', 'client_move_id' => 'move-1',
@@ -630,11 +636,125 @@ it('rejects an illegal bot slide', function () {
         'to_space' => 7, 'client_move_id' => 'move-2',
     ])->assertHasNoErrors();
 
-    // Entry 7 is not a slide configuration at all
+    // Entry 7 isn't even a slide configuration — if the server read these
+    // props the turn would fail. It succeeds because the server picks its
+    // own moves and the props are dead weight.
     elephantCallAction($this, $players[0], $challenge, 'playBotTurn', [
         'bot_entry_space' => 7, 'bot_direction' => 'down',
-        'bot_tile_move_id' => 'bot-1', 'bot_to_space' => 6, 'bot_elephant_move_id' => 'bot-2',
-    ])->assertHasErrors('action_error');
+        'bot_tile_move_id' => 'bot-1', 'bot_to_space' => 16, 'bot_elephant_move_id' => 'bot-2',
+    ])->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['moves'][2]['type'])->toBe('tile');
+    expect($data['moves'][2]['entry_space'])->not->toBe(7);
+    expect($data['current_actor_id'])->toBe((string) $players[0]->id);
+});
+
+it('takes an immediate winning slide when one exists', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+    $bot = ElephantMatch::BOT_ID;
+
+    // Square [1,2,5,6]: the bot holds 2, 5, 6 — sliding into the empty
+    // entry 1 wins, and every difficulty must find it
+    $challenge = elephantMutateState($challenge, function ($state) use ($bot) {
+        $state->challenge_data['bot_difficulty'] = 'normal';
+        $state->challenge_data['victory_shape'] = 'square';
+        $state->challenge_data['board'][2] = $bot;
+        $state->challenge_data['board'][5] = $bot;
+        $state->challenge_data['board'][6] = $bot;
+        $state->challenge_data['hands'][$bot] = 5;
+        $state->challenge_data['current_actor_id'] = $bot;
+        $state->challenge_data['elephant_space'] = 16;
+    });
+
+    elephantCallAction($this, $players[0], $challenge, 'playBotTurn')
+        ->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['match_status'])->toBe('complete');
+    expect($data['victor_ids'])->toBe([$bot]);
+    expect($players[0]->fresh()->score)->toBe(0);
+});
+
+it('denies the human\'s immediate winning slide on impossible', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+    $human = (string) $players[0]->id;
+
+    // Line [1,5,9,13]: the human holds 1, 5, 9 and can win by sliding into
+    // 13 (from below or from the left). The elephant on 6 can't reach 13,
+    // so the bot's only denial is occupying 13 itself — the lookahead must
+    // leave the human with no winning slide.
+    $challenge = elephantMutateState($challenge, function ($state) use ($human) {
+        $state->challenge_data['bot_difficulty'] = 'impossible';
+        $state->challenge_data['victory_shape'] = 'line';
+        $state->challenge_data['board'][1] = $human;
+        $state->challenge_data['board'][5] = $human;
+        $state->challenge_data['board'][9] = $human;
+        $state->challenge_data['hands'][$human] = 5;
+        $state->challenge_data['current_actor_id'] = \App\Challenges\ElephantInTheRoom\ElephantMatch::BOT_ID;
+    });
+
+    elephantCallAction($this, $players[0], $challenge, 'playBotTurn')
+        ->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['match_status'])->toBe('active');
+    expect(\App\Challenges\ElephantInTheRoom\Support\BotLogic::winningSlides(
+        $data['board'],
+        $data['elephant_space'],
+        $human,
+        'line',
+    ))->toBe([]);
+});
+
+it('never makes a fatal third identical slide', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+    $bot = ElephantMatch::BOT_ID;
+
+    $challenge = elephantMutateState($challenge, function ($state) use ($bot) {
+        $state->challenge_data['bot_difficulty'] = 'normal';
+        $state->challenge_data['current_actor_id'] = $bot;
+    });
+    $challenge = elephantSeedTileMoves($challenge, [
+        [$bot, 1, 'down'], [$bot, 1, 'down'],
+    ]);
+
+    elephantCallAction($this, $players[0], $challenge, 'playBotTurn')
+        ->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+    $bot_slide = $data['moves'][2];
+
+    expect($bot_slide['actor_id'])->toBe($bot);
+    expect([$bot_slide['entry_space'], $bot_slide['direction']])->not->toBe([1, 'down']);
+    expect($data['repetition_loss_by'] ?? null)->not->toBe($bot);
+});
+
+it('keeps playing while the human has no tiles in hand', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+    $human = (string) $players[0]->id;
+    $bot = ElephantMatch::BOT_ID;
+
+    // Human's hand is empty, so after each bot turn the bot goes again —
+    // two tiles later every hand is empty and the match is a dead draw
+    $challenge = elephantMutateState($challenge, function ($state) use ($human, $bot) {
+        $state->challenge_data['bot_difficulty'] = 'normal';
+        $state->challenge_data['hands'][$human] = 0;
+        $state->challenge_data['hands'][$bot] = 2;
+        $state->challenge_data['current_actor_id'] = $bot;
+    });
+
+    elephantCallAction($this, $players[0], $challenge, 'playBotTurn')
+        ->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['match_status'])->toBe('complete');
+    expect($data['hands'][$bot])->toBe(0);
+    expect(collect($data['board'])->filter(fn ($occupant) => $occupant === $bot))->toHaveCount(2);
 });
 
 it('gives the human the win when their score is settled after beating the bot', function () {
@@ -642,6 +762,7 @@ it('gives the human the win when their score is settled after beating the bot', 
     $human = (string) $players[0]->id;
 
     $challenge = elephantMutateState($challenge, function ($state) use ($human) {
+        $state->challenge_data['bot_difficulty'] = 'impossible';
         $state->challenge_data['victory_shape'] = 'square';
         $state->challenge_data['board'][2] = $human;
         $state->challenge_data['board'][5] = $human;
@@ -660,6 +781,11 @@ it('gives the human the win when their score is settled after beating the bot', 
     expect($data['victor_ids'])->toBe([$human]);
     expect($this->game->fresh()->status)->toBe('ended');
     expect($players[0]->fresh()->score)->toBe(ElephantMatch::WIN_POINTS);
+
+    // The win record names the difficulty, so a contest claim is
+    // verifiable straight from the score history
+    $entry = collect(\App\States\PlayerState::load($players[0]->id)->score_history)->last();
+    expect($entry['description'])->toContain('impossible');
 });
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -822,6 +948,84 @@ it('rejects a bot-game forfeit claim while the timer is still running', function
         ->assertHasErrors('action_error');
 
     expect($challenge->refresh()->challenge_data['match_status'])->toBe('active');
+});
+
+it('rejects a slide in a bot game before a difficulty is chosen', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    elephantCallAction($this, $players[0], $challenge, 'slideTile', [
+        'entry_space' => 1, 'direction' => 'down', 'client_move_id' => 'move-1',
+    ])->assertHasErrors('action_error');
+
+    expect(collect($challenge->refresh()->challenge_data['board'])->filter())->toBeEmpty();
+});
+
+it('forfeits to the bot when a slide arrives after the turn clock has run out', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    $challenge = elephantMutateState($challenge, function ($state) {
+        $state->challenge_data['bot_difficulty'] = 'impossible';
+        $state->challenge_data['turn_started_at'] = now()->timestamp - 120;
+    });
+
+    // The action itself succeeds — but the move is dropped and the match
+    // forfeits, so a client that suppresses its own timeout claim gains
+    // nothing: the server enforces the clock at move time
+    elephantCallAction($this, $players[0], $challenge, 'slideTile', [
+        'entry_space' => 1, 'direction' => 'down', 'client_move_id' => 'late-move',
+    ])->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['match_status'])->toBe('complete');
+    expect($data['victor_ids'])->toBe([ElephantMatch::BOT_ID]);
+    expect($data['board'][1])->toBeNull();
+    expect(collect($data['moves'])->last()['type'])->toBe('forfeit');
+});
+
+it('forfeits to the bot when an elephant move arrives after the clock has run out', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this, bot_game: true);
+
+    elephantCallAction($this, $players[0], $challenge, 'setBotDifficulty', [
+        'difficulty' => 'normal',
+    ])->assertHasNoErrors();
+
+    elephantCallAction($this, $players[0], $challenge, 'slideTile', [
+        'entry_space' => 1, 'direction' => 'down', 'client_move_id' => 'move-1',
+    ])->assertHasNoErrors();
+
+    $challenge = elephantMutateState($challenge, function ($state) {
+        $state->challenge_data['turn_started_at'] = now()->timestamp - 120;
+    });
+
+    elephantCallAction($this, $players[0], $challenge, 'moveElephant', [
+        'to_space' => 7, 'client_move_id' => 'move-2',
+    ])->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['match_status'])->toBe('complete');
+    expect($data['victor_ids'])->toBe([ElephantMatch::BOT_ID]);
+    expect($data['elephant_space'])->toBe(6);
+});
+
+it('does not auto-forfeit a late move in a 2-player game', function () {
+    ['players' => $players, 'challenge' => $challenge] = setupElephantMatch($this);
+
+    // 2-player keeps the lazy claim: a late move stands unless the waiting
+    // player called the timeout first
+    $challenge = elephantMutateState($challenge, function ($state) {
+        $state->challenge_data['turn_started_at'] = now()->timestamp - 120;
+    });
+
+    elephantCallAction($this, $players[0], $challenge, 'slideTile', [
+        'entry_space' => 1, 'direction' => 'down', 'client_move_id' => 'move-1',
+    ])->assertHasNoErrors();
+
+    $data = $challenge->refresh()->challenge_data;
+
+    expect($data['match_status'])->toBe('active');
+    expect($data['board'][1])->toBe((string) $players[0]->id);
 });
 
 it('rejects claiming a forfeit against the bot on its turn', function () {
